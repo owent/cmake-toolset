@@ -1,0 +1,125 @@
+$PSDefaultParameterValues['*:Encoding'] = 'UTF-8'
+
+$OutputEncoding = [System.Text.UTF8Encoding]::new()
+
+$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Set-Location $SCRIPT_DIR
+
+$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR = "@CMAKE_CURRENT_BINARY_DIR@/deps/protobuf-@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION@/build_jobs_dir_@PROJECT_PREBUILT_PLATFORM_NAME@"
+$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR = "@CMAKE_CURRENT_BINARY_DIR@/deps/protobuf-@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION@/build_jobs_dir_@PROJECT_PREBUILT_HOST_PLATFORM_NAME@"
+
+# build host protoc first
+if ( "@CMAKE_SYSTEM@" -ne "@CMAKE_HOST_SYSTEM@" ) {
+    $ENV:PATH = "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" + [IO.Path]::PathSeparator + "$ENV:PATH"
+
+    if (!(Test-Path "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" )) {
+        New-Item -Path "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" -ItemType "directory" -Force
+    }
+
+    Set-Location "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR"
+
+    if (!(Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ) -and !(Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" )) {
+        $ENV:BACKUP_CC = $ENV:CC
+        $ENV:BACKUP_CXX = $ENV:CXX
+        $ENV:BACKUP_SDKROOT = $ENV:SDKROOT
+        & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
+        if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
+            & "@CMAKE_COMMAND@" --build . --target install --config Debug @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_MULTI_CORE@
+            if ( $LastExitCode -ne 0 ) {
+                & "@CMAKE_COMMAND@" --build . --target install --config Debug
+            }
+            else {
+                exit $LastExitCode
+            }
+        }
+        & "@CMAKE_COMMAND@" --build . --target install --config Release @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_MULTI_CORE@
+        if ( $LastExitCode -ne 0 ) {
+            & "@CMAKE_COMMAND@" --build . --target install --config Release
+        }
+        else {
+            exit $LastExitCode
+        }
+        $ENV:CC = $ENV:BACKUP_CC
+        $ENV:CXX = $ENV:BACKUP_CXX
+        $ENV:SDKROOT = $ENV:BACKUP_SDKROOT
+    }
+
+}
+else {
+    $ENV:PATH = "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR" + [IO.Path]::PathSeparator + "$ENV:PATH"
+}
+
+if (!(Test-Path "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR" )) {
+    New-Item -Path "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR" -ItemType "directory" -Force
+}
+
+Set-Location "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR"
+
+if ("@CMAKE_SYSTEM@" -ne "@CMAKE_HOST_SYSTEM@" ) {
+    & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" -Dprotobuf_BUILD_CONFORMANCE=OFF -Dprotobuf_BUILD_PROTOC_BINARIES=OFF
+}
+else {
+    & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
+}
+
+if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MSVC@".ToLower() -eq "1")) {
+    & "@CMAKE_COMMAND@" --build . --target install --config Debug @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_MULTI_CORE@
+    if ( $LastExitCode -ne 0 ) {
+        & "@CMAKE_COMMAND@" --build . --target install --config Debug
+    }
+
+    if ( $LastExitCode -ne 0 ) {
+        exit $LastExitCode
+    }
+}
+
+& "@CMAKE_COMMAND@" --build . --target install --config Release @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_MULTI_CORE@
+
+if ( $LastExitCode -ne 0 ) {
+    & "@CMAKE_COMMAND@" --build . --target install --config Release
+}
+if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+}
+
+if (( $LastExitCode -eq 0 ) -and (Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_PKG_DIR@/protobuf-@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION@/python/setup.py" )) {
+    if ($IsWindows) {
+        $ENV:PATH = "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin;${ENV:PATH}"
+    }
+    else {
+        $ENV:PATH = "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:${ENV:PATH}"
+    }
+    
+    if (Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python") {
+        Remove-Item -Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python" -Recurse -Force
+    }
+    Copy-Item -Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_PKG_DIR@/protobuf-@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION@/python" -Destination "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" -Force -Recurse
+    Copy-Item -Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/include" -Destination "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/src" -Force -Recurse
+    Set-Location "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python"
+    
+    $PYTHON_BIN = "";
+    if ( "x" -ne "x@PYTHON_EXECUTABLE@" ) {
+        & "@PYTHON_EXECUTABLE@" --version
+        if ( $LastExitCode -eq 0 ) {
+            $PYTHON_BIN = "@PYTHON_EXECUTABLE@"
+        }
+    }
+
+    if ( "x" -eq "x$PYTHON_BIN" ) {
+        python3 --version
+        if ( $LastExitCode -eq 0 ) {
+            $PYTHON_BIN = "python3"
+        }
+    }
+    if ( "x" -eq "x$PYTHON_BIN" ) {
+        python --version
+        if ( $LastExitCode -eq 0 ) {
+            $PYTHON_BIN = "python"
+        }
+    }
+    if ( "x" -ne "x$PYTHON_BIN" ) {
+        & "$PYTHON_BIN" ./setup.py build_py
+    }
+    Remove-Item -Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/src" -Recurse -Force
+}

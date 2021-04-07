@@ -1,6 +1,4 @@
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.10")
-  include_guard(GLOBAL)
-endif()
+include_guard(GLOBAL)
 
 # default configure, can be load multiple times
 # ##################################################################################################
@@ -88,7 +86,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       else()
         set(PROPERTY_OLD_VALUES ${PROPERTY_VALUES})
       endif()
-      set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} ${PROPERTY_OLD_VALUES})
+      set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} "${PROPERTY_OLD_VALUES}")
     endif()
   endfunction(add_target_properties)
 
@@ -102,7 +100,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         foreach(def ${PROPERTY_VALUES})
           list(REMOVE_ITEM PROPERTY_OLD_VALUES ${def})
         endforeach()
-        set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} ${PROPERTY_OLD_VALUES})
+        set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} "${PROPERTY_OLD_VALUES}")
       endif()
     endif()
   endfunction(remove_target_properties)

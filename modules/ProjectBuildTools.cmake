@@ -260,11 +260,11 @@ macro(project_expand_list_for_command_line OUTPUT INPUT)
       set(project_expand_list_for_command_line_ENABLE_CONVERT ON)
     else()
       if(project_expand_list_for_command_line_ENABLE_CONVERT)
-        string(REPLACE "\\" "\\\\" project_expand_list_for_command_line_OUT_VAR ${ARG})
+        string(REPLACE "\\" "\\\\" project_expand_list_for_command_line_OUT_VAR "${ARG}")
         string(REPLACE "\"" "\\\"" project_expand_list_for_command_line_OUT_VAR
-                       ${project_expand_list_for_command_line_OUT_VAR})
+                       "${project_expand_list_for_command_line_OUT_VAR}")
       else()
-        set(project_expand_list_for_command_line_OUT_VAR ${ARG})
+        set(project_expand_list_for_command_line_OUT_VAR "${ARG}")
       endif()
       set(${OUTPUT} "${${OUTPUT}} \"${project_expand_list_for_command_line_OUT_VAR}\"")
       unset(project_expand_list_for_command_line_OUT_VAR)
@@ -286,11 +286,11 @@ function(project_expand_list_for_command_line_to_file)
       set(project_expand_list_for_command_line_to_file_OUTPUT "${ARG}")
     else()
       if(project_expand_list_for_command_line_to_file_ENABLE_CONVERT)
-        string(REPLACE "\\" "\\\\" project_expand_list_for_command_line_OUT_VAR ${ARG})
+        string(REPLACE "\\" "\\\\" project_expand_list_for_command_line_OUT_VAR "${ARG}")
         string(REPLACE "\"" "\\\"" project_expand_list_for_command_line_OUT_VAR
-                       ${project_expand_list_for_command_line_OUT_VAR})
+                       "${project_expand_list_for_command_line_OUT_VAR}")
       else()
-        set(project_expand_list_for_command_line_OUT_VAR ${ARG})
+        set(project_expand_list_for_command_line_OUT_VAR "${ARG}")
       endif()
       if(project_expand_list_for_command_line_to_file_LINE)
         set(project_expand_list_for_command_line_to_file_LINE
@@ -326,11 +326,11 @@ else()
   set(PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL "\n")
 endif()
 
-function(project_git_clone_3rd_party)
+function(project_git_clone_repository)
   if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
     include(CMakeParseArguments)
   endif()
-  set(optionArgs GIT_ENABLE_SUBMODULE REQUIRED)
+  set(optionArgs ENABLE_SUBMODULE SUBMODULE_RECURSIVE REQUIRED FORCE_RESET)
   set(oneValueArgs
       URL
       WORKING_DIRECTORY
@@ -340,32 +340,34 @@ function(project_git_clone_3rd_party)
       COMMIT
       TAG
       CHECK_PATH)
-  cmake_parse_arguments(project_git_clone_3rd_party "${optionArgs}" "${oneValueArgs}" "" ${ARGN})
+  set(multiValueArgs SUBMODULE_PATH)
+  cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN})
 
-  if(NOT project_git_clone_3rd_party_URL)
+  if(NOT project_git_clone_repository_URL)
     message(FATAL_ERROR "URL is required")
   endif()
-  if(NOT project_git_clone_3rd_party_REPO_DIRECTORY)
+  if(NOT project_git_clone_repository_REPO_DIRECTORY)
     message(FATAL_ERROR "REPO_DIRECTORY is required")
   endif()
-  if(NOT project_git_clone_3rd_party_WORKING_DIRECTORY)
-    get_filename_component(project_git_clone_3rd_party_WORKING_DIRECTORY
-                           ${project_git_clone_3rd_party_REPO_DIRECTORY} DIRECTORY)
+  if(NOT project_git_clone_repository_WORKING_DIRECTORY)
+    get_filename_component(project_git_clone_repository_WORKING_DIRECTORY
+                           ${project_git_clone_repository_REPO_DIRECTORY} DIRECTORY)
   endif()
-  if(NOT project_git_clone_3rd_party_CHECK_PATH)
-    set(project_git_clone_3rd_party_CHECK_PATH ".git")
-  endif()
-
-  if(NOT project_git_clone_3rd_party_DEPTH)
-    set(project_git_clone_3rd_party_DEPTH 100)
+  if(NOT project_git_clone_repository_CHECK_PATH)
+    set(project_git_clone_repository_CHECK_PATH ".git")
   endif()
 
-  unset(project_git_clone_3rd_party_GIT_BRANCH)
+  if(NOT project_git_clone_repository_DEPTH)
+    set(project_git_clone_repository_DEPTH 100)
+  endif()
 
-  if(project_git_clone_3rd_party_TAG)
-    set(project_git_clone_3rd_party_GIT_BRANCH ${project_git_clone_3rd_party_TAG})
-  elseif(project_git_clone_3rd_party_BRANCH)
-    set(project_git_clone_3rd_party_GIT_BRANCH ${project_git_clone_3rd_party_BRANCH})
+  unset(project_git_clone_repository_GIT_BRANCH)
+
+  if(project_git_clone_repository_TAG)
+    set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_TAG})
+  elseif(project_git_clone_repository_BRANCH)
+    set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_BRANCH})
   endif()
 
   find_package(Git)
@@ -373,135 +375,158 @@ function(project_git_clone_3rd_party)
     message(FATAL_ERROR "git not found")
   endif()
 
-  unset(project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS)
+  unset(project_git_clone_repository_EXECUTE_PROCESS_FLAGS)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
-    list(APPEND project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS COMMAND_ECHO STDOUT)
+    list(APPEND project_git_clone_repository_EXECUTE_PROCESS_FLAGS COMMAND_ECHO STDOUT)
   endif()
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
-    list(APPEND project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS ECHO_OUTPUT_VARIABLE
+    list(APPEND project_git_clone_repository_EXECUTE_PROCESS_FLAGS ECHO_OUTPUT_VARIABLE
          ECHO_ERROR_VARIABLE)
   endif()
 
-  if(PROJECT_RESET_DENPEND_REPOSITORIES AND EXISTS ${project_git_clone_3rd_party_REPO_DIRECTORY})
+  if(project_git_clone_repository_FORCE_RESET AND EXISTS
+                                                  ${project_git_clone_repository_REPO_DIRECTORY})
     execute_process(
       COMMAND ${GIT_EXECUTABLE} clean -dfx
       COMMAND ${GIT_EXECUTABLE} reset --hard
-      WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-      RESULT_VARIABLE LAST_GIT_RESET_RESULT ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
+      WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+      RESULT_VARIABLE LAST_GIT_RESET_RESULT ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
 
     if(LAST_GIT_RESET_RESULT AND NOT LAST_GIT_RESET_RESULT EQUAL 0)
-      file(REMOVE_RECURSE ${project_git_clone_3rd_party_REPO_DIRECTORY})
+      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
+    elseif(project_git_clone_repository_ENABLE_SUBMODULE)
+      if(project_git_clone_repository_SUBMODULE_RECURSIVE)
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} submodule foreach --recursive "git clean -dfx"
+          COMMAND ${GIT_EXECUTABLE} submodule foreach --recursive "git reset --hard"
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
+      else()
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} submodule foreach "git clean -dfx"
+          COMMAND ${GIT_EXECUTABLE} submodule foreach "git reset --hard"
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
+      endif()
+
     endif()
   endif()
 
   if(NOT EXISTS
-     "${project_git_clone_3rd_party_REPO_DIRECTORY}/${project_git_clone_3rd_party_CHECK_PATH}")
-    if(EXISTS ${project_git_clone_3rd_party_REPO_DIRECTORY})
-      file(REMOVE_RECURSE ${project_git_clone_3rd_party_REPO_DIRECTORY})
+     "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
+    if(EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
+      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
     endif()
   endif()
 
   if(NOT EXISTS
-     "${project_git_clone_3rd_party_REPO_DIRECTORY}/${project_git_clone_3rd_party_CHECK_PATH}")
-    if(NOT EXISTS ${project_git_clone_3rd_party_REPO_DIRECTORY})
-      file(MAKE_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY})
+     "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
+    if(NOT EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
+      file(MAKE_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
     endif()
 
     execute_process(
       COMMAND ${GIT_EXECUTABLE} init
-      WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                        ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
+      WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} remote add origin "${project_git_clone_3rd_party_URL}"
-      WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                        ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
+      COMMAND ${GIT_EXECUTABLE} remote add origin "${project_git_clone_repository_URL}"
+      WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
 
-    if(NOT project_git_clone_3rd_party_GIT_BRANCH AND NOT project_git_clone_3rd_party_COMMIT)
-      unset(project_git_clone_3rd_party_GIT_CHECK_REPO)
+    if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
+      unset(project_git_clone_repository_GIT_CHECK_REPO)
       execute_process(
         COMMAND ${GIT_EXECUTABLE} ls-remote --symref origin HEAD
-        RESULT_VARIABLE project_git_clone_3rd_party_GIT_LS_REMOTE_RESULT
-        WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-        OUTPUT_VARIABLE project_git_clone_3rd_party_GIT_CHECK_REPO
-                        ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
-      if(project_git_clone_3rd_party_GIT_CHECK_REPO
-         AND project_git_clone_3rd_party_GIT_CHECK_REPO MATCHES
+        RESULT_VARIABLE project_git_clone_repository_GIT_LS_REMOTE_RESULT
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+        OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
+                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+      if(project_git_clone_repository_GIT_CHECK_REPO
+         AND project_git_clone_repository_GIT_CHECK_REPO MATCHES
              "ref.*refs/heads/([^ \t]*)[ \t]*HEAD.*")
-        set(project_git_clone_3rd_party_GIT_BRANCH "${CMAKE_MATCH_1}")
+        set(project_git_clone_repository_GIT_BRANCH "${CMAKE_MATCH_1}")
       else()
         execute_process(
           COMMAND ${GIT_EXECUTABLE} ls-remote origin HEAD
-          RESULT_VARIABLE project_git_clone_3rd_party_GIT_LS_REMOTE_RESULT
-          WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-          OUTPUT_VARIABLE project_git_clone_3rd_party_GIT_CHECK_REPO
-                          ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
-        if(project_git_clone_3rd_party_GIT_CHECK_REPO MATCHES "^([a-zA-Z0-9]*)[ \t]*HEAD.*")
-          set(project_git_clone_3rd_party_COMMIT "${CMAKE_MATCH_1}")
+          RESULT_VARIABLE project_git_clone_repository_GIT_LS_REMOTE_RESULT
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+          OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
+                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+        if(project_git_clone_repository_GIT_CHECK_REPO MATCHES "^([a-zA-Z0-9]*)[ \t]*HEAD.*")
+          set(project_git_clone_repository_COMMIT "${CMAKE_MATCH_1}")
         endif()
       endif()
-      if(NOT project_git_clone_3rd_party_GIT_BRANCH AND NOT project_git_clone_3rd_party_COMMIT)
-        if(NOT project_git_clone_3rd_party_GIT_LS_REMOTE_RESULT EQUAL 0
-           AND project_git_clone_3rd_party_REQUIRED)
+      if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
+        if(NOT project_git_clone_repository_GIT_LS_REMOTE_RESULT EQUAL 0
+           AND project_git_clone_repository_REQUIRED)
           message(
             FATAL_ERROR
-              "git ls-remote --symref origin(${project_git_clone_3rd_party_URL}) HEAD failed")
+              "git ls-remote --symref origin(${project_git_clone_repository_URL}) HEAD failed")
         endif()
         # Fallback
-        set(project_git_clone_3rd_party_GIT_BRANCH master)
+        set(project_git_clone_repository_GIT_BRANCH master)
       endif()
-      unset(project_git_clone_3rd_party_GIT_CHECK_REPO)
-      unset(project_git_clone_3rd_party_GIT_LS_REMOTE_RESULT)
+      unset(project_git_clone_repository_GIT_CHECK_REPO)
+      unset(project_git_clone_repository_GIT_LS_REMOTE_RESULT)
     endif()
 
-    if(project_git_clone_3rd_party_GIT_BRANCH)
+    if(project_git_clone_repository_GIT_BRANCH)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} fetch "--depth=${project_git_clone_3rd_party_DEPTH}" "-n" origin
-                ${project_git_clone_3rd_party_GIT_BRANCH}
-        RESULT_VARIABLE project_git_clone_3rd_party_GIT_FETCH_RESULT
-        WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                          ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
-      if(NOT project_git_clone_3rd_party_GIT_FETCH_RESULT EQUAL 0
-         AND project_git_clone_3rd_party_REQUIRED)
+        COMMAND ${GIT_EXECUTABLE} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n" origin
+                ${project_git_clone_repository_GIT_BRANCH}
+        RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+      if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0
+         AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_3rd_party_URL}) ${project_git_clone_3rd_party_GIT_BRANCH} failed"
+            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed"
         )
       endif()
     else()
       if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} fetch "--deepen=${project_git_clone_3rd_party_DEPTH}" "-n"
-                  origin ${project_git_clone_3rd_party_COMMIT}
-          RESULT_VARIABLE project_git_clone_3rd_party_GIT_FETCH_RESULT
-          WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                            ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
+          COMMAND ${GIT_EXECUTABLE} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n"
+                  origin ${project_git_clone_repository_COMMIT}
+          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                            ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
       else()
         message(
           WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} fetch "-n" origin ${project_git_clone_3rd_party_COMMIT}
-          RESULT_VARIABLE project_git_clone_3rd_party_GIT_FETCH_RESULT
-          WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                            ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
+          COMMAND ${GIT_EXECUTABLE} fetch "-n" origin ${project_git_clone_repository_COMMIT}
+          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                            ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
       endif()
-      if(NOT project_git_clone_3rd_party_GIT_FETCH_RESULT EQUAL 0
-         AND project_git_clone_3rd_party_REQUIRED)
+      if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0
+         AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_3rd_party_URL}) ${project_git_clone_3rd_party_GIT_BRANCH} failed"
+            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed"
         )
       endif()
     endif()
-    unset(project_git_clone_3rd_party_GIT_FETCH_RESULT)
+    unset(project_git_clone_repository_GIT_FETCH_RESULT)
     execute_process(
       COMMAND ${GIT_EXECUTABLE} reset --hard FETCH_HEAD
-      WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                        ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
-    if(project_git_clone_3rd_party_GIT_ENABLE_SUBMODULE)
+      WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+    if(project_git_clone_repository_ENABLE_SUBMODULE)
+      set(project_git_clone_repository_submodule_args update --init -f)
+      if(project_git_clone_repository_SUBMODULE_RECURSIVE)
+        list(APPEND project_git_clone_repository_submodule_args "--recursive")
+      endif()
+      if(project_git_clone_repository_SUBMODULE_PATH)
+        list(APPEND project_git_clone_repository_submodule_args "--"
+             ${project_git_clone_repository_SUBMODULE_PATH})
+      endif()
+
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} submodule update --init -f
-        WORKING_DIRECTORY ${project_git_clone_3rd_party_REPO_DIRECTORY}
-                          ${project_git_clone_3rd_party_EXECUTE_PROCESS_FLAGS})
+        COMMAND ${GIT_EXECUTABLE} ${project_git_clone_repository_submodule_args}
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
     endif()
   endif()
 endfunction()

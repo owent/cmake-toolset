@@ -21,4 +21,13 @@ But if you want a special version of some package or custom some compile options
 
 This toolset also works with iOS toolchain and Android NDK.
 
+## Utility Scripts
+
+### ```CompilerOption.cmake```
+
+1. Use lastest C++/C standard.
+2. Set ```CMAKE_MSVC_RUNTIME_LIBRARY``` into ```MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>``` .
+            "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>"
+            CACHE STRING "")
+
 [1]: https://github.com/microsoft/vcpkg
