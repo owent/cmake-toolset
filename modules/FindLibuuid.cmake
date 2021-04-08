@@ -31,16 +31,12 @@
 #
 # A user may set ``LIBUUID_ROOT`` to a libuuid installation root to tell this
 # module where to look.
-
-# =============================================================================
-# Copyright 2014-2020 OWenT.
 #
-# Distributed under the OSI-approved BSD License (the "License"); see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE. See the License for more information.
 # =============================================================================
-# (To distribute this file outside of CMake, substitute the full License text for the above reference.)
+# Copyright 2021 atframework.
+#
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 unset(_LIBUUID_SEARCH_ROOT_INC)
 unset(_LIBUUID_SEARCH_ROOT_LIB)
@@ -95,7 +91,8 @@ if(_LIBUUID_SEARCH_BACKUP_CMAKE_FIND_FRAMEWORK)
   unset(_LIBUUID_SEARCH_BACKUP_CMAKE_FIND_FRAMEWORK)
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set LIBUUID_FOUND to TRUE if all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set LIBUUID_FOUND to TRUE if all listed variables
+# are TRUE
 include("FindPackageHandleStandardArgs")
 if(Libuuid_CHECK_NO_LIBRARY)
   find_package_handle_standard_args(
@@ -121,11 +118,13 @@ if(Libuuid_FOUND)
     set_target_properties(libuuid PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Libuuid_INCLUDE_DIRS})
 
     if(Libuuid_LIBRARIES)
-      set_target_properties(libuuid PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION ${Libuuid_LIBRARIES})
+      set_target_properties(libuuid PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC"
+                                               IMPORTED_LOCATION ${Libuuid_LIBRARIES})
     endif()
 
     if(WIN32)
-      set_target_properties(libuuid PROPERTIES INTERFACE_LINK_LIBRARIES "psapi;iphlpapi;userenv;ws2_32")
+      set_target_properties(libuuid PROPERTIES INTERFACE_LINK_LIBRARIES
+                                               "psapi;iphlpapi;userenv;ws2_32")
     endif()
   endif()
 else()

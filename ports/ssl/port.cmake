@@ -46,7 +46,7 @@ if(NOT OPENSSL_FOUND AND NOT MBEDTLS_FOUND)
   message(FATAL_ERROR "Dependency: must at least have one of openssl,libressl or mbedtls.")
 else()
   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN
-       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}/bin/openssl*")
+       "${PROJECT_THIRD_PARTY_INSTALL_DIR}/bin/openssl*")
 endif()
 
 if(NOT CRYPTO_DISABLED)

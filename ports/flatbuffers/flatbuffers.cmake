@@ -1,7 +1,5 @@
 ﻿# =========== third party flatbuffer ==================
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.10")
-  include_guard(GLOBAL)
-endif()
+include_guard(GLOBAL)
 
 # =========== third party flatbuffer ==================
 macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
@@ -28,7 +26,7 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
   if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_VERSION "v1.12.0")
     if(NOT Flatbuffers_ROOT)
-      set(Flatbuffers_ROOT ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR})
+      set(Flatbuffers_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
     endif()
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
@@ -50,7 +48,7 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
       CMAKE_FLAGS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS}
       WORKING_DIRECTORY
-      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}
+      ${PROJECT_THIRD_PARTY_PACKAGE_DIR}
       BUILD_DIRECTORY
       "${CMAKE_CURRENT_BINARY_DIR}/deps/flatbuffers-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
       PREFIX_DIRECTORY

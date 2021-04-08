@@ -21,16 +21,12 @@
 # Hints ^^^^^
 #
 # A user may set ``RAPIDJSON_ROOT`` to a rapidjson installation root to tell this module where to look.
-
-# =============================================================================
-# Copyright 2014-2015 OWenT.
 #
-# Distributed under the OSI-approved BSD License (the "License"); see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE. See the License for more information.
 # =============================================================================
-# (To distribute this file outside of CMake, substitute the full License text for the above reference.)
+# Copyright 2021 atframework.
+#
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 unset(_RAPIDJSON_SEARCH_ROOT_INC)
 unset(_RAPIDJSON_SEARCH_ROOT_LIB)
@@ -49,7 +45,8 @@ find_path(Rapidjson_INCLUDE_DIRS NAMES rapidjson/document.h ${_RAPIDJSON_SEARCH_
 
 mark_as_advanced(Rapidjson_INCLUDE_DIRS)
 
-# handle the QUIETLY and REQUIRED arguments and set RAPIDJSON_FOUND to TRUE if all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set RAPIDJSON_FOUND to TRUE if all listed variables
+# are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Rapidjson

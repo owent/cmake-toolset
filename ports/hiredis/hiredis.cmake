@@ -1,6 +1,4 @@
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.10")
-  include_guard(GLOBAL)
-endif()
+include_guard(GLOBAL)
 # =========== third_party redis ==================
 
 macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
@@ -31,8 +29,10 @@ macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
   endif()
 endmacro()
 
-# if (VCPKG_TOOLCHAIN) find_package(hiredis QUIET) PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT() endif
-# ()
+if(VCPKG_TOOLCHAIN)
+  find_package(hiredis QUIET CONFIG)
+  project_third_party_redis_hiredis_import()
+endif()
 
 if(NOT TARGET hiredis::hiredis_ssl_static
    AND NOT TARGET hiredis::hiredis_static
@@ -44,7 +44,7 @@ if(NOT TARGET hiredis::hiredis_ssl_static
     # some patch
   endif()
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_DIR
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}"
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}"
   )
 
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_OPTIONS "-DDISABLE_TESTS=YES"
@@ -62,11 +62,11 @@ if(NOT TARGET hiredis::hiredis_ssl_static
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_OPTIONS}
     "-DCMAKE_POSITION_INDEPENDENT_CODE=YES"
     WORKING_DIRECTORY
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}"
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY
     "${CMAKE_CURRENT_BINARY_DIR}/deps/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
     PREFIX_DIRECTORY
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}"
+    "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
     SRC_DIRECTORY_NAME
     "hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}"
     GIT_COMMIT
@@ -84,7 +84,7 @@ if(NOT TARGET hiredis::hiredis_ssl_static
   endif()
 
   if(TARGET hiredis::hiredis_static OR TARGET hiredis::hiredis)
-    find_package(hiredis_ssl QUIET NO_MODULE)
+    find_package(hiredis_ssl QUIET CONFIG)
   endif()
 
   project_third_party_redis_hiredis_import()
@@ -97,7 +97,7 @@ endif()
 
 if(NOT TARGET hiredis-happ)
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HAPP_DIR
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}/hiredis-happ-repo")
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-happ-repo")
 
   project_git_clone_repository(
     URL
@@ -109,7 +109,7 @@ if(NOT TARGET hiredis-happ)
     BRANCH
     master
     WORKING_DIRECTORY
-    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}
+    ${PROJECT_THIRD_PARTY_PACKAGE_DIR}
     CHECK_PATH
     "CMakeLists.txt")
 

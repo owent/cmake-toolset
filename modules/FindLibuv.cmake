@@ -26,16 +26,12 @@
 # Hints ^^^^^
 #
 # A user may set ``LIBUV_ROOT`` to a libuv installation root to tell this module where to look.
-
-# =============================================================================
-# Copyright 2014-2020 OWenT.
 #
-# Distributed under the OSI-approved BSD License (the "License"); see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE. See the License for more information.
 # =============================================================================
-# (To distribute this file outside of CMake, substitute the full License text for the above reference.)
+# Copyright 2021 atframework.
+#
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 unset(_LIBUV_SEARCH_ROOT_INC)
 unset(_LIBUV_SEARCH_ROOT_LIB)
@@ -58,11 +54,13 @@ if(LIBUV_ROOT)
           "${LIBUV_ROOT}/lib"
           NO_DEFAULT_PATH)
     else()
-      set(_LIBUV_SEARCH_ROOT_LIB PATHS ${LIBUV_ROOT} "${LIBUV_ROOT}/lib64" "${LIBUV_ROOT}/lib" NO_DEFAULT_PATH)
+      set(_LIBUV_SEARCH_ROOT_LIB PATHS ${LIBUV_ROOT} "${LIBUV_ROOT}/lib64" "${LIBUV_ROOT}/lib"
+                                 NO_DEFAULT_PATH)
     endif()
   else()
     if(MSVC AND CMAKE_BUILD_TYPE)
-      set(_LIBUV_SEARCH_ROOT_LIB PATHS ${LIBUV_ROOT} "${LIBUV_ROOT}/lib/${CMAKE_BUILD_TYPE}" "${LIBUV_ROOT}/lib" NO_DEFAULT_PATH)
+      set(_LIBUV_SEARCH_ROOT_LIB PATHS ${LIBUV_ROOT} "${LIBUV_ROOT}/lib/${CMAKE_BUILD_TYPE}"
+                                 "${LIBUV_ROOT}/lib" NO_DEFAULT_PATH)
     else()
       set(_LIBUV_SEARCH_ROOT_LIB PATHS ${LIBUV_ROOT} "${LIBUV_ROOT}/lib" NO_DEFAULT_PATH)
     endif()
@@ -78,7 +76,8 @@ find_library(Libuv_LIBRARIES NAMES ${Libuv_NAMES} ${_LIBUV_SEARCH_ROOT_LIB})
 
 mark_as_advanced(Libuv_INCLUDE_DIRS Libuv_LIBRARIES)
 
-# handle the QUIETLY and REQUIRED arguments and set LIBUV_FOUND to TRUE if all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set LIBUV_FOUND to TRUE if all listed variables are
+# TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Libuv
@@ -90,10 +89,12 @@ if(Libuv_FOUND)
   if(NOT TARGET libuv)
     add_library(libuv UNKNOWN IMPORTED)
     set_target_properties(libuv PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Libuv_INCLUDE_DIRS})
-    set_target_properties(libuv PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION ${Libuv_LIBRARIES})
+    set_target_properties(libuv PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC"
+                                           IMPORTED_LOCATION ${Libuv_LIBRARIES})
 
     if(WIN32)
-      set_target_properties(libuv PROPERTIES INTERFACE_LINK_LIBRARIES "psapi;user32;advapi32;iphlpapi;userenv;ws2_32")
+      set_target_properties(libuv PROPERTIES INTERFACE_LINK_LIBRARIES
+                                             "psapi;user32;advapi32;iphlpapi;userenv;ws2_32")
     else()
       unset(uv_libraries)
       if(NOT CMAKE_SYSTEM_NAME MATCHES "Android|OS390")

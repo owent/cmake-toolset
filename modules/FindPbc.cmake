@@ -29,18 +29,11 @@
 #  Pbc_ROOT            - Preferred installation prefix
 #   (or Pbc_ROOT)
 #
-#=============================================================================
-# Copyright 2014-2015 OWenT.
+# =============================================================================
+# Copyright 2021 atframework.
 #
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 unset(_PBC_SEARCH_ROOT)
 
@@ -61,7 +54,8 @@ find_library(Pbc_LIBRARY NAMES ${Pbc_NAMES} ${_PBC_SEARCH_ROOT})
 
 mark_as_advanced(Pbc_LIBRARY Pbc_INCLUDE_DIR)
 
-# handle the QUIETLY and REQUIRED arguments and set LIBUV_FOUND to TRUE if all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set LIBUV_FOUND to TRUE if all listed variables are
+# TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Pbc

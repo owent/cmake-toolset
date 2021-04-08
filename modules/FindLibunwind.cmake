@@ -22,16 +22,12 @@
 #   Libunwind::libunwind
 #
 # ::
-
-# =============================================================================
-# Copyright 2020 OWenT.
 #
-# Distributed under the OSI-approved BSD License (the "License"); see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE. See the License for more information.
 # =============================================================================
-# (To distribute this file outside of CMake, substitute the full License text for the above reference.)
+# Copyright 2021 atframework.
+#
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 if(Libunwind_ROOT)
   set(LIBUNWIND_ROOT ${Libunwind_ROOT})
@@ -68,7 +64,8 @@ if(NOT Libunwind_FOUND)
   endif()
 
   find_library(Libunwind_LIBRARY NAMES unwind ${_LIBUNWIND_SEARCH_LIB})
-  find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-${CMAKE_SYSTEM_PROCESSOR} ${_LIBUNWIND_SEARCH_LIB})
+  find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-${CMAKE_SYSTEM_PROCESSOR}
+                                             ${_LIBUNWIND_SEARCH_LIB})
   if(NOT Libunwind_LIBRARY_EXTRA AND ${CMAKE_SYSTEM_PROCESSOR} EQUAL ${CMAKE_HOST_SYSTEM_PROCESSOR})
     find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-generic ${_LIBUNWIND_SEARCH_LIB})
   endif()
@@ -77,15 +74,20 @@ if(NOT Libunwind_FOUND)
       CACHE FILEPATH "Path of libunwind libraries." FORCE)
   get_filename_component(Libunwind_LIBRARY_DIRS ${Libunwind_LIBRARY} DIRECTORY CACHE)
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Libunwind REQUIRED_VARS Libunwind_INCLUDE_DIRS Libunwind_LIBRARIES)
+  find_package_handle_standard_args(Libunwind REQUIRED_VARS Libunwind_INCLUDE_DIRS
+                                                            Libunwind_LIBRARIES)
 endif()
 
 if(Libunwind_INCLUDE_DIRS AND EXISTS "${Libunwind_INCLUDE_DIRS}/libunwind-common.h")
-  file(STRINGS "${Libunwind_INCLUDE_DIRS}/libunwind-common.h" Libunwind_HEADER_CONTENTS REGEX "#define UNW_VERSION_[A-Z]+\t[0-9]*")
+  file(STRINGS "${Libunwind_INCLUDE_DIRS}/libunwind-common.h" Libunwind_HEADER_CONTENTS
+       REGEX "#define UNW_VERSION_[A-Z]+\t[0-9]*")
 
-  string(REGEX REPLACE ".*#define UNW_VERSION_MAJOR\t([0-9]*).*" "\\1" Libunwind_VERSION_MAJOR "${Libunwind_HEADER_CONTENTS}")
-  string(REGEX REPLACE ".*#define UNW_VERSION_MINOR\t([0-9]*).*" "\\1" Libunwind_VERSION_MINOR "${Libunwind_HEADER_CONTENTS}")
-  string(REGEX REPLACE ".*#define UNW_VERSION_EXTRA\t([0-9]*).*" "\\1" Libunwind_VERSION_EXTRA "${Libunwind_HEADER_CONTENTS}")
+  string(REGEX REPLACE ".*#define UNW_VERSION_MAJOR\t([0-9]*).*" "\\1" Libunwind_VERSION_MAJOR
+                       "${Libunwind_HEADER_CONTENTS}")
+  string(REGEX REPLACE ".*#define UNW_VERSION_MINOR\t([0-9]*).*" "\\1" Libunwind_VERSION_MINOR
+                       "${Libunwind_HEADER_CONTENTS}")
+  string(REGEX REPLACE ".*#define UNW_VERSION_EXTRA\t([0-9]*).*" "\\1" Libunwind_VERSION_EXTRA
+                       "${Libunwind_HEADER_CONTENTS}")
 
   if(Libunwind_VERSION_EXTRA)
     set(Libunwind_VERSION_STRING
@@ -152,21 +154,26 @@ if(Libunwind_FOUND)
 
   if(NOT TARGET Libunwind::libunwind)
     add_library(Libunwind::libunwind UNKNOWN IMPORTED)
-    set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Libunwind_INCLUDE_DIRS})
+    set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                          ${Libunwind_INCLUDE_DIRS})
     if(Libunwind_LIBRARIES)
       list(GET Libunwind_LIBRARIES 0 Libunwind_LIBRARIES_LOCATION)
-      set_target_properties(Libunwind::libunwind PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX" IMPORTED_LOCATION
-                                                                                                      ${Libunwind_LIBRARIES_LOCATION})
+      set_target_properties(
+        Libunwind::libunwind PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
+                                        IMPORTED_LOCATION ${Libunwind_LIBRARIES_LOCATION})
       set(Libunwind_LIBRARIES_LOCATION ${Libunwind_LIBRARIES})
       list(REMOVE_AT Libunwind_LIBRARIES_LOCATION 0)
-      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_LIBRARIES ${Libunwind_LIBRARIES_LOCATION})
+      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_LIBRARIES
+                                                            ${Libunwind_LIBRARIES_LOCATION})
       unset(Libunwind_LIBRARIES_LOCATION)
     endif()
     if(Libunwind_LDFLAGS)
-      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_OPTIONS ${Libunwind_LDFLAGS})
+      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_OPTIONS
+                                                            ${Libunwind_LDFLAGS})
     endif()
     if(Libunwind_CFLAGS)
-      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_COMPILE_OPTIONS ${Libunwind_CFLAGS})
+      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_COMPILE_OPTIONS
+                                                            ${Libunwind_CFLAGS})
     endif()
   endif()
 

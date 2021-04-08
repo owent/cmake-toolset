@@ -1,8 +1,18 @@
+# .rst: EchoWithColor
+# ----------------
+#
 # cmake color echo function the final output color associated with terminal settings using
 # [print_color.py](https://github.com/owent-utils/python/blob/master/print_color.py) for cross platform color rending. so
 # [python](https://www.python.org/) and [print_color.py](https://github.com/owent-utils/python/blob/master/print_color.py) is required.
-# python2 or python3 are all supported. usage: EchoWithColor( [ [COLOR RED|GREEN|YELLOW|BLUE|MAGENTA|CYAN] [message1 [message2 ...]]] ... )
+# python2 or python3 are all supported.
 #
+# EchoWithColor( [ [COLOR RED|GREEN|YELLOW|BLUE|MAGENTA|CYAN] [message1 [message2 ...]]] ... )
+#
+# =============================================================================
+# Copyright 2021 atframework.
+#
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12")
   find_package(Python3 COMPONENTS Interpreter)
@@ -65,8 +75,8 @@ function(EchoWithColor)
   if(ECHO_WITH_COLOR_COLOR
      AND Python_EXECUTABLE
      AND ECHO_WITH_COLOR_TOOL_PATH)
-    execute_process(COMMAND ${Python_EXECUTABLE} ${ECHO_WITH_COLOR_TOOL_PATH} -e -c ${ECHO_WITH_COLOR_COLOR} "{0}\r\n"
-                            "${ECHO_WITH_COLOR_MSG}")
+    execute_process(COMMAND ${Python_EXECUTABLE} ${ECHO_WITH_COLOR_TOOL_PATH} -e -c
+                            ${ECHO_WITH_COLOR_COLOR} "{0}\r\n" "${ECHO_WITH_COLOR_MSG}")
   else()
     message(${ECHO_WITH_COLOR_MSG})
   endif()

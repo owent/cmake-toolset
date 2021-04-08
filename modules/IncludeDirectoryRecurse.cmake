@@ -1,10 +1,10 @@
-# cmake 递归包含头文件目录模块 include_directory_recurse [dir1 [dir2 [...]]]
+# include_directory_recurse [dir1 [dir2 [...]]]
 macro(include_directory_recurse)
   foreach(basedir ${ARGV})
     file(GLOB_RECURSE SRC_HEADER_LIST_H "${basedir}/*.h" "${basedir}/*.hpp")
     set(LAST_HEAD_FILE_DIR "  ")
     foreach(src ${SRC_HEADER_LIST_H})
-      # 去掉文件名，截取路径
+      # remove file name
       string(REGEX REPLACE "(.+)[/\\].+\\.h(pp)?$" "\\1" CUR_HEAD_FILE_DIR ${src})
 
       if(NOT "${CUR_HEAD_FILE_DIR}" STREQUAL "${LAST_HEAD_FILE_DIR}")
@@ -18,7 +18,7 @@ macro(include_directory_recurse)
   endforeach()
 endmacro(include_directory_recurse)
 
-# cmake 递归包含macro声明模块 include_macro_recurse [FILTER filter] | [dir1 [dir2 [...]]]
+# include_macro_recurse [FILTER filter] | [dir1 [dir2 [...]]]
 macro(include_macro_recurse)
   set(INCLUDE_MACRO_RECURSE_FILTER "*.macro.cmake")
   set(INCLUDE_MACRO_RECURSE_FILTER_FLAG "false")
@@ -39,7 +39,7 @@ macro(include_macro_recurse)
   endforeach()
 endmacro(include_macro_recurse)
 
-# cmake 递归添加工程列表模块 add_project_recurse [RECURSE] | [dir1 [dir2 [...]]]
+# add_project_recurse [RECURSE] | [dir1 [dir2 [...]]]
 macro(add_project_recurse)
   set(INCLUDE_PROJECT_RECURSE_RECURSE_FLAG "false")
 
@@ -62,7 +62,7 @@ macro(add_project_recurse)
   endforeach()
 endmacro(add_project_recurse)
 
-# cmake VC 源文件分组 source_group_by_dir [Source List Var1 [Source List Var2 [...]]]
+# source_group_by_dir [Source List Var1 [Source List Var2 [...]]]
 macro(source_group_by_dir)
   if(MSVC)
     foreach(source_files ${ARGV})

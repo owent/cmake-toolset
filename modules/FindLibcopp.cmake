@@ -30,14 +30,10 @@
 # module where to look.
 
 # =============================================================================
-# Copyright 2014-2015 OWenT.
+# Copyright 2021 atframework.
 #
-# Distributed under the OSI-approved BSD License (the "License"); see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE. See the License for more information.
-# =============================================================================
-# (To distribute this file outside of CMake, substitute the full License text for the above reference.)
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
+# for details.
 
 unset(_LIBCOPP_SEARCH_ROOT)
 
@@ -55,7 +51,8 @@ set(Libcopp_NAMES copp libcopp)
 set(Libcotask_NAMES cotask libcotask)
 
 # Try each search configuration.
-find_path(Libcopp_INCLUDE_DIRS NAMES libcopp/coroutine/coroutine_context_base.h ${_LIBCOPP_SEARCH_ROOT})
+find_path(Libcopp_INCLUDE_DIRS NAMES libcopp/coroutine/coroutine_context_base.h
+                                     ${_LIBCOPP_SEARCH_ROOT})
 find_library(
   Libcopp_LIBRARIES
   NAMES ${Libcopp_NAMES} ${_LIBCOPP_SEARCH_ROOT}
@@ -67,7 +64,8 @@ find_library(
 
 mark_as_advanced(Libcopp_INCLUDE_DIRS Libcopp_LIBRARIES Libcotask_LIBRARIES)
 
-# handle the QUIETLY and REQUIRED arguments and set LIBCOPP_FOUND to TRUE if all listed variables are TRUE
+# handle the QUIETLY and REQUIRED arguments and set LIBCOPP_FOUND to TRUE if all listed variables
+# are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Libcopp

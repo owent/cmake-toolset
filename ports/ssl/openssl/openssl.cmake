@@ -1,6 +1,4 @@
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.10")
-  include_guard(GLOBAL)
-endif()
+include_guard(GLOBAL)
 
 # =========== third party openssl ==================
 
@@ -76,8 +74,8 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   # "no-hw" and "no-engine" is recommanded by openssl only for mobile devices @see
   # https://wiki.openssl.org/index.php/Compilation_and_Installation
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-      "--prefix=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}"
-      "--openssldir=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}/ssl"
+      "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+      "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
       "--release"
       # "--api=1.1.1" # libwebsockets and atframe_utils has warnings of using deprecated APIs, maybe
       # it can be remove later "no-deprecated" # libcurl and gRPC requires openssl's API of 1.1.0
@@ -105,20 +103,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   endif()
 
   if(NOT OPENSSL_FOUND)
-    set(OPENSSL_ROOT_DIR ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR})
+    set(OPENSSL_ROOT_DIR ${PROJECT_THIRD_PARTY_INSTALL_DIR})
     set(OPENSSL_USE_STATIC_LIBS TRUE)
 
     find_library(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_FIND_LIB_CRYPTO
       NAMES crypto libcrypto
-      PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}/lib"
-            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}/lib64"
+      PATHS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
       NO_DEFAULT_PATH)
     find_library(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_FIND_LIB_SSL
       NAMES ssl libssl
-      PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}/lib"
-            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}/lib64"
+      PATHS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
       NO_DEFAULT_PATH)
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_FIND_LIB_CRYPTO
@@ -156,17 +152,17 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
       URL
       "https://github.com/openssl/openssl.git"
       REPO_DIRECTORY
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_DEFAULT_VERSION}"
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_DEFAULT_VERSION}"
       DEPTH
       200
       TAG
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_GITHUB_TAG}
       WORKING_DIRECTORY
-      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR})
+      ${PROJECT_THIRD_PARTY_PACKAGE_DIR})
 
     if(NOT
        EXISTS
-       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_DEFAULT_VERSION}"
+       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_DEFAULT_VERSION}"
     )
       echowithcolor(COLOR RED "-- Dependency: Build openssl failed")
       message(FATAL_ERROR "Dependency: openssl is required")
@@ -312,8 +308,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "PERL=no-perl")
       project_expand_list_for_command_line_to_file(
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_DIR}/run-build-release.bat" "nmake"
-        "install_sw"
-        "install_ssldirs" # "DESTDIR=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INSTALL_DIR}"
+        "install_sw" "install_ssldirs" # "DESTDIR=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
       )
 
       # build & install
