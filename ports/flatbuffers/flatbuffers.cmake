@@ -1,4 +1,4 @@
-﻿# =========== third party flatbuffer ==================
+# =========== third party flatbuffer ==================
 include_guard(GLOBAL)
 
 # =========== third party flatbuffer ==================

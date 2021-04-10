@@ -1,0 +1,10 @@
+*.md text eol=crlf
+*.bat text eol=crlf
+*.bat.in text eol=crlf
+*.ps1 text eol=crlf
+*.ps1.in text eol=crlf
+*.sh text eol=lf
+*.sh.in text eol=lf
+*.cmake text eol=lf
+*.cmake.in text eol=lf
+CMakeLists.txt eol=lf
