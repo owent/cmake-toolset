@@ -38,20 +38,37 @@ if(NOT TARGET hiredis::hiredis_ssl_static
    AND NOT TARGET hiredis::hiredis_static
    AND NOT TARGET hiredis::hiredis_ssl
    AND NOT TARGET hiredis::hiredis)
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION
-        "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with
-    # some patch
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION
+        "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with some patch
   endif()
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL
+        "https://github.com/redis/hiredis.git")
+  endif()
+
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_DIR
-      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}"
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION}"
   )
 
-  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_OPTIONS "-DDISABLE_TESTS=YES"
-                                                                  "-DENABLE_EXAMPLES=OFF")
-  if(OPENSSL_FOUND)
-    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_OPTIONS "-DENABLE_SSL=ON")
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS "-DDISABLE_TESTS=YES"
+                                                              "-DENABLE_EXAMPLES=OFF")
   endif()
+
+  string(REPLACE ";" "\\;" CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS "${CMAKE_FIND_ROOT_PATH}")
+  string(REPLACE ";" "\\;" CMAKE_PREFIX_PATH_AS_CMD_ARGS "${CMAKE_PREFIX_PATH}")
+
+  list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS
+       "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS}"
+       "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_AS_CMD_ARGS}")
+
+  if(OPENSSL_FOUND)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS "-DENABLE_SSL=ON")
+  endif()
+
   findconfigurepackage(
     PACKAGE
     hiredis
@@ -59,26 +76,24 @@ if(NOT TARGET hiredis::hiredis_ssl_static
     CMAKE_INHIRT_BUILD_ENV
     CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
     CMAKE_FLAGS
-    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_OPTIONS}
+    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS}
     "-DCMAKE_POSITION_INDEPENDENT_CODE=YES"
-    WORKING_DIRECTORY
-    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY
-    "${CMAKE_CURRENT_BINARY_DIR}/deps/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
+    "${CMAKE_CURRENT_BINARY_DIR}/deps/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
     PREFIX_DIRECTORY
     "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
     SRC_DIRECTORY_NAME
-    "hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}"
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION}"
     GIT_COMMIT
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_VERSION}"
+    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION}"
     GIT_URL
-    "https://github.com/redis/hiredis.git")
+    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL}")
 
   if(NOT hiredis_FOUND)
     echowithcolor(
       COLOR
       RED
-      "-- Dependency: hiredis is required, we can not find prebuilt for hiredis and can not build from the sources"
+      "-- Dependency(${PROJECT_NAME}): hiredis is required, we can not find prebuilt for hiredis and can not build from the sources"
     )
     message(FATAL_ERROR "hiredis not found")
   endif()
@@ -91,36 +106,6 @@ if(NOT TARGET hiredis::hiredis_ssl_static
 endif()
 
 if(NOT hiredis_FOUND)
-  echowithcolor(COLOR RED "-- Dependency: hiredis is required")
+  echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): hiredis is required")
   message(FATAL_ERROR "hiredis not found")
-endif()
-
-if(NOT TARGET hiredis-happ)
-  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HAPP_DIR
-      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-happ-repo")
-
-  project_git_clone_repository(
-    URL
-    "https://github.com/owt5008137/hiredis-happ.git"
-    REPO_DIRECTORY
-    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HAPP_DIR}
-    DEPTH
-    200
-    BRANCH
-    master
-    WORKING_DIRECTORY
-    ${PROJECT_THIRD_PARTY_PACKAGE_DIR}
-    CHECK_PATH
-    "CMakeLists.txt")
-
-  set(HOREDIS_HAPP_LIBHIREDIS_USING_SRC ON)
-  add_subdirectory(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HAPP_DIR}
-                   "${CMAKE_BINARY_DIR}/deps/hiredis-happ-repo")
-
-  if(NOT TARGET hiredis-happ)
-    echowithcolor(COLOR RED "-- Dependency: hiredis-happ not found")
-    message(FATAL_ERROR "hiredis-happ not found")
-  endif()
-
-  list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES hiredis-happ)
 endif()

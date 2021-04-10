@@ -2,17 +2,17 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_FMTLIB_IMPORT)
   if(TARGET fmt::fmt-header-only)
-    message(STATUS "fmtlib using target: fmt::fmt-header-only")
+    message(STATUS "Dependency(${PROJECT_NAME}): fmtlib using target fmt::fmt-header-only")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_LINK_NAME fmt::fmt-header-only)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_LINK_NAME})
   elseif(TARGET fmt::fmt)
-    message(STATUS "fmtlib using target: fmt::fmt")
+    message(STATUS "Dependency(${PROJECT_NAME}): fmtlib using target fmt::fmt")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_LINK_NAME fmt::fmt)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_LINK_NAME})
   else()
-    message(STATUS "fmtlib support disabled")
+    message(STATUS "Dependency(${PROJECT_NAME}): fmtlib support disabled")
   endif()
 endmacro()
 

@@ -2,27 +2,27 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_LIBUV_IMPORT)
   if(TARGET uv_a)
-    message(STATUS "libuv using target: uv_a")
+    message(STATUS "Dependency(${PROJECT_NAME}): libuv using target: uv_a")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME uv_a)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME})
   elseif(TARGET uv)
-    message(STATUS "libuv using target: uv")
+    message(STATUS "Dependency(${PROJECT_NAME}): libuv using target: uv")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME uv)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME})
   elseif(TARGET libuv)
-    message(STATUS "libuv using target: libuv")
+    message(STATUS "Dependency(${PROJECT_NAME}): libuv using target: libuv")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME libuv)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME})
   elseif(TARGET libuv::libuv)
-    message(STATUS "libuv using target: libuv::libuv")
+    message(STATUS "Dependency(${PROJECT_NAME}): libuv using target: libuv::libuv")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME libuv::libuv)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME})
   else()
-    message(STATUS "Libuv support disabled")
+    message(STATUS "Dependency(${PROJECT_NAME}): Libuv support disabled")
   endif()
 endmacro()
 
@@ -42,7 +42,13 @@ if(NOT TARGET uv_a
      AND NOT TARGET libuv
      AND NOT Libuv_FOUND
      AND NOT LIBUV_FOUND)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION "1.41.0")
+
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION "v1.41.0")
+    endif()
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_GIT_URL)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_GIT_URL "https://github.com/libuv/libuv.git")
+    endif()
 
     set(Libuv_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
     findconfigurepackage(
@@ -58,21 +64,21 @@ if(NOT TARGET uv_a
       WORKING_DIRECTORY
       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
       BUILD_DIRECTORY
-      "${CMAKE_CURRENT_BINARY_DIR}/deps/libuv-v${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
+      "${CMAKE_CURRENT_BINARY_DIR}/deps/libuv-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
       PREFIX_DIRECTORY
       "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
       SRC_DIRECTORY_NAME
-      "libuv-v${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION}"
+      "libuv-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION}"
       GIT_BRANCH
-      "v${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION}"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION}"
       GIT_URL
-      "https://github.com/libuv/libuv.git")
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_GIT_URL}")
 
     if(NOT Libuv_FOUND)
       echowithcolor(
         COLOR
         RED
-        "-- Dependency: Libuv is required, we can not find prebuilt for libuv and can not find git to clone the sources"
+        "-- Dependency(${PROJECT_NAME}): Libuv is required, we can not find prebuilt for libuv and can not find git to clone the sources"
       )
       message(FATAL_ERROR "Libuv not found")
     endif()

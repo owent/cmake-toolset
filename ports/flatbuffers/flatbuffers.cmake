@@ -12,7 +12,7 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
     echowithcolor(
       COLOR
       GREEN
-      "-- Dependency: Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})"
+      "-- Dependency(${PROJECT_NAME}): Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})"
     )
   endif()
 endmacro()
@@ -24,20 +24,29 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
   endif()
 
   if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_VERSION "v1.12.0")
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION "v1.12.0")
+    endif()
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL
+          "https://github.com/google/flatbuffers.git")
+    endif()
+
     if(NOT Flatbuffers_ROOT)
       set(Flatbuffers_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
     endif()
 
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
-        -DFLATBUFFERS_CODE_COVERAGE=OFF
-        -DFLATBUFFERS_BUILD_TESTS=OFF
-        -DFLATBUFFERS_INSTALL=ON
-        -DFLATBUFFERS_BUILD_FLATLIB=ON
-        -DFLATBUFFERS_BUILD_FLATC=ON
-        -DFLATBUFFERS_BUILD_FLATHASH=ON
-        -DFLATBUFFERS_BUILD_GRPCTEST=OFF
-        -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
+          -DFLATBUFFERS_CODE_COVERAGE=OFF
+          -DFLATBUFFERS_BUILD_TESTS=OFF
+          -DFLATBUFFERS_INSTALL=ON
+          -DFLATBUFFERS_BUILD_FLATLIB=ON
+          -DFLATBUFFERS_BUILD_FLATC=ON
+          -DFLATBUFFERS_BUILD_FLATHASH=ON
+          -DFLATBUFFERS_BUILD_GRPCTEST=OFF
+          -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
+    endif()
     findconfigurepackage(
       PACKAGE
       Flatbuffers
@@ -50,18 +59,19 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
       WORKING_DIRECTORY
       ${PROJECT_THIRD_PARTY_PACKAGE_DIR}
       BUILD_DIRECTORY
-      "${CMAKE_CURRENT_BINARY_DIR}/deps/flatbuffers-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
+      "${CMAKE_CURRENT_BINARY_DIR}/deps/flatbuffers-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
       PREFIX_DIRECTORY
-      ${Flatbuffers_ROOT}
+      "${Flatbuffers_ROOT}"
       SRC_DIRECTORY_NAME
-      "flatbuffers-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_VERSION}"
+      "flatbuffers-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION}"
       GIT_BRANCH
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_VERSION}"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION}"
       GIT_URL
-      "https://github.com/google/flatbuffers.git")
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL}")
 
     if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
-      echowithcolor(COLOR RED "-- Dependency: Flatbuffer is required but not found")
+      echowithcolor(COLOR RED
+                    "-- Dependency(${PROJECT_NAME}): Flatbuffer is required but not found")
       message(FATAL_ERROR "Flatbuffer not found")
     endif()
     project_third_party_flatbuffers_import()

@@ -4,10 +4,10 @@ include_guard(GLOBAL)
 # force to use prebuilt when using mingw
 macro(PROJECT_THIRD_PARTY_LZ4_IMPORT)
   if(TARGET lz4::lz4_static)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): lz4 found target: lz4::lz4_static")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4_static")
     # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES lz4::lz4_static)
   elseif(TARGET lz4::lz4_shared)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): lz4 found target: lz4::lz4_shared")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4_shared")
     # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES lz4::lz4_shared)
   endif()
 
@@ -92,7 +92,7 @@ if(NOT TARGET lz4::lz4_static
        AND NOT TARGET lz4::lz4_shared
        AND NOT TARGET lz4::lz4cli
        AND NOT TARGET lz4::lz4c)
-      echowithcolor(COLOR YELLOW "-- Dependency: lz4 not found")
+      echowithcolor(COLOR YELLOW "-- Dependency(${PROJECT_NAME}): lz4 not found")
     endif()
     project_third_party_lz4_import()
   endif()

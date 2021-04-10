@@ -53,7 +53,7 @@ if(NOT TARGET ZLIB::ZLIB)
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZLIB_GIT_URL}")
 
   if(NOT TARGET ZLIB::ZLIB)
-    echowithcolor(COLOR RED "-- Dependency: zlib is required")
+    echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): zlib is required")
     message(FATAL_ERROR "zlib not found")
   endif()
   project_third_party_zlib_import()

@@ -461,7 +461,7 @@ function(project_git_clone_repository)
               "git ls-remote --symref origin(${project_git_clone_repository_URL}) HEAD failed")
         endif()
         # Fallback
-        set(project_git_clone_repository_GIT_BRANCH master)
+        set(project_git_clone_repository_GIT_BRANCH main)
       endif()
       unset(project_git_clone_repository_GIT_CHECK_REPO)
       unset(project_git_clone_repository_GIT_LS_REMOTE_RESULT)

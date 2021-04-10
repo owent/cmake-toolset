@@ -7,7 +7,7 @@ include_guard(GLOBAL)
 # =========== third party re2 ==================
 macro(PROJECT_THIRD_PARTY_RE2_IMPORT)
   if(TARGET re2::re2)
-    message(STATUS "re2 using target(${PROJECT_NAME}): re2::re2")
+    message(STATUS "Dependency(${PROJECT_NAME}): re2 using target re2::re2")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_LINK_NAME re2::re2)
   endif()
 endmacro()

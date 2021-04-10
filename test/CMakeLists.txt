@@ -1,0 +1,42 @@
+project(cmake-toolset-test CXX)
+
+set(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
+
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
+
+# Ports
+
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/fmtlib/fmtlib.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/rapidjson/rapidjson.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libwebsockets/libwebsockets.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
+
+add_executable(cmake-toolset-test main.cpp)
+
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS)
+  target_include_directories(cmake-toolset-test
+                             ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS})
+endif()
+target_link_directories(cmake-toolset-test
+                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES})
+
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN)
+  if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/bin")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+  endif()
+  file(GLOB THIRD_PARTY_ALL_DYNAMIC_BIN_FILES
+       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN})
+  list(REMOVE_DUPLICATES THIRD_PARTY_ALL_DYNAMIC_BIN_FILES)
+
+  file(COPY ${THIRD_PARTY_ALL_DYNAMIC_BIN_FILES} "${CMAKE_CURRENT_BINARY_DIR}/bin")
+endif()

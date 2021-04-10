@@ -3,7 +3,7 @@
 This is a cmake script set for atframework.It contains some utility functions and it can works with [vcpkg][1].
 
 It's recommanded to use [vcpkg][1] if you just want a package manager on x86/x86_64 platform.
-But if you want a special version of some package or custom some compile options, you can use this toolset.
+But if you want a special version of some packages or just download packages from custom mirrors, you can use this toolset.
 
 > e.g.: If you want to use openssl 1.1.0k and use options ```no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers```
 > Just add these codes below:
@@ -60,6 +60,7 @@ This toolset also works with iOS toolchain and Android NDK.
 
 + Option(Optional): ```PROJECT_THIRD_PARTY_PACKAGE_DIR``` : Where to place package sources.
 + Option(Optional): ```PROJECT_THIRD_PARTY_INSTALL_DIR``` : Where to place installed packages.
++ Option(Optional): ```FindConfigurePackageGitFetchDepth``` : Fetch depth og git repository.
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")
@@ -75,7 +76,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/<package dir>[/package sub dir]/
 + Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS``` : Directories to include of all imported packages.
 + Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES``` : Public libraries and targets to link of all imported packages.
 + Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INTERFACE_LINK_NAMES``` : Interface libraries and targets to link of all imported packages.
-+ Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN``` : Executable files of all imported packages.
++ Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN``` : Executable file patterns of all imported packages.
 
 ### Package - jemalloc
 
@@ -111,24 +112,177 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
 
 ### Package - libuv
 
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION "v1.41.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_GIT_URL "https://github.com/libuv/libuv.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
+```
+
 ### Package - libunwind
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION "v1.5")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL "https://github.com/libunwind/libunwind.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+```
 
 ### Package - rapidjson
 
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_VERSION "47b837e14ab5712fade68e0b00768ff95c120966")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_GIT_URL "https://github.com/Tencent/rapidjson.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/rapidjson/rapidjson.cmake")
+```
+
 ### Package - flatbuffers
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION "47b837e14ab5712fade68e0b00768ff95c120966")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL "https://github.com/Tencent/rapidjson.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
+#   -DFLATBUFFERS_CODE_COVERAGE=OFF
+#   -DFLATBUFFERS_BUILD_TESTS=OFF
+#   -DFLATBUFFERS_INSTALL=ON
+#   -DFLATBUFFERS_BUILD_FLATLIB=ON
+#   -DFLATBUFFERS_BUILD_FLATC=ON
+#   -DFLATBUFFERS_BUILD_FLATHASH=ON
+#   -DFLATBUFFERS_BUILD_GRPCTEST=OFF
+#   -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
+```
 
 ### Package - protobuf
 
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION "v3.15.8")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_GIT_URL "https://github.com/protocolbuffers/protobuf.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS
+#   "-Dprotobuf_BUILD_TESTS=OFF"
+#   "-Dprotobuf_BUILD_EXAMPLES=OFF"
+#   "-Dprotobuf_BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}"
+#   "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
+```
+
 ### Package - crypto(openssl/libressl/mbedtls/libsodium)
+
+```cmake
+# ============ crypto - openssl ============
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL)
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_LIBRESSL)
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL) # Not support yet
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_MBEDTLS)
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_DISABLED)
+
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION "1.1.1k")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL "https://github.com/openssl/openssl.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
+#   "--release"
+#   # "--api=1.1.1" # libwebsockets and atframe_utils has warnings of using deprecated APIs,
+#   # maybe it can be remove later "no-deprecated" # libcurl and gRPC requires openssl's API of
+#   # 1.1.0 and 1.0.2, so we can not disable deprecated APIS here
+#   "no-dso"
+#   "no-tests"
+#   "no-external-tests"
+#   "no-shared"
+#   "no-idea"
+#   "no-md4"
+#   "no-mdc2"
+#   "no-rc2"
+#   "no-ssl2"
+#   "no-ssl3"
+#   "no-weak-ssl-ciphers"
+#   "enable-static-engine")
+
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION "v3.2.5")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_GIT_URL "https://github.com/libressl-portable/portable.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_FLAGS "-DLIBRESSL_TESTS=OFF")
+
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v2.26.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_GIT_URL "https://github.com/ARMmbed/mbedtls.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_BUILD_FLAGS
+#   "-DENABLE_TESTING=OFF" "-DUSE_STATIC_MBEDTLS_LIBRARY=ON" "-DENABLE_PROGRAMS=OFF")
+
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
+```
 
 ### Package - libcurl
 
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION "7.76.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_GIT_URL "https://github.com/curl/curl.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBUILD_TESTING=OFF")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
+```
+
 ### Package - libwebsockets
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_VERSION "v4.1.6")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_GIT_URL "https://github.com/warmcat/libwebsockets.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+#   "-DLWS_STATIC_PIC=ON"
+#   "-DLWS_LINK_TESTAPPS_DYNAMIC=OFF"
+#   "-DLWS_WITHOUT_CLIENT=ON"
+#   "-DLWS_WITHOUT_DAEMONIZE=ON"
+#   "-DLWS_WITHOUT_TESTAPPS=ON"
+#   "-DLWS_WITHOUT_TEST_CLIENT=ON"
+#   "-DLWS_WITHOUT_TEST_PING=ON"
+#   "-DLWS_WITHOUT_TEST_SERVER=ON"
+#   "-DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON"
+#   "-DLWS_WITH_PLUGINS=ON"
+#   "-DLWS_WITHOUT_EXTENSIONS=OFF")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libwebsockets/libwebsockets.cmake")
+```
 
 ### Package - lua
 
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION "v5.4.3")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL "https://github.com/lua/lua.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
+```
+
 ### Package - yaml-cpp
 
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION "0.6.3")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL "https://github.com/jbeder/yaml-cpp.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
+```
+
 ### Package - hiredis
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with some patch
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL "https://github.com/redis/hiredis.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS "-DDISABLE_TESTS=YES" "-DENABLE_EXAMPLES=OFF")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
+```
+
+### Package - libcopp
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION "v2")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owt5008137/libcopp.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
+```
+
+## CI
+
++ Format
++ Build shared libries
++ Build static libraries
++ GCC
++ Clang
++ Apple Clang
++ GCC 4.8
++ MinGW
++ VS 2017
++ VS 2019
++ Build openssl
++ Build libressl
++ Build mbedtls
 
 [1]: https://github.com/microsoft/vcpkg

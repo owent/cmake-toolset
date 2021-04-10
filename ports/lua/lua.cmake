@@ -3,7 +3,8 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
   if(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
     if(TARGET lua::liblua-dynamic)
-      echowithcolor(COLOR GREEN "-- Dependency: Lua found.(Target: lua::liblua-dynamic)")
+      echowithcolor(COLOR GREEN
+                    "-- Dependency(${PROJECT_NAME}): Lua found target lua::liblua-dynamic")
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES lua::liblua-dynamic)
       if(NOT TARGET lua)
         add_library(lua ALIAS lua::liblua-dynamic)
@@ -11,7 +12,8 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     endif()
   else()
     if(TARGET lua::liblua-static)
-      echowithcolor(COLOR GREEN "-- Dependency: Lua found.(Target: lua::liblua-static)")
+      echowithcolor(COLOR GREEN
+                    "-- Dependency(${PROJECT_NAME}): Lua found target lua::liblua-static")
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES lua::liblua-static)
       if(NOT TARGET lua)
         add_library(lua ALIAS lua::liblua-static)
@@ -21,30 +23,31 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
 endmacro()
 
 if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
-  set(PROJECT_THIRD_PARTY_LUA_VERSION "v5.4.3")
-  set(PROJECT_THIRD_PARTY_LUA_REPO_DIR
-      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/lua-${PROJECT_THIRD_PARTY_LUA_VERSION}")
-  set(PROJECT_THIRD_PARTY_LUA_REPO_URL "https://github.com/lua/lua.git")
-  set(PROJECT_THIRD_PARTY_LUA_BUILD_DIR
-      "${CMAKE_BINARY_DIR}/deps/lua-${PROJECT_THIRD_PARTY_LUA_VERSION}")
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION "v5.4.3")
+  endif()
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL "https://github.com/lua/lua.git")
+  endif()
 
-  if(NOT EXISTS ${PROJECT_THIRD_PARTY_LUA_BUILD_DIR})
-    file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_LUA_BUILD_DIR})
+  if(NOT EXISTS
+     "${CMAKE_CURRENT_BINARY_DIR}/deps/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}")
+    file(
+      MAKE_DIRECTORY
+      "${CMAKE_CURRENT_BINARY_DIR}/deps/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}")
   endif()
   project_git_clone_repository(
     URL
-    ${PROJECT_THIRD_PARTY_LUA_REPO_URL}
+    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL}"
     REPO_DIRECTORY
-    ${PROJECT_THIRD_PARTY_LUA_REPO_DIR}
-    DEPTH
-    200
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}"
     BRANCH
-    ${PROJECT_THIRD_PARTY_LUA_VERSION}
-    WORKING_DIRECTORY
-    ${PROJECT_THIRD_PARTY_PACKAGE_DIR}
+    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}"
     CHECK_PATH
     "luaconf.h")
-  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/build-script" ${PROJECT_THIRD_PARTY_LUA_BUILD_DIR})
+  add_subdirectory(
+    "${CMAKE_CURRENT_LIST_DIR}/build-script"
+    "${CMAKE_CURRENT_BINARY_DIR}/deps/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}")
   project_third_party_lua_import()
 else()
   project_third_party_lua_import()

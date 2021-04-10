@@ -6,16 +6,16 @@ macro(PROJECT_THIRD_PARTY_ZSTD_IMPORT)
   if(TARGET zstd::libzstd_shared)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd_shared)
     echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): zstd found target: zstd::libzstd_shared")
+                  "-- Dependency(${PROJECT_NAME}): zstd found target zstd::libzstd_shared")
     # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES zstd::libzstd_shared)
   elseif(TARGET zstd::libzstd_static)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd_static)
     echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): zstd found target: zstd::libzstd_static")
+                  "-- Dependency(${PROJECT_NAME}): zstd found target zstd::libzstd_static")
     # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES zstd::libzstd_static)
   elseif(TARGET zstd::libzstd)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): zstd found target: zstd::libzstd")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): zstd found target zstd::libzstd")
     # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES zstd::libzstd)
   else()
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
@@ -119,7 +119,7 @@ if(NOT TARGET zstd::libzstd_shared
        AND NOT TARGET zstd::libzstd_static
        AND NOT TARGET zstd::libzstd
        AND NOT TARGET zstd::zstd)
-      echowithcolor(COLOR YELLOW "-- Dependency: zstd not found")
+      echowithcolor(COLOR YELLOW "-- Dependency(${PROJECT_NAME}): zstd not found")
     endif()
     project_third_party_zstd_import()
   endif()

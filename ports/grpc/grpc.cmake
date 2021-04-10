@@ -9,13 +9,18 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
   if(TARGET gRPC::grpc++_alts)
     message(
-      STATUS "grpc using target(${PROJECT_NAME}): gRPC::grpc++_alts (version: ${gRPC_VERSION})")
+      STATUS
+        "Dependency(${PROJECT_NAME}): grpc using target gRPC::grpc++_alts (version: ${gRPC_VERSION})"
+    )
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++_alts)
   elseif(TARGET gRPC::grpc++)
-    message(STATUS "grpc using target(${PROJECT_NAME}): gRPC::grpc++ (version: ${gRPC_VERSION})")
+    message(
+      STATUS
+        "Dependency(${PROJECT_NAME}): grpc using target gRPC::grpc++ (version: ${gRPC_VERSION})")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++)
   elseif(TARGET gRPC::grpc)
-    message(STATUS "grpc using target(${PROJECT_NAME}): gRPC::grpc (version: ${gRPC_VERSION})")
+    message(
+      STATUS "Dependency(${PROJECT_NAME}): grpc using target gRPC::grpc (version: ${gRPC_VERSION})")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc)
   endif()
 endmacro()
@@ -74,7 +79,7 @@ if(NOT TARGET gRPC::grpc++_alts
        OR TARGET gRPC::grpc)
       project_third_party_grpc_import()
     else()
-      message(FATAL_ERROR "grpc build failed.")
+      message(FATAL_ERROR "Dependency(${PROJECT_NAME}): grpc build failed.")
     endif()
   endif()
 else()
