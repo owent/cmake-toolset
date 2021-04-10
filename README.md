@@ -22,6 +22,30 @@ But if you want a special version of some packages or just download packages fro
 
 This toolset also works with iOS toolchain and Android NDK.
 
+## Quick Start
+
+```bash
+cmake_minimum_required(VERSION 3.16.0)
+cmake_policy(SET CMP0022 NEW)
+cmake_policy(SET CMP0054 NEW)
+cmake_policy(SET CMP0067 NEW)
+cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0091 NEW)
+
+set(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${PROJECT_SOURCE_DIR}/cmake")
+
+include(FetchContent)
+FetchContent_Populate(
+    "download-atframework-cmake-toolset"
+    SOURCE_DIR "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}"
+    GIT_REPOSITORY "https://github.com/atframework/cmake-toolset.git"
+    GIT_TAG "origin/main"
+    GIT_REMOTE_NAME "origin"
+    GIT_SHALLOW TRUE)
+
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
+```
+
 ## Utility Scripts
 
 ### ```CompilerOption.cmake```
@@ -257,7 +281,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with some patch
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL "https://github.com/redis/hiredis.git")
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_OPTIONS "-DDISABLE_TESTS=YES" "-DENABLE_EXAMPLES=OFF")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS "-DDISABLE_TESTS=YES" "-DENABLE_EXAMPLES=OFF")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
 ```
 
@@ -267,6 +291,29 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION "v2")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owt5008137/libcopp.git")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
+```
+
+### Package - gRPC
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20210324.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_GIT_URL "https://github.com/abseil/abseil-cpp.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBUILD_TESTING=OFF")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CARES_VERSION "1.17.1")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CARES_GIT_URL "https://github.com/c-ares/c-ares.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CARES_BUILD_OPTIONS
+#  "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DCARES_STATIC_PIC=ON")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RE2_VERSION "2021-04-01")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RE2_GIT_URL "https://github.com/google/re2.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RE2_BUILD_OPTIONS 
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DRE2_BUILD_TESTING=OFF")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.37.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_GIT_URL "https://github.com/grpc/grpc.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DgRPC_INSTALL=ON")
+
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
 ```
 
 ## CI

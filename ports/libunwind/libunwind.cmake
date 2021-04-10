@@ -43,7 +43,7 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     "--enable-block-signals"
     "--with-pic=yes"
     WORKING_DIRECTORY
-    ${PROJECT_THIRD_PARTY_PACKAGE_DIR}
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY
     "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
     PREFIX_DIRECTORY

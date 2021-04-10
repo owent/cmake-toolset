@@ -20,12 +20,4 @@ include("${CMAKE_CURRENT_LIST_DIR}/c-ares.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/re2.cmake")
 # include ("${CMAKE_CURRENT_LIST_DIR}/upb.cmake")
 
-# cmake ../.. -DgRPC_INSTALL=ON        \ -DCMAKE_BUILD_TYPE=Release       \
-# -DgRPC_ABSL_PROVIDER=package     \ -DgRPC_CARES_PROVIDER=package    \
-# -DgRPC_PROTOBUF_PROVIDER=package \ -DgRPC_PROTOBUF_PACKAGE_TYPE=CONFIG \
-# -DgRPC_RE2_PROVIDER=package      \ -DgRPC_SSL_PROVIDER=package      \ -DgRPC_ZLIB_PROVIDER=package
-# \ -DgRPC_UPB_PROVIDER=package       \ -DgRPC_GFLAGS_PROVIDER=none -DgRPC_BENCHMARK_PROVIDER=none
-# -DgRPC_BUILD_TESTS=OFF -DgRPC_BUILD_CODEGEN=${gRPC_BUILD_CODEGEN}
-# -DCMAKE_CROSSCOMPILING=${gRPC_CMAKE_CROSSCOMPILING}
-
 include("${CMAKE_CURRENT_LIST_DIR}/grpc.cmake")

@@ -35,3 +35,39 @@ unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INTERFACE_LINK_NAMES)
 unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN)
 
 find_package(Threads)
+
+# Utility macros for build third party libraries
+macro(project_third_party_append_build_shared_lib_var LISTNAME)
+  if(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
+    foreach(VARNAME ${ARGN})
+      list(APPEND ${LISTNAME} "-D${VARNAME}=YES")
+    endforeach()
+  else()
+    foreach(VARNAME ${ARGN})
+      list(APPEND ${LISTNAME} "-D${VARNAME}=NO")
+    endforeach()
+  endif()
+endmacro()
+
+macro(project_third_party_append_build_static_lib_var LISTNAME)
+  if(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
+    foreach(VARNAME ${ARGN})
+      list(APPEND ${LISTNAME} "-D${VARNAME}=NO")
+    endforeach()
+  else()
+    foreach(VARNAME ${ARGN})
+      list(APPEND ${LISTNAME} "-D${VARNAME}=YES")
+    endforeach()
+  endif()
+endmacro()
+
+macro(project_third_party_append_find_root_args VARNAME)
+  string(REPLACE ";" "\\;" CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS "${CMAKE_FIND_ROOT_PATH}")
+  string(REPLACE ";" "\\;" CMAKE_PREFIX_PATH_AS_CMD_ARGS "${CMAKE_PREFIX_PATH}")
+
+  list(APPEND ${VARNAME} "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS}"
+       "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_AS_CMD_ARGS}")
+
+  unset(CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS)
+  unset(CMAKE_PREFIX_PATH_AS_CMD_ARGS)
+endmacro()
