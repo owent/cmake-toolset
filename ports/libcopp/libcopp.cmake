@@ -47,7 +47,7 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
         CACHE BOOL "Build dynamic libraries of libcopp" FORCE)
     add_subdirectory(
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_REPOSITORY_DIR}"
-      "${CMAKE_CURRENT_BINARY_DIR}/deps/libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
+      "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
     )
 
     project_third_party_libcopp_import()
