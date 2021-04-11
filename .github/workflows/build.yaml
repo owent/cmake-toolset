@@ -1,0 +1,32 @@
+name: "Build"
+
+on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#webhook-events
+  push:
+    branches: # Array of patterns that match refs/heads
+      - "*"
+
+jobs:
+  build: # job id, can be any string
+    # Job name is Build And Publish
+    name: Build
+    # This job runs on Linux
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            do_ci_args: format
+            env:
+              CC: gcc
+              CXX: g++
+          - os: ubuntu-20.04
+            do_ci_args: gcc.test
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CI Job
+        shell: bash
+        env:
+          DO_CI_ARGS: ${{ matrix.do_ci_args }}
+        run: |
+          ci/do_ci.sh $DO_CI_ARGS

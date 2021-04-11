@@ -72,34 +72,38 @@ if(NOT MSVC
     endif()
 
     # Copy dynamic libraries for LD_PRELOAD
-    foreach(LIB_PATH ${Jemalloc_LIBRARYIES})
-      get_filename_component(LIB_EXT_NAME "${LIB_PATH}" EXT)
-      if(LIB_EXT_NAME MATCHES ".*\\.so.*")
-        file(
-          COPY "${LIB_PATH}"
-          DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
-          FILE_PERMISSIONS
-            OWNER_READ
-            OWNER_WRITE
-            OWNER_EXECUTE
-            GROUP_READ
-            GROUP_EXECUTE
-            WORLD_READ
-            WORLD_EXECUTE)
-      elseif(LIB_EXT_NAME MATCHES ".*\\.dll.*")
-        file(
-          COPY "${LIB_PATH}"
-          DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-          FILE_PERMISSIONS
-            OWNER_READ
-            OWNER_WRITE
-            OWNER_EXECUTE
-            GROUP_READ
-            GROUP_EXECUTE
-            WORLD_READ
-            WORLD_EXECUTE)
-      endif()
-    endforeach()
-    unset(LIB_EXT_NAME)
+    file(GLOB LIB_FILES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/libjemalloc*.so*"
+         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/libjemalloc*.so*")
+    if(LIB_FILES)
+      file(
+        COPY ${LIB_FILES}
+        DESTINATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+        FILE_PERMISSIONS
+          OWNER_READ
+          OWNER_WRITE
+          OWNER_EXECUTE
+          GROUP_READ
+          GROUP_EXECUTE
+          WORLD_READ
+          WORLD_EXECUTE)
+    endif()
+    unset(LIB_FILES)
+    file(GLOB LIB_FILES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/bin/*jemalloc*.dll*"
+         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/*jemalloc*.dll*"
+         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/*jemalloc*.dll*")
+    if(LIB_FILES)
+      file(
+        COPY ${LIB_FILES}
+        DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+        FILE_PERMISSIONS
+          OWNER_READ
+          OWNER_WRITE
+          OWNER_EXECUTE
+          GROUP_READ
+          GROUP_EXECUTE
+          WORLD_READ
+          WORLD_EXECUTE)
+    endif()
+    unset(LIB_FILES)
   endif()
 endif()

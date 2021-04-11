@@ -1,0 +1,26 @@
+name: "Release"
+
+on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#webhook-events
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build: # job id, can be any string
+    # Job name is Build And Publish
+    name: Build
+    # This job runs on Linux
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Create Tag
+        shell: bash
+        run: |
+          MAJOR_TAG_NAME=${TAG_NAME/.*} ;
+          git tag -d $MAJOR_TAG_NAME || true ;
+          git push -f --tags ;
+      

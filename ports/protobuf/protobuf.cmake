@@ -1,66 +1,35 @@
 include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
-  if(Protobuf_FOUND
-     AND Protobuf_INCLUDE_DIRS
-     AND Protobuf_LIBRARY
-     AND Protobuf_PROTOC_EXECUTABLE)
-    if(TARGET protobuf::libprotobuf AND TARGET protobuf::libprotobuf-lite)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf-lite)
-      echowithcolor(
-        COLOR GREEN
-        "-- Dependency(${PROJECT_NAME}): Protobuf libraries.(${Protobuf_LIBRARY_DEBUG})")
-      echowithcolor(
-        COLOR GREEN
-        "-- Dependency(${PROJECT_NAME}): Protobuf lite libraries.(${Protobuf_LITE_LIBRARY_DEBUG})")
-      get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_INC_DIR
-                          protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
-    elseif(${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND Protobuf_LIBRARY_DEBUG)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_INC_DIR ${PROTOBUF_INCLUDE_DIRS})
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME ${Protobuf_LIBRARY_DEBUG})
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME
-          ${Protobuf_LITE_LIBRARY_DEBUG})
-      echowithcolor(
-        COLOR GREEN
-        "-- Dependency(${PROJECT_NAME}): Protobuf libraries.(${Protobuf_LIBRARY_DEBUG})")
-      echowithcolor(
-        COLOR GREEN
-        "-- Dependency(${PROJECT_NAME}): Protobuf lite libraries.(${Protobuf_LITE_LIBRARY_DEBUG})")
-    else()
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_INC_DIR ${PROTOBUF_INCLUDE_DIRS})
-      if(Protobuf_LIBRARY_RELEASE)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME ${Protobuf_LIBRARY_RELEASE})
+  if(TARGET protobuf::protoc
+     OR TARGET protobuf::libprotobuf
+     OR TARGET protobuf::libprotobuf-lite)
+    if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
+      if(TARGET protobuf::libprotobuf)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf)
       else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME ${Protobuf_LIBRARY})
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf-lite)
       endif()
-      if(Protobuf_LITE_LIBRARY_RELEASE)
+
+      if(TARGET protobuf::libprotobuf)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME
-            ${Protobuf_LITE_LIBRARY_RELEASE})
+            protobuf::libprotobuf-lite)
       else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME ${Protobuf_LIBRARY})
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf)
       endif()
-      echowithcolor(COLOR GREEN
-                    "-- Dependency(${PROJECT_NAME}): Protobuf libraries.(${Protobuf_LIBRARY})")
-      echowithcolor(
-        COLOR GREEN
-        "-- Dependency(${PROJECT_NAME}): Protobuf lite libraries.(${Protobuf_LITE_LIBRARY})")
     endif()
 
-    if(Protobuf_PROTOC_EXECUTABLE)
+    # Protobuf_PROTOC_*/PROTOBUF_*/protobuf_generate_* may not set when
+    # set(protobuf_MODULE_COMPATIBLE FALSE)
+    if(TARGET protobuf::protoc)
+      project_build_tools_get_imported_location(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC protobuf::protoc)
+    elseif(Protobuf_PROTOC_EXECUTABLE)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC ${Protobuf_PROTOC_EXECUTABLE})
     else()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC ${PROTOBUF_PROTOC_EXECUTABLE})
     endif()
-    if(UNIX)
-      execute_process(COMMAND chmod +x
-                              "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}")
-    endif()
-
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_INC_DIR)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS
-           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_INC_DIR})
-    endif()
+    project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}")
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
@@ -74,18 +43,17 @@ endmacro()
 
 # =========== third party protobuf ==================
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
-   OR (NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME
-       AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_INC_DIR))
+   OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME)
 
+  set(protobuf_MODULE_COMPATIBLE TRUE)
   if(VCPKG_TOOLCHAIN)
-    find_package(Protobuf QUIET CONFIG)
+    find_package(protobuf QUIET CONFIG)
     project_third_party_protobuf_import()
   endif()
 
-  if(NOT Protobuf_FOUND
-     OR NOT Protobuf_PROTOC_EXECUTABLE
-     OR NOT Protobuf_INCLUDE_DIRS
-     OR NOT Protobuf_LIBRARY)
+  if(NOT TARGET protobuf::protoc
+     AND NOT TARGET protobuf::libprotobuf
+     AND NOT TARGET protobuf::libprotobuf-lite)
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION "v3.15.8")
@@ -161,7 +129,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       endif()
     endif()
 
-    set(Protobuf_USE_STATIC_LIBS ON)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FIND_LIB CACHE)
     find_library(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FIND_LIB
@@ -286,76 +253,23 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
         NO_DEFAULT_PATH)
     endif()
-    find_package(Protobuf QUIET CONFIG)
+    find_package(protobuf CONFIG)
     project_third_party_protobuf_import()
   endif()
 
-  # try again, cached vars will cause find failed.
-  if(NOT Protobuf_FOUND
-     OR NOT Protobuf_PROTOC_EXECUTABLE
-     OR NOT Protobuf_INCLUDE_DIRS
-     OR NOT Protobuf_LIBRARY)
-    if(CMAKE_VERSION VERSION_LESS "3.14"
-       AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
-       AND NOT EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-      if(CMAKE_HOST_WIN32)
-        execute_process(
-          COMMAND mklink /D "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib"
-                  "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
-          WORKING_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
-      else()
-        execute_process(
-          COMMAND ln -s "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
-                  "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib"
-          WORKING_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
-      endif()
-    endif()
-    echowithcolor(COLOR YELLOW
-                  "-- Dependency(${PROJECT_NAME}): Try to find protobuf libraries again")
-    unset(Protobuf_FOUND)
-    unset(Protobuf_FOUND CACHE)
-    unset(PROTOBUF_FOUND)
-    unset(PROTOBUF_FOUND CACHE)
-    if(NOT Protobuf_PROTOC_EXECUTABLE)
-      unset(Protobuf_PROTOC_EXECUTABLE)
-      unset(Protobuf_PROTOC_EXECUTABLE CACHE)
-      unset(PROTOBUF_PROTOC_EXECUTABLE)
-      unset(PROTOBUF_PROTOC_EXECUTABLE CACHE)
-    endif()
-    unset(Protobuf_LIBRARY)
-    unset(Protobuf_LIBRARY CACHE)
-    unset(Protobuf_PROTOC_LIBRARY)
-    unset(Protobuf_PROTOC_LIBRARY CACHE)
-    unset(Protobuf_INCLUDE_DIR)
-    unset(Protobuf_INCLUDE_DIR CACHE)
-    unset(Protobuf_LIBRARY_DEBUG)
-    unset(Protobuf_LIBRARY_DEBUG CACHE)
-    unset(Protobuf_PROTOC_LIBRARY_DEBUG)
-    unset(Protobuf_PROTOC_LIBRARY_DEBUG CACHE)
-    unset(Protobuf_LITE_LIBRARY)
-    unset(Protobuf_LITE_LIBRARY CACHE)
-    unset(Protobuf_LITE_LIBRARY_DEBUG)
-    unset(Protobuf_LITE_LIBRARY_DEBUG CACHE)
-    unset(Protobuf_VERSION)
-    unset(Protobuf_VERSION CACHE)
-    unset(Protobuf_INCLUDE_DIRS)
-    unset(Protobuf_INCLUDE_DIRS CACHE)
-    unset(Protobuf_LIBRARIES)
-    unset(Protobuf_LIBRARIES CACHE)
-    unset(Protobuf_PROTOC_LIBRARIES)
-    unset(Protobuf_PROTOC_LIBRARIES CACHE)
-    unset(Protobuf_LITE_LIBRARIES)
-    unset(Protobuf_LITE_LIBRARIES CACHE)
-    unset(Protobuf::protoc)
-    find_package(Protobuf)
-    project_third_party_protobuf_import()
-  endif()
-
-  if(Protobuf_FOUND AND Protobuf_LIBRARY)
-    echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): Protobuf found.(${Protobuf_PROTOC_EXECUTABLE})")
-    echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): Protobuf include.(${Protobuf_INCLUDE_DIRS})")
+  if(TARGET protobuf::protoc
+     OR TARGET protobuf::libprotobuf
+     OR TARGET protobuf::libprotobuf-lite)
+    echowithcolor(
+      COLOR
+      GREEN
+      "-- Dependency(${PROJECT_NAME}): Protobuf found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC})"
+    )
+    echowithcolor(
+      COLOR
+      GREEN
+      "-- Dependency(${PROJECT_NAME}): Protobuf libraries.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME})"
+    )
   else()
     echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): Protobuf is required")
     message(FATAL_ERROR "Protobuf not found")
