@@ -5,7 +5,7 @@ cd "$(cd "$(dirname $0)" && pwd)";
 set -e ;
 
 if [[ "$1" == "format" ]]; then
-  ./format.sh ;
+  bash ./format.sh ;
   CHANGED="$(git ls-files --modified)" ;
   if [[ ! -z "$CHANGED" ]]; then
     echo "The following files have changes:" ;

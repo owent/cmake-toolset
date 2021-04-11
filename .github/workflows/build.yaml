@@ -29,4 +29,4 @@ jobs:
         env:
           DO_CI_ARGS: ${{ matrix.do_ci_args }}
         run: |
-          ci/do_ci.sh $DO_CI_ARGS
+          bash ci/do_ci.sh $DO_CI_ARGS ;
