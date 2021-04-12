@@ -91,7 +91,6 @@ jobs:
           bash ci/do_ci.sh gcc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
-        if: ${{ contains(matrix.do_ci_args, "vcpkg") && contains(matrix.os, "ubuntu-") }}
         with:
           path: |
             /usr/local/share/vcpkg/installed
@@ -148,7 +147,6 @@ jobs:
           bash ci/do_ci.sh msvc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
-        if: ${{ contains(matrix.do_ci_args, "vcpkg") && contains(matrix.os, "windows-") }}
         with:
           path: |
             C:/vcpkg/installed

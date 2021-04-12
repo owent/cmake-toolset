@@ -1,4 +1,4 @@
-name: "Release"
+name: "Create Release Major Tag"
 
 on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#webhook-events
   push:
@@ -6,14 +6,10 @@ on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#web
       - "*"
 
 jobs:
-  build: # job id, can be any string
+  create_Release_major_tag: # job id, can be any string
     # Job name is Build And Publish
-    name: Build
-    # This job runs on Linux
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+    name: "Create Release Major Tag"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout And Create Tag
         uses: actions/checkout@v2
