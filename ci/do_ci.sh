@@ -5,7 +5,7 @@ cd "$(cd "$(dirname $0)" && pwd)/..";
 set -ex ;
 
 if [[ "$1" == "format" ]]; then
-  python3 -m pip install --user -r requirements.txt ;
+  python3 -m pip install --user -r ./ci/requirements.txt ;
   bash ./ci/format.sh ;
   CHANGED="$(git ls-files --modified)" ;
   if [[ ! -z "$CHANGED" ]]; then
@@ -66,7 +66,7 @@ elif [[ "$1" == "msys2.mingw.static.test" ]]; then
   git config --global http.sslBackend openssl ;
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  export LDFLAGS="$LDFLAGS -ladvapi32 -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc"
+  # export LDFLAGS="$LDFLAGS -ladvapi32 -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc"
   cmake .. -G "MinGW Makefiles" -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DBUILD_SHARED_LIBS=OFF 2>&1 | tee output.txt;
   cmake --build . -j || cmake --build . ;
   sleep 180
@@ -77,7 +77,7 @@ elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
   git config --global http.sslBackend openssl ;
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  export LDFLAGS="$LDFLAGS -ladvapi32 -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc"
+  # export LDFLAGS="$LDFLAGS -ladvapi32 -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc"
   cmake .. -G "MinGW Makefiles" -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DBUILD_SHARED_LIBS=ON 2>&1 | tee output.txt;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "msvc.static.test" ]]; then
@@ -110,14 +110,14 @@ elif [[ "$1" == "android.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  bash ../../ci/cmake_android_wrapper.sh -a arm64-v8a ;
+  bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a ;
   cd build_jobs_arm64-v8a ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "ios.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  bash ../../ci/cmake_ios_wrapper.sh -a arm64 ;
+  bash ../../ci/cmake_ios_wrapper.sh -r .. -a arm64 ;
   cd build_jobs_arm64 ;
   cmake --build . -j || cmake --build .;
 fi

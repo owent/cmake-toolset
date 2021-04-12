@@ -32,7 +32,7 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
         "${PROJECT_3RD_PARTY_PACKAGE_DIR}/libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}"
     )
 
-    project_git_clone_3rd_party(
+    project_git_clone_repository(
       URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL}"
       REPO_DIRECTORY
