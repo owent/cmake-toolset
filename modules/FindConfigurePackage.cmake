@@ -27,6 +27,7 @@
 #   PREFIX_DIRECTORY <prefix directory>
 #   SRC_DIRECTORY_NAME <source directory name>
 #   MSVC_CONFIGURE <Debug/Release/RelWithDebInfo/MinSizeRel>
+#   AUTOGEN_CONFIGURE [autogen command and args...]
 #   INSTALL_TARGET [install targets...]
 #   ZIP_URL <zip url>
 #   TAR_URL <tar url>
@@ -39,22 +40,23 @@
 #
 # ::
 #
-# <configure options>     - flags added to configure command
-# <cmake options>         - flags added to cmake command
-# <scons options>         - flags added to scons command
-# <custom build cmd>      - custom commands for build
-# <make options>          - flags added to make command
-# <pre build cmd>         - commands to run before build tool
-# <work directory>        - work directory
-# <build directory>       - where to execute configure and make
-# <prefix directory>      - prefix directory(default: <work directory>)
-# <source directory name> - source directory name(default detected by download url)
-# <install targets>       - which target(s) used to install package(default: install) <zip url> - from where to download zip when find package failed
-# <tar url>               - from where to download tar.* or tgz when find package failed <svn url>               - from where to svn co when find package failed
-# <git url>               - from where to git clone when find package failed
-# <git branch>            - git branch or tag to fetch
-# <git commit>            - git commit to fetch, server must support --deepen=<depth>. if both <git branch> and <git commit> is set, we will use <git branch>
-# <fetch depth/deepen>    - --deepen or --depth for git fetch depend using <git branch> or <git commit>
+# <configure options>         - flags added to configure command
+# <cmake options>             - flags added to cmake command
+# <scons options>             - flags added to scons command
+# <custom build cmd>          - custom commands for build
+# <make options>              - flags added to make command
+# <pre build cmd>             - commands to run before build tool
+# <autogen command and args>  - command and arguments to run before configure.(on source directory)
+# <work directory>            - work directory
+# <build directory>           - where to execute configure and make
+# <prefix directory>          - prefix directory(default: <work directory>)
+# <source directory name>     - source directory name(default detected by download url)
+# <install targets>           - which target(s) used to install package(default: install) <zip url> - from where to download zip when find package failed
+# <tar url>                   - from where to download tar.* or tgz when find package failed <svn url>               - from where to svn co when find package failed
+# <git url>                   - from where to git clone when find package failed
+# <git branch>                - git branch or tag to fetch
+# <git commit>                - git commit to fetch, server must support --deepen=<depth>. if both <git branch> and <git commit> is set, we will use <git branch>
+# <fetch depth/deepen>        - --deepen or --depth for git fetch depend using <git branch> or <git commit>
 #
 
 # =============================================================================
@@ -179,6 +181,7 @@ macro(FindConfigurePackage)
       GIT_FETCH_DEPTH
       GIT_ENABLE_SUBMODULE)
   set(multiValueArgs
+      AUTOGEN_CONFIGURE
       CONFIGURE_CMD
       CONFIGURE_FLAGS
       CMAKE_FLAGS
@@ -304,7 +307,7 @@ macro(FindConfigurePackage)
           if(FindConfigurePackage_GIT_CHECK_REPO STREQUAL "")
             message(
               STATUS
-                "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR} is not a valid git reposutory, remove it..."
+                "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR} is not a valid git repository, remove it..."
             )
             file(REMOVE_RECURSE ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
           endif()
@@ -432,6 +435,14 @@ macro(FindConfigurePackage)
         if(FindConfigurePackage_PROJECT_DIRECTORY)
           file(RELATIVE_PATH CONFIGURE_EXEC_FILE ${FindConfigurePackage_BUILD_DIRECTORY}
                "${FindConfigurePackage_PROJECT_DIRECTORY}/configure")
+          if(FindConfigurePackage_AUTOGEN_CONFIGURE)
+            message(
+              STATUS
+                "@${FindConfigurePackage_PROJECT_DIRECTORY} Run: ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
+            )
+            execute_process(COMMAND ${FindConfigurePackage_AUTOGEN_CONFIGURE}
+                            WORKING_DIRECTORY "${FindConfigurePackage_PROJECT_DIRECTORY}")
+          endif()
         else()
           file(
             RELATIVE_PATH
@@ -439,6 +450,17 @@ macro(FindConfigurePackage)
             ${FindConfigurePackage_BUILD_DIRECTORY}
             "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}/configure"
           )
+          if(FindConfigurePackage_AUTOGEN_CONFIGURE)
+            message(
+              STATUS
+                "@${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME} Run: ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
+            )
+            execute_process(
+              COMMAND ${FindConfigurePackage_AUTOGEN_CONFIGURE}
+              WORKING_DIRECTORY
+                "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}"
+            )
+          endif()
         endif()
         if(${CONFIGURE_EXEC_FILE} STREQUAL "configure")
           set(CONFIGURE_EXEC_FILE "./configure")

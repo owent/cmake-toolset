@@ -32,8 +32,9 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     PACKAGE
     Libunwind
     BUILD_WITH_CONFIGURE
-    PREBUILD_COMMAND
-    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}/autogen.sh"
+    AUTOGEN_CONFIGURE
+    bash
+    "./autogen.sh"
     CONFIGURE_FLAGS
     "--enable-shared=no"
     "--enable-static=yes"

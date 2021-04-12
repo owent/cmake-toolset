@@ -408,6 +408,23 @@ function(project_git_clone_repository)
     endif()
   endif()
 
+  # Check and cleanup directory if fetch failed before
+  if(EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/.git")
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} log -n 1 --oneline
+      WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+      RESULT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
+      OUTPUT_QUIET ERROR_QUIET)
+    if(NOT project_git_clone_repository_GIT_CHECK_REPO EQUAL 0)
+      message(
+        STATUS
+          "${project_git_clone_repository_REPO_DIRECTORY} is not a valid git repository, remove it..."
+      )
+      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
+    endif()
+    unset(project_git_clone_repository_GIT_CHECK_REPO)
+  endif()
+
   if(NOT EXISTS
      "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
     if(EXISTS ${project_git_clone_repository_REPO_DIRECTORY})

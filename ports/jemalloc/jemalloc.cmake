@@ -45,7 +45,8 @@ if(NOT MSVC
     "install_lib"
     MAKE_FLAGS
     "-j4"
-    PREBUILD_COMMAND
+    AUTOGEN_CONFIGURE
+    bash
     "./autogen.sh"
     WORKING_DIRECTORY
     "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"

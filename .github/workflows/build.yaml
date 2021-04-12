@@ -104,7 +104,7 @@ jobs:
       - name: CI Job
         shell: bash
         run: |
-          C:/msys64/msys2_shell.cmd -mingw64 -lc "cd $PWD; ci/do_ci.sh msys2.mingw.static.test "
+          C:/msys64/msys2_shell.cmd -mingw64 -no-start -here -c "ci/do_ci.sh msys2.mingw.static.test"
   msys2_mingw_shared_test:
     name: "msys2.mingw.shared.test"
     runs-on: windows-latest
@@ -114,7 +114,7 @@ jobs:
       - name: CI Job
         shell: bash
         run: |
-          C:/msys64/msys2_shell.cmd -mingw64 -lc "cd $PWD; ci/do_ci.sh msys2.mingw.shared.test "
+          C:/msys64/msys2_shell.cmd -mingw64 -no-start -here -c "ci/do_ci.sh msys2.mingw.shared.test"
   msvc_static_test:
     name: "msvc.static.test"
     runs-on: windows-latest
