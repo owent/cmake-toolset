@@ -5,6 +5,7 @@ cd "$(cd "$(dirname $0)" && pwd)";
 set -e ;
 
 if [[ "$1" == "format" ]]; then
+  python3 -m pip install --user -r requirements.txt ;
   bash ./format.sh ;
   CHANGED="$(git ls-files --modified)" ;
   if [[ ! -z "$CHANGED" ]]; then
@@ -16,36 +17,100 @@ if [[ "$1" == "format" ]]; then
   exit 0 ;
 elif [[ "$1" == "gcc.static.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DBUILD_SHARED_LIBS=OFF;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.shared.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DBUILD_SHARED_LIBS=ON -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=ON;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.libressl.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. --  -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_LIBRESSL=ON;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.mbedtls.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. --  -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_MBEDTLS=ON;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.4.8.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "clang.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.vcpkg.test" ]]; then
   echo "$1";
-elif [[ "$1" == "mingw.static.test" ]]; then
+  [ ! -z "$VCPKG_INSTALLATION_ROOT" ];
+  vcpkg install --triplet=x64-linux fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc ;
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux ;
+  cmake --build . -j || cmake --build . ;
+elif [[ "$1" == "msys2.mingw.static.test" ]]; then
   echo "$1";
-elif [[ "$1" == "mingw.shared.test" ]]; then
+  pacman -S --noconfirm --force cmake m4 curl wget tar autoconf automake mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool python || true;
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DBUILD_SHARED_LIBS=OFF ;
+  cmake --build . -j || cmake --build . ;
+elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
   echo "$1";
+  pacman -S --noconfirm --force cmake m4 curl wget tar autoconf automake mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool python || true;
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -- -DBUILD_SHARED_LIBS=ON ;
+  cmake --build . -j || cmake --build .;
 elif [[ "$1" == "msvc.static.test" ]]; then
   echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -G "Visual Studio 16 2019" -A x64 -- -DBUILD_SHARED_LIBS=OFF ;
+  cmake --build . -j || cmake --build . ;
 elif [[ "$1" == "msvc.shared.test" ]]; then
   echo "$1";
-elif [[ "$1" == "msvc.vcpkg.shared.test" ]]; then
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -G "Visual Studio 16 2019" -A x64 -- -DBUILD_SHARED_LIBS=ON ;
+  cmake --build . -j || cmake --build . ;
+elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   echo "$1";
-elif [[ "$1" == "msvc.vcpkg.static.test" ]]; then
+  [ ! -z "$VCPKG_INSTALLATION_ROOT" ];
+  vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc ;
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -G "Visual Studio 16 2019" -A x64 -- -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows;
+  cmake --build . -j || cmake --build . ;
+elif [[ "$1" == "msvc2017.test" ]]; then
   echo "$1";
-elif [[ "$1" == "msvc2017.vcpkg.test" ]]; then
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  cmake .. -G "Visual Studio 15 2017" -A x64 ;
+  cmake --build . -j || cmake --build .;
+elif [[ "$1" == "android.test" ]]; then
   echo "$1";
-elif [[ "$1" == "android.gcc.test" ]]; then
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  bash ../../ci/cmake_android_wrapper.sh -a arm64-v8a ;
+  cd build_jobs_arm64-v8a ;
+  cmake --build . -j || cmake --build .;
+elif [[ "$1" == "ios.test" ]]; then
   echo "$1";
-elif [[ "$1" == "android.clang.test" ]]; then
-  echo "$1";
-elif [[ "$1" == "ios.clang.test" ]]; then
-  echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  bash ../../ci/cmake_ios_wrapper.sh -a arm64 ;
+  cd build_jobs_arm64 ;
+  cmake --build . -j || cmake --build .;
 fi
