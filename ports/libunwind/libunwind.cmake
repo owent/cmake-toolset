@@ -28,6 +28,17 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
         "https://github.com/libunwind/libunwind.git")
   endif()
 
+  find_package(Libunwind QUIET)
+  if(NOT Libunwind_FOUND
+     AND EXISTS
+         "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}/configure"
+  )
+    execute_process(
+      COMMAND make distclean
+      WORKING_DIRECTORY
+        "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}"
+    )
+  endif()
   findconfigurepackage(
     PACKAGE
     Libunwind
@@ -46,7 +57,8 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     WORKING_DIRECTORY
     "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY
-    "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
+    # libunwind can not be built on all platforms at a different build directory
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}"
     PREFIX_DIRECTORY
     "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
     SRC_DIRECTORY_NAME

@@ -27,10 +27,17 @@ macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
   else()
     message(STATUS "hiredis support disabled")
   endif()
+
+  project_build_tools_move_imported_location_out_of_config(
+    "hiredis::hiredis_ssl_static" "hiredis::hiredis_static" "hiredis::hiredis_ssl"
+    "hiredis::hiredis")
 endmacro()
 
 if(VCPKG_TOOLCHAIN)
   find_package(hiredis QUIET CONFIG)
+  if(TARGET hiredis::hiredis_static OR TARGET hiredis::hiredis)
+    find_package(hiredis_ssl QUIET)
+  endif()
   project_third_party_redis_hiredis_import()
 endif()
 
@@ -107,7 +114,7 @@ if(NOT TARGET hiredis::hiredis_ssl_static
   endif()
 
   if(TARGET hiredis::hiredis_static OR TARGET hiredis::hiredis)
-    find_package(hiredis_ssl QUIET CONFIG)
+    find_package(hiredis_ssl QUIET)
   endif()
 
   project_third_party_redis_hiredis_import()

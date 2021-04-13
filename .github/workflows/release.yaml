@@ -3,7 +3,7 @@ name: "Create Release Major Tag"
 on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#webhook-events
   push:
     tags:
-      - "*"
+      - "v*.*.*"
 
 jobs:
   create_Release_major_tag: # job id, can be any string
