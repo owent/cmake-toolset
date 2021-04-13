@@ -439,7 +439,7 @@ function(project_git_clone_repository)
     endif()
 
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} init
+      COMMAND ${GIT_EXECUTABLE} init -b main
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                         ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
     execute_process(

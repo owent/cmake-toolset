@@ -67,7 +67,9 @@ if(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
   list(APPEND LZ4_TARGETS_BUILT lz4_shared)
 endif()
 
-if(BUILD_STATIC_LIBS)
+if(BUILD_STATIC_LIBS
+   OR MINGW
+   OR WIN32)
   add_library(lz4_static STATIC ${LZ4_SOURCES})
 
   target_include_directories(lz4_static PUBLIC "$<BUILD_INTERFACE:${LZ4_LIB_SOURCE_DIR}>"
@@ -81,7 +83,9 @@ if(BUILD_STATIC_LIBS)
 endif()
 
 # link to shared whenever possible, to static otherwise
-if(TARGET lz4_shared)
+if(TARGET lz4_shared
+   AND NOT MINGW
+   AND NOT WIN32)
   set(LZ4_LINK_LIBRARY lz4_shared)
 else()
   set(LZ4_LINK_LIBRARY lz4_static)

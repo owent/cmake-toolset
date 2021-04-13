@@ -302,86 +302,34 @@ macro(FindConfigurePackage)
         endif()
         set(FindConfigurePackage_DOWNLOAD_SOURCE_DIR
             "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}")
-        findconfigurepackageremoveemptydir(${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-
-        if(EXISTS "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}/.git")
-          execute_process(
-            COMMAND ${GIT_EXECUTABLE} ls-files
-            WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}
-            OUTPUT_VARIABLE FindConfigurePackage_GIT_CHECK_REPO)
-          string(STRIP "${FindConfigurePackage_GIT_CHECK_REPO}" FindConfigurePackage_GIT_CHECK_REPO)
-          if(FindConfigurePackage_GIT_CHECK_REPO STREQUAL "")
-            message(
-              STATUS
-                "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR} is not a valid git repository, remove it..."
-            )
-            file(REMOVE_RECURSE ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-          endif()
-          unset(FindConfigurePackage_GIT_CHECK_REPO)
+        if(NOT FindConfigurePackage_GIT_FETCH_DEPTH)
+          set(FindConfigurePackage_GIT_FETCH_DEPTH ${FindConfigurePackageGitFetchDepth})
         endif()
-        if(NOT EXISTS "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}/.git")
-          find_package(Git)
-          if(GIT_FOUND)
-            if(NOT EXISTS ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-              file(MAKE_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-            endif()
-            execute_process(COMMAND ${GIT_EXECUTABLE} init
-                            WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-            execute_process(
-              COMMAND ${GIT_EXECUTABLE} remote add origin "${FindConfigurePackage_GIT_URL}"
-              WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-            if(NOT FindConfigurePackage_GIT_BRANCH AND NOT FindConfigurePackage_GIT_COMMIT)
-              execute_process(
-                COMMAND ${GIT_EXECUTABLE} ls-remote --symref origin HEAD
-                WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}
-                OUTPUT_VARIABLE FindConfigurePackage_GIT_CHECK_REPO)
-              string(REGEX
-                     REPLACE ".*refs/heads/([^ \t]*)[ \t]*HEAD.*" "\\1"
-                             FindConfigurePackage_GIT_BRANCH ${FindConfigurePackage_GIT_CHECK_REPO})
-              if(NOT FindConfigurePackage_GIT_BRANCH OR FindConfigurePackage_GIT_BRANCH STREQUAL
-                                                        FindConfigurePackage_GIT_CHECK_REPO)
-                string(REGEX REPLACE "([^ \t]*)[ \t]*HEAD.*" "\\1" FindConfigurePackage_GIT_BRANCH
-                                     ${FindConfigurePackage_GIT_CHECK_REPO})
-                if(NOT FindConfigurePackage_GIT_BRANCH OR FindConfigurePackage_GIT_BRANCH STREQUAL
-                                                          FindConfigurePackage_GIT_CHECK_REPO)
-                  set(FindConfigurePackage_GIT_BRANCH master)
-                endif()
-              endif()
-              unset(FindConfigurePackage_GIT_CHECK_REPO)
-            endif()
-            if(NOT FindConfigurePackage_GIT_FETCH_DEPTH)
-              set(FindConfigurePackage_GIT_FETCH_DEPTH ${FindConfigurePackageGitFetchDepth})
-            endif()
-            if(FindConfigurePackage_GIT_BRANCH)
-              execute_process(
-                COMMAND ${GIT_EXECUTABLE} fetch "--depth=${FindConfigurePackage_GIT_FETCH_DEPTH}"
-                        "-n" origin ${FindConfigurePackage_GIT_BRANCH}
-                WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-            else()
-              if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
-                execute_process(
-                  COMMAND ${GIT_EXECUTABLE} fetch "--deepen=${FindConfigurePackage_GIT_FETCH_DEPTH}"
-                          "-n" origin ${FindConfigurePackage_GIT_COMMIT}
-                  WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-              else()
-                message(
-                  WARNING
-                    "It's recommended to use git 2.11.0 or upper to only fetch partly of repository."
-                )
-                execute_process(
-                  COMMAND ${GIT_EXECUTABLE} fetch "-n" origin ${FindConfigurePackage_GIT_COMMIT}
-                  WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-              endif()
-            endif()
-            execute_process(COMMAND ${GIT_EXECUTABLE} reset --hard FETCH_HEAD
-                            WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-            if(FindConfigurePackage_GIT_ENABLE_SUBMODULE)
-              execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init -f
-                              WORKING_DIRECTORY ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
-            endif()
-          else()
-            message(STATUS "git not found, skip ${FindConfigurePackage_GIT_URL}")
-          endif()
+        if(FindConfigurePackage_GIT_BRANCH)
+          project_git_clone_repository(
+            URL
+            "${FindConfigurePackage_GIT_URL}"
+            REPO_DIRECTORY
+            "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}"
+            DEPTH
+            ${FindConfigurePackage_GIT_FETCH_DEPTH}
+            BRANCH
+            "${FindConfigurePackage_GIT_BRANCH}")
+        elseif(FindConfigurePackage_GIT_COMMIT)
+          project_git_clone_repository(
+            URL
+            "${FindConfigurePackage_GIT_URL}"
+            REPO_DIRECTORY
+            "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}"
+            DEPTH
+            ${FindConfigurePackage_GIT_FETCH_DEPTH}
+            COMMIT
+            "${FindConfigurePackage_GIT_FETCH_DEPTH}")
+        else()
+          project_git_clone_repository(
+            URL "${FindConfigurePackage_GIT_URL}" REPO_DIRECTORY
+            "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}" DEPTH
+            ${FindConfigurePackage_GIT_FETCH_DEPTH})
         endif()
 
         if(EXISTS ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})

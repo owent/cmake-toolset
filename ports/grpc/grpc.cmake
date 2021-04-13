@@ -70,7 +70,8 @@ if(NOT TARGET gRPC::grpc++_alts
            "-DgRPC_ABSL_PROVIDER=package")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-           "-DgRPC_ABSL_PROVIDER=module")
+           # "-DgRPC_ABSL_PROVIDER=module"
+           "-DgRPC_ABSL_PROVIDER=none")
     endif()
     if(TARGET c-ares::cares
        OR TARGET c-ares::cares_static
@@ -80,7 +81,8 @@ if(NOT TARGET gRPC::grpc++_alts
            "-DgRPC_CARES_PROVIDER=package")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-           "-DgRPC_CARES_PROVIDER=module")
+           # "-DgRPC_CARES_PROVIDER=module"
+           "-DgRPC_CARES_PROVIDER=none")
     endif()
     if(TARGET protobuf::protoc
        OR TARGET protobuf::libprotobuf
@@ -89,28 +91,32 @@ if(NOT TARGET gRPC::grpc++_alts
            "-DgRPC_PROTOBUF_PROVIDER=package" "-DgRPC_PROTOBUF_PACKAGE_TYPE=CONFIG")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-           "-DgRPC_PROTOBUF_PROVIDER=module")
+           # "-DgRPC_PROTOBUF_PROVIDER=module"
+           "-DgRPC_PROTOBUF_PROVIDER=none")
     endif()
     if(TARGET re2::re2)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
            "-DgRPC_RE2_PROVIDER=package")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-           "-DgRPC_RE2_PROVIDER=module")
+           # "-DgRPC_RE2_PROVIDER=module"
+           "-DgRPC_RE2_PROVIDER=none")
     endif()
     if(TARGET ZLIB::ZLIB)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
            "-DgRPC_ZLIB_PROVIDER=package")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-           "-DgRPC_ZLIB_PROVIDER=module")
+           # "-DgRPC_ZLIB_PROVIDER=module"
+           "-DgRPC_ZLIB_PROVIDER=none")
     endif()
     if(OPENSSL_FOUND)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
            "-DgRPC_SSL_PROVIDER=package")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-           "-DgRPC_SSL_PROVIDER=module")
+           # "-DgRPC_SSL_PROVIDER=module"
+           "-DgRPC_SSL_PROVIDER=none")
     endif()
     findconfigurepackage(
       PACKAGE

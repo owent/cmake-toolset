@@ -150,12 +150,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       message(STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c++0x.")
     endif()
 
-    if(MINGW)
-      # list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS stdc++)
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
-      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
-    endif()
-
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     # add_compile_options(-Wall -Werror)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra)
