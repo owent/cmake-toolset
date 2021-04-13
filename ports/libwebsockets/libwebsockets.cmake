@@ -137,7 +137,10 @@ if(NOT Libwebsockets_FOUND
         unset(ZLIB_LIBRARIES_AS_CMD_ARGS)
       endif()
       if(OPENSSL_FOUND AND NOT LIBRESSL_FOUND)
-        if(OPENSSL_ROOT_DIR)
+        if(OPENSSL_ROOT_DIR
+           AND (TARGET OpenSSL::SSL
+                OR TARGET OpenSSL::Crypto
+                OR OPENSSL_LIBRARIES))
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
                "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}")
         endif()

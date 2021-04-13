@@ -199,12 +199,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         add_compile_options(-D__STRICT_ANSI__)
         message(STATUS "Clang use stdlib=default(libstdc++) and add -D__STRICT_ANSI__")
       endif()
-      if(MINGW)
-        # list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS stdc++)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
-        set(CMAKE_SHARED_LINKER_FLAGS
-            "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
-      endif()
     endif()
 
     # C++20 coroutine precondition

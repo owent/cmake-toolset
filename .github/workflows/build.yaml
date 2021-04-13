@@ -152,7 +152,7 @@ jobs:
             C:/vcpkg/installed
           key: ${{ runner.os }}-${{ hashFiles('C:/vcpkg/installed/**') }}
   msvc2017_test:
-    name: "msvc.vcpkg.test"
+    name: "msvc2017.test"
     runs-on: windows-2016
     steps:
       - name: Checkout
