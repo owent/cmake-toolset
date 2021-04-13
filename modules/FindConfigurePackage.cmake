@@ -16,6 +16,7 @@
 #   CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS
 #   CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
 #   CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS
+#   CMAKE_INHIRT_FIND_ROOT_PATH
 #   SCONS_FLAGS [scons options...]
 #   CUSTOM_BUILD_COMMAND [custom build cmd...]
 #   MAKE_FLAGS [make options...]
@@ -163,7 +164,8 @@ macro(FindConfigurePackage)
       CMAKE_INHIRT_BUILD_ENV
       CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS
       CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
-      CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS)
+      CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS
+      CMAKE_INHIRT_FIND_ROOT_PATH)
   set(oneValueArgs
       PACKAGE
       WORKING_DIRECTORY
@@ -217,10 +219,14 @@ macro(FindConfigurePackage)
       set(FindConfigurePackage_PREFIX_DIRECTORY ${FindConfigurePackage_WORK_DIRECTORY})
     endif()
 
-    set(FindConfigurePackage_BACKUP_CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH})
-    set(FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})
-    list(APPEND CMAKE_FIND_ROOT_PATH ${FindConfigurePackage_PREFIX_DIRECTORY})
-    list(APPEND CMAKE_PREFIX_PATH ${FindConfigurePackage_PREFIX_DIRECTORY})
+    if(NOT "${FindConfigurePackage_PREFIX_DIRECTORY}" IN_LIST CMAKE_FIND_ROOT_PATH)
+      set(FindConfigurePackage_BACKUP_CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH})
+      list(APPEND CMAKE_FIND_ROOT_PATH ${FindConfigurePackage_PREFIX_DIRECTORY})
+    endif()
+    if(NOT "${FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH}" IN_LIST CMAKE_PREFIX_PATH)
+      set(FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH})
+      list(APPEND CMAKE_PREFIX_PATH ${FindConfigurePackage_PREFIX_DIRECTORY})
+    endif()
 
     # step 2. find in prefix
     find_package(${FindConfigurePackage_PACKAGE} QUIET ${FindConfigurePackage_FIND_PACKAGE_FLAGS})
@@ -519,6 +525,16 @@ macro(FindConfigurePackage)
           project_build_tools_append_cmake_inherit_options(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
+        endif()
+        if(FindConfigurePackage_CMAKE_INHIRT_FIND_ROOT_PATH)
+          string(REPLACE ";" "\\;" CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS "${CMAKE_FIND_ROOT_PATH}")
+          string(REPLACE ";" "\\;" CMAKE_PREFIX_PATH_AS_CMD_ARGS "${CMAKE_PREFIX_PATH}")
+          list(APPEND FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
+               "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS}")
+          list(APPEND FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
+               "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_AS_CMD_ARGS}")
+          unset(CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS)
+          unset(CMAKE_PREFIX_PATH_AS_CMD_ARGS)
         endif()
 
         message(
