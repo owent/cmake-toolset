@@ -161,6 +161,16 @@ jobs:
         shell: pwsh
         run: |
           ci/do_ci.ps1 msvc2017.test ;
+  appleclang_test:
+    name: "ios.test"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: CI Job
+        shell: bash
+        run: |
+          bash ci/do_ci.sh clang.test ;
   android_test:
     name: "android.test"
     runs-on: ubuntu-latest
@@ -172,13 +182,13 @@ jobs:
         run: |
           bash ci/do_ci.sh android.test ;
   # Build libuv on ios has some problem now.
-  # ios_test:
-  #   name: "ios.test"
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: CI Job
-  #       shell: bash
-  #       run: |
-  #         bash ci/do_ci.sh ios.test ;
+  ios_test:
+    name: "ios.test"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: CI Job
+        shell: bash
+        run: |
+          bash ci/do_ci.sh ios.test ;

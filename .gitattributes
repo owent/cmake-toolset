@@ -1,3 +1,4 @@
+*.patch text eol=lf
 *.md text eol=crlf
 *.bat text eol=crlf
 *.bat.in text eol=crlf

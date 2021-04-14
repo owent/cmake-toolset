@@ -417,6 +417,7 @@ function(project_git_clone_repository)
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
+          COMMAND ${GIT_EXECUTABLE} config "core.autocrlf" "true"
           COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
@@ -454,10 +455,17 @@ function(project_git_clone_repository)
       file(MAKE_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
     endif()
 
-    execute_process(
-      COMMAND ${GIT_EXECUTABLE} init -b main
-      WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+    if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.28.0")
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} init -b main
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+    else()
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} init -b main
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+    endif()
     execute_process(
       COMMAND ${GIT_EXECUTABLE} remote add origin "${project_git_clone_repository_URL}"
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
@@ -562,6 +570,7 @@ function(project_git_clone_repository)
 
     if(project_git_clone_repository_PATCH_FILES)
       execute_process(
+        COMMAND ${GIT_EXECUTABLE} config "core.autocrlf" "true"
         COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})

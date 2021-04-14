@@ -466,6 +466,8 @@ macro(FindConfigurePackage)
           endif()
           project_build_tools_append_cmake_inherit_options(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
+          project_build_tools_append_cmake_cxx_standard_options(
+            ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
         endif()
         if(FindConfigurePackage_CMAKE_INHIRT_FIND_ROOT_PATH)

@@ -7,21 +7,27 @@ include_guard(GLOBAL)
 
 # =========== third party grpc ==================
 macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
-  if(TARGET gRPC::grpc++_alts)
+  if(TARGET gRPC::grpc++_alts
+     OR TARGET gRPC::grpc++
+     OR TARGET gRPC::grpc)
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME)
+    if(TARGET gRPC::gpr)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::gpr)
+    endif()
+    if(TARGET gRPC::grpc)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc)
+    endif()
+    if(TARGET gRPC::grpc++)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++)
+    endif()
+    if(TARGET gRPC::grpc++_alts)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++_alts)
+    endif()
+
     message(
       STATUS
-        "Dependency(${PROJECT_NAME}): grpc using target gRPC::grpc++_alts (version: ${gRPC_VERSION})"
+        "Dependency(${PROJECT_NAME}): grpc using target ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME} (version: ${gRPC_VERSION})"
     )
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++_alts)
-  elseif(TARGET gRPC::grpc++)
-    message(
-      STATUS
-        "Dependency(${PROJECT_NAME}): grpc using target gRPC::grpc++ (version: ${gRPC_VERSION})")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++)
-  elseif(TARGET gRPC::grpc)
-    message(
-      STATUS "Dependency(${PROJECT_NAME}): grpc using target gRPC::grpc (version: ${gRPC_VERSION})")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc)
   endif()
 endmacro()
 
@@ -30,6 +36,7 @@ if(NOT TARGET gRPC::grpc++_alts
    AND NOT TARGET gRPC::grpc)
   if(VCPKG_TOOLCHAIN)
     find_package(gRPC QUIET)
+    find_package(grpc QUIET)
     project_third_party_grpc_import()
   endif()
 
@@ -123,6 +130,10 @@ if(NOT TARGET gRPC::grpc++_alts
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
            # "-DgRPC_SSL_PROVIDER=module"
            "-DgRPC_SSL_PROVIDER=none")
+    endif()
+    if(MSVC)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
+           "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
     findconfigurepackage(
       PACKAGE

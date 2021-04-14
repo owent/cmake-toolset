@@ -2,7 +2,7 @@
 
 ###########################################################################
 #  Change values here
-#
+#  Use xcode-select --install to install command line tools
 SDKVERSION=$(xcrun -sdk iphoneos --show-sdk-version);
 #
 ###########################################################################

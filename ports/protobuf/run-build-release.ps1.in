@@ -30,7 +30,7 @@ if ( "@CMAKE_SYSTEM@" -ne "@CMAKE_HOST_SYSTEM@" ) {
                 exit $LastExitCode
             }
         }
-        & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+        & "@CMAKE_COMMAND@" --build . --target install --config RelWithDebInfo -j || & "@CMAKE_COMMAND@" --build . --target install --config RelWithDebInfo
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
         }
@@ -65,7 +65,7 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
     }
 }
 
-& "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+& "@CMAKE_COMMAND@" --build . --target install --config RelWithDebInfo -j || & "@CMAKE_COMMAND@" --build . --target install --config RelWithDebInfo
 
 if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
