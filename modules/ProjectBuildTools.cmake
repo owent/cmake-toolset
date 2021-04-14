@@ -349,7 +349,7 @@ function(project_git_clone_repository)
       COMMIT
       TAG
       CHECK_PATH)
-  set(multiValueArgs SUBMODULE_PATH)
+  set(multiValueArgs PATCH_FILES SUBMODULE_PATH)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN})
 
@@ -415,7 +415,12 @@ function(project_git_clone_repository)
           COMMAND ${GIT_EXECUTABLE} submodule foreach "git reset --hard"
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
       endif()
-
+      if(project_git_clone_repository_PATCH_FILES)
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                            ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+      endif()
     endif()
   endif()
 
@@ -551,6 +556,13 @@ function(project_git_clone_repository)
 
       execute_process(
         COMMAND ${GIT_EXECUTABLE} ${project_git_clone_repository_submodule_args}
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+    endif()
+
+    if(project_git_clone_repository_PATCH_FILES)
+      execute_process(
+        COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
     endif()

@@ -37,15 +37,13 @@ if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL "https://github.com/lua/lua.git")
   endif()
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR)
+    project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR "lua"
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION})
+  endif()
 
-  if(NOT
-     EXISTS
-     "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}"
-  )
-    file(
-      MAKE_DIRECTORY
-      "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}"
-    )
+  if(NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR}")
+    file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR}")
   endif()
   project_git_clone_repository(
     URL
@@ -56,10 +54,8 @@ if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}"
     CHECK_PATH
     "luaconf.h")
-  add_subdirectory(
-    "${CMAKE_CURRENT_LIST_DIR}/build-script"
-    "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}"
-  )
+  add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/build-script"
+                   "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR}")
   project_third_party_lua_import()
 else()
   project_third_party_lua_import()

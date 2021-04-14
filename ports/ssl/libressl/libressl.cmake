@@ -71,8 +71,14 @@ if(NOT TARGET LibreSSL::Crypto)
         "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL")
   endif()
 
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR)
+    project_third_party_get_build_dir(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR "libressl"
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION})
+  endif()
+
   if(VCPKG_TOOLCHAIN)
-    find_package(LibreSSL QUIET CONFIG)
+    find_package(LibreSSL QUIET)
     project_third_party_libressl_import()
   endif()
 
@@ -136,9 +142,6 @@ if(NOT TARGET LibreSSL::Crypto)
     project_build_tools_append_cmake_options_for_lib(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_FLAGS)
 
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBRESSL_BUILD_DIR
-        "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/libressl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION}/build_jobs_dir_${PROJECT_PREBUILT_PLATFORM_NAME}"
-    )
     if(NOT EXISTS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBRESSL_BUILD_DIR})
       file(MAKE_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBRESSL_BUILD_DIR})
     endif()
@@ -252,6 +255,13 @@ if(NOT TARGET LibreSSL::Crypto)
         COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBRESSL_BUILD_DIR}/run-build-release.bat"
         WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBRESSL_BUILD_DIR})
     endif()
+    if(EXISTS
+       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libressl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION}/FindLibreSSL.cmake"
+    )
+      file(
+        COPY "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libressl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION}/FindLibreSSL.cmake"
+        DESTINATION "${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR}")
+    endif()
 
     unset(LIBRESSL_FOUND CACHE)
     unset(LIBRESSL_INCLUDE_DIR CACHE)
@@ -313,7 +323,7 @@ if(NOT TARGET LibreSSL::Crypto)
 
       unset(LIBRESSL_PATCH_WIN32_FILE_NAME)
     endif()
-    find_package(LibreSSL CONFIG)
+    find_package(LibreSSL)
     project_third_party_libressl_import()
   endif()
 

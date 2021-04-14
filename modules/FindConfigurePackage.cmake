@@ -36,7 +36,7 @@
 #   GIT_URL <git url>
 #   GIT_BRANCH <git branch>
 #   GIT_COMMIT <git commit sha>
-#   GIT_FETCH_DEPTH <fetch depth/deepen>
+#   GIT_PATCH_FILES [git patch files...]
 # )
 #
 # ::
@@ -58,6 +58,7 @@
 # <git branch>                - git branch or tag to fetch
 # <git commit>                - git commit to fetch, server must support --deepen=<depth>. if both <git branch> and <git commit> is set, we will use <git branch>
 # <fetch depth/deepen>        - --deepen or --depth for git fetch depend using <git branch> or <git commit>
+# <git patch files>           - git apply [git patch files...]
 #
 
 # =============================================================================
@@ -194,7 +195,8 @@ macro(FindConfigurePackage)
       CUSTOM_BUILD_COMMAND
       PREBUILD_COMMAND
       AFTERBUILD_COMMAND
-      INSTALL_TARGET)
+      INSTALL_TARGET
+      GIT_PATCH_FILES)
   foreach(RESTORE_VAR IN LISTS optionArgs oneValueArgs multiValueArgs)
     unset(FindConfigurePackage_${RESTORE_VAR})
   endforeach()
@@ -305,32 +307,24 @@ macro(FindConfigurePackage)
         if(NOT FindConfigurePackage_GIT_FETCH_DEPTH)
           set(FindConfigurePackage_GIT_FETCH_DEPTH ${FindConfigurePackageGitFetchDepth})
         endif()
-        if(FindConfigurePackage_GIT_BRANCH)
-          project_git_clone_repository(
-            URL
-            "${FindConfigurePackage_GIT_URL}"
-            REPO_DIRECTORY
-            "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}"
-            DEPTH
-            ${FindConfigurePackage_GIT_FETCH_DEPTH}
-            BRANCH
-            "${FindConfigurePackage_GIT_BRANCH}")
-        elseif(FindConfigurePackage_GIT_COMMIT)
-          project_git_clone_repository(
-            URL
-            "${FindConfigurePackage_GIT_URL}"
-            REPO_DIRECTORY
-            "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}"
-            DEPTH
-            ${FindConfigurePackage_GIT_FETCH_DEPTH}
-            COMMIT
-            "${FindConfigurePackage_GIT_FETCH_DEPTH}")
-        else()
-          project_git_clone_repository(
+        set(FindConfigurePackage_GIT_CLONE_ARGS
             URL "${FindConfigurePackage_GIT_URL}" REPO_DIRECTORY
             "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}" DEPTH
             ${FindConfigurePackage_GIT_FETCH_DEPTH})
+        if(FindConfigurePackage_GIT_BRANCH)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS BRANCH
+               "${FindConfigurePackage_GIT_BRANCH}")
+        elseif(FindConfigurePackage_GIT_COMMIT)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS COMMIT
+               "${FindConfigurePackage_GIT_FETCH_DEPTH}")
         endif()
+        if(FindConfigurePackage_GIT_PATCH_FILES)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS PATCH_FILES
+               "${FindConfigurePackage_GIT_PATCH_FILES}")
+        endif()
+
+        project_git_clone_repository(${FindConfigurePackage_GIT_CLONE_ARGS})
+        unset(FindConfigurePackage_GIT_CLONE_ARGS)
 
         if(EXISTS ${FindConfigurePackage_DOWNLOAD_SOURCE_DIR})
           set(FindConfigurePackage_UNPACK_SOURCE YES)
@@ -622,3 +616,7 @@ macro(FindConfigurePackage)
     unset(FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH)
   endif()
 endmacro(FindConfigurePackage)
+
+function(FIND_CONFIGURE_PACKAGE)
+  findconfigurepackage(${ARGN})
+endfunction(FIND_CONFIGURE_PACKAGE)

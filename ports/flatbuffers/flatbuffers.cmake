@@ -31,6 +31,11 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL
           "https://github.com/google/flatbuffers.git")
     endif()
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_DIR)
+      project_third_party_get_build_dir(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_DIR "flatbuffers"
+        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION})
+    endif()
 
     if(NOT Flatbuffers_ROOT)
       set(Flatbuffers_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
@@ -59,7 +64,7 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
       WORKING_DIRECTORY
       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
       BUILD_DIRECTORY
-      "${CMAKE_CURRENT_BINARY_DIR}/dependency-buildtree/flatbuffers-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION}/build_jobs_${PROJECT_PREBUILT_PLATFORM_NAME}"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_DIR}"
       PREFIX_DIRECTORY
       "${Flatbuffers_ROOT}"
       SRC_DIRECTORY_NAME

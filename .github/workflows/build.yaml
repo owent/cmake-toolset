@@ -122,9 +122,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: bash
+        shell: pwsh
         run: |
-          bash ci/do_ci.sh msvc.static.test ;
+          ci/do_ci.ps1 msvc.static.test ;
   msvc_shared_test:
     name: "msvc.shared.test"
     runs-on: windows-latest
@@ -132,9 +132,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: bash
+        shell: pwsh
         run: |
-          bash ci/do_ci.sh msvc.shared.test ;
+          ci/do_ci.ps1 msvc.shared.test ;
   msvc_vcpkg_test:
     name: "msvc.vcpkg.test"
     runs-on: windows-latest
@@ -142,9 +142,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: bash
+        shell: pwsh
         run: |
-          bash ci/do_ci.sh msvc.vcpkg.test ;
+          ci/do_ci.ps1 msvc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
         with:
@@ -158,9 +158,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: bash
+        shell: pwsh
         run: |
-          bash ci/do_ci.sh msvc2017.test ;
+          ci/do_ci.ps1 msvc2017.test ;
   android_test:
     name: "android.test"
     runs-on: ubuntu-latest
