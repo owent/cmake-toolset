@@ -101,6 +101,10 @@ for ARCH in ${ARCHS}; do
     export SDKROOT="${DEVROOT}/SDKs/${PLATFORM}${SDKVERSION}.sdk"
     mkdir -p "$WORKING_DIR/build_jobs_$ARCH";
     cd "$WORKING_DIR/build_jobs_$ARCH";
+
+    # For openssl
+    export CROSS_TOP="${DEVROOT}";
+    export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk";
     
     EXT_OPTIONS="";
     if [[ $(echo $DEPLOYMENT_TARGET | cut -d. -f 1) -lt 11 ]]; then 

@@ -99,7 +99,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       project_third_party_append_build_shared_lib_var(
         ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS protobuf_BUILD_SHARED_LIBS
         BUILD_SHARED_LIBS)
-
     endif()
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR
@@ -115,6 +114,8 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
 
     project_build_tools_append_cmake_options_for_lib(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
+    project_third_party_append_find_root_args(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS)
 
     if(NOT PROJECT_PREBUILT_PLATFORM_NAME STREQUAL PROJECT_PREBUILT_HOST_PLATFORM_NAME)
       list(
@@ -167,9 +168,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR}/cmake"
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS}
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS})
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS ${CMAKE_COMMAND}
-           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR}/cmake"
-           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS})
+      list(
+        APPEND
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS
+        ${CMAKE_COMMAND}
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR}/cmake"
+        "-Dprotobuf_BUILD_TESTS=OFF"
+        "-Dprotobuf_BUILD_EXAMPLES=OFF"
+        "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF")
+
+      project_third_party_append_build_shared_lib_var(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS protobuf_BUILD_SHARED_LIBS
+        BUILD_SHARED_LIBS)
 
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR}")
@@ -177,17 +187,15 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         file(MAKE_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR})
       endif()
 
-      string(REGEX
-             REPLACE ";" "\" \"" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD
-                     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS}")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD
-          "\"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD}\"")
-      string(
-        REGEX
-        REPLACE ";" "\" \"" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD
-                "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS}")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD
-          "\"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD}\"")
+      foreach(CMD_ARG ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS})
+        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD
+                                  "\"${CMD_ARG}\"")
+      endforeach()
+
+      foreach(CMD_ARG ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS})
+        add_compiler_flags_to_var(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD "\"${CMD_ARG}\"")
+      endforeach()
 
       if(CMAKE_HOST_UNIX OR MSYS)
         message(
@@ -245,13 +253,51 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
     endif()
 
     # prefer to find protoc from host prebuilt directory
-    if(NOT PROJECT_PREBUILT_PLATFORM_NAME STREQUAL PROJECT_PREBUILT_HOST_PLATFORM_NAME)
+    if(NOT "${PROJECT_PREBUILT_PLATFORM_NAME}" STREQUAL "${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
       find_program(
         Protobuf_PROTOC_EXECUTABLE
         NAMES protoc protoc.exe
         PATHS
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
         NO_DEFAULT_PATH)
+      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE}")
+
+      # Set protoc and libprotoc to hosted targets
+      if(Protobuf_PROTOC_EXECUTABLE AND NOT TARGET protobuf::protoc)
+        add_executable(protobuf::protoc IMPORTED)
+        set_target_properties(protobuf::protoc PROPERTIES IMPORTED_LOCATION
+                                                          "${Protobuf_PROTOC_EXECUTABLE}")
+      endif()
+      if(NOT TARGET protobuf::libprotoc)
+        if(NOT Protobuf_PROTOC_LIBRARIES)
+          unset(Protobuf_PROTOC_LIBRARIES)
+          unset(Protobuf_PROTOC_LIBRARIES CACHE)
+          find_library(
+            Protobuf_PROTOC_LIBRARIES
+            NAMES protoc libprotoc
+            PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/lib"
+                  "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/lib64"
+            NO_DEFAULT_PATH)
+        endif()
+        if(Protobuf_PROTOC_LIBRARIES)
+          message(STATUS "Cross Compiling: using hosted libprotoc: ${Protobuf_PROTOC_LIBRARIES}")
+          if(Protobuf_PROTOC_LIBRARIES MATCHES "\\.(a|lib)$")
+            add_library(protobuf::libprotoc STATIC IMPORTED)
+          else()
+            add_library(protobuf::libprotoc SHARED IMPORTED)
+          endif()
+          set_target_properties(
+            protobuf::libprotoc
+            PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/include"
+                       IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARIES}")
+        else()
+          message(
+            STATUS
+              "libprotoc not found on ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}"
+          )
+        endif()
+      endif()
     endif()
     if($ENV{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL})
       find_package(protobuf)

@@ -146,3 +146,53 @@ macro(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSI
   unset(project_third_party_get_build_dir_PORT_VERSION_LEN)
   unset(project_third_party_get_build_dir_PORT_VERSION)
 endmacro()
+
+find_package(Git)
+if(NOT GIT_FOUND AND NOT Git_FOUND)
+  message(FATAL_ERROR "git is required to use ports")
+endif()
+
+if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+  find_package(UnixCommands)
+  if(BASH)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_BASH "${BASH}")
+  elseif(WIN32)
+    get_filename_component(GIT_EXECUTABLE_DIR "${GIT_EXECUTABLE}" DIRECTORY)
+    get_filename_component(GIT_HOME_DIR "${GIT_EXECUTABLE_DIR}" DIRECTORY)
+
+    set(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS
+        "${GIT_EXECUTABLE_DIR}/bash.exe"
+        "${GIT_EXECUTABLE_DIR}/sh.exe"
+        "${GIT_EXECUTABLE_DIR}/bin/bash.exe"
+        "${GIT_EXECUTABLE_DIR}/bin/sh.exe"
+        "${GIT_EXECUTABLE_DIR}/usr/bin/bash.exe"
+        "${GIT_EXECUTABLE_DIR}/usr/bin/sh.exe"
+        "${GIT_EXECUTABLE_DIR}/usr/bin/dash.exe"
+        "${GIT_HOME_DIR}/bin/bash.exe"
+        "${GIT_HOME_DIR}/bin/sh.exe"
+        "${GIT_HOME_DIR}/usr/bin/bash.exe"
+        "${GIT_HOME_DIR}/usr/bin/sh.exe"
+        "${GIT_HOME_DIR}/usr/bin/dash.exe")
+
+    foreach(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH ${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS})
+      if(EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH}")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_BASH "${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH}")
+        break()
+      endif()
+    endforeach()
+
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+      message(FATAL_ERROR "bash is required to use ports")
+    endif()
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH)
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS)
+  endif()
+endif()
+
+function(project_third_party_generate_load_env_bash)
+  project_build_tools_generate_load_env_bash(${ARGN})
+endfunction()
+
+function(project_third_party_generate_load_env_powershell)
+  project_build_tool_generate_load_env_powershell(${ARGN})
+endfunction()

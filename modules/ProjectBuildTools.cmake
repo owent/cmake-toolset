@@ -18,6 +18,7 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
     CMAKE_C_COMPILER_AR
     CMAKE_C_COMPILER_RANLIB
     CMAKE_C_LINK_LIBRARY_SUFFIX
+    CMAKE_C_IMPLICIT_LINK_LIBRARIES
     CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
     CMAKE_C_STANDARD_LIBRARIES
     CMAKE_OBJC_EXTENSIONS)
@@ -34,8 +35,10 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
     CMAKE_CXX_COMPILER_AR
     CMAKE_CXX_COMPILER_RANLIB
     CMAKE_CXX_LINK_LIBRARY_SUFFIX
+    CMAKE_CXX_IMPLICIT_LINK_LIBRARIES
     ANDROID_CPP_FEATURES
     ANDROID_STL
+    CMAKE_ANDROID_STL_TYPE
     CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
     CMAKE_CXX_STANDARD_LIBRARIES
     CMAKE_OBJCXX_EXTENSIONS)
@@ -75,6 +78,11 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
     ANDROID_DISABLE_RELRO
     ANDROID_DISABLE_FORMAT_STRING_CHECKS
     ANDROID_CCACHE
+    ANDROID_NATIVE_API_LEVEL
+    ANDROID_TOOLCHAIN
+    CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION
+    CMAKE_ANDROID_ARCH_ABI
+    CMAKE_ANDROID_API
     # For MSVC
     CMAKE_MSVC_RUNTIME_LIBRARY)
 
@@ -103,7 +111,7 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS
     ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM})
 
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
-  list(APPEND ${ARGV0} "-G" "${CMAKE_GENERATOR}")
+  list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
 
   set(project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS FALSE)
   set(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS FALSE)
@@ -140,18 +148,20 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
       set(VAR_VALUE "${${VAR_NAME}}")
       # message("DEBUG============ ${VAR_NAME}=${VAR_VALUE}")
       if(VAR_VALUE)
-        list(APPEND ${ARGV0} "-D${VAR_NAME}=${VAR_VALUE}")
+        string(REPLACE ";" "\\;" VAR_VALUE_AS_CMD_ARGS "${VAR_VALUE}")
+        list(APPEND ${OUTVAR} "-D${VAR_NAME}=${VAR_VALUE_AS_CMD_ARGS}")
       endif()
       unset(VAR_VALUE)
+      unset(VAR_VALUE_AS_CMD_ARGS)
     endif()
   endforeach()
 
   if(CMAKE_GENERATOR_PLATFORM)
-    list(APPEND ${ARGV0} "-A" "${CMAKE_GENERATOR_PLATFORM}")
+    list(APPEND ${OUTVAR} "-A" "${CMAKE_GENERATOR_PLATFORM}")
   endif()
 
   if(CMAKE_GENERATOR_TOOLSET)
-    list(APPEND ${ARGV0} "-T" "${CMAKE_GENERATOR_TOOLSET}")
+    list(APPEND ${OUTVAR} "-T" "${CMAKE_GENERATOR_TOOLSET}")
   endif()
 
   # Policy
@@ -160,7 +170,7 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   if(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
     list(
       APPEND
-      ${ARGV0}
+      ${OUTVAR}
       "-DCMAKE_POLICY_DEFAULT_CMP0091=${project_build_tools_append_cmake_inherit_options_POLICY_VALUE}"
     )
   endif()
@@ -740,4 +750,212 @@ function(project_build_tools_move_imported_location_out_of_config)
       set_target_properties(${TARGET_NAME} PROPERTIES IMPORTED_LOCATION "${PATCH_TARGET_LOCATION}")
     endif()
   endforeach()
+endfunction()
+
+function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
+  file(WRITE "${OUTPUT_FILE}" "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  project_make_executable("${OUTPUT_FILE}")
+
+  file(APPEND "${OUTPUT_FILE}"
+       "export CC=\"${CMAKE_C_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(APPEND "${OUTPUT_FILE}"
+       "export CXX=\"${CMAKE_CXX_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  if(CMAKE_AR)
+    file(APPEND "${OUTPUT_FILE}"
+         "export AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+
+  unset(FINAL_CFLAGS)
+  unset(FINAL_CXXFLAGS)
+  add_compiler_flags_to_var(FINAL_CFLAGS ${CMAKE_C_FLAGS})
+  add_compiler_flags_to_var(FINAL_CXXFLAGS ${CMAKE_CXX_FLAGS})
+  if(ANDROID)
+    if(ANDROID_PLATFORM_LEVEL)
+      add_compiler_flags_to_var(FINAL_CFLAGS "-D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}")
+    endif()
+  else()
+    if(CMAKE_OSX_SYSROOT)
+      add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+    endif()
+
+    if(CMAKE_OSX_DEPLOYMENT_TARGET)
+      add_compiler_flags_to_var(FINAL_CFLAGS
+                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS
+                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
+
+    if(CMAKE_OSX_ARCHITECTURES)
+      add_compiler_flags_to_var(FINAL_CFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
+    endif()
+  endif()
+
+  if(FINAL_CFLAGS)
+    file(APPEND "${OUTPUT_FILE}"
+         "export CFLAGS=\"${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  unset(FINAL_CFLAGS)
+
+  if(FINAL_CXXFLAGS)
+    file(APPEND "${OUTPUT_FILE}"
+         "export CXXFLAGS=\"${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  unset(FINAL_CXXFLAGS)
+
+  if(ENV{LD})
+    file(APPEND "${OUTPUT_FILE}" "export LD=\"$ENV{LD}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(ENV{AS})
+    file(APPEND "${OUTPUT_FILE}" "export AS=\"$ENV{AS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(ENV{STRIP})
+    file(APPEND "${OUTPUT_FILE}"
+         "export STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(ENV{NM})
+    file(APPEND "${OUTPUT_FILE}" "export NM=\"$ENV{NM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+
+  if(CMAKE_ASM_FLAGS OR CMAKE_ASM_FLAGS_RELEASE)
+    file(
+      APPEND "${OUTPUT_FILE}"
+      "export ASFLAGS=\"${CMAKE_ASM_FLAGS} ${CMAKE_ASM_FLAGS_RELEASE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+    )
+  endif()
+
+  if(CMAKE_EXE_LINKER_FLAGS OR CMAKE_STATIC_LINKER_FLAGS)
+    file(
+      APPEND "${OUTPUT_FILE}"
+      "export LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_STATIC_LINKER_FLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+    )
+  endif()
+
+  if(CMAKE_RANLIB)
+    file(APPEND "${OUTPUT_FILE}"
+         "export RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(CMAKE_OSX_SYSROOT)
+    file(APPEND "${OUTPUT_FILE}"
+         "export OSX_SYSROOT=\"${CMAKE_OSX_SYSROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(CMAKE_OSX_ARCHITECTURES)
+    file(
+      APPEND "${OUTPUT_FILE}"
+      "export OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+    )
+  endif()
+  if(ANDROID)
+    file(APPEND "${OUTPUT_FILE}"
+         "export ANDROID_NDK=\"${ANDROID_NDK}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}"
+         "export ANDROID_NDK_HOME=\"${ANDROID_NDK}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+endfunction()
+
+function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
+  file(WRITE "${OUTPUT_FILE}" "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  project_make_executable("${OUTPUT_FILE}")
+
+  file(
+    APPEND "${OUTPUT_FILE}"
+    "$PSDefaultParameterValues['*:Encoding'] = 'UTF-8'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(
+    APPEND "${OUTPUT_FILE}"
+    "$OutputEncoding = [System.Text.UTF8Encoding]::new()${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  if(CMAKE_AR)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+
+  unset(FINAL_CFLAGS)
+  unset(FINAL_CXXFLAGS)
+  add_compiler_flags_to_var(FINAL_CFLAGS ${CMAKE_C_FLAGS})
+  add_compiler_flags_to_var(FINAL_CXXFLAGS ${CMAKE_CXX_FLAGS})
+  if(ANDROID)
+    if(ANDROID_PLATFORM_LEVEL)
+      add_compiler_flags_to_var(FINAL_CFLAGS "-D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-D__ANDROID_API__=${ANDROID_PLATFORM_LEVEL}")
+    endif()
+  else()
+    if(CMAKE_OSX_SYSROOT)
+      add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+    endif()
+
+    if(CMAKE_OSX_DEPLOYMENT_TARGET)
+      add_compiler_flags_to_var(FINAL_CFLAGS
+                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS
+                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
+
+    if(CMAKE_OSX_ARCHITECTURES)
+      add_compiler_flags_to_var(FINAL_CFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
+    endif()
+  endif()
+
+  if(FINAL_CFLAGS)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:CFLAGS=\"${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  unset(FINAL_CFLAGS)
+
+  if(FINAL_CXXFLAGS)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:CXXFLAGS=\"${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  unset(FINAL_CXXFLAGS)
+
+  if(ENV{LD})
+    file(APPEND "${OUTPUT_FILE}" "$ENV:LD=\"$ENV{LD}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(ENV{AS})
+    file(APPEND "${OUTPUT_FILE}" "$ENV:AS=\"$ENV{AS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(ENV{STRIP})
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(ENV{NM})
+    file(APPEND "${OUTPUT_FILE}" "$ENV:NM=\"$ENV{NM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+
+  if(CMAKE_ASM_FLAGS OR CMAKE_ASM_FLAGS_RELEASE)
+    file(
+      APPEND "${OUTPUT_FILE}"
+      "$ENV:ASFLAGS=\"${CMAKE_ASM_FLAGS} ${CMAKE_ASM_FLAGS_RELEASE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+    )
+  endif()
+
+  if(CMAKE_EXE_LINKER_FLAGS OR CMAKE_STATIC_LINKER_FLAGS)
+    file(
+      APPEND "${OUTPUT_FILE}"
+      "$ENV:LDFLAGS=\"${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_STATIC_LINKER_FLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+    )
+  endif()
+
+  if(CMAKE_RANLIB)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(CMAKE_OSX_SYSROOT)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:OSX_SYSROOT=\"${CMAKE_OSX_SYSROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+  if(CMAKE_OSX_ARCHITECTURES)
+    file(
+      APPEND "${OUTPUT_FILE}"
+      "$ENV:OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+    )
+  endif()
+  if(ANDROID)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:ANDROID_NDK=\"${ANDROID_NDK}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:ANDROID_NDK_HOME=\"${ANDROID_NDK}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
 endfunction()

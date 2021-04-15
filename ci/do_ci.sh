@@ -43,7 +43,7 @@ elif [[ "$1" == "gcc.4.8.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ;
+  cmake .. -DCMAKE_C_COMPILER=gcc-4.8 -DCMAKE_CXX_COMPILER=g++-4.8 ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "clang.test" ]]; then
   echo "$1";
@@ -116,14 +116,14 @@ elif [[ "$1" == "android.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a ;
+  bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a -- -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES ;
   cd build_jobs_arm64-v8a ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "ios.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  bash ../../ci/cmake_ios_wrapper.sh -r .. -a arm64 ;
+  bash ../../ci/cmake_ios_wrapper.sh -r .. -a arm64 -- -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES ;
   cd build_jobs_arm64 ;
   cmake --build . -j || cmake --build .;
 fi

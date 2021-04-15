@@ -383,13 +383,20 @@ macro(FindConfigurePackage)
         if(FindConfigurePackage_PROJECT_DIRECTORY)
           file(RELATIVE_PATH CONFIGURE_EXEC_FILE ${FindConfigurePackage_BUILD_DIRECTORY}
                "${FindConfigurePackage_PROJECT_DIRECTORY}/configure")
+          set(FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN
+              "${FindConfigurePackage_PROJECT_DIRECTORY}/load-envs-run.sh")
+          project_build_tools_generate_load_env_bash(
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
+          file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             message(
               STATUS
-                "@${FindConfigurePackage_PROJECT_DIRECTORY} Run: ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
+                "@${FindConfigurePackage_PROJECT_DIRECTORY} Run: ${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN} ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
             )
-            execute_process(COMMAND ${FindConfigurePackage_AUTOGEN_CONFIGURE}
-                            WORKING_DIRECTORY "${FindConfigurePackage_PROJECT_DIRECTORY}")
+            execute_process(
+              COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+                      ${FindConfigurePackage_AUTOGEN_CONFIGURE}
+              WORKING_DIRECTORY "${FindConfigurePackage_PROJECT_DIRECTORY}")
           endif()
         else()
           file(
@@ -398,13 +405,20 @@ macro(FindConfigurePackage)
             ${FindConfigurePackage_BUILD_DIRECTORY}
             "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}/configure"
           )
+          set(FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN
+              "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}/load-envs-run.sh"
+          )
+          project_build_tools_generate_load_env_bash(
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
+          file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             message(
               STATUS
-                "@${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME} Run: ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
+                "@${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME} Run: ${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN} ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
             )
             execute_process(
-              COMMAND ${FindConfigurePackage_AUTOGEN_CONFIGURE}
+              COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+                      ${FindConfigurePackage_AUTOGEN_CONFIGURE}
               WORKING_DIRECTORY
                 "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}"
             )
@@ -415,11 +429,13 @@ macro(FindConfigurePackage)
         endif()
         message(
           STATUS
-            "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CONFIGURE_EXEC_FILE} --prefix=${FindConfigurePackage_PREFIX_DIRECTORY} ${FindConfigurePackage_CONFIGURE_FLAGS}"
+            "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN} ${CONFIGURE_EXEC_FILE} --prefix=${FindConfigurePackage_PREFIX_DIRECTORY} ${FindConfigurePackage_CONFIGURE_FLAGS}"
         )
         execute_process(
-          COMMAND ${CONFIGURE_EXEC_FILE} "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}"
-                  ${FindConfigurePackage_CONFIGURE_FLAGS}
+          COMMAND
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" ${CONFIGURE_EXEC_FILE}
+            "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}"
+            ${FindConfigurePackage_CONFIGURE_FLAGS}
           WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}")
 
         if(PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD)
@@ -428,8 +444,10 @@ macro(FindConfigurePackage)
           unset(FindConfigurePackageCMakeBuildParallelFlags)
         endif()
         execute_process(
-          COMMAND "make" ${FindConfigurePackage_MAKE_FLAGS} ${FindConfigurePackage_INSTALL_TARGET}
-                  ${FindConfigurePackageCMakeBuildParallelFlags}
+          COMMAND
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "make"
+            ${FindConfigurePackage_MAKE_FLAGS} ${FindConfigurePackage_INSTALL_TARGET}
+            ${FindConfigurePackageCMakeBuildParallelFlags}
           WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
         unset(FindConfigurePackageCMakeBuildParallelFlags)
 

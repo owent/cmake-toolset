@@ -172,6 +172,8 @@ if(NOT Libwebsockets_FOUND
         file(WRITE
              "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
              "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        project_third_party_generate_load_env_bash(
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-load-envs.sh")
         file(
           APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-config.sh"
           "export PATH=\"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}:\$PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
@@ -179,10 +181,13 @@ if(NOT Libwebsockets_FOUND
         file(
           APPEND
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
-          "export PATH=\"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}:\$PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "source \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-load-envs.sh\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
         )
-        project_make_executable(
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-config.sh")
+        file(
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-load-envs.sh"
+          "source \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-load-envs.sh\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+        )
+
         project_make_executable(
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh")
 
@@ -193,18 +198,15 @@ if(NOT Libwebsockets_FOUND
                "-DCMAKE_AR=${CMAKE_AR}")
         endif()
 
-        file(
-          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-config.sh"
-          "export CFLAGS=\"\$CFLAGS -I${OPENSSL_INCLUDE_DIR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-        )
         find_package(Threads)
         if(CMAKE_USE_PTHREADS_INIT)
           file(
-            APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-config.sh"
+            APPEND
+            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-load-envs.sh"
             "export LDFLAGS=\"\$LDFLAGS -ldl -pthread\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         else()
           file(APPEND
-               "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-config.sh"
+               "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-load-envs.sh"
                "export LDFLAGS=\"\$LDFLAGS -ldl\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         endif()
 
