@@ -45,7 +45,13 @@ if(NOT TARGET gRPC::grpc++_alts
      AND NOT TARGET gRPC::grpc)
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.37.0")
+      # This is related to abseil-cpp
+      if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS
+                                                     "4.9.0")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.33.2")
+      else()
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.37.0")
+      endif()
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_GIT_URL)
@@ -142,6 +148,21 @@ if(NOT TARGET gRPC::grpc++_alts
            "-DProtobuf_PROTOC_EXECUTABLE=${Protobuf_PROTOC_EXECUTABLE}")
 
     endif()
+
+    if(MINGW)
+      set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
+      set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
+                                       "-luserenv" "-lws2_32" "-lgcc")
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
+                                       "-luserenv" "-lws2_32" "-lgcc")
+    elseif(APPLE)
+      set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
+      set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-lresolv")
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-lresolv")
+    endif()
+
     find_configure_package(
       PACKAGE
       gRPC
@@ -164,6 +185,14 @@ if(NOT TARGET gRPC::grpc++_alts
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}"
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_GIT_URL}")
+    if(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES)
+      set(CMAKE_C_STANDARD_LIBRARIES ${PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES})
+      unset(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES)
+    endif()
+    if(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES)
+      set(CMAKE_CXX_STANDARD_LIBRARIES ${PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES})
+      unset(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES)
+    endif()
 
     if(TARGET gRPC::grpc++_alts
        OR TARGET gRPC::grpc++

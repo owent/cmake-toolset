@@ -122,9 +122,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: pwsh
+        shell: cmd
         run: |
-          ci/do_ci.ps1 msvc.static.test ;
+          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          pwsh ci/do_ci.ps1 msvc.static.test ;
   msvc_shared_test:
     name: "msvc.shared.test"
     runs-on: windows-latest
@@ -132,9 +133,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: pwsh
+        shell: cmd
         run: |
-          ci/do_ci.ps1 msvc.shared.test ;
+          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          pwsh ci/do_ci.ps1 msvc.shared.test ;
   msvc_vcpkg_test:
     name: "msvc.vcpkg.test"
     runs-on: windows-latest
@@ -142,9 +144,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: pwsh
+        shell: cmd
         run: |
-          ci/do_ci.ps1 msvc.vcpkg.test ;
+          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
         with:
@@ -158,11 +161,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: pwsh
+        shell: cmd
         run: |
-          ci/do_ci.ps1 msvc2017.test ;
-  appleclang_test:
-    name: "ios.test"
+          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          pwsh ci/do_ci.ps1 msvc2017.test ;
+  macos_appleclang_test:
+    name: "macos.appleclang.test"
     runs-on: macos-latest
     steps:
       - name: Checkout

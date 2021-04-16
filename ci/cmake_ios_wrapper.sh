@@ -124,6 +124,11 @@ for ARCH in ${ARCHS}; do
         -DCMAKE_CXX_FLAGS="$OTHER_CFLAGS -fembed-bitcode=$BUILD_WITH_EMBED_BITCODE" \
         -DCMAKE_C_FLAGS="$OTHER_CFLAGS -fembed-bitcode=$BUILD_WITH_EMBED_BITCODE"   \
         -DCMAKE_OSX_DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET}                          \
+        -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER                                   \
+        -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY                                    \
+        -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY                                    \
+        -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY                                    \
+        -DCMAKE_FIND_ROOT_PATH=${SDKROOT}                                           \
         $EXT_OPTIONS "$@";
     if [[ $LAST_EXIT_CODE -ne 0 ]]; then
         echo "run cmake failed"

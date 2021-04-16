@@ -234,10 +234,10 @@ if(NOT Libwebsockets_FOUND
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS}")
         project_expand_list_for_command_line_to_file(
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
-          ${CMAKE_COMMAND} "--build" "." "-j")
+          "${CMAKE_COMMAND}" "--build" "." "-j")
         project_expand_list_for_command_line_to_file(
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
-          ${CMAKE_COMMAND} "--build" "." "--" "install")
+          "${CMAKE_COMMAND}" "--build" "." "--" "install")
 
         # build & install
         message(
@@ -283,10 +283,10 @@ if(NOT Libwebsockets_FOUND
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS}")
         project_expand_list_for_command_line_to_file(
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
-          ${CMAKE_COMMAND} "--build" "." "-j")
+          "${CMAKE_COMMAND}" "--build" "." "-j")
         project_expand_list_for_command_line_to_file(
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
-          ${CMAKE_COMMAND} "--build" "." "--target" "INSTALL")
+          "${CMAKE_COMMAND}" "--build" "." "--target" "INSTALL")
 
         # build & install
         message(
