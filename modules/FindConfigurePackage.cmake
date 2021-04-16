@@ -489,14 +489,10 @@ macro(FindConfigurePackage)
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
         endif()
         if(FindConfigurePackage_CMAKE_INHIRT_FIND_ROOT_PATH)
-          string(REPLACE ";" "\\;" CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS "${CMAKE_FIND_ROOT_PATH}")
-          string(REPLACE ";" "\\;" CMAKE_PREFIX_PATH_AS_CMD_ARGS "${CMAKE_PREFIX_PATH}")
-          list(APPEND FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
-               "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS}")
-          list(APPEND FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
-               "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_AS_CMD_ARGS}")
-          unset(CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS)
-          unset(CMAKE_PREFIX_PATH_AS_CMD_ARGS)
+          list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
+                               "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
+          list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
+                               "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
         endif()
 
         message(

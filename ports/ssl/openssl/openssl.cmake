@@ -106,11 +106,20 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "no-rc2"
         "no-ssl2"
         "no-ssl3"
-        "no-weak-ssl-ciphers"
-        "enable-static-engine")
-    if(NOT MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+        "no-weak-ssl-ciphers")
+    if(NOT ANDROID
+       AND NOT MSVC
+       AND CMAKE_SIZEOF_VOID_P EQUAL 8)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
            "enable-ec_nistp_64_gcc_128")
+    endif()
+
+    if(ANDROID OR CMAKE_OSX_ARCHITECTURES)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-comp" "no-hw"
+           "no-engine")
+    else()
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
+           "enable-static-engine")
     endif()
 
   endif()
@@ -283,6 +292,19 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         else()
           message(FATAL_ERROR "Invalid Android ABI: ${CMAKE_ANDROID_ARCH_ABI}.")
         endif()
+
+        # @see https://wiki.openssl.org/images/7/70/Setenv-android.sh @see
+        # https://wiki.openssl.org/index.php/Android
+        file(
+          APPEND
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
+          "export SYSTEM=\"android\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "export ANDROID_API=\"${ANDROID_PLATFORM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "export ARCH=\"${ANDROID_SYSROOT_ABI}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "export CROSS_COMPILE=\"\$ANDROID_TOOLCHAIN_PREFIX\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "export CROSS_SYSROOT=\"\$ANDROID_SYSROOT\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "export NDK_SYSROOT=\"\$ANDROID_SYSROOT\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+          "export SYSROOT=\"\$ANDROID_SYSROOT\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CONFIG "Configure")
       elseif(CMAKE_OSX_ARCHITECTURES)
         if(CMAKE_OSX_ARCHITECTURES MATCHES "armv7(s?)")

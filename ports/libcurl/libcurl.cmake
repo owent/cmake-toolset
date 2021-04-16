@@ -125,15 +125,15 @@ if(NOT CURL_EXECUTABLE)
     if(MINGW)
       set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
       set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-      set(CMAKE_C_STANDARD_LIBRARIES
-          "${CMAKE_C_STANDARD_LIBRARIES} -liphlpapi -lpsapi -luserenv -lws2_32 -lgcc")
-      set(CMAKE_CXX_STANDARD_LIBRARIES
-          "${CMAKE_CXX_STANDARD_LIBRARIES} -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc")
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
+                                       "-luserenv" "-lws2_32" "-lgcc")
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
+                                       "-luserenv" "-lws2_32" "-lgcc")
     elseif(APPLE)
       set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
       set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-      set(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} -lresolv")
-      set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES} -lresolv")
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-lresolv")
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-lresolv")
     endif()
 
     findconfigurepackage(

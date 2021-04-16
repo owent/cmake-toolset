@@ -77,14 +77,12 @@ macro(project_third_party_append_build_static_lib_var LISTNAME)
 endmacro()
 
 macro(project_third_party_append_find_root_args VARNAME)
-  string(REPLACE ";" "\\;" CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS "${CMAKE_FIND_ROOT_PATH}")
-  string(REPLACE ";" "\\;" CMAKE_PREFIX_PATH_AS_CMD_ARGS "${CMAKE_PREFIX_PATH}")
-
-  list(APPEND ${VARNAME} "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS}"
-       "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_AS_CMD_ARGS}")
-
-  unset(CMAKE_FIND_ROOT_PATH_AS_CMD_ARGS)
-  unset(CMAKE_PREFIX_PATH_AS_CMD_ARGS)
+  if(CMAKE_FIND_ROOT_PATH)
+    list_append_unescape(${VARNAME} "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
+  endif()
+  if(CMAKE_PREFIX_PATH)
+    list_append_unescape(${VARNAME} "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
+  endif()
 endmacro()
 
 file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)

@@ -38,6 +38,34 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endforeach()
   endmacro(add_compiler_flags_to_var)
 
+  macro(add_compiler_flags_to_var_unique VARNAME)
+    foreach(def ${ARGN})
+      if(${VARNAME})
+        if(NOT "${def}" IN_LIST ${VARNAME})
+          set(${VARNAME} "${${VARNAME}} ${def}")
+        endif()
+      else()
+        set(${VARNAME} ${def})
+      endif()
+    endforeach()
+  endmacro(add_compiler_flags_to_var)
+
+  macro(list_append_unescape VARNAME)
+    string(REPLACE ";" "\\;" list_append_unescape_VAL "${ARGN}")
+    if(list_append_unescape_VAL)
+      list(APPEND ${VARNAME} "${list_append_unescape_VAL}")
+    endif()
+    unset(list_append_unescape_VAL)
+  endmacro()
+
+  macro(list_prepend_unescape VARNAME)
+    string(REPLACE ";" "\\;" list_append_unescape_VAL "${ARGN}")
+    if(list_append_unescape_VAL)
+      list(PREPEND ${VARNAME} "${list_append_unescape_VAL}")
+    endif()
+    unset(list_append_unescape_VAL)
+  endmacro()
+
   macro(add_compiler_define)
     foreach(def ${ARGN})
       if(NOT MSVC)
@@ -97,6 +125,41 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endfunction(add_target_link_flags)
 
+  # ================== system checking ==================
+  if(ANDROID)
+    if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS
+                                       "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS
+                                       "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS
+                                       "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+    endif()
+    if(ANDROID_LLVM_TOOLCHAIN_PREFIX)
+      get_filename_component(ANDROID_LLVM_TOOLCHAIN_ROOT "${ANDROID_LLVM_TOOLCHAIN_PREFIX}"
+                             DIRECTORY)
+      if(ANDROID_LLVM_TOOLCHAIN_ROOT
+         AND EXISTS "${ANDROID_LLVM_TOOLCHAIN_ROOT}/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}")
+        add_compiler_flags_to_var_unique(
+          CMAKE_SHARED_LINKER_FLAGS
+          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
+          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
+        )
+        add_compiler_flags_to_var_unique(
+          CMAKE_MODULE_LINKER_FLAGS
+          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
+          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
+        )
+        add_compiler_flags_to_var_unique(
+          CMAKE_EXE_LINKER_FLAGS
+          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
+          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
+        )
+      endif()
+    endif()
+  endif()
+
+  # ================== compiler flags ==================
   # Auto compiler options, support gcc,MSVC,Clang,AppleClang
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     # add_compile_options(-Wall -Werror)
@@ -321,6 +384,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO /O2 /D NDEBUG)
     add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL /Ox /D NDEBUG)
   endif()
+
+  # ================== support checking ==================
   # check c++20 coroutine
   if(NOT DEFINED COMPILER_OPTIONS_TEST_STD_COROUTINE)
     set(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
