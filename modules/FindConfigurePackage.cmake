@@ -633,6 +633,6 @@ macro(FindConfigurePackage)
   endif()
 endmacro(FindConfigurePackage)
 
-function(FIND_CONFIGURE_PACKAGE)
+macro(FIND_CONFIGURE_PACKAGE)
   findconfigurepackage(${ARGN})
-endfunction(FIND_CONFIGURE_PACKAGE)
+endmacro(FIND_CONFIGURE_PACKAGE)
