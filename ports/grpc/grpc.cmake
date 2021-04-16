@@ -152,10 +152,22 @@ if(NOT TARGET gRPC::grpc++_alts
     if(MINGW)
       set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
       set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
-                                       "-luserenv" "-lws2_32" "-lgcc")
-      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
-                                       "-luserenv" "-lws2_32" "-lgcc")
+      add_compiler_flags_to_var_unique(
+        CMAKE_C_STANDARD_LIBRARIES
+        "-lcrypt32"
+        "-liphlpapi"
+        "-lpsapi"
+        "-luserenv"
+        "-lws2_32"
+        "-lgcc")
+      add_compiler_flags_to_var_unique(
+        CMAKE_CXX_STANDARD_LIBRARIES
+        "-lcrypt32"
+        "-liphlpapi"
+        "-lpsapi"
+        "-luserenv"
+        "-lws2_32"
+        "-lgcc")
     elseif(APPLE)
       set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
       set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
