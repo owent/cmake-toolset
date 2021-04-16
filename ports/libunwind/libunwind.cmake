@@ -39,7 +39,7 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
         "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}"
     )
   endif()
-  findconfigurepackage(
+  find_configure_package(
     PACKAGE
     Libunwind
     BUILD_WITH_CONFIGURE

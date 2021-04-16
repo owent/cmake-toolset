@@ -40,7 +40,7 @@ if(NOT TARGET ZLIB::ZLIB)
 
   set(ZLIB_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
 
-  findconfigurepackage(
+  find_configure_package(
     PACKAGE
     ZLIB
     BUILD_WITH_CMAKE

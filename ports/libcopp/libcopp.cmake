@@ -28,6 +28,12 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
           "https://github.com/owt5008137/libcopp.git")
     endif()
 
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS
+          "-DPROJECT_ENABLE_UNITTEST=OFF" "-DPROJECT_ENABLE_SAMPLE=OFF"
+          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+    endif()
+
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR)
       project_third_party_get_build_dir(
         ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR "libcopp"
@@ -40,73 +46,31 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_REPOSITORY_DIR
         "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}"
     )
+    project_third_party_append_build_shared_lib_var(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS LIBCOPP_USE_DYNAMIC_LIBRARY)
 
-    project_git_clone_repository(
-      URL
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL}"
-      REPO_DIRECTORY
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_REPOSITORY_DIR}"
-      BRANCH
+    find_configure_package(
+      PACKAGE
+      Libcopp
+      FIND_PACKAGE_FLAGS
+      CONFIG
+      BUILD_WITH_CMAKE
+      CMAKE_INHIRT_BUILD_ENV
+      CMAKE_INHIRT_FIND_ROOT_PATH
+      CMAKE_FLAGS
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS}
+      WORKING_DIRECTORY
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
+      BUILD_DIRECTORY
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR}"
+      PREFIX_DIRECTORY
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+      SRC_DIRECTORY_NAME
+      "libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}"
+      GIT_BRANCH
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}"
-      CHECK_PATH
-      "CMakeLists.txt")
-
-    set(LIBCOPP_USE_DYNAMIC_LIBRARY
-        ${ATFRAMEWORK_USE_DYNAMIC_LIBRARY}
-        CACHE BOOL "Build dynamic libraries of libcopp" FORCE)
-
-    if(ANDROID)
-      if(CMAKE_ANDROID_ARCH_ABI MATCHES "^armeabi(-v7a)?$")
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "arm"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL arm64-v8a)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "arm64"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL x86)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "i386"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL x86_64)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "x86_64"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL mips)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "mips32"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL mips64)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "mips64"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      else()
-        message(FATAL_ERROR "Invalid Android ABI: ${CMAKE_ANDROID_ARCH_ABI}.")
-      endif()
-    elseif(CMAKE_OSX_ARCHITECTURES)
-      if(CMAKE_OSX_ARCHITECTURES MATCHES "armv7(s?)")
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "arm"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_OSX_ARCHITECTURES MATCHES "arm64.*")
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "arm64"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_OSX_ARCHITECTURES MATCHES)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "i386"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      elseif(CMAKE_OSX_ARCHITECTURES STREQUAL x86_64)
-        set(LIBCOPP_FCONTEXT_OS_PLATFORM
-            "x86_64"
-            CACHE STRING "set system platform for libcopp." FORCE)
-      else()
-        message(FATAL_ERROR "Invalid OSX ABI: ${CMAKE_OSX_ARCHITECTURES}.")
-      endif()
-    endif()
-
-    add_subdirectory("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_REPOSITORY_DIR}"
-                     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR}")
+      GIT_URL
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL}")
 
     project_third_party_libcopp_import()
   endif()

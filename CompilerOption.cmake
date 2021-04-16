@@ -48,7 +48,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         set(${VARNAME} ${def})
       endif()
     endforeach()
-  endmacro(add_compiler_flags_to_var)
+  endmacro(add_compiler_flags_to_var_unique)
 
   macro(list_append_unescape VARNAME)
     string(REPLACE ";" "\\;" list_append_unescape_VAL "${ARGN}")

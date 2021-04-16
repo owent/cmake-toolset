@@ -43,7 +43,7 @@ if(NOT TARGET rapidjson
       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/rapidjson-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_VERSION}"
   )
 
-  findconfigurepackage(
+  find_configure_package(
     PACKAGE
     RapidJSON
     BUILD_WITH_CMAKE

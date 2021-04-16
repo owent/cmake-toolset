@@ -67,7 +67,7 @@ if(NOT TARGET c-ares::cares
     string(REPLACE "." "_" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_DEFAULT_VERSION
                    "cares-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION}")
 
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       c-ares
       BUILD_WITH_CMAKE

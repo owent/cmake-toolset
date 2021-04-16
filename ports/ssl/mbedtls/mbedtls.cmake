@@ -76,7 +76,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
     endif()
 
     echowithcolor(COLOR GREEN "-- Try to configure and use mbedtls")
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       MbedTLS
       BUILD_WITH_CMAKE

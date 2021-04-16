@@ -71,7 +71,7 @@ if(NOT TARGET uv_a
     endif()
 
     set(Libuv_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       Libuv
       BUILD_WITH_CMAKE

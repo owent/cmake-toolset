@@ -103,6 +103,7 @@ if [[ ! -e "$SOURCE_DIR/CMakeLists.txt" ]]; then
     exit 2 ;
 fi
 SOURCE_DIR="$(cd "$SOURCE_DIR" && pwd)";
+WORKING_DIR="$PWD";
 
 mkdir -p "$WORKING_DIR/lib";
 

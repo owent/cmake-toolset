@@ -25,7 +25,7 @@ if(NOT MSVC
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_BUILD_OPTIONS "")
   endif()
 
-  findconfigurepackage(
+  find_configure_package(
     PACKAGE
     Jemalloc
     BUILD_WITH_CONFIGURE

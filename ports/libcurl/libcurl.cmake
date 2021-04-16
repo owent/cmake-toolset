@@ -136,7 +136,7 @@ if(NOT CURL_EXECUTABLE)
       add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-lresolv")
     endif()
 
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       CURL
       FIND_PACKAGE_FLAGS

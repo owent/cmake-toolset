@@ -47,7 +47,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
 
   set(protobuf_MODULE_COMPATIBLE TRUE)
   if(VCPKG_TOOLCHAIN)
-    find_package(protobuf QUIET CONFIG)
+    find_package(Protobuf QUIET CONFIG)
     project_third_party_protobuf_import()
   endif()
 
@@ -264,44 +264,20 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       # Set protoc and libprotoc to hosted targets
       if(Protobuf_PROTOC_EXECUTABLE AND NOT TARGET protobuf::protoc)
         add_executable(protobuf::protoc IMPORTED)
-        set_target_properties(protobuf::protoc PROPERTIES IMPORTED_LOCATION
-                                                          "${Protobuf_PROTOC_EXECUTABLE}")
-      endif()
-      if(NOT TARGET protobuf::libprotoc)
-        if(NOT Protobuf_PROTOC_LIBRARIES)
-          unset(Protobuf_PROTOC_LIBRARIES)
-          unset(Protobuf_PROTOC_LIBRARIES CACHE)
-          find_library(
-            Protobuf_PROTOC_LIBRARIES
-            NAMES protoc libprotoc
-            PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/lib"
-                  "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/lib64"
-            NO_DEFAULT_PATH)
-        endif()
-        if(Protobuf_PROTOC_LIBRARIES)
-          message(STATUS "Cross Compiling: using hosted libprotoc: ${Protobuf_PROTOC_LIBRARIES}")
-          if(Protobuf_PROTOC_LIBRARIES MATCHES "\\.(a|lib)$")
-            add_library(protobuf::libprotoc STATIC IMPORTED)
-          else()
-            add_library(protobuf::libprotoc SHARED IMPORTED)
-          endif()
-          set_target_properties(
-            protobuf::libprotoc
-            PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/include"
-                       IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARIES}")
-        else()
-          message(
-            STATUS
-              "libprotoc not found on ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}"
-          )
-        endif()
+        set_target_properties(
+          protobuf::protoc
+          PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE}"
+                     IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_EXECUTABLE}"
+                     IMPORTED_LOCATION_RELWITHDEBINFO "${Protobuf_PROTOC_EXECUTABLE}"
+                     IMPORTED_LOCATION_MINSIZEREL "${Protobuf_PROTOC_EXECUTABLE}"
+                     IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_EXECUTABLE}"
+                     IMPORTED_LOCATION_NOCONFIG "${Protobuf_PROTOC_EXECUTABLE}")
       endif()
     endif()
     if($ENV{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL})
-      find_package(protobuf)
+      find_package(Protobuf)
     else()
-      find_package(protobuf CONFIG)
+      find_package(Protobuf CONFIG)
     endif()
     project_third_party_protobuf_import()
   endif()

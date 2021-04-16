@@ -39,7 +39,7 @@ if(NOT TARGET yaml-cpp::yaml-cpp
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION})
   endif()
 
-  findconfigurepackage(
+  find_configure_package(
     PACKAGE
     yaml-cpp
     BUILD_WITH_CMAKE

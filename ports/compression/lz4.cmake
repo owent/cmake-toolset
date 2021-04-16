@@ -73,7 +73,7 @@ if(NOT TARGET lz4::lz4_static
     project_third_party_append_build_static_lib_var(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS BUILD_STATIC_LIBS)
 
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       lz4
       BUILD_WITH_CMAKE

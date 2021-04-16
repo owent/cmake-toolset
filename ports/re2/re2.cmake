@@ -41,7 +41,7 @@ if(NOT TARGET re2::re2)
     project_third_party_append_build_shared_lib_var(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       re2
       BUILD_WITH_CMAKE

@@ -71,7 +71,7 @@ if(NOT TARGET fmt::fmt-header-only
       set(Fmt_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
       set(fmt_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
 
-      findconfigurepackage(
+      find_configure_package(
         PACKAGE
         fmt
         BUILD_WITH_CMAKE

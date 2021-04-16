@@ -1,5 +1,7 @@
 # cmake-toolset
 
+[![Build](https://github.com/atframework/cmake-toolset/actions/workflows/build.yaml/badge.svg)](https://github.com/atframework/cmake-toolset/actions/workflows/build.yaml)
+
 This is a cmake script set for atframework.It contains some utility functions and it can works with [vcpkg][1].
 
 It's recommanded to use [vcpkg][1] if you just want a package manager on x86/x86_64 platform.

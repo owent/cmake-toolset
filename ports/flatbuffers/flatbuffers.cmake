@@ -52,7 +52,7 @@ if(NOT TARGET flatbuffers::flatc OR NOT TARGET flatbuffers::flatbuffers)
           -DFLATBUFFERS_BUILD_GRPCTEST=OFF
           -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
     endif()
-    findconfigurepackage(
+    find_configure_package(
       PACKAGE
       Flatbuffers
       BUILD_WITH_CMAKE
