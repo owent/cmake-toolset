@@ -35,6 +35,9 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
 
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/gtest.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/benchmark.cmake")
+
 # We do not support these libraries for ios and android now
 if(NOT ANDROID AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libwebsockets/libwebsockets.cmake")
@@ -88,4 +91,18 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN)
   list(REMOVE_DUPLICATES THIRD_PARTY_ALL_DYNAMIC_BIN_FILES)
 
   file(COPY ${THIRD_PARTY_ALL_DYNAMIC_BIN_FILES} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/bin")
+endif()
+
+if(TARGET GTest::gtest_main)
+  add_executable(cmake-toolset-gtest gtest.cpp)
+  target_link_libraries(cmake-toolset-gtest GTest::gtest_main)
+else()
+  message(FATAL_ERROR "Build GTest failed")
+endif()
+
+if(TARGET benchmark::benchmark)
+  add_executable(cmake-toolset-benchmark benchmark.cpp)
+  target_link_libraries(cmake-toolset-benchmark benchmark::benchmark)
+else()
+  message(FATAL_ERROR "Build benchmark failed")
 endif()
