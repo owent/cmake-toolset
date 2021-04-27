@@ -74,7 +74,7 @@ if(NOT TARGET benchmark::benchmark)
          AND EXISTS "${GOOGLETEST_PATH}/googlemock"
          AND IS_DIRECTORY "${GOOGLETEST_PATH}/googlemock"
          AND EXISTS "${GOOGLETEST_PATH}/googlemock/CMakeLists.txt")
-        message(STATUS "Building benchmark: Found Google Test in ${GOOGLETEST_PATH}")
+        message(STATUS "Building benchmark: Found Google Test source ${GOOGLETEST_PATH}")
 
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
              "-DGOOGLETEST_PATH=${GOOGLETEST_PATH}")
@@ -87,6 +87,11 @@ if(NOT TARGET benchmark::benchmark)
            "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
 
+    if(ANDROID OR CMAKE_OSX_ARCHITECTURES)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
+           "-DCMAKE_DEBUG_POSTFIX=d")
+    endif()
+
     find_configure_package(
       PACKAGE
       benchmark
@@ -94,6 +99,7 @@ if(NOT TARGET benchmark::benchmark)
       FIND_PACKAGE_FLAGS
       CONFIG
       CMAKE_INHIRT_BUILD_ENV
+      CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS
       CMAKE_INHIRT_FIND_ROOT_PATH
       CMAKE_FLAGS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS}
@@ -116,4 +122,8 @@ if(NOT TARGET benchmark::benchmark)
   endif()
 else()
   project_third_party_benchmark_import()
+endif()
+
+if(NOT TARGET benchmark::benchmark)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build benchmark failed.")
 endif()

@@ -85,3 +85,9 @@ if(NOT TARGET GTest::gtest AND NOT TARGET GTest::gtest_main)
 else()
   project_third_party_gtest_import()
 endif()
+
+if(NOT TARGET GTest::gtest
+   AND NOT TARGET GTest::gtest_main NOT TARGET GTest::gmock
+   AND NOT TARGET GTest::gmock_main)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build GTest failed.")
+endif()
