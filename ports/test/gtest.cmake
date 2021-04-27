@@ -8,15 +8,19 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_GTEST_IMPORT)
   if(TARGET GTest::gtest)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gtest found")
+    project_build_tools_move_imported_location_out_of_config(GTest::gtest)
   endif()
   if(TARGET GTest::gtest_main)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gtest_main found")
+    project_build_tools_move_imported_location_out_of_config(GTest::gtest_main)
   endif()
   if(TARGET GTest::gmock)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gmock found")
+    project_build_tools_move_imported_location_out_of_config(GTest::gmock)
   endif()
   if(TARGET GTest::gmock_main)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gmock_main found")
+    project_build_tools_move_imported_location_out_of_config(GTest::gmock_main)
   endif()
 endmacro()
 
@@ -87,7 +91,8 @@ else()
 endif()
 
 if(NOT TARGET GTest::gtest
-   AND NOT TARGET GTest::gtest_main NOT TARGET GTest::gmock
+   AND NOT TARGET GTest::gtest_main
+   AND NOT TARGET GTest::gmock
    AND NOT TARGET GTest::gmock_main)
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build GTest failed.")
 endif()

@@ -756,8 +756,21 @@ endmacro()
 function(project_build_tools_move_imported_location_out_of_config)
   foreach(TARGET_NAME ${ARGN})
     if(TARGET ${TARGET_NAME})
-      project_build_tools_get_imported_location(PATCH_TARGET_LOCATION ${TARGET_NAME})
-      set_target_properties(${TARGET_NAME} PROPERTIES IMPORTED_LOCATION "${PATCH_TARGET_LOCATION}")
+      get_target_property(DO_NOT_OVERWRITE ${TARGET_NAME} IMPORTED_LOCATION)
+      if(DO_NOT_OVERWRITE)
+        continue()
+      endif()
+      # MSVC's STL and debug level must match the target, so we can only move out
+      # IMPORTED_LOCATION_NOCONFIG
+      if(MSVC)
+        get_target_property(PATCH_TARGET_LOCATION ${TARGET_NAME} IMPORTED_LOCATION_NOCONFIG)
+        set_target_properties(${TARGET_NAME} PROPERTIES IMPORTED_LOCATION
+                                                        "${PATCH_TARGET_LOCATION}")
+      else()
+        project_build_tools_get_imported_location(PATCH_TARGET_LOCATION ${TARGET_NAME})
+        set_target_properties(${TARGET_NAME} PROPERTIES IMPORTED_LOCATION
+                                                        "${PATCH_TARGET_LOCATION}")
+      endif()
     endif()
   endforeach()
 endfunction()
