@@ -753,24 +753,47 @@ macro(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
   endif()
 endmacro()
 
-function(project_build_tools_move_imported_location_out_of_config)
+function(project_build_tools_patch_default_imported_config)
+  set(PATCH_VARS
+      IMPORTED_IMPLIB
+      IMPORTED_LIBNAME
+      IMPORTED_LINK_DEPENDENT_LIBRARIES
+      IMPORTED_LINK_INTERFACE_LANGUAGES
+      IMPORTED_LINK_INTERFACE_LIBRARIES
+      IMPORTED_LINK_INTERFACE_MULTIPLICITY
+      IMPORTED_LOCATION
+      IMPORTED_NO_SONAME
+      IMPORTED_OBJECTS
+      IMPORTED_SONAME)
   foreach(TARGET_NAME ${ARGN})
     if(TARGET ${TARGET_NAME})
       get_target_property(DO_NOT_OVERWRITE ${TARGET_NAME} IMPORTED_LOCATION)
       if(DO_NOT_OVERWRITE)
         continue()
       endif()
+
       # MSVC's STL and debug level must match the target, so we can only move out
       # IMPORTED_LOCATION_NOCONFIG
       if(MSVC)
-        get_target_property(PATCH_TARGET_LOCATION ${TARGET_NAME} IMPORTED_LOCATION_NOCONFIG)
-        set_target_properties(${TARGET_NAME} PROPERTIES IMPORTED_LOCATION
-                                                        "${PATCH_TARGET_LOCATION}")
+        set(PATCH_IMPORTED_CONFIGURATION "NOCONFIG")
       else()
-        project_build_tools_get_imported_location(PATCH_TARGET_LOCATION ${TARGET_NAME})
-        set_target_properties(${TARGET_NAME} PROPERTIES IMPORTED_LOCATION
-                                                        "${PATCH_TARGET_LOCATION}")
+        get_target_property(PATCH_IMPORTED_CONFIGURATION ${TARGET_NAME} IMPORTED_CONFIGURATIONS)
       endif()
+
+      get_target_property(PATCH_TARGET_LOCATION ${TARGET_NAME}
+                          "IMPORTED_LOCATION_${PATCH_IMPORTED_CONFIGURATION}")
+      if(NOT PATCH_TARGET_LOCATION)
+        continue()
+      endif()
+
+      foreach(PATCH_IMPORTED_KEY IN LISTS PATCH_VARS)
+        get_target_property(PATCH_IMPORTED_VALUE ${TARGET_NAME}
+                            "${PATCH_IMPORTED_KEY}_${PATCH_IMPORTED_CONFIGURATION}")
+        if(PATCH_IMPORTED_VALUE)
+          set_target_properties(${TARGET_NAME} PROPERTIES "${PATCH_IMPORTED_KEY}"
+                                                          "${PATCH_IMPORTED_VALUE}")
+        endif()
+      endforeach()
     endif()
   endforeach()
 endfunction()
