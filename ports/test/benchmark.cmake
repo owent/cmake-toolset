@@ -92,11 +92,6 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
            "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
 
-    if(ANDROID OR CMAKE_OSX_ARCHITECTURES)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
-           "-DCMAKE_DEBUG_POSTFIX=d")
-    endif()
-
     find_configure_package(
       PACKAGE
       benchmark

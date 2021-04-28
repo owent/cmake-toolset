@@ -174,6 +174,11 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
     list(APPEND ${OUTVAR} "-T" "${CMAKE_GENERATOR_TOOLSET}")
   endif()
 
+  # This toolset is not used to build app to RUN on GUI, so just set(CMAKE_MACOSX_BUNDLE OFF).
+  if(CMAKE_OSX_ARCHITECTURES AND CMAKE_CROSSCOMPILING)
+    list(APPEND ${OUTVAR} "-DCMAKE_MACOSX_BUNDLE=OFF")
+  endif()
+
   # Policy
   unset(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
   cmake_policy(GET CMP0091 project_build_tools_append_cmake_inherit_options_POLICY_VALUE)

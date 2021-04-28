@@ -114,7 +114,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
            "enable-ec_nistp_64_gcc_128")
     endif()
 
-    if(ANDROID OR CMAKE_OSX_ARCHITECTURES)
+    if(CMAKE_CROSSCOMPILING)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-comp" "no-hw"
            "no-engine")
     else()
