@@ -7,7 +7,7 @@ This is a cmake script set for atframework.It contains some utility functions an
 It's recommanded to use [vcpkg][1] if you just want a package manager on x86/x86_64 platform.
 But if you want a special version of some packages or just download packages from custom mirrors, you can use this toolset.
 
-> e.g.: If you want to use openssl 1.1.0k and use options ```no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers```
+> E.g.: If you want to use openssl 1.1.0k and use options ```no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers```
 > Just add these codes below:
 >
 > ```cmake
@@ -52,7 +52,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
 Name                    | Target System | Toolchain         | Note
 ------------------------|---------------|-------------------|--------------------------------
-Format                  | -             |                   | 
+Format                  | -             |                   |
 gcc.static.test         | Linux         | GCC               | Static linking
 gcc.shared.test         | Linux         | GCC               | Dynamic linking
 gcc.libressl.test       | Linux         | GCC               | Using libressl for SSL porting
@@ -67,8 +67,8 @@ msvc.shared.test        | Windows       | MSVC              | Dynamic linking
 msvc.vcpkg.test         | Windows       | MSVC With vcpkg   |
 msvc2017.test           | Windows       | MSVC              | Legacy
 macos.appleclang.test   | macOS         | Clang with libc++ |
-android.test            | Android       | Clang with libc++ |
-ios.test                | iOS           | Clang with libc++ |
+android.test            | Android       | Clang with libc++ | ```-DANDROID_ABI=arm64-v8a```
+ios.test                | iOS           | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=arm64```
 
 ## Utility Scripts
 
