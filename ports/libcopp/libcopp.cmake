@@ -51,7 +51,7 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
 
     find_configure_package(
       PACKAGE
-      Libcopp
+      libcopp
       FIND_PACKAGE_FLAGS
       CONFIG
       BUILD_WITH_CMAKE

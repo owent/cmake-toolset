@@ -3,8 +3,13 @@
 cmake_minimum_required(VERSION 3.0)
 project(lz4 C)
 
-option(LZ4_BUILD_CLI "Build lz4 program" ON)
-option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c progam with legacy argument support" ON)
+if(CMAKE_CROSSCOMPILING)
+  option(LZ4_BUILD_CLI "Build lz4 program" OFF)
+  option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c progam with legacy argument support" OFF)
+else()
+  option(LZ4_BUILD_CLI "Build lz4 program" ON)
+  option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c progam with legacy argument support" ON)
+endif()
 option(LZ4_POSITION_INDEPENDENT_LIB
        "Use position independent code for static library (if applicable)" ON)
 include(CMakeDependentOption)

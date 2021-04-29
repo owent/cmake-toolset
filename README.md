@@ -48,6 +48,28 @@ FetchContent_Populate(
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 ```
 
+## CI Job Matrix
+
+Name                    | Target System | Toolchain         | Note
+------------------------|---------------|-------------------|--------------------------------
+Format                  | -             |                   | 
+gcc.static.test         | Linux         | GCC               | Static linking
+gcc.shared.test         | Linux         | GCC               | Dynamic linking
+gcc.libressl.test       | Linux         | GCC               | Using libressl for SSL porting
+gcc.mbedtls.test        | Linux         | GCC               | Using mbedtls for SSL porting
+gcc.4.8.test            | Linux         | GCC 4.8           | Legacy
+clang.test              | Linux         | Clang with libc++ |
+gcc.vcpkg.test          | Linux         | GCC With vcpkg    |
+msys2.mingw.static.test | Windows       | GCC               | Static linking
+msys2.mingw.shared.test | Windows       | GCC               | Dynamic linking
+msvc.static.test        | Windows       | MSVC              | Static linking
+msvc.shared.test        | Windows       | MSVC              | Dynamic linking
+msvc.vcpkg.test         | Windows       | MSVC With vcpkg   |
+msvc2017.test           | Windows       | MSVC              | Legacy
+macos.appleclang.test   | macOS         | Clang with libc++ |
+android.test            | Android       | Clang with libc++ |
+ios.test                | iOS           | Clang with libc++ |
+
 ## Utility Scripts
 
 ### ```CompilerOption.cmake```
@@ -171,6 +193,28 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
 ```
 
+### Package - GTest
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION "release-1.10.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL "https://github.com/google/googletest.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBUILD_GMOCK=ON" "-DINSTALL_GTEST=ON")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/gtest.cmake")
+```
+
+### Package - benchmark
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_VERSION "v1.5.3")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_GIT_URL "https://github.com/google/benchmark.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBENCHMARK_ENABLE_TESTING=OFF"
+#   "-DBENCHMARK_ENABLE_LTO=OFF" "-DBENCHMARK_ENABLE_INSTALL=ON"
+#   "-DALLOW_DOWNLOADING_GOOGLETEST=ON" "-DBENCHMARK_ENABLE_GTEST_TESTS=OFF")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/benchmark.cmake")
+```
+
 ### Package - rapidjson
 
 ```cmake
@@ -179,14 +223,24 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_BUILD_OPTIONS
 #   "-DRAPIDJSON_BUILD_DOC=OFF" "-DRAPIDJSON_BUILD_EXAMPLES=OFF" "-DRAPIDJSON_BUILD_TESTS=OFF"
 #   "-DRAPIDJSON_BUILD_THIRDPARTY_GTEST=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/rapidjson/rapidjson.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/rapidjson.cmake")
+```
+
+### Package - nlohmann_json
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_VERSION "v3.9.1")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_GIT_URL "https://github.com/nlohmann/json.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS
+#   "-DJSON_Install=ON" "-DJSON_BuildTests=OFF")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/nlohmann_json.cmake")
 ```
 
 ### Package - flatbuffers
 
 ```cmake
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION "47b837e14ab5712fade68e0b00768ff95c120966")
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL "https://github.com/Tencent/rapidjson.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION "v1.12.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL "https://github.com/google/flatbuffers.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
 #   -DFLATBUFFERS_CODE_COVERAGE=OFF
 #   -DFLATBUFFERS_BUILD_TESTS=OFF

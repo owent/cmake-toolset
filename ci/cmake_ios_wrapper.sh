@@ -88,10 +88,21 @@ mkdir -p "$WORKING_DIR/lib";
 
 for ARCH in ${ARCHS}; do
     echo "================== Compling $ARCH ==================";
-    if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
-        PLATFORM="iPhoneSimulator"
+    EXT_OPTIONS="-DCMAKE_SYSTEM_NAME=iOS";
+
+    if [[ "${ARCH}" == "i386" ]]; then
+        PLATFORM="iPhoneSimulator";
+        EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_SYSTEM_PROCESSOR=i386";
+    elif [[ "${ARCH}" == "x86_64" ]]; then
+        PLATFORM="iPhoneSimulator";
+        EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_SYSTEM_PROCESSOR=x86_64";
     else
-        PLATFORM="iPhoneOS"
+        PLATFORM="iPhoneOS";
+        if [[ "${ARCH}" == "armv7" ]] || [[ "${ARCH}" == "armv7s" ]]; then
+            EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_SYSTEM_PROCESSOR=arm";
+        else
+            EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_SYSTEM_PROCESSOR=aarch64";
+        fi
     fi
 
     echo "Building for ${PLATFORM} ${SDKVERSION} ${ARCH}"
@@ -106,11 +117,9 @@ for ARCH in ${ARCHS}; do
     export CROSS_TOP="${DEVROOT}";
     export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk";
     
-    EXT_OPTIONS="";
     if [[ $(echo $DEPLOYMENT_TARGET | cut -d. -f 1) -lt 11 ]]; then 
         EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_CXX_STANDARD=14"; 
     fi
-
 
     # for CACHE_SRC in $(find "$SOURCE_DIR/protocol" -name "*.pb.h") ; do
     #     rm -f "$CACHE_SRC";

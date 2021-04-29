@@ -28,7 +28,7 @@ macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
     message(STATUS "hiredis support disabled")
   endif()
 
-  project_build_tools_move_imported_location_out_of_config(
+  project_build_tools_patch_default_imported_config(
     "hiredis::hiredis_ssl_static" "hiredis::hiredis_static" "hiredis::hiredis_ssl"
     "hiredis::hiredis")
 endmacro()
