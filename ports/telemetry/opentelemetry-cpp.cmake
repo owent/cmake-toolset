@@ -7,11 +7,9 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_OPENTELEMETRY_CPP_IMPORT)
   if(TARGET opentelemetry-cpp::api)
     message(STATUS "Dependency(${PROJECT_NAME}): Target opentelemetry-cpp::api found")
-    project_build_tools_patch_default_imported_config(opentelemetry-cpp::api)
   endif()
   if(TARGET opentelemetry-cpp::sdk)
     message(STATUS "Dependency(${PROJECT_NAME}): Target opentelemetry-cpp::sdk found")
-    project_build_tools_patch_default_imported_config(opentelemetry-cpp::sdk)
   endif()
 endmacro()
 
@@ -22,8 +20,12 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
   endif()
 
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION "v0.5.0")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE
+          "${CMAKE_CURRENT_LIST_DIR}/opentelemetry-cpp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION}.patch"
+      )
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_GIT_URL)
@@ -53,16 +55,18 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
              "-DWITH_OTLP=ON")
       endif()
 
-      if(TARGET CURL::libcurl)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
-             "-DWITH_ZIPKIN=ON")
-      endif()
-
       # TODO "-DWITH_PROMETHEUS=ON"
 
       if(TARGET CURL::libcurl AND TARGET nlohmann_json::nlohmann_json)
+        get_target_property(nlohmann_json_INC_DIR nlohmann_json::nlohmann_json
+                            INTERFACE_INCLUDE_DIRECTORIES)
+        if(nlohmann_json_INC_DIR)
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES
+               ${nlohmann_json_INC_DIR})
+        endif()
+        unset(nlohmann_json_INC_DIR)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
-             "-DWITH_ELASTICSEARCH=ON")
+             "-DWITH_ELASTICSEARCH=ON" "-DWITH_ZIPKIN=ON")
       endif()
     endif()
     if(MSVC)
@@ -73,6 +77,22 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS)
     project_third_party_append_build_shared_lib_var(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS BUILD_SHARED_LIBS)
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE
+       AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE}")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+           GIT_PATCH_FILES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE})
+    endif()
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
+      list(REMOVE_DUPLICATES
+           ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
+      list(
+        APPEND
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+        "-DCMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES}"
+      )
+    endif()
 
     find_configure_package(
       PACKAGE
@@ -98,7 +118,8 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_GIT_URL}"
       GIT_ENABLE_SUBMODULE
       GIT_SUBMODULE_PATHS
-      "open-telemetry/opentelemetry-proto")
+      "third_party/opentelemetry-proto"
+      "third_party/ms-gsl")
 
     if(TARGET opentelemetry-cpp::api OR TARGET opentelemetry-cpp::sdk)
       project_third_party_opentelemetry_cpp_import()
