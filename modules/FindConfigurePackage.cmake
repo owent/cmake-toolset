@@ -182,7 +182,8 @@ macro(FindConfigurePackage)
       GIT_BRANCH
       GIT_COMMIT
       GIT_FETCH_DEPTH
-      GIT_ENABLE_SUBMODULE)
+      GIT_ENABLE_SUBMODULE
+      GIT_SUBMODULE_RECURSIVE)
   set(multiValueArgs
       AUTOGEN_CONFIGURE
       CONFIGURE_CMD
@@ -196,7 +197,8 @@ macro(FindConfigurePackage)
       PREBUILD_COMMAND
       AFTERBUILD_COMMAND
       INSTALL_TARGET
-      GIT_PATCH_FILES)
+      GIT_PATCH_FILES
+      GIT_SUBMODULE_PATHS)
   foreach(RESTORE_VAR IN LISTS optionArgs oneValueArgs multiValueArgs)
     unset(FindConfigurePackage_${RESTORE_VAR})
   endforeach()
@@ -317,6 +319,16 @@ macro(FindConfigurePackage)
         elseif(FindConfigurePackage_GIT_COMMIT)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS COMMIT
                "${FindConfigurePackage_GIT_FETCH_DEPTH}")
+        endif()
+        if(FindConfigurePackage_GIT_ENABLE_SUBMODULE)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS ENABLE_SUBMODULE)
+        endif()
+        if(FindConfigurePackage_GIT_SUBMODULE_RECURSIVE)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS SUBMODULE_RECURSIVE)
+        endif()
+        if(FindConfigurePackage_GIT_SUBMODULE_PATHS)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS SUBMODULE_PATH
+               "${FindConfigurePackage_GIT_SUBMODULE_PATHS}")
         endif()
         if(FindConfigurePackage_GIT_PATCH_FILES)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS PATCH_FILES

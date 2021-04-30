@@ -95,7 +95,10 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       GIT_BRANCH
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION}"
       GIT_URL
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_GIT_URL}")
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_GIT_URL}"
+      GIT_ENABLE_SUBMODULE
+      GIT_SUBMODULE_PATHS
+      "open-telemetry/opentelemetry-proto")
 
     if(TARGET opentelemetry-cpp::api OR TARGET opentelemetry-cpp::sdk)
       project_third_party_opentelemetry_cpp_import()
