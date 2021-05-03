@@ -70,9 +70,11 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
              "-DWITH_ABSEIL=ON")
       endif()
 
-      if(TARGET gRPC::grpc++_alts
-         OR TARGET gRPC::grpc++
-         OR TARGET gRPC::grpc)
+      # TODO OTLP exporter depend host built protoc and gRPC
+      if(NOT CMAKE_CROSSCOMPILING
+         AND (TARGET gRPC::grpc++_alts
+              OR TARGET gRPC::grpc++
+              OR TARGET gRPC::grpc))
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
              "-DWITH_OTLP=ON")
       endif()

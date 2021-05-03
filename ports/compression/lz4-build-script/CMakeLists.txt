@@ -2,7 +2,9 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-set(LZ4_TOP_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+if(NOT LZ4_TOP_SOURCE_DIR)
+  set(LZ4_TOP_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+endif()
 if(CMAKE_CROSSCOMPILING)
   option(LZ4_BUILD_CLI "Build lz4 program" OFF)
   option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c progam with legacy argument support" OFF)
