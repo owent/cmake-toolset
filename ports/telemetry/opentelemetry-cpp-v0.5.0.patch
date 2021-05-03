@@ -1,3 +1,20 @@
+diff --git a/exporters/otlp/CMakeLists.txt b/exporters/otlp/CMakeLists.txt
+index 0529436..a043d87 100644
+--- a/exporters/otlp/CMakeLists.txt
++++ b/exporters/otlp/CMakeLists.txt
+@@ -4,8 +4,10 @@ add_library(opentelemetry_exporter_otprotocol src/recordable.cc
+ set_target_properties(opentelemetry_exporter_otprotocol
+                       PROPERTIES EXPORT_NAME otlp_exporter)
+ 
+-target_link_libraries(opentelemetry_exporter_otprotocol
+-                      PUBLIC opentelemetry_trace opentelemetry_proto)
++target_link_libraries(
++  opentelemetry_exporter_otprotocol
++  PUBLIC opentelemetry_trace opentelemetry_proto protobuf::libprotobuf
++         gRPC::grpc++)
+ 
+ install(
+   TARGETS opentelemetry_exporter_otprotocol
 diff --git a/sdk/src/common/core.cc b/sdk/src/common/core.cc
 index a8db9a0..262dd51 100644
 --- a/sdk/src/common/core.cc

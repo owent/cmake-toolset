@@ -96,8 +96,8 @@ ios.test                | iOS           | Clang with libc++ | ```-DCMAKE_OSX_ARC
 
 ### ```TargetOption.cmake```
 
-1. Variable ```PROJECT_PREBUILT_PLATFORM_NAME``` to flags of all extra warnings.
-2. Variable ```PROJECT_PREBUILT_HOST_PLATFORM_NAME``` to flags of all extra warnings.
+1. Variable ```PROJECT_PREBUILT_PLATFORM_NAME``` : Target platform name.
+2. Variable ```PROJECT_PREBUILT_HOST_PLATFORM_NAME``` : Host platform name.
 3. Set the default value of ```CMAKE_ARCHIVE_OUTPUT_DIRECTORY``` to ```${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}``` .
 4. Set the default value of ```CMAKE_LIBRARY_OUTPUT_DIRECTORY``` to ```${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}``` .
 5. Set the default value of ```CMAKE_RUNTIME_OUTPUT_DIRECTORY``` to ```${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}``` .
@@ -108,6 +108,7 @@ ios.test                | iOS           | Clang with libc++ | ```-DCMAKE_OSX_ARC
 
 + Option(Optional): ```PROJECT_THIRD_PARTY_PACKAGE_DIR``` : Where to place package sources.
 + Option(Optional): ```PROJECT_THIRD_PARTY_INSTALL_DIR``` : Where to place installed packages.
++ Option(Optional): ```PROJECT_THIRD_PARTY_HOST_INSTALL_DIR``` : Where to place installed packages of host system.
 + Option(Optional): ```FindConfigurePackageGitFetchDepth``` : Fetch depth og git repository.
 
 ```cmake
