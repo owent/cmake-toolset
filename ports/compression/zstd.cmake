@@ -163,3 +163,10 @@ if(NOT TARGET zstd::libzstd_shared
 else()
   project_third_party_zstd_import()
 endif()
+
+if(NOT TARGET zstd::libzstd_shared
+   AND NOT TARGET zstd::libzstd_static
+   AND NOT TARGET zstd::libzstd
+   AND NOT TARGET zstd::zstd)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build zstd.")
+endif()

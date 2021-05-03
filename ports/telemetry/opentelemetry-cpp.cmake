@@ -41,8 +41,30 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
-          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DBUILD_TESTING=OFF" "-DWITH_EXAMPLES=OFF"
-          "-DWITH_STL=ON")
+          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DBUILD_TESTING=OFF" "-DWITH_EXAMPLES=OFF")
+
+      # Require at least C++17. C++20 is needed to avoid gsl::span
+      if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "7.0.0")
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+               "-DWITH_STL=ON")
+        endif()
+      elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0.0")
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+               "-DWITH_STL=ON")
+        endif()
+      elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "8.0.0")
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+               "-DWITH_STL=ON")
+        endif()
+      elseif(MSVC)
+        if(MSVC_VERSION GREATER_EQUAL 1914)
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+               "-DWITH_STL=ON")
+        endif()
+      endif()
       if(absl_FOUND)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
              "-DWITH_ABSEIL=ON")
@@ -94,6 +116,13 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
            GIT_PATCH_FILES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE})
     endif()
 
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES
+        "third_party/opentelemetry-proto" "third_party/ms-gsl")
+
+    if(MINGW)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES "tools/vcpkg")
+    endif()
+
     find_configure_package(
       PACKAGE
       opentelemetry-cpp
@@ -118,8 +147,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_GIT_URL}"
       GIT_ENABLE_SUBMODULE
       GIT_SUBMODULE_PATHS
-      "third_party/opentelemetry-proto"
-      "third_party/ms-gsl")
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES})
 
     if(TARGET opentelemetry-cpp::api OR TARGET opentelemetry-cpp::sdk)
       project_third_party_opentelemetry_cpp_import()

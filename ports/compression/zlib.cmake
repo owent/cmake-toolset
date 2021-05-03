@@ -69,3 +69,7 @@ if(NOT TARGET ZLIB::ZLIB)
 else()
   project_third_party_zlib_import()
 endif()
+
+if(NOT TARGET ZLIB::ZLIB)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build zlib.")
+endif()

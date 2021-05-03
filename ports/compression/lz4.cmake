@@ -117,3 +117,7 @@ if(NOT TARGET lz4::lz4_static
 else()
   project_third_party_lz4_import()
 endif()
+
+if(NOT TARGET lz4::lz4_static AND NOT TARGET lz4::lz4_shared)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build lz4.")
+endif()
