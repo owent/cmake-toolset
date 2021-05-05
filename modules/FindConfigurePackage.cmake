@@ -477,7 +477,7 @@ macro(FindConfigurePackage)
         endif()
 
         set(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
-            "-DCMAKE_INSTALL_PREFIX=${FindConfigurePackage_PREFIX_DIRECTORY}")
+            -Wno-dev "-DCMAKE_INSTALL_PREFIX=${FindConfigurePackage_PREFIX_DIRECTORY}")
 
         if(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV)
           set(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV OFF)

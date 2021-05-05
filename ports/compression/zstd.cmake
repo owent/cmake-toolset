@@ -107,6 +107,9 @@ if(NOT TARGET zstd::libzstd_shared
     elseif(TARGET lz4::lz4_shared)
       get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_INCLUDE_DIR
                           lz4::lz4_shared INTERFACE_INCLUDE_DIRECTORIES)
+    elseif(TARGET lz4::lz4)
+      get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_INCLUDE_DIR
+                          lz4::lz4 INTERFACE_INCLUDE_DIRECTORIES)
     endif()
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_INCLUDE_DIR)
       get_filename_component(
