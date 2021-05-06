@@ -73,6 +73,7 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
     CMAKE_FIND_ROOT_PATH_MODE_INCLUDE
     CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
     CMAKE_FIND_ROOT_PATH
+    CMAKE_FIND_PACKAGE_PREFER_CONFIG
     # For OSX
     CMAKE_OSX_SYSROOT
     CMAKE_OSX_ARCHITECTURES
@@ -157,10 +158,10 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
 
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
     if(DEFINED ${VAR_NAME})
-      set(VAR_VALUE "${${VAR_NAME}}")
-      if(VAR_VALUE MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES")
+      if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES")
         list(REMOVE_DUPLICATES ${VAR_NAME})
       endif()
+      set(VAR_VALUE "${${VAR_NAME}}")
       if(VAR_VALUE)
         list_append_unescape(${OUTVAR} "-D${VAR_NAME}=${VAR_VALUE}")
       endif()

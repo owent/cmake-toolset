@@ -154,9 +154,6 @@ if(NOT FindConfigurePackageGitFetchDepth)
 endif()
 
 macro(FindConfigurePackage)
-  if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
-    include(CMakeParseArguments)
-  endif()
   set(optionArgs
       BUILD_WITH_CONFIGURE
       BUILD_WITH_CMAKE
@@ -214,6 +211,13 @@ macro(FindConfigurePackage)
 
   unset(FindConfigurePackage_BACKUP_CMAKE_FIND_ROOT_PATH)
   unset(FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH)
+  if(CMAKE_EXECUTE_PROCESS_COMMAND_ECHO)
+    set(FindConfigurePackage_BACKUP_CMAKE_EXECUTE_PROCESS_COMMAND_ECHO
+        ${CMAKE_EXECUTE_PROCESS_COMMAND_ECHO})
+  else()
+    unset(FindConfigurePackage_BACKUP_CMAKE_EXECUTE_PROCESS_COMMAND_ECHO)
+  endif()
+  set(CMAKE_EXECUTE_PROCESS_COMMAND_ECHO STDOUT)
 
   # step 1. find using standard method
   find_package(${FindConfigurePackage_PACKAGE} QUIET ${FindConfigurePackage_FIND_PACKAGE_FLAGS})
@@ -385,8 +389,6 @@ macro(FindConfigurePackage)
 
       # prebuild commands
       foreach(cmd ${FindConfigurePackage_PREBUILD_COMMAND})
-        message(
-          STATUS "FindConfigurePackage - Run: ${cmd} @ ${FindConfigurePackage_BUILD_DIRECTORY}")
         execute_process(COMMAND ${cmd} WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
       endforeach()
 
@@ -401,10 +403,6 @@ macro(FindConfigurePackage)
             "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
-            message(
-              STATUS
-                "@${FindConfigurePackage_PROJECT_DIRECTORY} Run: ${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN} ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
-            )
             execute_process(
               COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
                       ${FindConfigurePackage_AUTOGEN_CONFIGURE}
@@ -424,10 +422,6 @@ macro(FindConfigurePackage)
             "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
-            message(
-              STATUS
-                "@${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME} Run: ${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN} ${FindConfigurePackage_AUTOGEN_CONFIGURE}"
-            )
             execute_process(
               COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
                       ${FindConfigurePackage_AUTOGEN_CONFIGURE}
@@ -439,10 +433,6 @@ macro(FindConfigurePackage)
         if(${CONFIGURE_EXEC_FILE} STREQUAL "configure")
           set(CONFIGURE_EXEC_FILE "./configure")
         endif()
-        message(
-          STATUS
-            "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN} ${CONFIGURE_EXEC_FILE} --prefix=${FindConfigurePackage_PREFIX_DIRECTORY} ${FindConfigurePackage_CONFIGURE_FLAGS}"
-        )
         execute_process(
           COMMAND
             "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" ${CONFIGURE_EXEC_FILE}
@@ -507,11 +497,6 @@ macro(FindConfigurePackage)
                                "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
         endif()
 
-        message(
-          STATUS
-            "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CMAKE_COMMAND} ${BUILD_WITH_CMAKE_PROJECT_DIR} ${FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR} ${FindConfigurePackage_CMAKE_FLAGS}"
-        )
-
         execute_process(
           COMMAND
             ${CMAKE_COMMAND} ${BUILD_WITH_CMAKE_PROJECT_DIR}
@@ -526,10 +511,6 @@ macro(FindConfigurePackage)
         endif()
         if(MSVC)
           if(FindConfigurePackage_MSVC_CONFIGURE)
-            message(
-              STATUS
-                "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET} --config ${FindConfigurePackage_MSVC_CONFIGURE} ${FindConfigurePackageCMakeBuildParallelFlags}"
-            )
             execute_process(
               COMMAND
                 ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET} --config
@@ -537,27 +518,15 @@ macro(FindConfigurePackage)
                 ${FindConfigurePackageCMakeBuildParallelFlags}
               WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
           else()
-            message(
-              STATUS
-                "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET} --config Debug ${FindConfigurePackageCMakeBuildParallelFlags}"
-            )
             execute_process(
               COMMAND ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET}
                       --config Debug ${FindConfigurePackageCMakeBuildParallelFlags}
               WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
-            message(
-              STATUS
-                "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET} --config Release ${FindConfigurePackageCMakeBuildParallelFlags}"
-            )
             execute_process(
               COMMAND ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET}
                       --config Release ${FindConfigurePackageCMakeBuildParallelFlags}
               WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
             if(CMAKE_BUILD_TYPE)
-              message(
-                STATUS
-                  "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET} --config ${CMAKE_BUILD_TYPE} ${FindConfigurePackageCMakeBuildParallelFlags}"
-              )
               execute_process(
                 COMMAND ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET}
                         --config ${CMAKE_BUILD_TYPE} ${FindConfigurePackageCMakeBuildParallelFlags}
@@ -566,10 +535,6 @@ macro(FindConfigurePackage)
           endif()
 
         else()
-          message(
-            STATUS
-              "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET} ${FindConfigurePackageCMakeBuildParallelFlags}"
-          )
           execute_process(
             COMMAND ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET}
                     ${FindConfigurePackageCMakeBuildParallelFlags}
@@ -595,10 +560,6 @@ macro(FindConfigurePackage)
 
         set(OLD_ENV_PREFIX $ENV{prefix})
         set(ENV{prefix} ${FindConfigurePackage_PREFIX_DIRECTORY})
-        message(
-          STATUS
-            "@${FindConfigurePackage_BUILD_DIRECTORY} Run: scons ${FindConfigurePackage_SCONS_FLAGS} ${BUILD_WITH_SCONS_PROJECT_DIR}"
-        )
         execute_process(
           COMMAND "scons" ${FindConfigurePackage_SCONS_FLAGS} ${BUILD_WITH_SCONS_PROJECT_DIR}
           WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
@@ -607,7 +568,6 @@ macro(FindConfigurePackage)
         # build using custom commands(such as gyp)
       elseif(FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND)
         foreach(cmd ${FindConfigurePackage_CUSTOM_BUILD_COMMAND})
-          message(STATUS "@${FindConfigurePackage_BUILD_DIRECTORY} Run: ${cmd}")
           execute_process(COMMAND ${cmd} WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
         endforeach()
 
@@ -617,8 +577,6 @@ macro(FindConfigurePackage)
 
       # afterbuild commands
       foreach(cmd ${FindConfigurePackage_AFTERBUILD_COMMAND})
-        message(
-          STATUS "FindConfigurePackage - Run: ${cmd} @ ${FindConfigurePackage_BUILD_DIRECTORY}")
         execute_process(COMMAND ${cmd} WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY})
       endforeach()
 
@@ -642,6 +600,14 @@ macro(FindConfigurePackage)
   if(DEFINED FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH)
     set(CMAKE_PREFIX_PATH ${FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH})
     unset(FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH)
+  endif()
+
+  if(FindConfigurePackage_BACKUP_CMAKE_EXECUTE_PROCESS_COMMAND_ECHO)
+    set(CMAKE_EXECUTE_PROCESS_COMMAND_ECHO
+        ${FindConfigurePackage_BACKUP_CMAKE_EXECUTE_PROCESS_COMMAND_ECHO})
+    unset(FindConfigurePackage_BACKUP_CMAKE_EXECUTE_PROCESS_COMMAND_ECHO)
+  else()
+    unset(CMAKE_EXECUTE_PROCESS_COMMAND_ECHO)
   endif()
 endmacro(FindConfigurePackage)
 
