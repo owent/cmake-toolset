@@ -504,7 +504,7 @@ macro(FindConfigurePackage)
           list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
                                "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
           list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
-                               "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
+                               "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
         endif()
 
         message(

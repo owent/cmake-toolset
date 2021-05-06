@@ -43,6 +43,28 @@ index 5d4fe8d..eefcf2c 100644
  install(
    TARGETS opentelemetry_exporter_zipkin_trace
    EXPORT "${PROJECT_NAME}-target"
+diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
+index 0b85847..b2265e5 100644
+--- a/ext/src/http/client/curl/CMakeLists.txt
++++ b/ext/src/http/client/curl/CMakeLists.txt
+@@ -1,5 +1,16 @@
+ find_package(CURL)
+ if(CURL_FOUND)
+   add_library(http_client_curl http_client_factory_curl http_client_curl)
+-  target_link_libraries(http_client_curl CURL::libcurl)
++
++  set_target_properties(http_client_curl PROPERTIES EXPORT_NAME
++                                                    http_client_curl)
++
++  target_link_libraries(http_client_curl PUBLIC CURL::libcurl)
++
++  install(
++    TARGETS http_client_curl
++    EXPORT "${PROJECT_NAME}-target"
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif()
 diff --git a/sdk/src/common/core.cc b/sdk/src/common/core.cc
 index a8db9a0..280ef70 100644
 --- a/sdk/src/common/core.cc
