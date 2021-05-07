@@ -40,8 +40,8 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
 
-# We do not support these libraries for ios and android now
-if(NOT ANDROID AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+# We do not support these libraries for ios,android and mingw now
+if(NOT MINGW)
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libwebsockets/libwebsockets.cmake")
 endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
