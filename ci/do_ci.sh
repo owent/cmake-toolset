@@ -62,7 +62,7 @@ elif [[ "$1" == "gcc.vcpkg.test" ]]; then
 elif [[ "$1" == "msys2.mingw.static.test" ]]; then
   echo "$1";
   echo "PATH=$PATH";
-  pacman -S --needed --noconfirm cmake git mingw-w64-x86_64-git-lfs m4 curl wget tar autoconf automake mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool python || true;
+  pacman -S --needed --noconfirm mingw-w64-x86_64-cmake git mingw-w64-x86_64-git-lfs m4 curl wget tar autoconf automake mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool python || true;
   # Build protobuf may cause OOM on github hosted runner.
   export ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL=1
   pacman -S --needed --noconfirm mingw-w64-x86_64-protobuf ;
@@ -76,7 +76,7 @@ elif [[ "$1" == "msys2.mingw.static.test" ]]; then
 elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
   echo "$1";
   echo "PATH=$PATH";
-  pacman -S --needed --noconfirm cmake git mingw-w64-x86_64-git-lfs m4 curl wget tar autoconf automake mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool python || true;
+  pacman -S --needed --noconfirm mingw-w64-x86_64-cmake git mingw-w64-x86_64-git-lfs m4 curl wget tar autoconf automake mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool python || true;
   # Build protobuf may cause OOM on github hosted runner.
   export ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL=1
   pacman -S --needed --noconfirm mingw-w64-x86_64-protobuf ;
