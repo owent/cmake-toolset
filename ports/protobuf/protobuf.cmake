@@ -109,7 +109,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR ${PROTOBUF_HOST_ROOT})
     else()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR
-          "${PROJECT_THIRD_PARTY_INSTALL_DIR}/../${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
+          "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
     endif()
 
     project_build_tools_append_cmake_options_for_lib(
@@ -131,12 +131,14 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         execute_process(
           COMMAND mklink /D "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib"
                   "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
-          WORKING_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
+          WORKING_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR}
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
         execute_process(
           COMMAND ln -s "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
                   "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib"
-          WORKING_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
+          WORKING_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR}
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
     endif()
 
@@ -197,10 +199,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       endforeach()
 
       if(CMAKE_HOST_UNIX OR MSYS)
-        message(
-          STATUS
-            "@${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR} Run: run-build-release.sh"
-        )
         configure_file(
           "${CMAKE_CURRENT_LIST_DIR}/run-build-release.sh.in"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.sh"
@@ -209,9 +207,10 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         # build
         execute_process(
           COMMAND
-            bash
+            "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.sh"
-          WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR})
+          WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
         configure_file(
           "${CMAKE_CURRENT_LIST_DIR}/run-build-release.ps1.in"
@@ -222,13 +221,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.bat"
           @ONLY NEWLINE_STYLE CRLF)
 
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_POWERSHELL_BIN NAMES pwsh
-                                                                                         pwsh.exe)
-        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_POWERSHELL_BIN)
-          find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_POWERSHELL_BIN
-                       NAMES powershell powershell.exe)
-        endif()
-        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_POWERSHELL_BIN)
+        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
           echowithcolor(
             COLOR
             RED
@@ -237,16 +230,13 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
           message(FATAL_ERROR "powershell-core or powershell is required")
         endif()
         # build
-        message(
-          STATUS
-            "@${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR} Run: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_POWERSHELL_BIN} -NoProfile -InputFormat None -ExecutionPolicy Bypass -NonInteractive -NoLogo -File run-build-release.ps1"
-        )
         execute_process(
           COMMAND
-            ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_POWERSHELL_BIN} -NoProfile -InputFormat
-            None -ExecutionPolicy Bypass -NonInteractive -NoLogo -File
+            "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" -NoProfile -InputFormat None -ExecutionPolicy Bypass
+            -NonInteractive -NoLogo -File
             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.ps1"
-          WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR})
+          WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     endif()

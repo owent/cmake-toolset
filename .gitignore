@@ -1,3 +1,7 @@
+.vscode
+.clion
+.vs
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles

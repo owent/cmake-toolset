@@ -59,7 +59,6 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
     CMAKE_STATIC_LINKER_FLAGS
     CMAKE_LINK_DIRECTORIES_BEFORE
     CMAKE_INSTALL_RPATH_USE_LINK_PATH
-    CMAKE_TOOLCHAIN_FILE
     CMAKE_SYSROOT
     CMAKE_SYSROOT_COMPILE
     CMAKE_SYSROOT_LINK
@@ -73,6 +72,7 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
     CMAKE_FIND_ROOT_PATH_MODE_INCLUDE
     CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
     CMAKE_FIND_ROOT_PATH
+    CMAKE_FIND_PACKAGE_PREFER_CONFIG
     # For OSX
     CMAKE_OSX_SYSROOT
     CMAKE_OSX_ARCHITECTURES
@@ -122,25 +122,23 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS
     ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C}
     ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM})
 
+unset(PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
+  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS COMMAND_ECHO STDOUT)
+endif()
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
+  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS ECHO_OUTPUT_VARIABLE
+       ECHO_ERROR_VARIABLE)
+endif()
+
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
+  cmake_parse_arguments(
+    project_build_tools_append_cmake_inherit_options
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE" "" "" ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
 
-  set(project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS FALSE)
-  set(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS FALSE)
-  set(project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS FALSE)
   set(project_build_tools_append_cmake_inherit_options_VARS
       PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
-  foreach(ARG ${ARGN})
-    if("${ARG}" STREQUAL "DISABLE_C_FLAGS")
-      set(project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS TRUE)
-    endif()
-    if("${ARG}" STREQUAL "DISABLE_CXX_FLAGS")
-      set(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS TRUE)
-    endif()
-    if("${ARG}" STREQUAL "DISABLE_ASM_FLAGS")
-      set(project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS TRUE)
-    endif()
-  endforeach()
 
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
     list(APPEND project_build_tools_append_cmake_inherit_options_VARS
@@ -155,10 +153,17 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
          PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM)
   endif()
 
+  if(CMAKE_TOOLCHAIN_FILE
+     AND NOT project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
+    list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+  endif()
+
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
     if(DEFINED ${VAR_NAME})
+      if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES")
+        list(REMOVE_DUPLICATES ${VAR_NAME})
+      endif()
       set(VAR_VALUE "${${VAR_NAME}}")
-      # message("DEBUG============ ${VAR_NAME}=${VAR_VALUE}")
       if(VAR_VALUE)
         list_append_unescape(${OUTVAR} "-D${VAR_NAME}=${VAR_VALUE}")
       endif()
@@ -194,6 +199,7 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS)
+  unset(project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
   unset(project_build_tools_append_cmake_inherit_options_VARS)
 endmacro()
 
@@ -409,22 +415,14 @@ function(project_git_clone_repository)
     message(FATAL_ERROR "git not found")
   endif()
 
-  unset(project_git_clone_repository_EXECUTE_PROCESS_FLAGS)
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
-    list(APPEND project_git_clone_repository_EXECUTE_PROCESS_FLAGS COMMAND_ECHO STDOUT)
-  endif()
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
-    list(APPEND project_git_clone_repository_EXECUTE_PROCESS_FLAGS ECHO_OUTPUT_VARIABLE
-         ECHO_ERROR_VARIABLE)
-  endif()
-
   if(project_git_clone_repository_FORCE_RESET AND EXISTS
                                                   ${project_git_clone_repository_REPO_DIRECTORY})
     execute_process(
       COMMAND ${GIT_EXECUTABLE} clean -dfx
       COMMAND ${GIT_EXECUTABLE} reset --hard
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-      RESULT_VARIABLE LAST_GIT_RESET_RESULT ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+      RESULT_VARIABLE LAST_GIT_RESET_RESULT
+                      ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
     if(LAST_GIT_RESET_RESULT AND NOT LAST_GIT_RESET_RESULT EQUAL 0)
       file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
@@ -445,7 +443,7 @@ function(project_git_clone_repository)
           COMMAND ${GIT_EXECUTABLE} config "core.autocrlf" "true"
           COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                            ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
     endif()
   endif()
@@ -484,17 +482,17 @@ function(project_git_clone_repository)
       execute_process(
         COMMAND ${GIT_EXECUTABLE} init -b main
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     else()
       execute_process(
         COMMAND ${GIT_EXECUTABLE} init
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
     execute_process(
       COMMAND ${GIT_EXECUTABLE} remote add origin "${project_git_clone_repository_URL}"
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                        ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
     if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
       unset(project_git_clone_repository_GIT_CHECK_REPO)
@@ -503,7 +501,7 @@ function(project_git_clone_repository)
         RESULT_VARIABLE project_git_clone_repository_GIT_LS_REMOTE_RESULT
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
         OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
-                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                        ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       if(project_git_clone_repository_GIT_CHECK_REPO
          AND project_git_clone_repository_GIT_CHECK_REPO MATCHES
              "ref.*refs/heads/([^ \t]*)[ \t]*HEAD.*")
@@ -514,7 +512,7 @@ function(project_git_clone_repository)
           RESULT_VARIABLE project_git_clone_repository_GIT_LS_REMOTE_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
           OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
-                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
         if(project_git_clone_repository_GIT_CHECK_REPO MATCHES "^([a-zA-Z0-9]*)[ \t]*HEAD.*")
           set(project_git_clone_repository_COMMIT "${CMAKE_MATCH_1}")
         endif()
@@ -539,7 +537,7 @@ function(project_git_clone_repository)
                 ${project_git_clone_repository_GIT_BRANCH}
         RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0
          AND project_git_clone_repository_REQUIRED)
         message(
@@ -554,7 +552,7 @@ function(project_git_clone_repository)
                   origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                            ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
         message(
           WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
@@ -562,7 +560,7 @@ function(project_git_clone_repository)
           COMMAND ${GIT_EXECUTABLE} fetch "-n" origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                            ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                            ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0
          AND project_git_clone_repository_REQUIRED)
@@ -576,9 +574,9 @@ function(project_git_clone_repository)
     execute_process(
       COMMAND ${GIT_EXECUTABLE} reset --hard FETCH_HEAD
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                        ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                        ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     if(project_git_clone_repository_ENABLE_SUBMODULE)
-      set(project_git_clone_repository_submodule_args update --init -f)
+      set(project_git_clone_repository_submodule_args submodule update --init -f)
       if(project_git_clone_repository_SUBMODULE_RECURSIVE)
         list(APPEND project_git_clone_repository_submodule_args "--recursive")
       endif()
@@ -590,7 +588,7 @@ function(project_git_clone_repository)
       execute_process(
         COMMAND ${GIT_EXECUTABLE} ${project_git_clone_repository_submodule_args}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
 
     if(project_git_clone_repository_PATCH_FILES)
@@ -598,7 +596,7 @@ function(project_git_clone_repository)
         COMMAND ${GIT_EXECUTABLE} config "core.autocrlf" "true"
         COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${project_git_clone_repository_EXECUTE_PROCESS_FLAGS})
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
   endif()
 endfunction()
@@ -783,6 +781,10 @@ function(project_build_tools_patch_default_imported_config)
         set(PATCH_IMPORTED_CONFIGURATION "NOCONFIG")
       else()
         get_target_property(PATCH_IMPORTED_CONFIGURATION ${TARGET_NAME} IMPORTED_CONFIGURATIONS)
+      endif()
+
+      if(NOT PATCH_IMPORTED_CONFIGURATION)
+        continue()
       endif()
 
       get_target_property(PATCH_TARGET_LOCATION ${TARGET_NAME}

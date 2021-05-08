@@ -8,7 +8,6 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_NLOHMANN_JSON_IMPORT)
   if(TARGET nlohmann_json::nlohmann_json)
     message(STATUS "Dependency(${PROJECT_NAME}): Target nlohmann_json::nlohmann_json found")
-    project_build_tools_patch_default_imported_config(nlohmann_json::nlohmann_json)
   endif()
 endmacro()
 

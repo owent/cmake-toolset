@@ -9,6 +9,9 @@ macro(PROJECT_THIRD_PARTY_LZ4_IMPORT)
   elseif(TARGET lz4::lz4_shared)
     echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4_shared")
     # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES lz4::lz4_shared)
+  elseif(TARGET lz4::lz4)
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4")
+    # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES lz4::lz4)
   endif()
 
   if(TARGET lz4::lz4cli)
@@ -38,6 +41,7 @@ endmacro()
 
 if(NOT TARGET lz4::lz4_static
    AND NOT TARGET lz4::lz4_shared
+   AND NOT TARGET lz4::lz4
    AND NOT TARGET lz4::lz4cli
    AND NOT TARGET lz4::lz4c)
   if(VCPKG_TOOLCHAIN)
@@ -47,6 +51,7 @@ if(NOT TARGET lz4::lz4_static
 
   if(NOT TARGET lz4::lz4_static
      AND NOT TARGET lz4::lz4_shared
+     AND NOT TARGET lz4::lz4
      AND NOT TARGET lz4::lz4cli
      AND NOT TARGET lz4::lz4c)
 
@@ -59,7 +64,7 @@ if(NOT TARGET lz4::lz4_static
     endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
-          "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DLZ4_POSITION_INDEPENDENT_LIB=ON"
+          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DLZ4_POSITION_INDEPENDENT_LIB=ON"
           "-DCMAKE_DEBUG_POSTFIX=d")
 
       if(CMAKE_CROSSCOMPILING)
@@ -108,6 +113,7 @@ if(NOT TARGET lz4::lz4_static
 
     if(NOT TARGET lz4::lz4_static
        AND NOT TARGET lz4::lz4_shared
+       AND NOT TARGET lz4::lz4
        AND NOT TARGET lz4::lz4cli
        AND NOT TARGET lz4::lz4c)
       echowithcolor(COLOR YELLOW "-- Dependency(${PROJECT_NAME}): lz4 not found")
@@ -116,4 +122,10 @@ if(NOT TARGET lz4::lz4_static
   endif()
 else()
   project_third_party_lz4_import()
+endif()
+
+if(NOT TARGET lz4::lz4_static
+   AND NOT TARGET lz4::lz4_shared
+   AND NOT TARGET lz4::lz4)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build lz4.")
 endif()
