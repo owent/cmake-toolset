@@ -69,6 +69,16 @@ fi
 
 if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
+    "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+
+    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+
+    if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
+
+        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+
+    fi
+
 else
 
     "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
