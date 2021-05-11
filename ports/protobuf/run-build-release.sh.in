@@ -51,15 +51,7 @@ cd "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ;
 
 if [[ "@CMAKE_SYSTEM@" != "@CMAKE_HOST_SYSTEM@" ]]; then
 
-    "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-
-    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
-
-    if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
-
-        "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
-
-    fi
+    @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_INSTALL_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" -Dprotobuf_BUILD_LIBPROTOC=ON -Dprotobuf_BUILD_CONFORMANCE=OFF -Dprotobuf_BUILD_PROTOC_BINARIES=OFF ;
 
 else
 
