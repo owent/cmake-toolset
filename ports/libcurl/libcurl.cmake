@@ -132,18 +132,13 @@ if(NOT CURL_EXECUTABLE)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DENABLE_ARES=ON")
     endif()
 
-    if(MINGW)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
       set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
       set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
-                                       "-luserenv" "-lws2_32" "-lgcc")
-      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-liphlpapi" "-lpsapi"
-                                       "-luserenv" "-lws2_32" "-lgcc")
-    elseif(APPLE)
-      set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
-      set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES "-lresolv")
-      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES "-lresolv")
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES
+                                       ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES
+                                       ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
     endif()
 
     find_configure_package(

@@ -78,10 +78,8 @@ if(NOT TARGET LibreSSL::Crypto)
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION})
   endif()
 
-  if(VCPKG_TOOLCHAIN)
-    find_package(LibreSSL QUIET)
-    project_third_party_libressl_import()
-  endif()
+  find_package(LibreSSL QUIET)
+  project_third_party_libressl_import()
 
   if(NOT TARGET LibreSSL::Crypto)
     echowithcolor(COLOR GREEN "-- Try to configure and use libressl")

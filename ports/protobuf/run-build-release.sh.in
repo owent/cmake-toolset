@@ -17,7 +17,23 @@ if [[ "@CMAKE_SYSTEM@" != "@CMAKE_HOST_SYSTEM@" ]]; then
 
         env CC= CXX= SDKROOT= @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
 
-        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
+
+            "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+
+            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+
+            if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
+
+                "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
+
+            fi
+
+        else
+
+            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+
+        fi
 
     fi
 
@@ -35,7 +51,15 @@ cd "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ;
 
 if [[ "@CMAKE_SYSTEM@" != "@CMAKE_HOST_SYSTEM@" ]]; then
 
-    @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_INSTALL_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" -Dprotobuf_BUILD_LIBPROTOC=ON -Dprotobuf_BUILD_CONFORMANCE=OFF -Dprotobuf_BUILD_PROTOC_BINARIES=OFF ;
+    "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+
+    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+
+    if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
+
+        "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
+
+    fi
 
 else
 
@@ -43,7 +67,13 @@ else
 
 fi
 
-"@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
+
+else
+
+    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+
+fi
 
 if [[ $? -eq 0 ]] && [[ -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR@/python/setup.py" ]]; then
     export PATH="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:$PATH" ;

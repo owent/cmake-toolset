@@ -12,6 +12,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
          "Add /Zc:__cplusplus for MSVC (let __cplusplus be equal to _MSVC_LANG) when it support."
          ON)
   option(COMPILER_OPTION_CLANG_ENABLE_LIBCXX "Try to use libc++ when using clang." ON)
+
+  # See Windows.h for more details
+  option(COMPILER_OPTION_WINDOWS_ENABLE_NOMINMAX "Add #define NOMINMAX." ON)
+  option(COMPILER_OPTION_WINDOWS_ENABLE_WIN32_LEAN_AND_MEAN "Add #define WIN32_LEAN_AND_MEAN." OFF)
+
   set(CMAKE_POSITION_INDEPENDENT_CODE
       ON
       CACHE BOOL "Enable IndependentCode")
@@ -68,13 +73,31 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
   macro(add_compiler_define)
     foreach(def ${ARGN})
-      if(NOT MSVC)
-        add_compile_options(-D${def})
-      else()
+      if(MSVC)
         add_compile_options("/D ${def}")
+      else()
+        add_compile_options("-D${def}")
       endif()
     endforeach()
-  endmacro(add_compiler_define)
+  endmacro()
+
+  macro(add_compiler_define_to_var VARNAME)
+    foreach(def ${ARGN})
+      if(MSVC)
+        if(${VARNAME})
+          set(${VARNAME} "${${VARNAME}} /D${def}")
+        else()
+          set(${VARNAME} "/D${def}")
+        endif()
+      else()
+        if(${VARNAME})
+          set(${VARNAME} "${${VARNAME}} -D${def}")
+        else()
+          set(${VARNAME} "-D${def}")
+        endif()
+      endif()
+    endforeach()
+  endmacro()
 
   macro(add_linker_flags_for_runtime)
     foreach(def ${ARGN})
@@ -178,7 +201,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # ================== compiler flags ==================
   # Auto compiler options, support gcc,MSVC,Clang,AppleClang
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    # add_compile_options(-Wall -Werror)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
 
@@ -230,7 +252,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
 
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    # add_compile_options(-Wall -Werror)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.4")
@@ -290,7 +311,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS FALSE)
     endif()
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-    # add_compile_options(-Wall -Werror)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wno-implicit-fallthrough)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0")
@@ -509,6 +529,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     #include <cstdio>
     int main () { puts(typeid(int).name()); return 0; }" COMPILER_OPTIONS_TEST_RTTI)
 
+  # For Windows.h
+  if(WIN32 OR MINGW)
+    if(COMPILER_OPTION_WINDOWS_ENABLE_NOMINMAX)
+      add_compiler_define("NOMINMAX")
+    endif()
+    if(COMPILER_OPTION_WINDOWS_ENABLE_WIN32_LEAN_AND_MEAN)
+      add_compiler_define("WIN32_LEAN_AND_MEAN")
+    endif()
+  endif()
   # Features test finished
   cmake_policy(POP)
 endif()
