@@ -34,6 +34,12 @@ if ( "@CMAKE_SYSTEM@" -ne "@CMAKE_HOST_SYSTEM@" ) {
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
         }
+        if (("@CMAKE_BUILD_TYPE@" -ne "") -and ("@CMAKE_BUILD_TYPE@" -ne "Release")) {
+            & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+        }
+        if ( $LastExitCode -ne 0 ) {
+            exit $LastExitCode
+        }
         $ENV:CC = $ENV:BACKUP_CC
         $ENV:CXX = $ENV:BACKUP_CXX
         $ENV:SDKROOT = $ENV:BACKUP_SDKROOT
@@ -64,13 +70,21 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
     if ( $LastExitCode -ne 0 ) {
         exit $LastExitCode
     }
+
+    & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+
+    if ( $LastExitCode -ne 0 ) {
+        exit $LastExitCode
+    }
+
+    if (("@CMAKE_BUILD_TYPE@" -ne "") -and ("@CMAKE_BUILD_TYPE@" -ne "Release")) {
+        & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+    }
+}
+else {
+    & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
 }
 
-& "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
-
-if ( $LastExitCode -ne 0 ) {
-    exit $LastExitCode
-}
 
 if (( $LastExitCode -eq 0 ) -and (Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR@/python/setup.py" )) {
     if ($IsWindows) {

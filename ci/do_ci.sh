@@ -90,13 +90,13 @@ elif [[ "$1" == "msvc.static.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF ;
+  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release ;
   cmake --build . -j || cmake --build . ;
 elif [[ "$1" == "msvc.shared.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON ;
+  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release ;
   cmake --build . -j || cmake --build . ;
 elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   echo "$1";
@@ -104,13 +104,13 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark ;
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows;
+  cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release ;
   cmake --build . -j || cmake --build . ;
 elif [[ "$1" == "msvc2017.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -G "Visual Studio 15 2017" -A x64 ;
+  cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "android.test" ]]; then
   echo "$1";

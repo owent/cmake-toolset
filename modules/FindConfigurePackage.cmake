@@ -538,7 +538,7 @@ macro(FindConfigurePackage)
                       --config Release ${FindConfigurePackageCMakeBuildParallelFlags}
               WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                 ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-            if(CMAKE_BUILD_TYPE)
+            if(CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
               execute_process(
                 COMMAND ${CMAKE_COMMAND} --build . --target ${FindConfigurePackage_INSTALL_TARGET}
                         --config ${CMAKE_BUILD_TYPE} ${FindConfigurePackageCMakeBuildParallelFlags}
