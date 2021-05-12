@@ -358,7 +358,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
 #   "-DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON"
 #   "-DLWS_WITH_PLUGINS=ON"
 #   "-DLWS_WITHOUT_EXTENSIONS=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libwebsockets/libwebsockets.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/libwebsockets.cmake")
 ```
 
 ### Package - lua
