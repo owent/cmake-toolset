@@ -12,11 +12,6 @@ else()
   option(LZ4_BUILD_CLI "Build lz4 program" ON)
   option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c progam with legacy argument support" ON)
 endif()
-option(LZ4_POSITION_INDEPENDENT_LIB
-       "Use position independent code for static library (if applicable)" ON)
-include(CMakeDependentOption)
-cmake_dependent_option(BUILD_SHARED_LIBS "Build shared libraries" ON "NOT LZ4_BUNDLED_MODE" OFF)
-cmake_dependent_option(BUILD_STATIC_LIBS "Build static libraries" OFF "BUILD_SHARED_LIBS" ON)
 
 # Parse version information
 file(STRINGS "${LZ4_TOP_SOURCE_DIR}/lib/lz4.h" LZ4_VERSION_MAJOR
