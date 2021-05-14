@@ -18,10 +18,13 @@ macro(PROJECT_THIRD_PARTY_PROMETHEUS_CPP_IMPORT)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME
            prometheus-cpp::push)
     endif()
+
+    project_build_tools_patch_default_imported_config(prometheus-cpp::core prometheus-cpp::pull
+                                                      prometheus-cpp::push)
   endif()
 endmacro()
 
-if(TARGET prometheus-cpp::core)
+if(NOT TARGET prometheus-cpp::core)
   find_package(prometheus-cpp QUIET CONFIG)
   project_third_party_prometheus_cpp_import()
   if(NOT TARGET prometheus-cpp::core)
@@ -52,7 +55,7 @@ if(TARGET prometheus-cpp::core)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS
              "-DENABLE_COMPRESSION=ON")
       endif()
-      if(TARGET civetweb::civetweb-cpp OR TARGET civetweb::civetweb-c-library)
+      if(TARGET civetweb::civetweb-cpp OR TARGET civetweb::civetweb)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS
              "-DENABLE_PULL=ON")
       endif()
@@ -61,57 +64,57 @@ if(TARGET prometheus-cpp::core)
              "-DENABLE_PUSH=ON")
       endif()
     endif()
-  endif()
-  project_third_party_append_build_shared_lib_var(
-    ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
-  include(AtframeworkToolsetCommonDefinitions)
-  if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
-    set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
-    set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-    add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES
-                                     ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
-    add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES
-                                     ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
-  endif()
+    project_third_party_append_build_shared_lib_var(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
-  find_configure_package(
-    PACKAGE
-    prometheus-cpp
-    FIND_PACKAGE_FLAGS
-    CONFIG
-    BUILD_WITH_CMAKE
-    CMAKE_INHIRT_BUILD_ENV
-    CMAKE_INHIRT_FIND_ROOT_PATH
-    CMAKE_FLAGS
-    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS}
-    WORKING_DIRECTORY
-    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
-    BUILD_DIRECTORY
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR}"
-    PREFIX_DIRECTORY
-    "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
-    SRC_DIRECTORY_NAME
-    "prometheus-cpp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION}"
-    GIT_BRANCH
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION}"
-    GIT_URL
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_GIT_URL}")
-  if(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES)
-    set(CMAKE_C_STANDARD_LIBRARIES ${PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES})
-    unset(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES)
-  endif()
-  if(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES)
-    set(CMAKE_CXX_STANDARD_LIBRARIES ${PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES})
-    unset(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES)
-  endif()
+    include(AtframeworkToolsetCommonDefinitions)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
+      set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
+      set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES
+                                       ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES
+                                       ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+    endif()
 
+    find_configure_package(
+      PACKAGE
+      prometheus-cpp
+      FIND_PACKAGE_FLAGS
+      CONFIG
+      BUILD_WITH_CMAKE
+      CMAKE_INHIRT_BUILD_ENV
+      CMAKE_INHIRT_FIND_ROOT_PATH
+      CMAKE_FLAGS
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS}
+      WORKING_DIRECTORY
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
+      BUILD_DIRECTORY
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR}"
+      PREFIX_DIRECTORY
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+      SRC_DIRECTORY_NAME
+      "prometheus-cpp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION}"
+      GIT_BRANCH
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION}"
+      GIT_URL
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_GIT_URL}")
+    if(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES)
+      set(CMAKE_C_STANDARD_LIBRARIES ${PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES})
+      unset(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES)
+    endif()
+    if(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES)
+      set(CMAKE_CXX_STANDARD_LIBRARIES ${PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES})
+      unset(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES)
+    endif()
+
+    project_third_party_prometheus_cpp_import()
+  endif()
+else()
   project_third_party_prometheus_cpp_import()
 endif()
-else()
-project_third_party_prometheus_cpp_import()
-endif()
 
-if(TARGET prometheus-cpp::core)
+if(NOT TARGET prometheus-cpp::core)
   message(FATAL_ERROR "-- Dependency(${PROJECT_NAME}): prometheus-cpp not found")
 endif()
