@@ -2,8 +2,7 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_LIBCOPP_IMPORT)
   if(TARGET libcopp::cotask)
-    echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): libcopp using target: libcopp::cotask")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): libcopp using target: libcopp::cotask")
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES libcopp::cotask)
   elseif(TARGET cotask)
     echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): libcopp using target: cotask")
@@ -24,30 +23,26 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL
-          "https://github.com/owt5008137/libcopp.git")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owt5008137/libcopp.git")
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS
-          "-DPROJECT_ENABLE_UNITTEST=OFF" "-DPROJECT_ENABLE_SAMPLE=OFF"
-          "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+          "-DPROJECT_ENABLE_UNITTEST=OFF" "-DPROJECT_ENABLE_SAMPLE=OFF" "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR)
-      project_third_party_get_build_dir(
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR "libcopp"
-        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION})
+      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR "libcopp"
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION})
     endif()
     if(NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR}")
       file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_DIR}")
     endif()
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_REPOSITORY_DIR
-        "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}"
-    )
-    project_third_party_append_build_shared_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS LIBCOPP_USE_DYNAMIC_LIBRARY)
+        "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libcopp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION}")
+    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS
+                                                    LIBCOPP_USE_DYNAMIC_LIBRARY)
 
     find_configure_package(
       PACKAGE

@@ -2,14 +2,11 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_LIBUNWIND_IMPORT)
   if(TARGET Libunwind::libunwind)
-    message(
-      STATUS "Dependency(${PROJECT_NAME}): libunwind found and using target: Libunwind::libunwind")
+    message(STATUS "Dependency(${PROJECT_NAME}): libunwind found and using target: Libunwind::libunwind")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_LINK_NAME Libunwind::libunwind)
   elseif(Libunwind_FOUND)
     message(
-      STATUS
-        "Dependency(${PROJECT_NAME}): libunwind found and using ${Libunwind_INCLUDE_DIRS}:${Libunwind_LIBRARIES}"
-    )
+      STATUS "Dependency(${PROJECT_NAME}): libunwind found and using ${Libunwind_INCLUDE_DIRS}:${Libunwind_LIBRARIES}")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_INC_DIR ${Libunwind_INCLUDE_DIRS})
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_LINK_NAME ${Libunwind_LIBRARIES})
   else()
@@ -24,8 +21,7 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION "v1.5")
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL
-        "https://github.com/libunwind/libunwind.git")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL "https://github.com/libunwind/libunwind.git")
   endif()
 
   find_package(Libunwind QUIET)
@@ -69,8 +65,7 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL}")
 
   if(NOT Libunwind_FOUND)
-    echowithcolor(COLOR YELLOW
-                  "-- Dependency(${PROJECT_NAME}): Libunwind not found and skip import it.")
+    echowithcolor(COLOR YELLOW "-- Dependency(${PROJECT_NAME}): Libunwind not found and skip import it.")
   else()
     project_third_party_libunwind_import()
   endif()

@@ -25,8 +25,7 @@
 # =============================================================================
 # Copyright 2021 atframework.
 #
-# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
-# for details.
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE for details.
 
 unset(_LIBEVENT_SEARCH_ROOT_INC)
 unset(_LIBEVENT_SEARCH_ROOT_LIB)
@@ -50,8 +49,7 @@ find_library(Libevent_LIBRARIES NAMES ${Libevent_NAMES} ${_LIBEVENT_SEARCH_ROOT_
 
 mark_as_advanced(Libevent_INCLUDE_DIRS Libevent_LIBRARIES)
 
-# handle the QUIETLY and REQUIRED arguments and set LIBEVENT_FOUND to TRUE if all listed variables
-# are TRUE
+# handle the QUIETLY and REQUIRED arguments and set LIBEVENT_FOUND to TRUE if all listed variables are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Libevent

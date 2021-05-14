@@ -45,8 +45,7 @@ find_path(Rapidjson_INCLUDE_DIRS NAMES rapidjson/document.h ${_RAPIDJSON_SEARCH_
 
 mark_as_advanced(Rapidjson_INCLUDE_DIRS)
 
-# handle the QUIETLY and REQUIRED arguments and set RAPIDJSON_FOUND to TRUE if all listed variables
-# are TRUE
+# handle the QUIETLY and REQUIRED arguments and set RAPIDJSON_FOUND to TRUE if all listed variables are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Rapidjson

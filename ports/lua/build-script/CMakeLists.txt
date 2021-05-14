@@ -72,8 +72,8 @@ endif()
 include(CheckCXXSourceCompiles)
 include(CheckCXXCompilerFlag)
 include(CMakePackageConfigHelpers)
-# Allow to add flags from outside, don't unset it unset(PROJECT_LUA_LIB_DEPEND_LIBS)
-# unset(PROJECT_LUA_LIB_DEPEND_DEFS) unset(PROJECT_LUA_LIB_DEPEND_FLAGS)
+# Allow to add flags from outside, don't unset it unset(PROJECT_LUA_LIB_DEPEND_LIBS) unset(PROJECT_LUA_LIB_DEPEND_DEFS)
+# unset(PROJECT_LUA_LIB_DEPEND_FLAGS)
 if(BUILD_SHARED_LIBS
    AND NOT WIN32
    AND NOT MINGW)
@@ -183,9 +183,8 @@ if(NOT MSVC)
 endif()
 
 if(BUILD_STATIC_LIBS)
-  target_include_directories(
-    "${PROJECT_NAME}_STATIC" PUBLIC "$<BUILD_INTERFACE:${LUA_TOP_SOURCE_DIR}>"
-                                    "$<INSTALL_INTERFACE:include>")
+  target_include_directories("${PROJECT_NAME}_STATIC" PUBLIC "$<BUILD_INTERFACE:${LUA_TOP_SOURCE_DIR}>"
+                                                             "$<INSTALL_INTERFACE:include>")
 
   target_compile_options("${PROJECT_NAME}_STATIC" PRIVATE ${PROJECT_LUA_LIB_DEPEND_FLAGS})
 
@@ -193,19 +192,16 @@ if(BUILD_STATIC_LIBS)
 
   set_target_properties(
     "${PROJECT_NAME}_STATIC"
-    PROPERTIES
-      EXPORT_NAME "lib${PROJECT_NAME}-static"
-      OUTPUT_NAME "${PROJECT_NAME}"
-      VERSION
-      "${PROJECT_LUA_VERSION_MAJOR}.${PROJECT_LUA_VERSION_MINOR}.${PROJECT_LUA_VERSION_RELEASE}"
-      POSITION_INDEPENDENT_CODE TRUE
-      PUBLIC_HEADER ${PROJECT_LUA_PUBLIC_HEADERS})
+    PROPERTIES EXPORT_NAME "lib${PROJECT_NAME}-static"
+               OUTPUT_NAME "${PROJECT_NAME}"
+               VERSION "${PROJECT_LUA_VERSION_MAJOR}.${PROJECT_LUA_VERSION_MINOR}.${PROJECT_LUA_VERSION_RELEASE}"
+               POSITION_INDEPENDENT_CODE TRUE
+               PUBLIC_HEADER ${PROJECT_LUA_PUBLIC_HEADERS})
 endif()
 
 if(BUILD_SHARED_LIBS)
-  target_include_directories(
-    "${PROJECT_NAME}_DYNAMIC" PUBLIC "$<BUILD_INTERFACE:${LUA_TOP_SOURCE_DIR}>"
-                                     "$<INSTALL_INTERFACE:include>")
+  target_include_directories("${PROJECT_NAME}_DYNAMIC" PUBLIC "$<BUILD_INTERFACE:${LUA_TOP_SOURCE_DIR}>"
+                                                              "$<INSTALL_INTERFACE:include>")
 
   target_compile_options("${PROJECT_NAME}_DYNAMIC" PRIVATE ${PROJECT_LUA_LIB_DEPEND_FLAGS})
 
@@ -213,24 +209,21 @@ if(BUILD_SHARED_LIBS)
 
   if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_compile_definitions("${PROJECT_NAME}_DYNAMIC" PUBLIC LUA_BUILD_AS_DLL=1)
-    set_target_properties("${PROJECT_NAME}_DYNAMIC" PROPERTIES C_VISIBILITY_PRESET "hidden"
-                                                               CXX_VISIBILITY_PRESET "hidden")
+    set_target_properties("${PROJECT_NAME}_DYNAMIC" PROPERTIES C_VISIBILITY_PRESET "hidden" CXX_VISIBILITY_PRESET
+                                                                                            "hidden")
   else()
-    set_target_properties("${PROJECT_NAME}_DYNAMIC" PROPERTIES C_VISIBILITY_PRESET "default"
-                                                               CXX_VISIBILITY_PRESET "default")
+    set_target_properties("${PROJECT_NAME}_DYNAMIC" PROPERTIES C_VISIBILITY_PRESET "default" CXX_VISIBILITY_PRESET
+                                                                                             "default")
   endif()
 
   set_target_properties(
     "${PROJECT_NAME}_DYNAMIC"
-    PROPERTIES
-      OUTPUT_NAME "${PROJECT_NAME}"
-      EXPORT_NAME "lib${PROJECT_NAME}-dynamic"
-      VERSION
-      "${PROJECT_LUA_VERSION_MAJOR}.${PROJECT_LUA_VERSION_MINOR}.${PROJECT_LUA_VERSION_RELEASE}"
-      SOVERSION
-      "${PROJECT_LUA_VERSION_MAJOR}.${PROJECT_LUA_VERSION_MINOR}.${PROJECT_LUA_VERSION_RELEASE}"
-      POSITION_INDEPENDENT_CODE TRUE
-      PUBLIC_HEADER ${PROJECT_LUA_PUBLIC_HEADERS})
+    PROPERTIES OUTPUT_NAME "${PROJECT_NAME}"
+               EXPORT_NAME "lib${PROJECT_NAME}-dynamic"
+               VERSION "${PROJECT_LUA_VERSION_MAJOR}.${PROJECT_LUA_VERSION_MINOR}.${PROJECT_LUA_VERSION_RELEASE}"
+               SOVERSION "${PROJECT_LUA_VERSION_MAJOR}.${PROJECT_LUA_VERSION_MINOR}.${PROJECT_LUA_VERSION_RELEASE}"
+               POSITION_INDEPENDENT_CODE TRUE
+               PUBLIC_HEADER ${PROJECT_LUA_PUBLIC_HEADERS})
 endif()
 
 if(PROJECT_LUA_LIB_DEPEND_DEFS)
@@ -245,8 +238,7 @@ endif()
 
 if(PROJECT_LUA_LIB_DEPEND_LIBS)
   if(BUILD_STATIC_LIBS)
-    set_target_properties("${PROJECT_NAME}_STATIC" PROPERTIES INTERFACE_LINK_LIBRARIES
-                                                              "${PROJECT_LUA_LIB_DEPEND_LIBS}")
+    set_target_properties("${PROJECT_NAME}_STATIC" PROPERTIES INTERFACE_LINK_LIBRARIES "${PROJECT_LUA_LIB_DEPEND_LIBS}")
   endif()
   if(BUILD_SHARED_LIBS)
     target_link_libraries("${PROJECT_NAME}_DYNAMIC" PUBLIC "${PROJECT_LUA_LIB_DEPEND_LIBS}")
@@ -259,8 +251,7 @@ if(BUILD_SHARED_LIBS AND PROJECT_LUA_TEST_RDYNAMIC)
   else()
     set(PROJECT_LUA_LINK_FLAGS_VAR_NAME "LINK_FLAGS")
   endif()
-  get_target_property(PROJECT_LUA_LINK_FLAGS_OF_DYNAMIC "${PROJECT_NAME}_DYNAMIC"
-                      ${PROJECT_LUA_LINK_FLAGS_VAR_NAME})
+  get_target_property(PROJECT_LUA_LINK_FLAGS_OF_DYNAMIC "${PROJECT_NAME}_DYNAMIC" ${PROJECT_LUA_LINK_FLAGS_VAR_NAME})
   if(PROJECT_LUA_LINK_FLAGS_OF_DYNAMIC)
     list(APPEND "-rdynamic" PROJECT_LUA_LINK_FLAGS_OF_DYNAMIC)
   else()
@@ -330,8 +321,7 @@ install(
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/lua")
 
 configure_package_config_file(
-  "${CMAKE_CURRENT_LIST_DIR}/lua-config.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+  "${CMAKE_CURRENT_LIST_DIR}/lua-config.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
   INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/lua"
   # PATH_VARS PROJECT_NAME
   NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)

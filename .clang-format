@@ -1,7 +1,7 @@
 ---
 Language: Cpp
 BasedOnStyle: Google
-ColumnLimit: 100
+ColumnLimit: 120
 DerivePointerAlignment: true
 PointerAlignment: Left
 
@@ -21,6 +21,6 @@ IndentPPDirectives: AfterHash
 ---
 Language: Proto
 BasedOnStyle: Google
-ColumnLimit: 100
+ColumnLimit: 120
 ---
 

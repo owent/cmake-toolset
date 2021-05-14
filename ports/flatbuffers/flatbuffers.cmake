@@ -4,21 +4,18 @@ include_guard(GLOBAL)
 # =========== third party flatbuffer ==================
 macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
   if(TARGET flatbuffers::flatbuffers)
-    get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR
-                        flatbuffers::flatbuffers INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR flatbuffers::flatbuffers
+                        INTERFACE_INCLUDE_DIRECTORIES)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})
 
     echowithcolor(
-      COLOR
-      GREEN
-      "-- Dependency(${PROJECT_NAME}): Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})"
-    )
+      COLOR GREEN
+      "-- Dependency(${PROJECT_NAME}): Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})")
   endif()
 
   if(TARGET flatbuffers::flatc AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
-    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME
-                                              flatbuffers::flatc)
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME flatbuffers::flatc)
   endif()
 endmacro()
 
@@ -33,13 +30,11 @@ if(NOT TARGET flatbuffers::flatbuffers)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION "v1.12.0")
     endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL
-          "https://github.com/google/flatbuffers.git")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL "https://github.com/google/flatbuffers.git")
     endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_DIR)
-      project_third_party_get_build_dir(
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_DIR "flatbuffers"
-        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION})
+      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_DIR "flatbuffers"
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION})
     endif()
 
     if(NOT Flatbuffers_ROOT)
@@ -49,14 +44,13 @@ if(NOT TARGET flatbuffers::flatbuffers)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
           -DFLATBUFFERS_CODE_COVERAGE=OFF -DFLATBUFFERS_BUILD_TESTS=OFF -DFLATBUFFERS_INSTALL=ON
-          -DFLATBUFFERS_BUILD_FLATLIB=ON -DFLATBUFFERS_BUILD_GRPCTEST=OFF
-          -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
+          -DFLATBUFFERS_BUILD_FLATLIB=ON -DFLATBUFFERS_BUILD_GRPCTEST=OFF -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
       if(CMAKE_CROSSCOMPILING)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
-             "-DFLATBUFFERS_BUILD_FLATC=OFF" "-DFLATBUFFERS_BUILD_FLATHASH=OFF")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS "-DFLATBUFFERS_BUILD_FLATC=OFF"
+             "-DFLATBUFFERS_BUILD_FLATHASH=OFF")
       else()
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS
-             "-DFLATBUFFERS_BUILD_FLATC=ON" "-DFLATBUFFERS_BUILD_FLATHASH=ON")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_BUILD_OPTIONS "-DFLATBUFFERS_BUILD_FLATC=ON"
+             "-DFLATBUFFERS_BUILD_FLATHASH=ON")
       endif()
     endif()
     find_configure_package(
@@ -82,8 +76,7 @@ if(NOT TARGET flatbuffers::flatbuffers)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_GIT_URL}")
 
     if(NOT TARGET flatbuffers::flatbuffers)
-      echowithcolor(COLOR RED
-                    "-- Dependency(${PROJECT_NAME}): Flatbuffer is required but not found")
+      echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): Flatbuffer is required but not found")
       message(FATAL_ERROR "Flatbuffer not found")
     endif()
     project_third_party_flatbuffers_import()

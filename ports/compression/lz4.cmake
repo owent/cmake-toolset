@@ -15,22 +15,14 @@ macro(PROJECT_THIRD_PARTY_LZ4_IMPORT)
   endif()
 
   if(TARGET lz4::lz4cli)
-    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN
-                                              lz4::lz4cli)
-    echowithcolor(
-      COLOR
-      GREEN
-      "-- Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN}"
-    )
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN lz4::lz4cli)
+    echowithcolor(COLOR GREEN
+                  "-- Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN}")
   endif()
   if(TARGET lz4::lz4c)
-    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN
-                                              lz4::lz4c)
-    echowithcolor(
-      COLOR
-      GREEN
-      "-- Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN}"
-    )
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN lz4::lz4c)
+    echowithcolor(COLOR GREEN
+                  "-- Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN}")
   endif()
 
   if(TARGET lz4::lz4cli OR TARGET lz4::lz4c)
@@ -59,32 +51,29 @@ if(NOT TARGET lz4::lz4_static
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_VERSION "v1.9.3")
     endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_GIT_URL
-          "https://github.com/lz4/lz4.git")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_GIT_URL "https://github.com/lz4/lz4.git")
     endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
-          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DLZ4_POSITION_INDEPENDENT_LIB=ON"
-          "-DCMAKE_DEBUG_POSTFIX=d")
+          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DLZ4_POSITION_INDEPENDENT_LIB=ON" "-DCMAKE_DEBUG_POSTFIX=d")
 
       if(CMAKE_CROSSCOMPILING)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
-             "-DLZ4_BUILD_CLI=OFF" "-DLZ4_BUILD_LEGACY_LZ4C=OFF")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS "-DLZ4_BUILD_CLI=OFF"
+             "-DLZ4_BUILD_LEGACY_LZ4C=OFF")
       else()
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
-             "-DLZ4_BUILD_CLI=ON" "-DLZ4_BUILD_LEGACY_LZ4C=ON")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS "-DLZ4_BUILD_CLI=ON"
+             "-DLZ4_BUILD_LEGACY_LZ4C=ON")
       endif()
     endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_DIR)
-      project_third_party_get_build_dir(
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_DIR "lz4"
-        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_VERSION})
+      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_DIR "lz4"
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_VERSION})
     endif()
 
-    project_third_party_append_build_shared_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS BUILD_SHARED_LIBS)
-    project_third_party_append_build_static_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS BUILD_STATIC_LIBS)
+    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
+                                                    BUILD_SHARED_LIBS)
+    project_third_party_append_build_static_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
+                                                    BUILD_STATIC_LIBS)
 
     find_configure_package(
       PACKAGE

@@ -64,8 +64,7 @@ if(NOT Libunwind_FOUND)
   endif()
 
   find_library(Libunwind_LIBRARY NAMES unwind ${_LIBUNWIND_SEARCH_LIB})
-  find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-${CMAKE_SYSTEM_PROCESSOR}
-                                             ${_LIBUNWIND_SEARCH_LIB})
+  find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-${CMAKE_SYSTEM_PROCESSOR} ${_LIBUNWIND_SEARCH_LIB})
   if(NOT Libunwind_LIBRARY_EXTRA AND ${CMAKE_SYSTEM_PROCESSOR} EQUAL ${CMAKE_HOST_SYSTEM_PROCESSOR})
     find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-generic ${_LIBUNWIND_SEARCH_LIB})
   endif()
@@ -74,8 +73,7 @@ if(NOT Libunwind_FOUND)
       CACHE FILEPATH "Path of libunwind libraries." FORCE)
   get_filename_component(Libunwind_LIBRARY_DIRS ${Libunwind_LIBRARY} DIRECTORY CACHE)
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Libunwind REQUIRED_VARS Libunwind_INCLUDE_DIRS
-                                                            Libunwind_LIBRARIES)
+  find_package_handle_standard_args(Libunwind REQUIRED_VARS Libunwind_INCLUDE_DIRS Libunwind_LIBRARIES)
 endif()
 
 if(Libunwind_INCLUDE_DIRS AND EXISTS "${Libunwind_INCLUDE_DIRS}/libunwind-common.h")
@@ -154,26 +152,21 @@ if(Libunwind_FOUND)
 
   if(NOT TARGET Libunwind::libunwind)
     add_library(Libunwind::libunwind UNKNOWN IMPORTED)
-    set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
-                                                          ${Libunwind_INCLUDE_DIRS})
+    set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Libunwind_INCLUDE_DIRS})
     if(Libunwind_LIBRARIES)
       list(GET Libunwind_LIBRARIES 0 Libunwind_LIBRARIES_LOCATION)
-      set_target_properties(
-        Libunwind::libunwind PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
-                                        IMPORTED_LOCATION ${Libunwind_LIBRARIES_LOCATION})
+      set_target_properties(Libunwind::libunwind PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
+                                                            IMPORTED_LOCATION ${Libunwind_LIBRARIES_LOCATION})
       set(Libunwind_LIBRARIES_LOCATION ${Libunwind_LIBRARIES})
       list(REMOVE_AT Libunwind_LIBRARIES_LOCATION 0)
-      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_LIBRARIES
-                                                            ${Libunwind_LIBRARIES_LOCATION})
+      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_LIBRARIES ${Libunwind_LIBRARIES_LOCATION})
       unset(Libunwind_LIBRARIES_LOCATION)
     endif()
     if(Libunwind_LDFLAGS)
-      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_OPTIONS
-                                                            ${Libunwind_LDFLAGS})
+      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_OPTIONS ${Libunwind_LDFLAGS})
     endif()
     if(Libunwind_CFLAGS)
-      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_COMPILE_OPTIONS
-                                                            ${Libunwind_CFLAGS})
+      set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_COMPILE_OPTIONS ${Libunwind_CFLAGS})
     endif()
   endif()
 

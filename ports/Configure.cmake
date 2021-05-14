@@ -13,8 +13,7 @@ endif()
 if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR AND PROJECT_3RD_PARTY_INSTALL_DIR)
   set(PROJECT_THIRD_PARTY_INSTALL_DIR "${PROJECT_3RD_PARTY_INSTALL_DIR}")
 elseif(NOT PROJECT_THIRD_PARTY_INSTALL_DIR)
-  set(PROJECT_THIRD_PARTY_INSTALL_DIR
-      "${PROJECT_SOURCE_DIR}/third_party/install/${PROJECT_PREBUILT_PLATFORM_NAME}")
+  set(PROJECT_THIRD_PARTY_INSTALL_DIR "${PROJECT_SOURCE_DIR}/third_party/install/${PROJECT_PREBUILT_PLATFORM_NAME}")
 endif()
 if(NOT PROJECT_THIRD_PARTY_HOST_INSTALL_DIR)
   set(PROJECT_THIRD_PARTY_HOST_INSTALL_DIR
@@ -22,8 +21,7 @@ if(NOT PROJECT_THIRD_PARTY_HOST_INSTALL_DIR)
 endif()
 
 set(PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR
-    "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules"
-)
+    "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR)
   if(WIN32)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR "dbt")
@@ -127,8 +125,7 @@ macro(project_third_party_append_find_root_args VARNAME)
 endmacro()
 
 file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)
-string(SUBSTRING "${project_third_party_get_build_dir_HASH}" 0 8
-                 project_third_party_get_build_dir_HASH)
+string(SUBSTRING "${project_third_party_get_build_dir_HASH}" 0 8 project_third_party_get_build_dir_HASH)
 if(DEFINED ENV{HOME})
   set(project_third_party_get_build_dir_USER_BASE "$ENV{HOME}")
 elseif(DEFINED ENV{USERPROFILE})
@@ -136,12 +133,10 @@ elseif(DEFINED ENV{USERPROFILE})
 elseif(DEFINED ENV{TEMP})
   set(project_third_party_get_build_dir_USER_BASE "$ENV{TEMP}")
 endif()
-string(REPLACE "\\" "/" project_third_party_get_build_dir_USER_BASE
-               "${project_third_party_get_build_dir_USER_BASE}")
+string(REPLACE "\\" "/" project_third_party_get_build_dir_USER_BASE "${project_third_party_get_build_dir_USER_BASE}")
 macro(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
-  if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES
-                                                                       "[0-9A-Fa-f]+")
+  if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES "[0-9A-Fa-f]+")
     string(SUBSTRING "${PORT_VERSION}" 0 12 project_third_party_get_build_dir_PORT_VERSION)
   else()
     set(project_third_party_get_build_dir_PORT_VERSION "${PORT_VERSION}")
@@ -164,8 +159,7 @@ endmacro()
 
 macro(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
-  if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES
-                                                                       "[0-9A-Fa-f]+")
+  if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES "[0-9A-Fa-f]+")
     string(SUBSTRING "${PORT_VERSION}" 0 12 project_third_party_get_build_dir_PORT_VERSION)
   else()
     set(project_third_party_get_build_dir_PORT_VERSION "${PORT_VERSION}")

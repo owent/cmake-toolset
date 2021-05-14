@@ -36,28 +36,24 @@ if(NOT TARGET GTest::gtest AND NOT TARGET GTest::gtest_main)
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL
-          "https://github.com/google/googletest.git")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL "https://github.com/google/googletest.git")
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_DIR)
-      project_third_party_get_build_dir(
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_DIR "gtest"
-        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION})
+      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_DIR "gtest"
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION})
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
-          "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DBUILD_GMOCK=ON" "-DINSTALL_GTEST=ON")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+                                                                    "-DBUILD_GMOCK=ON" "-DINSTALL_GTEST=ON")
     endif()
     if(MSVC)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
-           "-DCMAKE_DEBUG_POSTFIX=d")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
-    project_third_party_append_find_root_args(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS)
-    project_third_party_append_build_shared_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS BUILD_SHARED_LIBS)
+    project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS)
+    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
+                                                    BUILD_SHARED_LIBS)
 
     find_configure_package(
       PACKAGE

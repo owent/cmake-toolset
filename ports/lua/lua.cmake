@@ -2,8 +2,7 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
   if(TARGET lua::liblua-dynamic)
-    echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): Lua found target lua::liblua-dynamic")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Lua found target lua::liblua-dynamic")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME lua::liblua-dynamic)
     if(NOT TARGET lua)
       add_library(lua INTERFACE IMPORTED)
@@ -21,8 +20,7 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
   endif()
-  project_build_tools_patch_default_imported_config(lua::liblua-dynamic lua::liblua-static lua::lua
-                                                    lua::luac)
+  project_build_tools_patch_default_imported_config(lua::liblua-dynamic lua::liblua-static lua::lua lua::luac)
 endmacro()
 
 if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
@@ -37,13 +35,13 @@ if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
                                       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION})
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS
-        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DCMAKE_DEBUG_POSTFIX=d")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+                                                                "-DCMAKE_DEBUG_POSTFIX=d")
 
-    project_third_party_append_build_shared_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS BUILD_SHARED_LIBS)
-    project_third_party_append_build_static_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS BUILD_STATIC_LIBS)
+    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS
+                                                    BUILD_SHARED_LIBS)
+    project_third_party_append_build_static_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS
+                                                    BUILD_STATIC_LIBS)
   endif()
 
   if(NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR}")
@@ -53,15 +51,9 @@ if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
       GIT_BRANCH "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}" GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL}")
   if(CMAKE_CROSSCOMPILING)
-    if(EXISTS
-       "${CMAKE_CURRENT_LIST_DIR}/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}.cross.patch"
-    )
-      list(
-        APPEND
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_ARGS
-        GIT_PATCH_FILES
-        "${CMAKE_CURRENT_LIST_DIR}/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}.cross.patch"
-      )
+    if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}.cross.patch")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_ARGS GIT_PATCH_FILES
+           "${CMAKE_CURRENT_LIST_DIR}/lua-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION}.cross.patch")
     else()
       message(FATAL_ERROR "Must apply patch to disable call of system() on android/ios")
     endif()

@@ -34,8 +34,7 @@
 # =============================================================================
 # Copyright 2021 atframework.
 #
-# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
-# for details.
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE for details.
 
 unset(_MBEDTLS_SEARCH_ROOT_INC)
 unset(_MBEDTLS_SEARCH_ROOT_LIB)
@@ -61,11 +60,9 @@ find_library(MbedTLS_TLS_LIBRARIES NAMES ${MbedTLS_TLS_NAMES} ${_MBEDTLS_SEARCH_
 find_library(MbedTLS_CRYPTO_LIBRARIES NAMES ${MbedTLS_CRYPTO_NAMES} ${_MBEDTLS_SEARCH_ROOT_LIB})
 find_library(MbedTLS_X509_LIBRARIES NAMES ${MbedTLS_X509_NAMES} ${_MBEDTLS_SEARCH_ROOT_LIB})
 
-mark_as_advanced(MbedTLS_INCLUDE_DIRS MbedTLS_TLS_LIBRARIES MbedTLS_CRYPTO_LIBRARIES
-                 MbedTLS_X509_LIBRARIES)
+mark_as_advanced(MbedTLS_INCLUDE_DIRS MbedTLS_TLS_LIBRARIES MbedTLS_CRYPTO_LIBRARIES MbedTLS_X509_LIBRARIES)
 
-# handle the QUIETLY and REQUIRED arguments and set MBEDTLS_FOUND to TRUE if all listed variables
-# are TRUE
+# handle the QUIETLY and REQUIRED arguments and set MBEDTLS_FOUND to TRUE if all listed variables are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   MbedTLS
@@ -74,8 +71,7 @@ find_package_handle_standard_args(
 
 if(MbedTLS_FOUND)
   set(MBEDTLS_FOUND ${MbedTLS_FOUND})
-  set(MbedTLS_LIBRARIES ${MbedTLS_TLS_LIBRARIES} ${MbedTLS_CRYPTO_LIBRARIES}
-                        ${MbedTLS_X509_LIBRARIES})
+  set(MbedTLS_LIBRARIES ${MbedTLS_TLS_LIBRARIES} ${MbedTLS_CRYPTO_LIBRARIES} ${MbedTLS_X509_LIBRARIES})
   if(NOT MbedTLS_CRYPTO_LIBRARIES)
     set(MbedTLS_CRYPTO_LIBRARIES ${MbedTLS_TLS_LIBRARIES})
   endif()

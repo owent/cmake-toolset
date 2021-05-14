@@ -19,20 +19,18 @@ function(PROJECT_THIRD_PARTY_CIVETWEB_PATCH_IMPORTED_TARGET TARGET_NAME)
     list(APPEND PATCH_ADD_TARGETS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
   endif()
   if(PATCH_REMOVE_RULES OR PATCH_ADD_TARGETS)
-    project_build_tools_patch_imported_link_interface_libraries(
-      ${TARGET_NAME} REMOVE_LIBRARIES ${PATCH_REMOVE_RULES} ADD_LIBRARIES ${PATCH_ADD_TARGETS})
+    project_build_tools_patch_imported_link_interface_libraries(${TARGET_NAME} REMOVE_LIBRARIES ${PATCH_REMOVE_RULES}
+                                                                ADD_LIBRARIES ${PATCH_ADD_TARGETS})
   endif()
   project_build_tools_patch_default_imported_config(${TARGET_NAME})
 endfunction()
 
 macro(PROJECT_THIRD_PARTY_CIVETWEB_IMPORT)
   if(TARGET civetweb::civetweb-cpp)
-    echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb-cpp")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb-cpp")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_LINK_NAME civetweb::civetweb-cpp)
   elseif(TARGET civetweb::civetweb)
-    echowithcolor(COLOR GREEN
-                  "-- Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb")
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_LINK_NAME civetweb::civetweb)
   endif()
 
@@ -53,14 +51,12 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_GIT_URL
-          "https://github.com/civetweb/civetweb.git")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_GIT_URL "https://github.com/civetweb/civetweb.git")
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR)
-      project_third_party_get_build_dir(
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR "civetweb"
-        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_VERSION})
+      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR "civetweb"
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_VERSION})
     endif()
 
     if(NOT EXISTS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR})
@@ -82,30 +78,25 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
              "-DCIVETWEB_ENABLE_SERVER_EXECUTABLE=OFF")
       endif()
       if(TARGET ZLIB::ZLIB)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS
-             "-DCIVETWEB_ENABLE_ZLIB=ON")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS "-DCIVETWEB_ENABLE_ZLIB=ON")
       endif()
       if(OPENSSL_FOUND AND NOT LIBRESSL_FOUND)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS
-             "-DCIVETWEB_ENABLE_SSL=ON")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS "-DCIVETWEB_ENABLE_SSL=ON")
       else()
 
       endif()
       # TODO CIVETWEB_ENABLE_LUA,CIVETWEB_ENABLE_LUA_SHARED
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS
-           "-DCIVETWEB_ENABLE_LUA=OFF")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS "-DCIVETWEB_ENABLE_LUA=OFF")
     endif()
-    project_third_party_append_build_shared_lib_var(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS BUILD_SHARED_LIBS)
+    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS
+                                                    BUILD_SHARED_LIBS)
 
     include(AtframeworkToolsetCommonDefinitions)
     if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
       set(PATCH_BACKUP_CMAKE_C_STANDARD_LIBRARIES ${CMAKE_C_STANDARD_LIBRARIES})
       set(PATCH_BACKUP_CMAKE_CXX_STANDARD_LIBRARIES ${CMAKE_CXX_STANDARD_LIBRARIES})
-      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES
-                                       ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
-      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES
-                                       ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+      add_compiler_flags_to_var_unique(CMAKE_C_STANDARD_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+      add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
     endif()
 
     find_configure_package(

@@ -31,8 +31,7 @@
 # =============================================================================
 # Copyright 2021 atframework.
 #
-# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
-# for details.
+# Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE for details.
 
 unset(_LIBSODIUM_SEARCH_ROOT_INC)
 unset(_LIBSODIUM_SEARCH_ROOT_LIB)
@@ -56,8 +55,7 @@ find_library(Libsodium_LIBRARIES NAMES ${Libsodium_NAMES} ${_LIBSODIUM_SEARCH_RO
 
 mark_as_advanced(Libsodium_INCLUDE_DIRS Libsodium_LIBRARIES)
 
-# handle the QUIETLY and REQUIRED arguments and set Libsodium_FOUND to TRUE if all listed variables
-# are TRUE
+# handle the QUIETLY and REQUIRED arguments and set Libsodium_FOUND to TRUE if all listed variables are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Libsodium
