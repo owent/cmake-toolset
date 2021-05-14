@@ -6,10 +6,21 @@ include_guard(GLOBAL)
 # =========== third party opentelemetry-cpp ==================
 macro(PROJECT_THIRD_PARTY_OPENTELEMETRY_CPP_IMPORT)
   if(TARGET opentelemetry-cpp::api)
-    message(STATUS "Dependency(${PROJECT_NAME}): Target opentelemetry-cpp::api found")
+    echowithcolor(
+      COLOR GREEN
+      "-- Dependency(${PROJECT_NAME}): opentelemetry-cpp found target opentelemetry-cpp::api")
   endif()
   if(TARGET opentelemetry-cpp::sdk)
-    message(STATUS "Dependency(${PROJECT_NAME}): Target opentelemetry-cpp::sdk found")
+    echowithcolor(
+      COLOR GREEN
+      "-- Dependency(${PROJECT_NAME}): opentelemetry-cpp found target opentelemetry-cpp::sdk")
+  endif()
+  if(OPENTELEMETRY_CPP_LIBRARIES)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES
+        ${OPENTELEMETRY_CPP_LIBRARIES} opentelemetry-cpp::resources opentelemetry-cpp::proto)
+    list(REMOVE_DUPLICATES ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES)
+    project_build_tools_patch_default_imported_config(
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES})
   endif()
 endmacro()
 
@@ -22,7 +33,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION "v0.5.0")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION "v0.6.0")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE
           "${CMAKE_CURRENT_LIST_DIR}/opentelemetry-cpp-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_VERSION}.patch"
       )

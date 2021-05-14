@@ -21,6 +21,8 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
   endif()
+  project_build_tools_patch_default_imported_config(lua::liblua-dynamic lua::liblua-static lua::lua
+                                                    lua::luac)
 endmacro()
 
 if(NOT TARGET lua::liblua-static AND NOT TARGET lua::liblua-dynamic)
