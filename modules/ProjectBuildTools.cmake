@@ -112,10 +112,10 @@ if(VCPKG_TARGET_TRIPLET)
 endif()
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL CMAKE_HOST_SYSTEM_NAME)
-  # Set CMAKE_SYSTEM_NAME will cause cmake to set CMAKE_CROSSCOMPILING to TRUE, so we don't set it
-  # when not crosscompiling
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_SYSTEM_NAME
-       CMAKE_SYSTEM_PROCESSOR CMAKE_SYSTEM_VERSION)
+  # Set CMAKE_SYSTEM_NAME will cause cmake to set CMAKE_CROSSCOMPILING to TRUE, so we don't set it when not
+  # crosscompiling
+  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_SYSTEM_NAME CMAKE_SYSTEM_PROCESSOR
+       CMAKE_SYSTEM_VERSION)
 endif()
 
 set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS
@@ -127,34 +127,27 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
   list(APPEND PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS COMMAND_ECHO STDOUT)
 endif()
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS ECHO_OUTPUT_VARIABLE
-       ECHO_ERROR_VARIABLE)
+  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE)
 endif()
 
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
-  cmake_parse_arguments(
-    project_build_tools_append_cmake_inherit_options
-    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE" "" "" ${ARGN})
+  cmake_parse_arguments(project_build_tools_append_cmake_inherit_options
+                        "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE" "" "" ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
 
-  set(project_build_tools_append_cmake_inherit_options_VARS
-      PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
+  set(project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
 
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
-    list(APPEND project_build_tools_append_cmake_inherit_options_VARS
-         PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C)
+    list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C)
   endif()
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS)
-    list(APPEND project_build_tools_append_cmake_inherit_options_VARS
-         PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX)
+    list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX)
   endif()
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS)
-    list(APPEND project_build_tools_append_cmake_inherit_options_VARS
-         PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM)
+    list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM)
   endif()
 
-  if(CMAKE_TOOLCHAIN_FILE
-     AND NOT project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
+  if(CMAKE_TOOLCHAIN_FILE AND NOT project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
     list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
   endif()
 
@@ -188,11 +181,8 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
   cmake_policy(GET CMP0091 project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
   if(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
-    list(
-      APPEND
-      ${OUTVAR}
-      "-DCMAKE_POLICY_DEFAULT_CMP0091=${project_build_tools_append_cmake_inherit_options_POLICY_VALUE}"
-    )
+    list(APPEND ${OUTVAR}
+         "-DCMAKE_POLICY_DEFAULT_CMP0091=${project_build_tools_append_cmake_inherit_options_POLICY_VALUE}")
   endif()
   unset(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
 
@@ -234,18 +224,15 @@ macro(project_build_tools_append_cmake_cxx_standard_options)
     list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
          "-DCMAKE_C_STANDARD=${CMAKE_C_STANDARD}")
   endif()
-  if(CMAKE_OBJC_STANDARD AND NOT
-                             project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
+  if(CMAKE_OBJC_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
     list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
          "-DCMAKE_OBJC_STANDARD=${CMAKE_OBJC_STANDARD}")
   endif()
-  if(CMAKE_CXX_STANDARD AND NOT
-                            project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
+  if(CMAKE_CXX_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
     list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
          "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
   endif()
-  if(CMAKE_OBJCXX_STANDARD
-     AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
+  if(CMAKE_OBJCXX_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
     list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
          "-DCMAKE_OBJCXX_STANDARD=${CMAKE_OBJCXX_STANDARD}")
   endif()
@@ -334,21 +321,17 @@ function(project_expand_list_for_command_line_to_file)
       endif()
       if(project_expand_list_for_command_line_to_file_LINE)
         set(project_expand_list_for_command_line_to_file_LINE
-            "${project_expand_list_for_command_line_to_file_LINE} \"${project_expand_list_for_command_line_OUT_VAR}\""
-        )
+            "${project_expand_list_for_command_line_to_file_LINE} \"${project_expand_list_for_command_line_OUT_VAR}\"")
       else()
-        set(project_expand_list_for_command_line_to_file_LINE
-            "\"${project_expand_list_for_command_line_OUT_VAR}\"")
+        set(project_expand_list_for_command_line_to_file_LINE "\"${project_expand_list_for_command_line_OUT_VAR}\"")
       endif()
       unset(project_expand_list_for_command_line_OUT_VAR)
     endif()
   endforeach()
 
   if(project_expand_list_for_command_line_to_file_OUTPUT)
-    file(
-      APPEND "${project_expand_list_for_command_line_to_file_OUTPUT}"
-      "${project_expand_list_for_command_line_to_file_LINE}${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+    file(APPEND "${project_expand_list_for_command_line_to_file_OUTPUT}"
+         "${project_expand_list_for_command_line_to_file_LINE}${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(project_expand_list_for_command_line_to_file_OUTPUT)
   unset(project_expand_list_for_command_line_to_file_LINE)
@@ -381,8 +364,7 @@ function(project_git_clone_repository)
       TAG
       CHECK_PATH)
   set(multiValueArgs PATCH_FILES SUBMODULE_PATH)
-  cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}"
-                        "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(NOT project_git_clone_repository_URL)
     message(FATAL_ERROR "URL is required")
@@ -415,14 +397,12 @@ function(project_git_clone_repository)
     message(FATAL_ERROR "git not found")
   endif()
 
-  if(project_git_clone_repository_FORCE_RESET AND EXISTS
-                                                  ${project_git_clone_repository_REPO_DIRECTORY})
+  if(project_git_clone_repository_FORCE_RESET AND EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
     execute_process(
       COMMAND ${GIT_EXECUTABLE} clean -dfx
       COMMAND ${GIT_EXECUTABLE} reset --hard
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-      RESULT_VARIABLE LAST_GIT_RESET_RESULT
-                      ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      RESULT_VARIABLE LAST_GIT_RESET_RESULT ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
     if(LAST_GIT_RESET_RESULT AND NOT LAST_GIT_RESET_RESULT EQUAL 0)
       file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
@@ -456,24 +436,19 @@ function(project_git_clone_repository)
       RESULT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
       OUTPUT_QUIET ERROR_QUIET)
     if(NOT project_git_clone_repository_GIT_CHECK_REPO EQUAL 0)
-      message(
-        STATUS
-          "${project_git_clone_repository_REPO_DIRECTORY} is not a valid git repository, remove it..."
-      )
+      message(STATUS "${project_git_clone_repository_REPO_DIRECTORY} is not a valid git repository, remove it...")
       file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
     endif()
     unset(project_git_clone_repository_GIT_CHECK_REPO)
   endif()
 
-  if(NOT EXISTS
-     "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
+  if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
     if(EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
       file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
     endif()
   endif()
 
-  if(NOT EXISTS
-     "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
+  if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
     if(NOT EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
       file(MAKE_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
     endif()
@@ -485,9 +460,8 @@ function(project_git_clone_repository)
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     else()
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} init
-        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        COMMAND ${GIT_EXECUTABLE} init WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                                                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
     execute_process(
       COMMAND ${GIT_EXECUTABLE} remote add origin "${project_git_clone_repository_URL}"
@@ -502,9 +476,8 @@ function(project_git_clone_repository)
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
         OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      if(project_git_clone_repository_GIT_CHECK_REPO
-         AND project_git_clone_repository_GIT_CHECK_REPO MATCHES
-             "ref.*refs/heads/([^ \t]*)[ \t]*HEAD.*")
+      if(project_git_clone_repository_GIT_CHECK_REPO AND project_git_clone_repository_GIT_CHECK_REPO MATCHES
+                                                         "ref.*refs/heads/([^ \t]*)[ \t]*HEAD.*")
         set(project_git_clone_repository_GIT_BRANCH "${CMAKE_MATCH_1}")
       else()
         execute_process(
@@ -518,11 +491,8 @@ function(project_git_clone_repository)
         endif()
       endif()
       if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
-        if(NOT project_git_clone_repository_GIT_LS_REMOTE_RESULT EQUAL 0
-           AND project_git_clone_repository_REQUIRED)
-          message(
-            FATAL_ERROR
-              "git ls-remote --symref origin(${project_git_clone_repository_URL}) HEAD failed")
+        if(NOT project_git_clone_repository_GIT_LS_REMOTE_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
+          message(FATAL_ERROR "git ls-remote --symref origin(${project_git_clone_repository_URL}) HEAD failed")
         endif()
         # Fallback
         set(project_git_clone_repository_GIT_BRANCH main)
@@ -538,36 +508,31 @@ function(project_git_clone_repository)
         RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0
-         AND project_git_clone_repository_REQUIRED)
+      if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed"
-        )
+            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
       endif()
     else()
       if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n"
-                  origin ${project_git_clone_repository_COMMIT}
+          COMMAND ${GIT_EXECUTABLE} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n" origin
+                  ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
-        message(
-          WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
+        message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
         execute_process(
           COMMAND ${GIT_EXECUTABLE} fetch "-n" origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
-      if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0
-         AND project_git_clone_repository_REQUIRED)
+      if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed"
-        )
+            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
       endif()
     endif()
     unset(project_git_clone_repository_GIT_FETCH_RESULT)
@@ -581,8 +546,7 @@ function(project_git_clone_repository)
         list(APPEND project_git_clone_repository_submodule_args "--recursive")
       endif()
       if(project_git_clone_repository_SUBMODULE_PATH)
-        list(APPEND project_git_clone_repository_submodule_args "--"
-             ${project_git_clone_repository_SUBMODULE_PATH})
+        list(APPEND project_git_clone_repository_submodule_args "--" ${project_git_clone_repository_SUBMODULE_PATH})
       endif()
 
       execute_process(
@@ -607,9 +571,8 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4244 /wd4251 /wd4267 /wd4309)
 
     if(MSVC_VERSION GREATER_EQUAL 1922)
-      # see
-      # https://docs.microsoft.com/en-us/cpp/overview/cpp-conformance-improvements?view=vs-2019#improvements_162
-      # for detail
+      # see https://docs.microsoft.com/en-us/cpp/overview/cpp-conformance-improvements?view=vs-2019#improvements_162 for
+      # detail
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd5054)
     endif()
 
@@ -624,14 +587,12 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
     unset(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS CACHE)
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-type-limits)
     include(CheckCXXCompilerFlag)
-    check_cxx_compiler_flag(-Wno-unused-parameter
-                            project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
+    check_cxx_compiler_flag(-Wno-unused-parameter project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
     if(project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-unused-parameter)
     endif()
-    check_cxx_compiler_flag(
-      -Wno-deprecated-declarations
-      project_build_tools_patch_protobuf_sources_LINT_NO_DEPRECATED_DECLARATIONS)
+    check_cxx_compiler_flag(-Wno-deprecated-declarations
+                            project_build_tools_patch_protobuf_sources_LINT_NO_DEPRECATED_DECLARATIONS)
     if(project_build_tools_patch_protobuf_sources_LINT_NO_DEPRECATED_DECLARATIONS)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-deprecated-declarations)
     endif()
@@ -730,9 +691,7 @@ function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME
   if(NOT OLD_LINK_LIBRARIES STREQUAL PATCH_INNER_LIBS)
     set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} "${PATCH_INNER_LIBS}")
     message(
-      STATUS
-        "Patch: ${PROPERTY_NAME} of ${TARGET_NAME} from \"${OLD_LINK_LIBRARIES}\" to \"${PATCH_INNER_LIBS}\""
-    )
+      STATUS "Patch: ${PROPERTY_NAME} of ${TARGET_NAME} from \"${OLD_LINK_LIBRARIES}\" to \"${PATCH_INNER_LIBS}\"")
   endif()
 endfunction()
 
@@ -740,13 +699,12 @@ macro(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
   get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} IMPORTED_LOCATION)
   if(NOT ${OUTPUT_VAR_NAME})
     unset(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS)
-    get_target_property(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS
-                        ${TARGET_NAME} IMPORTED_CONFIGURATIONS)
+    get_target_property(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
+                        IMPORTED_CONFIGURATIONS)
     foreach(project_build_tools_get_imported_location_IMPORTED_CONFIGURATION IN
             LISTS project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS)
-      get_target_property(
-        ${OUTPUT_VAR_NAME} ${TARGET_NAME}
-        "IMPORTED_LOCATION_${project_build_tools_get_imported_location_IMPORTED_CONFIGURATION}")
+      get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME}
+                          "IMPORTED_LOCATION_${project_build_tools_get_imported_location_IMPORTED_CONFIGURATION}")
       if(${OUTPUT_VAR_NAME})
         break()
       endif()
@@ -775,8 +733,7 @@ function(project_build_tools_patch_default_imported_config)
         continue()
       endif()
 
-      # MSVC's STL and debug level must match the target, so we can only move out
-      # IMPORTED_LOCATION_NOCONFIG
+      # MSVC's STL and debug level must match the target, so we can only move out IMPORTED_LOCATION_NOCONFIG
       if(MSVC)
         set(PATCH_IMPORTED_CONFIGURATION "NOCONFIG")
       else()
@@ -787,18 +744,15 @@ function(project_build_tools_patch_default_imported_config)
         continue()
       endif()
 
-      get_target_property(PATCH_TARGET_LOCATION ${TARGET_NAME}
-                          "IMPORTED_LOCATION_${PATCH_IMPORTED_CONFIGURATION}")
+      get_target_property(PATCH_TARGET_LOCATION ${TARGET_NAME} "IMPORTED_LOCATION_${PATCH_IMPORTED_CONFIGURATION}")
       if(NOT PATCH_TARGET_LOCATION)
         continue()
       endif()
 
       foreach(PATCH_IMPORTED_KEY IN LISTS PATCH_VARS)
-        get_target_property(PATCH_IMPORTED_VALUE ${TARGET_NAME}
-                            "${PATCH_IMPORTED_KEY}_${PATCH_IMPORTED_CONFIGURATION}")
+        get_target_property(PATCH_IMPORTED_VALUE ${TARGET_NAME} "${PATCH_IMPORTED_KEY}_${PATCH_IMPORTED_CONFIGURATION}")
         if(PATCH_IMPORTED_VALUE)
-          set_target_properties(${TARGET_NAME} PROPERTIES "${PATCH_IMPORTED_KEY}"
-                                                          "${PATCH_IMPORTED_VALUE}")
+          set_target_properties(${TARGET_NAME} PROPERTIES "${PATCH_IMPORTED_KEY}" "${PATCH_IMPORTED_VALUE}")
         endif()
       endforeach()
     endif()
@@ -809,13 +763,10 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
   file(WRITE "${OUTPUT_FILE}" "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   project_make_executable("${OUTPUT_FILE}")
 
-  file(APPEND "${OUTPUT_FILE}"
-       "export CC=\"${CMAKE_C_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-  file(APPEND "${OUTPUT_FILE}"
-       "export CXX=\"${CMAKE_CXX_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(APPEND "${OUTPUT_FILE}" "export CC=\"${CMAKE_C_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(APPEND "${OUTPUT_FILE}" "export CXX=\"${CMAKE_CXX_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   if(CMAKE_AR)
-    file(APPEND "${OUTPUT_FILE}"
-         "export AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "export AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   unset(FINAL_CFLAGS)
@@ -829,10 +780,8 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     endif()
 
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
-      add_compiler_flags_to_var(FINAL_CFLAGS
-                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
-      add_compiler_flags_to_var(FINAL_CXXFLAGS
-                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      add_compiler_flags_to_var(FINAL_CFLAGS "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
     endif()
 
     add_compiler_flags_to_var(FINAL_CFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
@@ -840,14 +789,12 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
   endif()
 
   if(FINAL_CFLAGS)
-    file(APPEND "${OUTPUT_FILE}"
-         "export CFLAGS=\"${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "export CFLAGS=\"${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(FINAL_CFLAGS)
 
   if(FINAL_CXXFLAGS)
-    file(APPEND "${OUTPUT_FILE}"
-         "export CXXFLAGS=\"${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "export CXXFLAGS=\"${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(FINAL_CXXFLAGS)
 
@@ -858,18 +805,15 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     file(APPEND "${OUTPUT_FILE}" "export AS=\"$ENV{AS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(ENV{STRIP})
-    file(APPEND "${OUTPUT_FILE}"
-         "export STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "export STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(ENV{NM})
     file(APPEND "${OUTPUT_FILE}" "export NM=\"$ENV{NM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_ASM_FLAGS OR CMAKE_ASM_FLAGS_RELEASE)
-    file(
-      APPEND "${OUTPUT_FILE}"
-      "export ASFLAGS=\"${CMAKE_ASM_FLAGS} ${CMAKE_ASM_FLAGS_RELEASE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+    file(APPEND "${OUTPUT_FILE}"
+         "export ASFLAGS=\"${CMAKE_ASM_FLAGS} ${CMAKE_ASM_FLAGS_RELEASE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_EXE_LINKER_FLAGS OR CMAKE_STATIC_LINKER_FLAGS)
@@ -880,18 +824,15 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
   endif()
 
   if(CMAKE_RANLIB)
-    file(APPEND "${OUTPUT_FILE}"
-         "export RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "export RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(CMAKE_OSX_SYSROOT)
     file(APPEND "${OUTPUT_FILE}"
          "export OSX_SYSROOT=\"${CMAKE_OSX_SYSROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(CMAKE_OSX_ARCHITECTURES)
-    file(
-      APPEND "${OUTPUT_FILE}"
-      "export OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+    file(APPEND "${OUTPUT_FILE}"
+         "export OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(ANDROID)
     file(
@@ -910,8 +851,7 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
       "export ANDROID_TOOLCHAIN_ROOT=\"${ANDROID_TOOLCHAIN_ROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       "export ANDROID_TOOLCHAIN_PREFIX=\"${ANDROID_TOOLCHAIN_PREFIX}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       "export ANDROID_TOOLCHAIN_SUFFIX=\"${ANDROID_TOOLCHAIN_SUFFIX}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-      "export PATH=\"${ANDROID_TOOLCHAIN_ROOT}/bin:\$PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+      "export PATH=\"${ANDROID_TOOLCHAIN_ROOT}/bin:\$PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 endfunction()
 
@@ -919,15 +859,12 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
   file(WRITE "${OUTPUT_FILE}" "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   project_make_executable("${OUTPUT_FILE}")
 
-  file(
-    APPEND "${OUTPUT_FILE}"
-    "$PSDefaultParameterValues['*:Encoding'] = 'UTF-8'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-  file(
-    APPEND "${OUTPUT_FILE}"
-    "$OutputEncoding = [System.Text.UTF8Encoding]::new()${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(APPEND "${OUTPUT_FILE}"
+       "$PSDefaultParameterValues['*:Encoding'] = 'UTF-8'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(APPEND "${OUTPUT_FILE}"
+       "$OutputEncoding = [System.Text.UTF8Encoding]::new()${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   if(CMAKE_AR)
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "$ENV:AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   unset(FINAL_CFLAGS)
@@ -946,10 +883,8 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     endif()
 
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
-      add_compiler_flags_to_var(FINAL_CFLAGS
-                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
-      add_compiler_flags_to_var(FINAL_CXXFLAGS
-                                "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      add_compiler_flags_to_var(FINAL_CFLAGS "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "-miphoneos-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
     endif()
 
     if(CMAKE_OSX_ARCHITECTURES)
@@ -959,14 +894,12 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
   endif()
 
   if(FINAL_CFLAGS)
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:CFLAGS=\"${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "$ENV:CFLAGS=\"${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(FINAL_CFLAGS)
 
   if(FINAL_CXXFLAGS)
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:CXXFLAGS=\"${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "$ENV:CXXFLAGS=\"${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(FINAL_CXXFLAGS)
 
@@ -977,18 +910,15 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     file(APPEND "${OUTPUT_FILE}" "$ENV:AS=\"$ENV{AS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(ENV{STRIP})
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "$ENV:STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(ENV{NM})
     file(APPEND "${OUTPUT_FILE}" "$ENV:NM=\"$ENV{NM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_ASM_FLAGS OR CMAKE_ASM_FLAGS_RELEASE)
-    file(
-      APPEND "${OUTPUT_FILE}"
-      "$ENV:ASFLAGS=\"${CMAKE_ASM_FLAGS} ${CMAKE_ASM_FLAGS_RELEASE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:ASFLAGS=\"${CMAKE_ASM_FLAGS} ${CMAKE_ASM_FLAGS_RELEASE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_EXE_LINKER_FLAGS OR CMAKE_STATIC_LINKER_FLAGS)
@@ -999,18 +929,14 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
   endif()
 
   if(CMAKE_RANLIB)
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "$ENV:RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(CMAKE_OSX_SYSROOT)
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:OSX_SYSROOT=\"${CMAKE_OSX_SYSROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    file(APPEND "${OUTPUT_FILE}" "$ENV:OSX_SYSROOT=\"${CMAKE_OSX_SYSROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(CMAKE_OSX_ARCHITECTURES)
-    file(
-      APPEND "${OUTPUT_FILE}"
-      "$ENV:OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:OSX_ARCHITECTURES=\"${CMAKE_OSX_ARCHITECTURES}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(ANDROID)
     file(

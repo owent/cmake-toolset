@@ -29,14 +29,12 @@ if(NOT TARGET yaml-cpp::yaml-cpp
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION "0.6.3")
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL
-        "https://github.com/jbeder/yaml-cpp.git")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL "https://github.com/jbeder/yaml-cpp.git")
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_YAML_CPP_BUILD_DIR)
-    project_third_party_get_build_dir(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_YAML_CPP_BUILD_DIR "yaml-cpp"
-      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION})
+    project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_YAML_CPP_BUILD_DIR "yaml-cpp"
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION})
   endif()
 
   find_configure_package(

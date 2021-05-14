@@ -54,7 +54,7 @@ elif [[ "$1" == "clang.test" ]]; then
 elif [[ "$1" == "gcc.vcpkg.test" ]]; then
   echo "$1";
   [ ! -z "$VCPKG_INSTALLATION_ROOT" ];
-  vcpkg install --triplet=x64-linux fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark ;
+  vcpkg install --triplet=x64-linux fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp ;
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
   cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux ;
@@ -101,7 +101,7 @@ elif [[ "$1" == "msvc.shared.test" ]]; then
 elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   echo "$1";
   [ ! -z "$VCPKG_INSTALLATION_ROOT" ];
-  vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark ;
+  vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp ;
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
   cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release ;

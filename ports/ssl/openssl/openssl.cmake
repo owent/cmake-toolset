@@ -11,11 +11,10 @@ macro(PROJECT_THIRD_PARTY_OPENSSL_IMPORT)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES OpenSSL::Crypto)
 
         if(TARGET Threads::Threads)
-          project_build_tools_patch_imported_link_interface_libraries(
-            OpenSSL::Crypto ADD_LIBRARIES Threads::Threads ${CMAKE_DL_LIBS})
-        elseif(CMAKE_DL_LIBS)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES Threads::Threads
                                                                       ${CMAKE_DL_LIBS})
+        elseif(CMAKE_DL_LIBS)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES ${CMAKE_DL_LIBS})
         endif()
       endif()
       if(TARGET OpenSSL::SSL)
@@ -23,17 +22,15 @@ macro(PROJECT_THIRD_PARTY_OPENSSL_IMPORT)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES OpenSSL::SSL)
 
         if(TARGET Threads::Threads)
-          project_build_tools_patch_imported_link_interface_libraries(
-            OpenSSL::SSL ADD_LIBRARIES Threads::Threads ${CMAKE_DL_LIBS})
-        elseif(CMAKE_DL_LIBS)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Threads::Threads
                                                                       ${CMAKE_DL_LIBS})
+        elseif(CMAKE_DL_LIBS)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ${CMAKE_DL_LIBS})
         endif()
       endif()
     else()
       if(OPENSSL_INCLUDE_DIR)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS
-             ${OPENSSL_INCLUDE_DIR})
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})
       endif()
 
       if(NOT OPENSSL_LIBRARIES)
@@ -53,8 +50,7 @@ macro(PROJECT_THIRD_PARTY_OPENSSL_IMPORT)
       PATHS "${OPENSSL_INCLUDE_DIR}/../bin" "${OPENSSL_INCLUDE_DIR}/../" ${OPENSSL_INCLUDE_DIR}
       NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH)
     if(OPENSSL_EXECUTABLE)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN
-           "${OPENSSL_EXECUTABLE}")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN "${OPENSSL_EXECUTABLE}")
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL)
@@ -70,32 +66,29 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION "1.1.1k")
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL
-        "https://github.com/openssl/openssl.git")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL "https://github.com/openssl/openssl.git")
   endif()
   string(REPLACE "." "_" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_GITHUB_TAG
                  "OpenSSL_${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION}")
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR)
-    project_third_party_get_build_dir(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR "openssl"
-      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION})
+    project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR "openssl"
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION})
   endif()
 
   # "no-hw" and "no-engine" is recommanded by openssl only for mobile devices @see
   # https://wiki.openssl.org/index.php/Compilation_and_Installation
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-        "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
-        "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
+        "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}" "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS})
   else()
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
         "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
         "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
         "--release"
-        # "--api=1.1.1" # libwebsockets and atframe_utils has warnings of using deprecated APIs,
-        # maybe it can be remove later "no-deprecated" # libcurl and gRPC requires openssl's API of
-        # 1.1.0 and 1.0.2, so we can not disable deprecated APIS here
+        # "--api=1.1.1" # libwebsockets and atframe_utils has warnings of using deprecated APIs, maybe it can be remove
+        # later "no-deprecated" # libcurl and gRPC requires openssl's API of 1.1.0 and 1.0.2, so we can not disable
+        # deprecated APIS here
         "no-dso"
         "no-tests"
         "no-external-tests"
@@ -110,16 +103,13 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     if(NOT ANDROID
        AND NOT MSVC
        AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-           "enable-ec_nistp_64_gcc_128")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "enable-ec_nistp_64_gcc_128")
     endif()
 
     if(CMAKE_CROSSCOMPILING)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-comp" "no-hw"
-           "no-engine")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-comp" "no-hw" "no-engine")
     else()
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-           "enable-static-engine")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "enable-static-engine")
     endif()
 
   endif()
@@ -176,17 +166,12 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     unset(OPENSSL_VERSION CACHE)
 
     project_git_clone_repository(
-      URL
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL}"
-      REPO_DIRECTORY
-      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION}"
-      TAG
+      URL "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL}" REPO_DIRECTORY
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION}" TAG
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_GITHUB_TAG}")
 
-    if(NOT
-       EXISTS
-       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION}"
-    )
+    if(NOT EXISTS
+       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION}")
       echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): Build openssl failed")
       message(FATAL_ERROR "Dependency(${PROJECT_NAME}): openssl is required")
     endif()
@@ -208,8 +193,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CONFIG "config")
       file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh"
            "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-      file(WRITE
-           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
+      file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
            "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
       project_third_party_generate_load_env_bash(
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh")
@@ -218,14 +202,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "source \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       )
       file(
-        APPEND
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
+        APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
         "source \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       )
-      project_make_executable(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh")
-      project_make_executable(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh")
+      project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh")
+      project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh")
 
       file(
         APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
@@ -234,14 +215,12 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
 
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS)
       # Android flags is set by NDK toolchain
-      if(NOT ANDROID AND NOT "${PROJECT_PREBUILT_PLATFORM_NAME}" STREQUAL
-                         "${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
+      if(NOT ANDROID AND NOT "${PROJECT_PREBUILT_PLATFORM_NAME}" STREQUAL "${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
         if(CMAKE_OSX_SYSROOT)
-          add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS
-                                    "-isysroot" "${CMAKE_OSX_SYSROOT}")
+          add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS "-isysroot"
+                                    "${CMAKE_OSX_SYSROOT}")
         elseif(CMAKE_SYSROOT)
-          add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS
-                                    "-isysroot" "${CMAKE_SYSROOT}")
+          add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS "-isysroot" "${CMAKE_SYSROOT}")
         endif()
 
         if(CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -257,25 +236,20 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
 
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS)
         file(
-          APPEND
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
           "export CFLAGS=\"\$CFLAGS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
         )
         file(
-          APPEND
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
           "export CXXFLAGS=\"\$CXXFLAGS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
         )
       endif()
 
       if(ANDROID)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-stdio")
-        file(
-          APPEND
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
-          "export PATH=\"\$(dirname \"\$CC\"):\$PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-        file(APPEND
-             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
+        file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
+             "export PATH=\"\$(dirname \"\$CC\"):\$PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
              "export CC=\"\$(basename \"\$CC\")\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
 
         if(CMAKE_ANDROID_ARCH_ABI MATCHES "^armeabi(-v7a)?$")
@@ -294,11 +268,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
           message(FATAL_ERROR "Invalid Android ABI: ${CMAKE_ANDROID_ARCH_ABI}.")
         endif()
 
-        # @see https://wiki.openssl.org/images/7/70/Setenv-android.sh @see
-        # https://wiki.openssl.org/index.php/Android
+        # @see https://wiki.openssl.org/images/7/70/Setenv-android.sh @see https://wiki.openssl.org/index.php/Android
         file(
-          APPEND
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
           "export SYSTEM=\"android\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
           "export ANDROID_API=\"${ANDROID_PLATFORM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
           "export ARCH=\"${ANDROID_SYSROOT_ABI}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
@@ -306,8 +278,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
           "export ANDROID_SYSROOT=\"\$ANDROID_SYSTEM_LIBRARY_PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
           "export CROSS_SYSROOT=\"\$ANDROID_SYSTEM_LIBRARY_PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
           "export NDK_SYSROOT=\"\$ANDROID_SYSTEM_LIBRARY_PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-          "export SYSROOT=\"\$ANDROID_SYSTEM_LIBRARY_PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-        )
+          "export SYSROOT=\"\$ANDROID_SYSTEM_LIBRARY_PATH\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CONFIG "Configure")
       elseif(CMAKE_OSX_ARCHITECTURES)
         if(CMAKE_OSX_ARCHITECTURES MATCHES "armv7(s?)")
@@ -319,8 +290,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "darwin-i386-cc")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CONFIG "Configure")
         elseif(CMAKE_OSX_ARCHITECTURES STREQUAL x86_64)
-          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-               "darwin64-x86_64-cc")
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "darwin64-x86_64-cc")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CONFIG "Configure")
         else()
           message(FATAL_ERROR "Invalid OSX ABI: ${CMAKE_OSX_ARCHITECTURES}.")
@@ -346,9 +316,8 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
       execute_process(
-        COMMAND
-          "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
+        COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
+                "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
         WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
@@ -357,25 +326,21 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
 
       file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.bat"
            "@echo off${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}")
-      file(WRITE
-           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
+      file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
            "@echo off${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}")
       file(
         APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.bat"
         "set PATH=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR};%PATH%${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}"
       )
       file(
-        APPEND
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
+        APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
         "set PATH=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR};%PATH%${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}"
       )
-      project_make_executable(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.bat")
-      project_make_executable(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat")
+      project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.bat")
+      project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat")
 
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-makedepend"
-           "-utf-8" "no-capieng" # "enable-capieng"  # 有些第三方库没有加入对这个模块检测的支持，比如 libwebsockets
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-makedepend" "-utf-8"
+           "no-capieng" # "enable-capieng"  # 有些第三方库没有加入对这个模块检测的支持，比如 libwebsockets
       )
 
       if(CMAKE_SIZEOF_VOID_P MATCHES 8)
@@ -390,19 +355,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/openssl-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_CONFIG}"
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS})
       file(
-        APPEND
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
+        APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
         "set CL=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_MULTI_CORE}${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       )
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
-        "nmake" "build_all_generated")
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat" "nmake"
+        "build_all_generated")
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
-        "nmake" "PERL=no-perl")
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat" "nmake"
+        "PERL=no-perl")
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
-        "nmake" "install_sw" "install_ssldirs" # "DESTDIR=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat" "nmake" "install_sw"
+        "install_ssldirs" # "DESTDIR=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
       )
 
       # build & install
@@ -412,8 +376,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
       execute_process(
-        COMMAND
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
+        COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.bat"
         WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()

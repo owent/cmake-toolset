@@ -1,7 +1,7 @@
 include_guard(GLOBAL)
 
 # default configure, can be load multiple times and in different paths
-# ##################################################################################################
+# ######################################################################################################################
 if(NOT DEFINED __COMPILER_OPTION_LOADED)
   include(CheckCXXSourceCompiles)
   set(__COMPILER_OPTION_LOADED 1)
@@ -9,8 +9,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   cmake_policy(SET CMP0067 NEW)
 
   option(COMPILER_OPTION_MSVC_ZC_CPP
-         "Add /Zc:__cplusplus for MSVC (let __cplusplus be equal to _MSVC_LANG) when it support."
-         ON)
+         "Add /Zc:__cplusplus for MSVC (let __cplusplus be equal to _MSVC_LANG) when it support." ON)
   option(COMPILER_OPTION_CLANG_ENABLE_LIBCXX "Try to use libc++ when using clang." ON)
 
   # See Windows.h for more details
@@ -167,18 +166,14 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # ================== system checking ==================
   if(ANDROID)
     if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS
-                                       "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS
-                                       "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS
-                                       "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
     endif()
     if(ANDROID_LLVM_TOOLCHAIN_PREFIX)
-      get_filename_component(ANDROID_LLVM_TOOLCHAIN_ROOT "${ANDROID_LLVM_TOOLCHAIN_PREFIX}"
-                             DIRECTORY)
-      if(ANDROID_LLVM_TOOLCHAIN_ROOT
-         AND EXISTS "${ANDROID_LLVM_TOOLCHAIN_ROOT}/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}")
+      get_filename_component(ANDROID_LLVM_TOOLCHAIN_ROOT "${ANDROID_LLVM_TOOLCHAIN_PREFIX}" DIRECTORY)
+      if(ANDROID_LLVM_TOOLCHAIN_ROOT AND EXISTS
+                                         "${ANDROID_LLVM_TOOLCHAIN_ROOT}/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}")
         add_compiler_flags_to_var_unique(
           CMAKE_SHARED_LINKER_FLAGS
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
@@ -219,11 +214,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
     # disable -Wno-unused-local-typedefs (which is often used in type_traits)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.8.0")
-      # GCC < 4.8 doesn't support the address sanitizer -fsanitize=address require -lasan be placed
-      # before -lstdc++, every target shoud add this
+      # GCC < 4.8 doesn't support the address sanitizer -fsanitize=address require -lasan be placed before -lstdc++,
+      # every target shoud add this
       add_compile_options(-Wno-unused-local-typedefs)
-      message(
-        STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} Found, -Wno-unused-local-typedefs added.")
+      message(STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} Found, -Wno-unused-local-typedefs added.")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.0.0")
@@ -236,16 +230,12 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 14)
       endif()
       message(
-        STATUS
-          "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}."
-      )
+        STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.7.0")
       try_set_compiler_lang_standard(CMAKE_C_STANDARD 11)
       try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 14)
       message(
-        STATUS
-          "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}."
-      )
+        STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.4.0")
       add_compiler_flags_to_var(CMAKE_CXX_FLAGS -std=c++0x)
       message(STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c++0x.")
@@ -268,9 +258,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 11)
     endif()
     message(
-      STATUS
-        "Clang Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}."
-    )
+      STATUS "Clang Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
     # Test libc++ and libc++abi
     set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
     set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -303,10 +291,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
     # C++20 coroutine precondition
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0")
-      # @see https://en.cppreference.com/w/cpp/compiler_support Clang 6 and older will crash when
-      # visit local variable of a c++20 coroutine stack It will use movaps of SSE to initialize
-      # local variables of a c++20 coroutine stack but doesn't aligned to 16, which will cause
-      # crash. @see https://github.com/HJLebbink/asm-dude/wiki/MOVAPS for details
+      # @see https://en.cppreference.com/w/cpp/compiler_support Clang 6 and older will crash when visit local variable
+      # of a c++20 coroutine stack It will use movaps of SSE to initialize local variables of a c++20 coroutine stack
+      # but doesn't aligned to 16, which will cause crash. @see https://github.com/HJLebbink/asm-dude/wiki/MOVAPS for
+      # details
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE FALSE)
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS FALSE)
     endif()
@@ -328,8 +316,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
     message(
       STATUS
-        "AppleClang Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}."
-    )
+        "AppleClang Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
     # Test libc++ and libc++abi
     set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
     set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -356,10 +343,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
     # C++20 coroutine precondition
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0.1")
-      # @see https://en.cppreference.com/w/cpp/compiler_support Apple clang 9 and older will crash
-      # when visit local variable of a c++20 coroutine stack. It will use movaps of SSE to
-      # initialize local variables of a c++20 coroutine stack but doesn't aligned to 16, which will
-      # cause crash. @see https://github.com/HJLebbink/asm-dude/wiki/MOVAPS for details
+      # @see https://en.cppreference.com/w/cpp/compiler_support Apple clang 9 and older will crash when visit local
+      # variable of a c++20 coroutine stack. It will use movaps of SSE to initialize local variables of a c++20
+      # coroutine stack but doesn't aligned to 16, which will cause crash. @see
+      # https://github.com/HJLebbink/asm-dude/wiki/MOVAPS for details
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE FALSE)
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS FALSE)
     endif()
@@ -388,18 +375,17 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
     # https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warnings-by-compiler-version
     # https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019#microsoft-specific-predefined-macros
-    # if (MSVC_VERSION GREATER_EQUAL 1910) add_compiler_flags_to_var(CMAKE_CXX_FLAGS /std:c++17)
-    # message(STATUS "MSVC ${MSVC_VERSION} found. using /std:c++17") endif() set __cplusplus to
-    # standard value, @see https://docs.microsoft.com/zh-cn/cpp/build/reference/zc-cplusplus
+    # if (MSVC_VERSION GREATER_EQUAL 1910) add_compiler_flags_to_var(CMAKE_CXX_FLAGS /std:c++17) message(STATUS "MSVC
+    # ${MSVC_VERSION} found. using /std:c++17") endif() set __cplusplus to standard value, @see
+    # https://docs.microsoft.com/zh-cn/cpp/build/reference/zc-cplusplus
     if(MSVC_VERSION GREATER_EQUAL 1914 AND COMPILER_OPTION_MSVC_ZC_CPP)
       add_compiler_flags_to_var(CMAKE_CXX_FLAGS /Zc:__cplusplus)
     endif()
 
     # C++20 coroutine precondition
     if(MSVC_VERSION LESS 1910)
-      # VS2015 is the first version to support coroutine API, but it defines macro of yield,resume
-      # and etc. Which is conflict with our old coroutine context and task. So we disable c++20
-      # coroutine support for it.
+      # VS2015 is the first version to support coroutine API, but it defines macro of yield,resume and etc. Which is
+      # conflict with our old coroutine context and task. So we disable c++20 coroutine support for it.
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE FALSE)
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS FALSE)
     endif()
@@ -410,8 +396,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb)
       add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
     endif()
-    # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb)
-    # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE)
+    # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb) add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE)
     # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
     # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL)
   else()

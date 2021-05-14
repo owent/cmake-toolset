@@ -24,7 +24,7 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
 }
 elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   Write-Output $args
-  vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark
+  vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location -Verbose "test/build_jobs_dir"
   & cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release

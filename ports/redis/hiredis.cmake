@@ -7,8 +7,7 @@ macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES hiredis::hiredis_ssl_static)
     if(TARGET hiredis::hiredis_static)
       project_build_tools_patch_imported_link_interface_libraries(
-        hiredis::hiredis_ssl_static REMOVE_LIBRARIES hiredis::hiredis ADD_LIBRARIES
-        hiredis::hiredis_static)
+        hiredis::hiredis_ssl_static REMOVE_LIBRARIES hiredis::hiredis ADD_LIBRARIES hiredis::hiredis_static)
     endif()
   elseif(TARGET hiredis::hiredis_static)
     message(STATUS "hiredis using target: hiredis::hiredis_static")
@@ -18,8 +17,7 @@ macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES hiredis::hiredis_ssl)
     if(TARGET hiredis::hiredis)
       project_build_tools_patch_imported_link_interface_libraries(
-        hiredis::hiredis_ssl REMOVE_LIBRARIES hiredis::hiredis_ssl_static ADD_LIBRARIES
-        hiredis::hiredis)
+        hiredis::hiredis_ssl REMOVE_LIBRARIES hiredis::hiredis_ssl_static ADD_LIBRARIES hiredis::hiredis)
     endif()
   elseif(TARGET hiredis::hiredis)
     message(STATUS "hiredis using target: hiredis::hiredis")
@@ -28,9 +26,8 @@ macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)
     message(STATUS "hiredis support disabled")
   endif()
 
-  project_build_tools_patch_default_imported_config(
-    "hiredis::hiredis_ssl_static" "hiredis::hiredis_static" "hiredis::hiredis_ssl"
-    "hiredis::hiredis")
+  project_build_tools_patch_default_imported_config("hiredis::hiredis_ssl_static" "hiredis::hiredis_static"
+                                                    "hiredis::hiredis_ssl" "hiredis::hiredis")
 endmacro()
 
 if(VCPKG_TOOLCHAIN)
@@ -47,40 +44,34 @@ if(NOT TARGET hiredis::hiredis_ssl_static
    AND NOT TARGET hiredis::hiredis)
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION
-        "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with some
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with
+                                                                                                          # some
     # patch
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL
-        "https://github.com/redis/hiredis.git")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL "https://github.com/redis/hiredis.git")
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_DIR)
-    project_third_party_get_build_dir(
-      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_DIR "hiredis"
-      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION})
+    project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_DIR "hiredis"
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION})
   endif()
 
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_REDIS_HIREDIS_DIR
-      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION}"
-  )
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/hiredis-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION}")
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS "-DDISABLE_TESTS=ON"
-                                                                    "-DENABLE_EXAMPLES=OFF")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS "-DDISABLE_TESTS=ON" "-DENABLE_EXAMPLES=OFF")
   endif()
 
-  project_third_party_append_find_root_args(
-    ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS)
+  project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS)
 
   # hiredis_ssl has linking error for android
   if(OPENSSL_FOUND AND NOT ANDROID)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS "-DENABLE_SSL=ON")
-    # if(OPENSSL_ROOT_DIR AND (TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto OR OPENSSL_LIBRARIES))
-    # list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS
-    # "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}") endif()
+    # if(OPENSSL_ROOT_DIR AND (TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto OR OPENSSL_LIBRARIES)) list(APPEND
+    # ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}") endif()
     if(MSVC)
       if(OPENSSL_CRYPTO_LIBRARY)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS

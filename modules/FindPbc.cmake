@@ -54,8 +54,7 @@ find_library(Pbc_LIBRARY NAMES ${Pbc_NAMES} ${_PBC_SEARCH_ROOT})
 
 mark_as_advanced(Pbc_LIBRARY Pbc_INCLUDE_DIR)
 
-# handle the QUIETLY and REQUIRED arguments and set LIBUV_FOUND to TRUE if all listed variables are
-# TRUE
+# handle the QUIETLY and REQUIRED arguments and set LIBUV_FOUND to TRUE if all listed variables are TRUE
 include("FindPackageHandleStandardArgs")
 find_package_handle_standard_args(
   Pbc
