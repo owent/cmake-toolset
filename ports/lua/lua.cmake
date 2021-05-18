@@ -79,7 +79,6 @@ if(NOT TARGET lua::liblua-static
    AND NOT TARGET lua::liblua
    AND NOT LUA_FOUND)
   find_package(lua QUIET CONFIG)
-  project_third_party_lua_import()
 endif()
 
 # Try to use FindLua.cmake
@@ -88,7 +87,6 @@ if(NOT TARGET lua::liblua-static
    AND NOT TARGET lua::liblua
    AND NOT LUA_FOUND)
   find_package(Lua QUIET MODULE)
-  project_third_party_lua_import()
 endif()
 
 if(NOT TARGET lua::liblua-static
@@ -133,6 +131,8 @@ if(NOT TARGET lua::liblua-static
   find_configure_package(
     PACKAGE
     lua
+    FIND_PACKAGE_FLAGS
+    CONFIG
     BUILD_WITH_CMAKE
     CMAKE_INHIRT_BUILD_ENV
     CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
