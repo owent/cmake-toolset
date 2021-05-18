@@ -2,6 +2,8 @@
 *.md text eol=crlf
 *.bat text eol=crlf
 *.bat.in text eol=crlf
+*.cmd text eol=crlf
+*.reg text eol=crlf
 *.ps1 text eol=crlf
 *.ps1.in text eol=crlf
 *.sh text eol=lf
