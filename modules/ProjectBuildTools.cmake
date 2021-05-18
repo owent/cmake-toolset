@@ -391,7 +391,7 @@ function(project_git_clone_repository)
   elseif(project_git_clone_repository_BRANCH)
     set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_BRANCH})
   endif()
-  set(git_global_options -c "core.autocrlf=true" -c "advice.detachedHead=false")
+  set(git_global_options -c "advice.detachedHead=false")
   if(project_git_clone_repository_GIT_CONFIG)
     foreach(config IN LISTS project_git_clone_repository_GIT_CONFIG)
       list(APPEND git_global_options -c \"${config}\")
@@ -426,7 +426,8 @@ function(project_git_clone_repository)
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} ${git_global_options} apply ${project_git_clone_repository_PATCH_FILES}
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} -c "core.autocrlf=true" apply
+                  ${project_git_clone_repository_PATCH_FILES}
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
@@ -563,7 +564,8 @@ function(project_git_clone_repository)
 
     if(project_git_clone_repository_PATCH_FILES)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} ${git_global_options} apply ${project_git_clone_repository_PATCH_FILES}
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} -c "core.autocrlf=true" apply
+                ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
