@@ -363,7 +363,7 @@ function(project_git_clone_repository)
       COMMIT
       TAG
       CHECK_PATH)
-  set(multiValueArgs PATCH_FILES SUBMODULE_PATH)
+  set(multiValueArgs PATCH_FILES SUBMODULE_PATH GIT_CONFIG)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(NOT project_git_clone_repository_URL)
@@ -391,6 +391,12 @@ function(project_git_clone_repository)
   elseif(project_git_clone_repository_BRANCH)
     set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_BRANCH})
   endif()
+  set(git_global_options -c "core.autocrlf=true" -c "advice.detachedHead=false")
+  if(project_git_clone_repository_GIT_CONFIG)
+    foreach(config IN LISTS project_git_clone_repository_GIT_CONFIG)
+      list(APPEND git_global_options -c \"${config}\")
+    endforeach()
+  endif()
 
   find_package(Git)
   if(NOT GIT_FOUND AND NOT Git_FOUND)
@@ -399,8 +405,8 @@ function(project_git_clone_repository)
 
   if(project_git_clone_repository_FORCE_RESET AND EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} clean -dfx
-      COMMAND ${GIT_EXECUTABLE} reset --hard
+      COMMAND ${GIT_EXECUTABLE} ${git_global_options} clean -dfx
+      COMMAND ${GIT_EXECUTABLE} ${git_global_options} reset --hard
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
       RESULT_VARIABLE LAST_GIT_RESET_RESULT ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
@@ -409,19 +415,18 @@ function(project_git_clone_repository)
     elseif(project_git_clone_repository_ENABLE_SUBMODULE)
       if(project_git_clone_repository_SUBMODULE_RECURSIVE)
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} submodule foreach --recursive "git clean -dfx"
-          COMMAND ${GIT_EXECUTABLE} submodule foreach --recursive "git reset --hard"
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} submodule foreach --recursive "git clean -dfx"
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} submodule foreach --recursive "git reset --hard"
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
       else()
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} submodule foreach "git clean -dfx"
-          COMMAND ${GIT_EXECUTABLE} submodule foreach "git reset --hard"
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} submodule foreach "git clean -dfx"
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} submodule foreach "git reset --hard"
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY})
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} config "core.autocrlf" "true"
-          COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} apply ${project_git_clone_repository_PATCH_FILES}
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
@@ -431,7 +436,7 @@ function(project_git_clone_repository)
   # Check and cleanup directory if fetch failed before
   if(EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/.git")
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} log -n 1 --oneline
+      COMMAND ${GIT_EXECUTABLE} ${git_global_options} log -n 1 --oneline
       WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
       RESULT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
       OUTPUT_QUIET ERROR_QUIET)
@@ -455,23 +460,24 @@ function(project_git_clone_repository)
 
     if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.28.0")
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} init -b main
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} init -b main
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     else()
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} init WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                                                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} init
+        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                          ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} remote add origin "${project_git_clone_repository_URL}"
+      COMMAND ${GIT_EXECUTABLE} ${git_global_options} remote add origin "${project_git_clone_repository_URL}"
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
     if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
       unset(project_git_clone_repository_GIT_CHECK_REPO)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} ls-remote --symref origin HEAD
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} ls-remote --symref origin HEAD
         RESULT_VARIABLE project_git_clone_repository_GIT_LS_REMOTE_RESULT
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
         OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
@@ -481,7 +487,7 @@ function(project_git_clone_repository)
         set(project_git_clone_repository_GIT_BRANCH "${CMAKE_MATCH_1}")
       else()
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} ls-remote origin HEAD
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} ls-remote origin HEAD
           RESULT_VARIABLE project_git_clone_repository_GIT_LS_REMOTE_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
           OUTPUT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
@@ -503,8 +509,8 @@ function(project_git_clone_repository)
 
     if(project_git_clone_repository_GIT_BRANCH)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n" origin
-                ${project_git_clone_repository_GIT_BRANCH}
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n"
+                origin ${project_git_clone_repository_GIT_BRANCH}
         RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -516,15 +522,15 @@ function(project_git_clone_repository)
     else()
       if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n" origin
-                  ${project_git_clone_repository_COMMIT}
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n"
+                  origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
         message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
         execute_process(
-          COMMAND ${GIT_EXECUTABLE} fetch "-n" origin ${project_git_clone_repository_COMMIT}
+          COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "-n" origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -537,7 +543,7 @@ function(project_git_clone_repository)
     endif()
     unset(project_git_clone_repository_GIT_FETCH_RESULT)
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} reset --hard FETCH_HEAD
+      COMMAND ${GIT_EXECUTABLE} ${git_global_options} reset --hard FETCH_HEAD
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     if(project_git_clone_repository_ENABLE_SUBMODULE)
@@ -550,15 +556,14 @@ function(project_git_clone_repository)
       endif()
 
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} ${project_git_clone_repository_submodule_args}
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} ${project_git_clone_repository_submodule_args}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
 
     if(project_git_clone_repository_PATCH_FILES)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} config "core.autocrlf" "true"
-        COMMAND ${GIT_EXECUTABLE} apply ${project_git_clone_repository_PATCH_FILES}
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} apply ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
