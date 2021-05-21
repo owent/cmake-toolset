@@ -23,7 +23,11 @@ endif()
 set(PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR
     "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules")
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR)
-  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR "_deps")
+  if(WIN32)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR "dbt")
+  else()
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR "dependency-buildtree")
+  endif()
 endif()
 
 if(NOT EXISTS ${PROJECT_THIRD_PARTY_PACKAGE_DIR})
@@ -182,50 +186,94 @@ if(NOT GIT_FOUND AND NOT Git_FOUND)
 endif()
 
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
-  find_package(UnixCommands)
-  if(BASH)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_BASH "${BASH}")
-  elseif(WIN32)
+  if(WIN32
+     AND NOT MSYS
+     AND NOT CYGWIN)
     get_filename_component(GIT_EXECUTABLE_DIR "${GIT_EXECUTABLE}" DIRECTORY)
     get_filename_component(GIT_HOME_DIR "${GIT_EXECUTABLE_DIR}" DIRECTORY)
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS
-        "${GIT_EXECUTABLE_DIR}/bash.exe"
-        "${GIT_EXECUTABLE_DIR}/sh.exe"
-        "${GIT_EXECUTABLE_DIR}/bin/bash.exe"
-        "${GIT_EXECUTABLE_DIR}/bin/sh.exe"
-        "${GIT_EXECUTABLE_DIR}/usr/bin/bash.exe"
-        "${GIT_EXECUTABLE_DIR}/usr/bin/sh.exe"
-        "${GIT_EXECUTABLE_DIR}/usr/bin/dash.exe"
-        "${GIT_HOME_DIR}/bin/bash.exe"
-        "${GIT_HOME_DIR}/bin/sh.exe"
-        "${GIT_HOME_DIR}/usr/bin/bash.exe"
-        "${GIT_HOME_DIR}/usr/bin/sh.exe"
-        "${GIT_HOME_DIR}/usr/bin/dash.exe")
+        "${GIT_EXECUTABLE_DIR}" "${GIT_EXECUTABLE_DIR}/bin" "${GIT_EXECUTABLE_DIR}/usr/bin" "${GIT_HOME_DIR}/bin"
+        "${GIT_HOME_DIR}/usr/bin")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_NAMES bash cp gzip mv rm tar)
 
-    foreach(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH ${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS})
-      if(EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH}")
-        set(ATFRAMEWORK_CMAKE_TOOLSET_BASH "${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH}")
+    if(DEFINED ENV{HOME})
+      if(EXISTS "$ENV{HOME}/scoop/apps")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS "$ENV{HOME}/scoop/shims"
+             "$ENV{HOME}/scoop/apps/git/current/bin" "$ENV{HOME}/scoop/apps/git/current/usr/bin"
+             "$ENV{HOME}/scoop/apps/msys2/current/usr/bin")
+      endif()
+    elseif(DEFINED ENV{USERPROFILE})
+      if(EXISTS "$ENV{USERPROFILE}/scoop/apps")
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS "$ENV{USERPROFILE}/scoop/shims"
+             "$ENV{USERPROFILE}/scoop/apps/git/current/bin" "$ENV{USERPROFILE}/scoop/apps/git/current/usr/bin"
+             "$ENV{USERPROFILE}/scoop/apps/msys2/current/usr/bin")
+      endif()
+    endif()
+
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS "C:/Program Files/Git/bin" "C:/msys64/usr/bin"
+         "C:/tools/msys64/usr/bin" "C:/Program Files (x86)/Git/bin")
+
+    foreach(TEST_BIN_NAME ${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_NAMES})
+      string(TOUPPER ${TEST_BIN_NAME} TEST_VAR_NAME)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_${TEST_VAR_NAME})
         break()
       endif()
+      foreach(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIR ${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS})
+        if(EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIR}/${TEST_BIN_NAME}.exe")
+          string(REPLACE "\\" "/" ATFRAMEWORK_CMAKE_TOOLSET_${TEST_VAR_NAME}
+                         "${ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIR}/${TEST_BIN_NAME}.exe")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_${TEST_VAR_NAME}
+              "${ATFRAMEWORK_CMAKE_TOOLSET_${TEST_VAR_NAME}}"
+              CACHE FILEPATH "PATH of ${TEST_BIN_NAME}")
+          break()
+        endif()
+      endforeach()
+      unset(TEST_VAR_NAME)
     endforeach()
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
-      message(FATAL_ERROR "bash is required to use ports")
-    endif()
-    unset(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_PATH)
+    unset(TEST_BIN_NAME)
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIR)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_BASH_TEST_DIRS)
   endif()
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+    find_package(UnixCommands)
+    if(BASH)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_BASH
+          "${BASH}"
+          CACHE FILEPATH "PATH of bash")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_CP
+          "${CP}"
+          CACHE FILEPATH "PATH of cp")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_GZIP
+          "${GZIP}"
+          CACHE FILEPATH "PATH of gzip")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_MV
+          "${MV}"
+          CACHE FILEPATH "PATH of mv")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_RM
+          "${RM}"
+          CACHE FILEPATH "PATH of rm")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_TAR
+          "${TAR}"
+          CACHE FILEPATH "PATH of tar")
+    endif()
+  endif()
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+    message(FATAL_ERROR "bash is required to use ports")
+  endif()
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_CP)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_GZIP)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_MV)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
 endif()
 
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_PWSH NAMES pwsh pwsh.exe pwsh-preview pwsh-preview.exe)
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-    find_program(ATFRAMEWORK_CMAKE_TOOLSET_PWSH NAMES powershell powershell.exe)
-  endif()
-  set(ATFRAMEWORK_CMAKE_TOOLSET_PWSH
-      "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}"
-      CACHE FILEPATH "powershell PATH" FORCE)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
 endif()
 

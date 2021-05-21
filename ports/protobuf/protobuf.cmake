@@ -181,7 +181,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD "\"${CMD_ARG}\"")
       endforeach()
 
-      if(CMAKE_HOST_UNIX OR MSYS)
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH
+         OR CMAKE_HOST_UNIX
+         OR MSYS)
         configure_file(
           "${CMAKE_CURRENT_LIST_DIR}/run-build-release.sh.in"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.sh" @ONLY

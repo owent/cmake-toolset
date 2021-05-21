@@ -154,6 +154,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   endif()
 
   if(NOT OPENSSL_FOUND AND NOT OpenSSL_FOUND)
+    find_package(Perl)
+  endif()
+  if(NOT OPENSSL_FOUND
+     AND NOT OpenSSL_FOUND
+     AND PERL_FOUND)
     echowithcolor(COLOR GREEN "-- Try to configure and use openssl")
     unset(OPENSSL_FOUND CACHE)
     unset(OPENSSL_EXECUTABLE CACHE)
