@@ -49,7 +49,31 @@ elif [[ "$1" == "clang.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ;
+  echo '#include <iostream>
+  int main() { std::cout<<"Hello"; }' > test-libc++.cpp
+  SELECT_CLANG_VERSION="";
+  SELECT_CLANG_HAS_LIBCXX=1;
+  clang -x c++ -stdlib=libc++ test-libc++.cpp -lc++ -lc++abi || SELECT_CLANG_HAS_LIBCXX=0;
+  if [[ $SELECT_CLANG_HAS_LIBCXX -eq 0 ]]; then
+    CURRENT_CLANG_VERSION=$(clang -x c /dev/null -dM -E | grep __clang_major__ | awk '{print $NF}');
+    for ((i=$CURRENT_CLANG_VERSION+3;$i>=$CURRENT_CLANG_VERSION-3;--i)); do
+      SELECT_CLANG_HAS_LIBCXX=1;
+      SELECT_CLANG_VERSION="-$i";
+      clang$SELECT_CLANG_VERSION -x c++ -stdlib=libc++ test-libc++.cpp -lc++ -lc++abi || SELECT_CLANG_HAS_LIBCXX=0;
+      if [[ $SELECT_CLANG_HAS_LIBCXX -eq 1 ]]; then
+        break;
+      fi
+    done
+  fi
+  SELECT_CLANGPP_BIN=clang++$SELECT_CLANG_VERSION;
+  LINK_CLANGPP_BIN=0;
+  which $SELECT_CLANGPP_BIN || LINK_CLANGPP_BIN=1;
+  if [[ $LINK_CLANGPP_BIN -eq 1 ]]; then
+    mkdir -p .local/bin ;
+    ln -s "$(which "clang$SELECT_CLANG_VERSION")" "$PWD/.local/bin/clang++$SELECT_CLANG_VERSION" ;
+    export PATH="$PWD/.local/bin:$PATH";
+  fi
+  cmake .. -DCMAKE_C_COMPILER=clang$SELECT_CLANG_VERSION -DCMAKE_CXX_COMPILER=clang++$SELECT_CLANG_VERSION ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.vcpkg.test" ]]; then
   echo "$1";
