@@ -49,7 +49,7 @@ elif [[ "$1" == "clang.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
-  cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ;
+  cmake .. -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10 ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "gcc.vcpkg.test" ]]; then
   echo "$1";
