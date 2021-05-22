@@ -185,7 +185,9 @@ jobs:
                 }
               } }
           }
-          Invoke-Environment 'call "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Auxiliary/Build/vcvars64.bat"'
+          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
           pwsh ci/do_ci.ps1 msvc2017.test ;
   macos_appleclang_test:
     name: "macos.appleclang.test"
