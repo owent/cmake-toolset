@@ -152,7 +152,8 @@ if(NOT TARGET lua::liblua-static
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR}"
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_ARGS})
 
-  if(NOT TARGET lua::liblua-dynamic
+  if(NOT MSVC
+     AND NOT TARGET lua::liblua-dynamic
      AND NOT TARGET lua::liblua-static
      AND NOT TARGET lua::liblua
      AND NOT LUA_FOUND)
