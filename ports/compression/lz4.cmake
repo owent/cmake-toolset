@@ -113,7 +113,10 @@ else()
   project_third_party_lz4_import()
 endif()
 
-if(NOT TARGET lz4::lz4_static
+# lz4 can not be built on some version of MSVC 2019 and Windows SDK, Just skip it
+
+if(NOT MSVC
+   AND NOT TARGET lz4::lz4_static
    AND NOT TARGET lz4::lz4_shared
    AND NOT TARGET lz4::lz4)
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build lz4.")
