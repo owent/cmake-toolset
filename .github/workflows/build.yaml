@@ -122,9 +122,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: cmd
+        shell: pwsh
         run: |
-          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.static.test ;
   msvc_shared_test:
     name: "msvc.shared.test"
@@ -133,9 +136,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: cmd
+        shell: pwsh
         run: |
-          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.shared.test ;
   msvc_vcpkg_test:
     name: "msvc.vcpkg.test"
@@ -144,9 +150,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: cmd
+        shell: pwsh
         run: |
-          "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
@@ -161,9 +170,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: CI Job
-        shell: cmd
+        shell: pwsh
         run: |
-          "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          function Invoke-Environment {
+            param
+            (
+              [Parameter(Mandatory = $true)]
+              [string] $Command
+            )
+            $Command = "`"" + $Command + "`""
+            cmd /c "$Command > nul 2>&1 && set" | . { process {
+                if ($_ -match '^([^=]+)=(.*)') {
+                  [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+                }
+              } }
+          }
+          Invoke-Environment 'call "C:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Auxiliary/Build/vcvars64.bat"'
           pwsh ci/do_ci.ps1 msvc2017.test ;
   macos_appleclang_test:
     name: "macos.appleclang.test"
