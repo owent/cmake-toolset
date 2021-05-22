@@ -9,10 +9,20 @@ macro(PROJECT_THIRD_PARTY_GTEST_IMPORT)
   if(TARGET GTest::gtest)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gtest found")
     project_build_tools_patch_default_imported_config(GTest::gtest)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_LINK_NAME GTest::gtest)
+  elseif(TARGET GTest::GTest)
+    message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::GTest found")
+    project_build_tools_patch_default_imported_config(GTest::GTest)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_LINK_NAME GTest::GTest)
   endif()
   if(TARGET GTest::gtest_main)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gtest_main found")
     project_build_tools_patch_default_imported_config(GTest::gtest_main)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_MAIN_LINK_NAME GTest::gtest_main)
+  elseif(TARGET GTest::Main)
+    message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::Main found")
+    project_build_tools_patch_default_imported_config(GTest::Main)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_MAIN_LINK_NAME GTest::Main)
   endif()
   if(TARGET GTest::gmock)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gmock found")
@@ -24,13 +34,19 @@ macro(PROJECT_THIRD_PARTY_GTEST_IMPORT)
   endif()
 endmacro()
 
-if(NOT TARGET GTest::gtest AND NOT TARGET GTest::gtest_main)
+if(NOT TARGET GTest::gtest
+   AND NOT TARGET GTest::gtest_main
+   AND NOT TARGET GTest::GTest
+   AND NOT TARGET GTest::Main)
   if(VCPKG_TOOLCHAIN)
     find_package(GTest QUIET CONFIG)
     project_third_party_gtest_import()
   endif()
 
-  if(NOT TARGET GTest::gtest AND NOT TARGET GTest::gtest_main)
+  if(NOT TARGET GTest::gtest
+     AND NOT TARGET GTest::gtest_main
+     AND NOT TARGET GTest::GTest
+     AND NOT TARGET GTest::Main)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION "release-1.10.0")
     endif()
@@ -78,7 +94,10 @@ if(NOT TARGET GTest::gtest AND NOT TARGET GTest::gtest_main)
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL}")
 
-    if(TARGET GTest::gtest OR TARGET GTest::gtest_main)
+    if(TARGET GTest::gtest
+       OR TARGET GTest::gtest_main
+       OR TARGET GTest::GTest
+       OR TARGET GTest::Main)
       project_third_party_gtest_import()
     endif()
   endif()
@@ -88,6 +107,8 @@ endif()
 
 if(NOT TARGET GTest::gtest
    AND NOT TARGET GTest::gtest_main
+   AND NOT TARGET GTest::GTest
+   AND NOT TARGET GTest::Main
    AND NOT TARGET GTest::gmock
    AND NOT TARGET GTest::gmock_main)
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build GTest failed.")
