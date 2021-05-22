@@ -127,7 +127,7 @@ jobs:
           $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
           $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath/2019/Enterprise" -StartInPath $(Get-Location)
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.static.test ;
   msvc_shared_test:
     name: "msvc.shared.test"
@@ -141,7 +141,7 @@ jobs:
           $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
           $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath/2019/Enterprise" -StartInPath $(Get-Location)
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.shared.test ;
   msvc_vcpkg_test:
     name: "msvc.vcpkg.test"
@@ -155,7 +155,7 @@ jobs:
           $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
           $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath/2019/Enterprise" -StartInPath $(Get-Location)
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
@@ -175,7 +175,7 @@ jobs:
           $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
           $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath/2019/Enterprise" -StartInPath $(Get-Location)
+          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc2017.test ;
   macos_appleclang_test:
     name: "macos.appleclang.test"
