@@ -31,9 +31,17 @@ if ($IsWindows) {
   $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
   $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
   $winSDKDir = "${ENV:ProgramFiles(x86)}/Windows Kits/10/Include/"
+  $winSDKDir = $(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" -Name "InstallationFolder")
+  if ([string]::IsNullOrEmpty($winSDKDir)) {
+    $winSDKDir = "${ENV:ProgramFiles(x86)}/Windows Kits/10/Include/"
+  }
   $lastWinSDKVersion = $(Get-ChildItem $winSDKDir | Sort-Object -Property Name | Select-Object -Last 1).Name
   if (!(Test-Path Env:WindowsSDKVersion)) {
     $Env:WindowsSDKVersion = $lastWinSDKVersion
+  }
+  Write-Output "Window SDKs:(Latest: $lastWinSDKVersion)"
+  foreach ($sdk in $(Get-ChildItem $winSDKDir | Sort-Object -Property Name)) {
+    Write-Output "  - $sdk"
   }
 }
 
@@ -42,7 +50,8 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release
+  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release `
+    "-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=$lastWinSDKVersion"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -56,7 +65,8 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release  `
+    "-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=$lastWinSDKVersion"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -71,7 +81,8 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv lua openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location -Verbose "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release
+  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
+    -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release "-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=$lastWinSDKVersion"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -85,7 +96,8 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release
+  & cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release `
+    "-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=$lastWinSDKVersion"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
