@@ -53,7 +53,6 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DBENCHMARK_USE_LIBCXX=OFF")
       endif()
     endif()
-    project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS)
     project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
 

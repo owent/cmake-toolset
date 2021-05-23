@@ -37,7 +37,6 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
     if(MSVC)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
-    project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS)
     project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
 
