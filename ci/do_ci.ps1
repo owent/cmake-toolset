@@ -40,7 +40,11 @@ if ($IsWindows) {
   else {
     $winSDKDir = "$winSDKDir/Include/"
   }
-  $selectWinSDKVersion = $(Get-ChildItem $winSDKDir | Sort-Object -Property Name | Select-Object -Last 1).Name
+  foreach ($sdk in $(Get-ChildItem $winSDKDir | Sort-Object -Property Name)) {
+    if ($sdk.Name -match "[0-9]+\.[0-9]+\.[0-9\.]+") {
+      $selectWinSDKVersion = $sdk.Name
+    }
+  }
   if (!(Test-Path Env:WindowsSDKVersion)) {
     $Env:WindowsSDKVersion = $selectWinSDKVersion
   }
