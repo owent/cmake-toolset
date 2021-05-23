@@ -55,7 +55,6 @@ if(NOT TARGET c-ares::cares
                                         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION})
     endif()
 
-    project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS)
     project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS
                                                     CARES_SHARED BUILD_SHARED_LIBS)
     project_third_party_append_build_static_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS
@@ -70,6 +69,7 @@ if(NOT TARGET c-ares::cares
       BUILD_WITH_CMAKE
       CMAKE_INHIRT_BUILD_ENV
       CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
+      CMAKE_INHIRT_FIND_ROOT_PATH
       CMAKE_FLAGS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS}
       MSVC_CONFIGURE

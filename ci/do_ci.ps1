@@ -106,8 +106,7 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release `
-    "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion"
+  & cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }

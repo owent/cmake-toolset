@@ -66,7 +66,6 @@ if(NOT TARGET gRPC::grpc++_alts
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
                                                                         "-DgRPC_INSTALL=ON")
     endif()
-    project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS)
 
     # Some versions has problem when linking with MSVC
     if(MSVC)
