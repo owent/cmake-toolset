@@ -82,10 +82,17 @@ if(NOT TARGET zstd::libzstd_shared
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZSTD_BUILD_OPTIONS "-DZSTD_BUILD_PROGRAMS=ON")
       endif()
     endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZSTD_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS ZSTD_BUILD_SHARED ZSTD_PROGRAMS_LINK_SHARED)
-    project_third_party_append_build_static_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZSTD_BUILD_OPTIONS
-                                                    ZSTD_BUILD_STATIC)
+    if(MSVC)
+      # Some versions of zstd has linking problem for MSVC So we always use static library when using MSVC
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZSTD_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
+           "-DZSTD_BUILD_SHARED=OFF" "-DZSTD_PROGRAMS_LINK_SHARED=OFF")
+    else()
+      project_third_party_append_build_shared_lib_var(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZSTD_BUILD_OPTIONS BUILD_SHARED_LIBS ZSTD_BUILD_SHARED
+        ZSTD_PROGRAMS_LINK_SHARED)
+      project_third_party_append_build_static_lib_var(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZSTD_BUILD_OPTIONS ZSTD_BUILD_STATIC)
+    endif()
 
     if(TARGET lz4::lz4_static)
       get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_INCLUDE_DIR lz4::lz4_static

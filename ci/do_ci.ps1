@@ -30,10 +30,12 @@ if ($IsWindows) {
   }
   $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
   $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-  $winSDKDir = "${ENV:ProgramFiles(x86)}/Windows Kits/10/Include/"
   $winSDKDir = $(Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" -Name "InstallationFolder")
   if ([string]::IsNullOrEmpty($winSDKDir)) {
     $winSDKDir = "${ENV:ProgramFiles(x86)}/Windows Kits/10/Include/"
+  }
+  else {
+    $winSDKDir = "$winSDKDir/Include/"
   }
   $lastWinSDKVersion = $(Get-ChildItem $winSDKDir | Sort-Object -Property Name | Select-Object -Last 1).Name
   if (!(Test-Path Env:WindowsSDKVersion)) {
