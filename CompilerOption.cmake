@@ -363,8 +363,20 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       /WX)
     add_linker_flags_for_runtime(/ignore:4217)
 
-    add_compiler_flags_to_var(CMAKE_CXX_FLAGS /MP /EHsc)
-    add_compiler_flags_to_var(CMAKE_C_FLAGS /MP /EHsc)
+    if(NOT VCPKG_TOOLCHAIN)
+      add_compiler_flags_to_var_unique(
+        CMAKE_CXX_FLAGS
+        /nologo
+        /DWIN32
+        /D_WINDOWS
+        "/utf-8"
+        /GR
+        /MP
+        /EHsc)
+      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
+      add_compiler_flags_to_var_unique(CMAKE_RC_FLAGS "-c65001" "/DWIN32")
+    endif()
+
     try_set_compiler_lang_standard(CMAKE_C_STANDARD 11)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
       try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 20)
@@ -391,7 +403,49 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endif()
 
-  if(NOT MSVC)
+  if(MSVC)
+    if(NOT VCPKG_TOOLCHAIN)
+      add_compiler_flags_to_var_unique(
+        CMAKE_CXX_FLAGS_DEBUG
+        /Od
+        /D_DEBUG
+        /Z7
+        /Ob0
+        /Od
+        /RTC1)
+      add_compiler_flags_to_var_unique(
+        CMAKE_C_FLAGS_DEBUG
+        /Od
+        /D_DEBUG
+        /Z7
+        /Ob0
+        /Od
+        /RTC1)
+      add_compiler_flags_to_var_unique(CMAKE_CXX_FLAGS_RELEASE /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS_RELEASE /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS_RELWITHDEBINFO /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL /Ox /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS_MINSIZEREL /Ox /Gy /DNDEBUG /Z7)
+      string(APPEND CMAKE_STATIC_LINKER_FLAGS_RELEASE_INIT " /nologo ")
+      add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/nologo" "/DEBUG" "/INCREMENTAL:NO"
+                                       "/OPT:REF" "/OPT:ICF")
+      add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS_RELEASE "/nologo" "/DEBUG" "/INCREMENTAL:NO" "/OPT:REF"
+                                       "/OPT:ICF")
+
+      string(APPEND CMAKE_STATIC_LINKER_FLAGS_DEBUG_INIT " /nologo ")
+      string(APPEND CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT " /nologo ")
+      string(APPEND CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT " /nologo ")
+    endif()
+    if(NOT CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
+      if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND ENV{WindowsSDKVersion})
+        set(WINDOWS_SDK $ENV{WindowsSDKVersion})
+        string(REPLACE "\\" "" WINDOWS_SDK "${WINDOWS_SDK}")
+        set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION ${WINDOWS_SDK})
+        message(STATUS "Set CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+      endif()
+    endif()
+  else()
     if(NOT EMSCRIPTEN)
       add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb)
       add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
@@ -399,11 +453,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb) add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE)
     # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
     # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL)
-  else()
-    add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG /Od)
-    add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE /O2 /D NDEBUG)
-    add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO /O2 /D NDEBUG)
-    add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL /Ox /D NDEBUG)
   endif()
 
   # ================== support checking ==================

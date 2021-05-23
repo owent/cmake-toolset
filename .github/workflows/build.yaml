@@ -124,10 +124,6 @@ jobs:
       - name: CI Job
         shell: pwsh
         run: |
-          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
-          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.static.test ;
   msvc_shared_test:
     name: "msvc.shared.test"
@@ -138,10 +134,6 @@ jobs:
       - name: CI Job
         shell: pwsh
         run: |
-          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
-          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.shared.test ;
   msvc_vcpkg_test:
     name: "msvc.vcpkg.test"
@@ -152,10 +144,6 @@ jobs:
       - name: CI Job
         shell: pwsh
         run: |
-          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
-          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          Import-Module "$vsInstallationPath/Common7/Tools/Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath "$vsInstallationPath" -StartInPath $(Get-Location)
           pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
@@ -172,22 +160,6 @@ jobs:
       - name: CI Job
         shell: pwsh
         run: |
-          function Invoke-Environment {
-            param
-            (
-              [Parameter(Mandatory = $true)]
-              [string] $Command
-            )
-            $Command = "`"" + $Command + "`""
-            cmd /c "$Command > nul 2>&1 && set" | . { process {
-                if ($_ -match '^([^=]+)=(.*)') {
-                  [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-                }
-              } }
-          }
-          $vswhere = "${ENV:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
-          $vsInstallationPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
           pwsh ci/do_ci.ps1 msvc2017.test ;
   macos_appleclang_test:
     name: "macos.appleclang.test"
