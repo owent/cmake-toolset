@@ -15,13 +15,16 @@ Set-Location "$SCRIPT_DIR/.."
 $RUN_MODE = $args[0]
 
 if ($IsWindows) {
+  if (Test-Path "${Env:USERPROFILE}/scoop/apps/perl/current/perl/bin") {
+    $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:USERPROFILE}/scoop/apps/perl/current/perl/bin"
+  }
+  
   function Invoke-Environment {
     param
     (
       [Parameter(Mandatory = $true)]
       [string] $Command
     )
-    $Command = "`"" + $Command + "`""
     cmd /c "$Command > nul 2>&1 && set" | . { process {
         if ($_ -match '^([^=]+)=(.*)') {
           [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])

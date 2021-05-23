@@ -67,8 +67,14 @@ if(NOT TARGET gRPC::grpc++_alts
                                                                         "-DgRPC_INSTALL=ON")
     endif()
     project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS)
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
+
+    # Some versions has problem when linking with MSVC
+    if(MSVC)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF")
+    else()
+      project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
+                                                      BUILD_SHARED_LIBS)
+    endif()
 
     list(
       APPEND
