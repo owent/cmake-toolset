@@ -13,6 +13,10 @@ if [[ "@CMAKE_SYSTEM@" != "@CMAKE_HOST_SYSTEM@" ]]; then
 
     cd "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" ;
 
+    if [[ -e "CMakeCache.txt" ]]; then
+        rm -f "CMakeCache.txt" ;
+    fi
+
     if [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ]] && [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" ]]; then
 
         env CC= CXX= SDKROOT= @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
@@ -48,6 +52,10 @@ if [[ ! -e "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ]]; then
 fi
 
 cd "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ;
+
+if [[ -e "CMakeCache.txt" ]]; then
+    rm -f "CMakeCache.txt" ;
+fi
 
 if [[ "@CMAKE_SYSTEM@" != "@CMAKE_HOST_SYSTEM@" ]]; then
 

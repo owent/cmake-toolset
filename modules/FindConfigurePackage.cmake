@@ -471,6 +471,9 @@ macro(FindConfigurePackage)
                                "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
         endif()
 
+        if(EXISTS "${FindConfigurePackage_BUILD_DIRECTORY}/CMakeCache.txt")
+          file(REMOVE "${FindConfigurePackage_BUILD_DIRECTORY}/CMakeCache.txt")
+        endif()
         execute_process(
           COMMAND ${CMAKE_COMMAND} ${BUILD_WITH_CMAKE_PROJECT_DIR} ${FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR}
                   ${FindConfigurePackage_CMAKE_FLAGS}
