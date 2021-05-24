@@ -548,7 +548,8 @@ function(project_git_clone_repository)
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     if(project_git_clone_repository_ENABLE_SUBMODULE)
-      set(project_git_clone_repository_submodule_args submodule update --init -f)
+      set(project_git_clone_repository_submodule_args submodule update --init -f --depth
+                                                      ${project_git_clone_repository_DEPTH})
       if(project_git_clone_repository_SUBMODULE_RECURSIVE)
         list(APPEND project_git_clone_repository_submodule_args "--recursive")
       endif()
