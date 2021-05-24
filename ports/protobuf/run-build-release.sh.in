@@ -4,6 +4,15 @@ BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PRO
 BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR@" ;
 BUILD_THIRD_IS_CROSS="@CMAKE_CROSSCOMPILING@"
 BUILD_THIRD_IS_CROSS="${BUILD_THIRD_IS_CROSS,,}"
+LOW_MEMORY_MODE="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE@"
+LOW_MEMORY_MODE="${LOW_MEMORY_MODE,,}"
+
+if [[ "x$LOW_MEMORY_MODE" == "xtrue" ]] || [[ "x$LOW_MEMORY_MODE" == "xyes" ]] || 
+    [[ "x$LOW_MEMORY_MODE" == "x1" ]] || [[ "x$LOW_MEMORY_MODE" == "xon" ]]; then
+    ALLOW_PARALLEL_BUILD_FLAGS = 0 ;
+else
+    ALLOW_PARALLEL_BUILD_FLAGS = 1 ;
+fi
 
 # build host protoc first
 if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "xyes" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "x1" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "xon" ]]; then
@@ -25,19 +34,29 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
 
         if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
-            "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-
-            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+                "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+                "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            else
+                "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+                "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            fi
 
             if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
-
-                "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
-
+                if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+                    "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
+                else
+                    "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
+                fi
             fi
 
         else
 
-            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+                "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            else
+                "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            fi
 
         fi
 
@@ -71,19 +90,29 @@ fi
 
 if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
-    "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-
-    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+        "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+    else
+        "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+        "@CMAKE_COMMAND@" --build . --target install --config Release ;
+    fi
 
     if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
-
-        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
-
+        if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        else
+            "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        fi
     fi
 
 else
 
-    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+    else
+        "@CMAKE_COMMAND@" --build . --target install --config Release ;
+    fi
 
 fi
 
