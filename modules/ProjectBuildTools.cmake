@@ -630,9 +630,6 @@ function(project_build_tools_patch_protobuf_sources)
 endfunction()
 
 function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME)
-  if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
-    include(CMakeParseArguments)
-  endif()
   set(multiValueArgs ADD_LIBRARIES REMOVE_LIBRARIES)
   cmake_parse_arguments(PATCH_OPTIONS "" "" "${multiValueArgs}" ${ARGN})
 

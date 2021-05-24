@@ -280,3 +280,59 @@ endfunction()
 function(project_third_party_generate_load_env_powershell)
   project_build_tool_generate_load_env_powershell(${ARGN})
 endfunction()
+
+function(project_third_party_port_declare PORT_NAME)
+  set(optionArgs APPEND_BUILD_OPTIONS)
+  set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR)
+  set(multiValueArgs BUILD_OPTIONS)
+  cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
+                        "${ARGN}")
+  unset(optionArgs)
+  unset(oneValueArgs)
+  unset(multiValueArgs)
+
+  if(NOT ${PORT_NAME}_VERSION AND project_third_party_port_declare_VERSION)
+    set(${PORT_NAME}_VERSION
+        "${project_third_party_port_declare_VERSION}"
+        PARENT_SCOPE)
+  endif()
+  if(NOT ${PORT_NAME}_GIT_URL AND project_third_party_port_declare_GIT_URL)
+    set(${PORT_NAME}_GIT_URL
+        "${project_third_party_port_declare_GIT_URL}"
+        PARENT_SCOPE)
+  endif()
+  if(NOT ${PORT_NAME}_BUILD_OPTIONS AND project_third_party_port_declare_BUILD_OPTIONS)
+    if(project_third_party_port_declare_APPEND_BUILD_OPTIONS)
+      set(${PORT_NAME}_BUILD_OPTIONS
+          ${${PORT_NAME}_BUILD_OPTIONS} ${project_third_party_port_declare_BUILD_OPTIONS}
+          PARENT_SCOPE)
+    else()
+      set(${PORT_NAME}_BUILD_OPTIONS
+          "${project_third_party_port_declare_BUILD_OPTIONS}"
+          PARENT_SCOPE)
+    endif()
+  endif()
+
+  if(NOT ${PORT_NAME}_BUILD_DIR)
+    if(NOT project_third_party_port_declare_BUILD_DIR)
+      project_third_party_get_build_dir(${PORT_NAME}_BUILD_DIR "${PORT_NAME}" ${${PORT_NAME}_VERSION})
+    else()
+      project_third_party_get_build_dir(${PORT_NAME}_BUILD_DIR "${project_third_party_port_declare_BUILD_DIR}")
+    endif()
+    set(${PORT_NAME}_BUILD_DIR
+        "${${PORT_NAME}_BUILD_DIR}"
+        PARENT_SCOPE)
+  endif()
+
+  if(NOT ${PORT_NAME}_SRC_DIRECTORY_NAME)
+    if(NOT project_third_party_port_declare_SRC_DIRECTORY_NAME)
+      project_third_party_get_build_dir(${PORT_NAME}_SRC_DIRECTORY_NAME "${PORT_NAME}-${${PORT_NAME}_VERSION}")
+    else()
+      project_third_party_get_build_dir(${PORT_NAME}_SRC_DIRECTORY_NAME
+                                        "${project_third_party_port_declare_SRC_DIRECTORY_NAME}")
+    endif()
+    set(${PORT_NAME}_SRC_DIRECTORY_NAME
+        "${${PORT_NAME}_SRC_DIRECTORY_NAME}"
+        PARENT_SCOPE)
+  endif()
+endfunction()
