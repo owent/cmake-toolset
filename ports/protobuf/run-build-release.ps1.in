@@ -9,6 +9,16 @@ $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR = "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR@"
 $ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR = "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR@"
 
+if (("@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE@".ToLower() -eq "true") -or 
+    ("@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE@".ToLower() -eq "yes") -or 
+    ("@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE@".ToLower() -eq "1") -or 
+    ("@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE@".ToLower() -eq "on")) {
+    $ALLOW_PARALLEL_BUILD_FLAGS = $false
+}
+else {
+    $ALLOW_PARALLEL_BUILD_FLAGS = $true
+}
+
 # build host protoc first
 if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@".ToLower() -eq "yes") -or ("@CMAKE_CROSSCOMPILING@".ToLower() -eq "1") -or ("@CMAKE_CROSSCOMPILING@".ToLower() -eq "on")) {
     $ENV:PATH = "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" + [IO.Path]::PathSeparator + "$ENV:PATH"
@@ -29,17 +39,32 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         $ENV:BACKUP_SDKROOT = $ENV:SDKROOT
         & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
         if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
-            & "@CMAKE_COMMAND@" --build . --target install --config Debug -j || & "@CMAKE_COMMAND@" --build . --target install --config Debug
+            if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+                & "@CMAKE_COMMAND@" --build . --target install --config Debug -j || & "@CMAKE_COMMAND@" --build . --target install --config Debug
+            }
+            else {
+                & "@CMAKE_COMMAND@" --build . --target install --config Debug
+            }
             if ( $LastExitCode -ne 0 ) {
                 exit $LastExitCode
             }
         }
-        & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+        if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+            & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+        }
+        else {
+            & "@CMAKE_COMMAND@" --build . --target install --config Release
+        }
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
         }
         if (("@CMAKE_BUILD_TYPE@" -ne "") -and ("@CMAKE_BUILD_TYPE@" -ne "Release")) {
-            & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+            if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+                & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+            }
+            else {
+                & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+            }
         }
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
@@ -73,24 +98,44 @@ else {
 }
 
 if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MSVC@".ToLower() -eq "1")) {
-    & "@CMAKE_COMMAND@" --build . --target install --config Debug -j || & "@CMAKE_COMMAND@" --build . --target install --config Debug
+    if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+        & "@CMAKE_COMMAND@" --build . --target install --config Debug -j || & "@CMAKE_COMMAND@" --build . --target install --config Debug
+    }
+    else {
+        & "@CMAKE_COMMAND@" --build . --target install --config Debug
+    }
 
     if ( $LastExitCode -ne 0 ) {
         exit $LastExitCode
     }
 
-    & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+    if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+        & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+    }
+    else {
+        & "@CMAKE_COMMAND@" --build . --target install --config Release
+    }
 
     if ( $LastExitCode -ne 0 ) {
         exit $LastExitCode
     }
 
     if (("@CMAKE_BUILD_TYPE@" -ne "") -and ("@CMAKE_BUILD_TYPE@" -ne "Release")) {
-        & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+        if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+            & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+        }
+        else {
+            & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+        }
     }
 }
 else {
-    & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+    if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+        & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+    }
+    else {
+        & "@CMAKE_COMMAND@" --build . --target install --config Release
+    }
 }
 
 

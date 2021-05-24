@@ -155,6 +155,11 @@ if(NOT TARGET gRPC::grpc++_alts
       add_compiler_flags_to_var_unique(CMAKE_CXX_STANDARD_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
     endif()
 
+    # Other flags for find_configure_package
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS DISABLE_PARALLEL_BUILD)
+    endif()
+
     find_configure_package(
       PACKAGE
       gRPC

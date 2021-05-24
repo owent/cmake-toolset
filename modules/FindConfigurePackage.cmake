@@ -5,6 +5,7 @@
 #
 # FindConfigurePackage(
 #   PACKAGE <name>
+#   DISABLE_PARALLEL_BUILD
 #   BUILD_WITH_CONFIGURE
 #   BUILD_WITH_CMAKE
 #   BUILD_WITH_SCONS
@@ -158,6 +159,7 @@ endif()
 
 macro(FindConfigurePackage)
   set(optionArgs
+      DISABLE_PARALLEL_BUILD
       BUILD_WITH_CONFIGURE
       BUILD_WITH_CMAKE
       BUILD_WITH_SCONS
@@ -417,10 +419,12 @@ macro(FindConfigurePackage)
           WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
-        if(PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD)
+        if(FindConfigurePackage_DISABLE_PARALLEL_BUILD)
+          unset(FindConfigurePackageCMakeBuildParallelFlags)
+        elseif(PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD)
           set(FindConfigurePackageCMakeBuildParallelFlags "-j${PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD}")
         else()
-          unset(FindConfigurePackageCMakeBuildParallelFlags)
+          set(FindConfigurePackageCMakeBuildParallelFlags "-j")
         endif()
         execute_process(
           COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "make" ${FindConfigurePackage_MAKE_FLAGS}
@@ -491,7 +495,9 @@ macro(FindConfigurePackage)
                             ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
         # cmake --build and install
-        if(PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD)
+        if(FindConfigurePackage_DISABLE_PARALLEL_BUILD)
+          unset(FindConfigurePackageCMakeBuildParallelFlags)
+        elseif(PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD)
           set(FindConfigurePackageCMakeBuildParallelFlags "-j${PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD}")
         else()
           set(FindConfigurePackageCMakeBuildParallelFlags "-j")
