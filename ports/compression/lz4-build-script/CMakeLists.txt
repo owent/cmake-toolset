@@ -92,10 +92,14 @@ option(LZ4_POSITION_INDEPENDENT_LIB "Use position independent code for static li
 # liblz4
 set(LZ4_LIBRARIES_BUILT)
 if(BUILD_SHARED_LIBS)
+  set(lz4_shared_OUTPUT_NAME lz4)
+  if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
+    set(lz4_shared_OUTPUT_NAME lz4_shared)
+  endif()
   add_library(lz4_shared SHARED ${LZ4_SOURCES})
   set_target_properties(
     lz4_shared
-    PROPERTIES OUTPUT_NAME lz4
+    PROPERTIES OUTPUT_NAME ${lz4_shared_OUTPUT_NAME}
                PUBLIC_HEADER ${LZ4_HEADERS}
                SOVERSION "${LZ4_VERSION_MAJOR}"
                VERSION "${LZ4_VERSION_STRING}")
@@ -106,9 +110,7 @@ if(BUILD_SHARED_LIBS)
   endif()
   list(APPEND LZ4_LIBRARIES_BUILT lz4_shared)
 endif()
-if(BUILD_STATIC_LIBS
-   OR MINGW
-   OR WIN32)
+if(BUILD_STATIC_LIBS)
   add_library(lz4_static STATIC ${LZ4_SOURCES})
   set_target_properties(
     lz4_static
@@ -121,9 +123,7 @@ if(BUILD_STATIC_LIBS
 endif()
 
 # link to shared whenever possible, to static otherwise
-if(BUILD_SHARED_LIBS
-   AND NOT MINGW
-   AND NOT WIN32)
+if(BUILD_SHARED_LIBS)
   set(LZ4_LINK_LIBRARY lz4_shared)
 else()
   set(LZ4_LINK_LIBRARY lz4_static)

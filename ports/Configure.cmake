@@ -120,7 +120,21 @@ macro(project_third_party_append_find_root_args VARNAME)
   endif()
 endmacro()
 
-file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)
+find_package(Git)
+if(NOT GIT_FOUND AND NOT Git_FOUND)
+  message(FATAL_ERROR "git is required to use ports")
+endif()
+
+if(NOT project_third_party_get_build_dir_HASH)
+  execute_process(
+    COMMAND ${GIT_EXECUTABLE} log -n 1 "--format=%H" --encoding=UTF-8
+    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../"
+    OUTPUT_VARIABLE project_third_party_get_build_dir_HASH)
+endif()
+
+if(NOT project_third_party_get_build_dir_HASH)
+  file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)
+endif()
 string(SUBSTRING "${project_third_party_get_build_dir_HASH}" 0 8 project_third_party_get_build_dir_HASH)
 if(DEFINED ENV{HOME})
   set(project_third_party_get_build_dir_USER_BASE "$ENV{HOME}")
@@ -130,6 +144,16 @@ elseif(DEFINED ENV{TEMP})
   set(project_third_party_get_build_dir_USER_BASE "$ENV{TEMP}")
 endif()
 string(REPLACE "\\" "/" project_third_party_get_build_dir_USER_BASE "${project_third_party_get_build_dir_USER_BASE}")
+
+if(WIN32
+   AND NOT MINGW
+   AND NOT CYGWIN)
+  message(
+    STATUS
+      "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset-${project_third_party_get_build_dir_HASH}"
+  )
+endif()
+
 macro(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
   if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES "[0-9A-Fa-f]+")
@@ -175,11 +199,6 @@ macro(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSI
   unset(project_third_party_get_build_dir_PORT_VERSION_LEN)
   unset(project_third_party_get_build_dir_PORT_VERSION)
 endmacro()
-
-find_package(Git)
-if(NOT GIT_FOUND AND NOT Git_FOUND)
-  message(FATAL_ERROR "git is required to use ports")
-endif()
 
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
   if(WIN32
@@ -287,52 +306,54 @@ function(project_third_party_port_declare PORT_NAME)
   set(multiValueArgs BUILD_OPTIONS)
   cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
                         "${ARGN}")
-  unset(optionArgs)
-  unset(oneValueArgs)
-  unset(multiValueArgs)
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
 
-  if(NOT ${PORT_NAME}_VERSION AND project_third_party_port_declare_VERSION)
-    set(${PORT_NAME}_VERSION
+  if(NOT ${FULL_PORT_NAME}_VERSION AND project_third_party_port_declare_VERSION)
+    set(${FULL_PORT_NAME}_VERSION
         "${project_third_party_port_declare_VERSION}"
         PARENT_SCOPE)
   endif()
-  if(NOT ${PORT_NAME}_GIT_URL AND project_third_party_port_declare_GIT_URL)
-    set(${PORT_NAME}_GIT_URL
+  if(NOT ${FULL_PORT_NAME}_GIT_URL AND project_third_party_port_declare_GIT_URL)
+    set(${FULL_PORT_NAME}_GIT_URL
         "${project_third_party_port_declare_GIT_URL}"
         PARENT_SCOPE)
   endif()
-  if(NOT ${PORT_NAME}_BUILD_OPTIONS AND project_third_party_port_declare_BUILD_OPTIONS)
+  if(NOT ${FULL_PORT_NAME}_BUILD_OPTIONS AND project_third_party_port_declare_BUILD_OPTIONS)
     if(project_third_party_port_declare_APPEND_BUILD_OPTIONS)
-      set(${PORT_NAME}_BUILD_OPTIONS
-          ${${PORT_NAME}_BUILD_OPTIONS} ${project_third_party_port_declare_BUILD_OPTIONS}
+      set(${FULL_PORT_NAME}_BUILD_OPTIONS
+          ${${FULL_PORT_NAME}_BUILD_OPTIONS} ${project_third_party_port_declare_BUILD_OPTIONS}
           PARENT_SCOPE)
     else()
-      set(${PORT_NAME}_BUILD_OPTIONS
+      set(${FULL_PORT_NAME}_BUILD_OPTIONS
           "${project_third_party_port_declare_BUILD_OPTIONS}"
           PARENT_SCOPE)
     endif()
   endif()
 
-  if(NOT ${PORT_NAME}_BUILD_DIR)
+  if(NOT ${FULL_PORT_NAME}_BUILD_DIR)
     if(NOT project_third_party_port_declare_BUILD_DIR)
-      project_third_party_get_build_dir(${PORT_NAME}_BUILD_DIR "${PORT_NAME}" ${${PORT_NAME}_VERSION})
+      project_third_party_get_build_dir(${FULL_PORT_NAME}_BUILD_DIR "${PORT_NAME}" ${${FULL_PORT_NAME}_VERSION})
     else()
-      project_third_party_get_build_dir(${PORT_NAME}_BUILD_DIR "${project_third_party_port_declare_BUILD_DIR}")
+      project_third_party_get_build_dir(${FULL_PORT_NAME}_BUILD_DIR "${project_third_party_port_declare_BUILD_DIR}")
     endif()
-    set(${PORT_NAME}_BUILD_DIR
-        "${${PORT_NAME}_BUILD_DIR}"
+    set(${FULL_PORT_NAME}_BUILD_DIR
+        "${${FULL_PORT_NAME}_BUILD_DIR}"
         PARENT_SCOPE)
   endif()
 
   if(NOT ${PORT_NAME}_SRC_DIRECTORY_NAME)
     if(NOT project_third_party_port_declare_SRC_DIRECTORY_NAME)
-      project_third_party_get_build_dir(${PORT_NAME}_SRC_DIRECTORY_NAME "${PORT_NAME}-${${PORT_NAME}_VERSION}")
+      project_third_party_get_build_dir(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME
+                                        "${PORT_NAME}-${${FULL_PORT_NAME}_VERSION}")
     else()
-      project_third_party_get_build_dir(${PORT_NAME}_SRC_DIRECTORY_NAME
+      project_third_party_get_build_dir(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME
                                         "${project_third_party_port_declare_SRC_DIRECTORY_NAME}")
     endif()
-    set(${PORT_NAME}_SRC_DIRECTORY_NAME
-        "${${PORT_NAME}_SRC_DIRECTORY_NAME}"
+    set(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME
+        "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
         PARENT_SCOPE)
   endif()
+  set(${FULL_PORT_NAME}_PROJECT_DIRECTORY
+      "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
+      PARENT_SCOPE)
 endfunction()

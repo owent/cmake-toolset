@@ -70,10 +70,15 @@ if(NOT TARGET lz4::lz4_static
                                         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_VERSION})
     endif()
 
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
-    project_third_party_append_build_static_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS
-                                                    BUILD_STATIC_LIBS)
+    if(WIN32 OR MINGW)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
+           "-DBUILD_STATIC_LIBS=ON")
+    else()
+      project_third_party_append_build_shared_lib_var(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS BUILD_SHARED_LIBS)
+      project_third_party_append_build_static_lib_var(
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS BUILD_STATIC_LIBS)
+    endif()
 
     find_configure_package(
       PACKAGE
