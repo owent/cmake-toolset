@@ -8,6 +8,7 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_NLOHMANN_JSON_IMPORT)
   if(TARGET nlohmann_json::nlohmann_json)
     message(STATUS "Dependency(${PROJECT_NAME}): Target nlohmann_json::nlohmann_json found")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_LINK_NAME nlohmann_json::nlohmann_json)
   endif()
 endmacro()
 

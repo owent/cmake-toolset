@@ -10,6 +10,7 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
         project_build_tools_patch_imported_link_interface_libraries(
           CURL::libcurl REMOVE_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto" ADD_LIBRARIES "LibreSSL::SSL;LibreSSL::Crypto")
       endif()
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl)
     else()
       if(CURL_INCLUDE_DIRS)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS ${CURL_INCLUDE_DIRS})
