@@ -361,7 +361,4 @@ function(project_third_party_port_declare PORT_NAME)
         "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
         PARENT_SCOPE)
   endif()
-  set(${FULL_PORT_NAME}_PROJECT_DIRECTORY
-      "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
-      PARENT_SCOPE)
 endfunction()
