@@ -45,8 +45,15 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/civetweb.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/libwebsockets.cmake")
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
+
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/prometheus-cpp.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/opentelemetry-cpp.cmake")
+if(MSVC AND MSVC_VERSION LESS 1920)
+  message(
+    STATUS "Opentelemetry-cpp only support Visual Studio 2019 and upper. Skip it for MSVC_VERSION=${MSVC_VERSION}")
+else()
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/opentelemetry-cpp.cmake")
+endif()
+
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
 
 add_executable(cmake-toolset-test main.cpp)
