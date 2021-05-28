@@ -9,20 +9,20 @@ macro(PROJECT_THIRD_PARTY_GTEST_IMPORT)
   if(TARGET GTest::gtest)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gtest found")
     project_build_tools_patch_default_imported_config(GTest::gtest)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_LINK_NAME GTest::gtest)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_GTEST_LINK_NAME GTest::gtest)
   elseif(TARGET GTest::GTest)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::GTest found")
     project_build_tools_patch_default_imported_config(GTest::GTest)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_LINK_NAME GTest::GTest)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_GTEST_LINK_NAME GTest::GTest)
   endif()
   if(TARGET GTest::gtest_main)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gtest_main found")
     project_build_tools_patch_default_imported_config(GTest::gtest_main)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_MAIN_LINK_NAME GTest::gtest_main)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_GTEST_MAIN_LINK_NAME GTest::gtest_main)
   elseif(TARGET GTest::Main)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::Main found")
     project_build_tools_patch_default_imported_config(GTest::Main)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GTEST_MAIN_LINK_NAME GTest::Main)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_GTEST_MAIN_LINK_NAME GTest::Main)
   endif()
   if(TARGET GTest::gmock)
     message(STATUS "Dependency(${PROJECT_NAME}): Target GTest::gmock found")
@@ -47,28 +47,32 @@ if(NOT TARGET GTest::gtest
      AND NOT TARGET GTest::gtest_main
      AND NOT TARGET GTest::GTest
      AND NOT TARGET GTest::Main)
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION "release-1.10.0")
-    endif()
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL "https://github.com/google/googletest.git")
-    endif()
+    project_third_party_port_declare(
+      gtest
+      VERSION
+      "release-1.10.0"
+      GIT_URL
+      "https://github.com/google/googletest.git"
+      BUILD_OPTIONS
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      "-DBUILD_GMOCK=ON"
+      "-DINSTALL_GTEST=ON")
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_DIR "gtest"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION})
-    endif()
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE
+        "${CMAKE_CURRENT_LIST_DIR}/gtest-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_VERSION}.patch")
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-                                                                    "-DBUILD_GMOCK=ON" "-DINSTALL_GTEST=ON")
-    endif()
     if(MSVC)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
     project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE
+       AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE}")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS GIT_PATCH_FILES
+           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE}")
+    endif()
 
     find_configure_package(
       PACKAGE

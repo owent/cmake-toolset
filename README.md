@@ -1,6 +1,12 @@
 # cmake-toolset
 
 [![Build](https://github.com/atframework/cmake-toolset/actions/workflows/build.yaml/badge.svg)](https://github.com/atframework/cmake-toolset/actions/workflows/build.yaml)
+[![Repo size](https://img.shields.io/github/repo-size/atframework/cmake-toolset)][2]
+[![Latest release](https://img.shields.io/github/v/release/atframework/cmake-toolset)][2]
+[![Languages](https://img.shields.io/github/languages/count/atframework/cmake-toolset)][2]
+[![License](https://img.shields.io/github/license/atframework/cmake-toolset)][2]
+
+[![Discord](https://img.shields.io/discord/846584335921840148)](https://discord.com/channels/846584335921840148)
 
 This is a cmake script set for atframework.It contains some utility functions and it can works with [vcpkg][1].
 
@@ -460,3 +466,4 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/opentelemetry-cpp.cmak
 ```
 
 [1]: https://github.com/microsoft/vcpkg
+[2]: https://github.com/atframework/cmake-toolset

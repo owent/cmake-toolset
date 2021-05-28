@@ -315,10 +315,12 @@ function(project_third_party_port_declare PORT_NAME)
   cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
                         "${ARGN}")
   string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  string(REPLACE "-" "_" FULL_PORT_NAME "${FULL_PORT_NAME}")
 
   if(NOT ${FULL_PORT_NAME}_VERSION AND project_third_party_port_declare_VERSION)
+    set(${FULL_PORT_NAME}_VERSION "${project_third_party_port_declare_VERSION}")
     set(${FULL_PORT_NAME}_VERSION
-        "${project_third_party_port_declare_VERSION}"
+        "${${FULL_PORT_NAME}_VERSION}"
         PARENT_SCOPE)
   endif()
   if(NOT ${FULL_PORT_NAME}_GIT_URL AND project_third_party_port_declare_GIT_URL)
@@ -340,9 +342,9 @@ function(project_third_party_port_declare PORT_NAME)
 
   if(NOT ${FULL_PORT_NAME}_BUILD_DIR)
     if(NOT project_third_party_port_declare_BUILD_DIR)
-      project_third_party_get_build_dir(${FULL_PORT_NAME}_BUILD_DIR "${PORT_NAME}" ${${FULL_PORT_NAME}_VERSION})
+      project_third_party_get_build_dir(${FULL_PORT_NAME}_BUILD_DIR "${PORT_NAME}" "${${FULL_PORT_NAME}_VERSION}")
     else()
-      project_third_party_get_build_dir(${FULL_PORT_NAME}_BUILD_DIR "${project_third_party_port_declare_BUILD_DIR}")
+      set(${FULL_PORT_NAME}_BUILD_DIR "${project_third_party_port_declare_BUILD_DIR}")
     endif()
     set(${FULL_PORT_NAME}_BUILD_DIR
         "${${FULL_PORT_NAME}_BUILD_DIR}"
@@ -351,17 +353,12 @@ function(project_third_party_port_declare PORT_NAME)
 
   if(NOT ${PORT_NAME}_SRC_DIRECTORY_NAME)
     if(NOT project_third_party_port_declare_SRC_DIRECTORY_NAME)
-      project_third_party_get_build_dir(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME
-                                        "${PORT_NAME}-${${FULL_PORT_NAME}_VERSION}")
+      set(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME "${PORT_NAME}-${${FULL_PORT_NAME}_VERSION}")
     else()
-      project_third_party_get_build_dir(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME
-                                        "${project_third_party_port_declare_SRC_DIRECTORY_NAME}")
+      set(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME "${project_third_party_port_declare_SRC_DIRECTORY_NAME}")
     endif()
     set(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME
         "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
         PARENT_SCOPE)
   endif()
-  set(${FULL_PORT_NAME}_PROJECT_DIRECTORY
-      "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
-      PARENT_SCOPE)
 endfunction()
