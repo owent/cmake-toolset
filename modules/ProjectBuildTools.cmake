@@ -367,7 +367,7 @@ function(project_git_clone_repository)
       COMMIT
       TAG
       CHECK_PATH)
-  set(multiValueArgs PATCH_FILES SUBMODULE_PATH GIT_CONFIG)
+  set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(NOT project_git_clone_repository_URL)
@@ -552,6 +552,22 @@ function(project_git_clone_repository)
       WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                         ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     if(project_git_clone_repository_ENABLE_SUBMODULE)
+      if(project_git_clone_repository_RESET_SUBMODULE_URLS)
+        if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.25.0")
+          foreach(RESET_SUBMODULE_URL ${project_git_clone_repository_RESET_SUBMODULE_URLS})
+            if(RESET_SUBMODULE_URL MATCHES "([^:]+):(.+)")
+              execute_process(
+                COMMAND ${GIT_EXECUTABLE} ${git_global_options} "set-url" "--" "${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}"
+                WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                                  ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+            else()
+              message(WARNING "Ignore invalid git submodule reset-url rule ${RESET_SUBMODULE_URL}")
+            endif()
+          endforeach()
+        else()
+          message(WARNING "Only git 2.25.0 or upper support git set-url ...")
+        endif()
+      endif()
       set(project_git_clone_repository_submodule_args submodule update --init -f --depth
                                                       ${project_git_clone_repository_DEPTH})
       if(project_git_clone_repository_SUBMODULE_RECURSIVE)

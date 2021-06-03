@@ -179,6 +179,12 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       add_compiler_define_to_var(CMAKE_CXX_FLAGS "NOMINMAX")
     endif()
 
+    # After all actived submodules, it's allowed to reset url of submodule
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_RESET_SUBMODULE_URLS)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES GIT_RESET_SUBMODULE_URLS
+           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_RESET_SUBMODULE_URLS})
+    endif()
+
     find_configure_package(
       PACKAGE
       opentelemetry-cpp
