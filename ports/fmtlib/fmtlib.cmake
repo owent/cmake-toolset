@@ -16,6 +16,8 @@ macro(PROJECT_THIRD_PARTY_FMTLIB_IMPORT)
   endif()
 endmacro()
 
+option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD "Do not compile fmt.dev if has std::format" ON)
+
 if(NOT TARGET fmt::fmt-header-only
    AND NOT TARGET fmt::fmt
    AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
@@ -28,25 +30,45 @@ if(NOT TARGET fmt::fmt-header-only
      AND NOT TARGET fmt::fmt
      AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
     include(CheckCXXSourceCompiles)
-    if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD
+       AND NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT
+       AND NOT DEFINED CACHE{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT})
       check_cxx_source_compiles(
-        "#include <format>
-         #include <iostream>
-         #include <string>
-         int main() {
-             std::cout<< std::format(\"The answer is {}.\", 42)<< std::endl;
-             char buffer[64] = {0};
-             const auto result = std::format_to_n(buffer, sizeof(buffer), \"{} {}: {}\", \"Hello\", \"World!\", 42);
-             std::cout << \"Buffer: \" << buffer << \",Untruncated output size = \" << result.size << std::endl;
-             return 0;
-         }"
+        "
+#include <format>
+#include <iostream>
+#include <string>
+struct custom_object {
+  int32_t x;
+  std::string y;
+};
+
+// Some STL implement may have BUGs on some APIs, we need check it
+template <class CharT>
+struct std::formatter<custom_object, CharT> : std::formatter<CharT*, CharT> {
+  template <class FormatContext>
+  auto format(const custom_object &vec, FormatContext &ctx) {
+    return std::vformat_to(ctx.out(), \"({},{})\", std::make_format_args(vec.x, vec.y));
+  }
+};
+int main() {
+  custom_object custom_obj;
+  custom_obj.x = 43;
+  custom_obj.y = \"44\";
+  std::cout<< std::format(\"The answer is {}, custom object: {}.\", 42, custom_obj)<< std::endl;
+  char buffer[64] = {0};
+  const auto result = std::format_to_n(buffer, sizeof(buffer), \"{} {}: {}\", \"Hello\", \"World!\", 42);
+  std::cout << \"Buffer: \" << buffer << \",Untruncated output size = \" << result.size << std::endl;
+  return 0;
+}"
         ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
     endif()
 
     # =========== third party fmtlib ==================
     if(NOT TARGET fmt::fmt-header-only
        AND NOT TARGET fmt::fmt
-       AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
+       AND (NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD
+            OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT))
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION "7.1.3")
       endif()

@@ -200,7 +200,8 @@ macro(FindConfigurePackage)
       AFTERBUILD_COMMAND
       INSTALL_TARGET
       GIT_PATCH_FILES
-      GIT_SUBMODULE_PATHS)
+      GIT_SUBMODULE_PATHS
+      GIT_RESET_SUBMODULE_URLS)
   foreach(RESTORE_VAR IN LISTS optionArgs oneValueArgs multiValueArgs)
     unset(FindConfigurePackage_${RESTORE_VAR})
   endforeach()
@@ -320,6 +321,10 @@ macro(FindConfigurePackage)
         endif()
         if(FindConfigurePackage_GIT_SUBMODULE_PATHS)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS SUBMODULE_PATH "${FindConfigurePackage_GIT_SUBMODULE_PATHS}")
+        endif()
+        if(FindConfigurePackage_GIT_RESET_SUBMODULE_URLS)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS RESET_SUBMODULE_URLS
+               "${FindConfigurePackage_GIT_RESET_SUBMODULE_URLS}")
         endif()
         if(FindConfigurePackage_GIT_PATCH_FILES)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS PATCH_FILES "${FindConfigurePackage_GIT_PATCH_FILES}")
