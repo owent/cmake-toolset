@@ -513,9 +513,14 @@ function(project_git_clone_repository)
     endif()
 
     if(project_git_clone_repository_GIT_BRANCH)
+      set(project_git_fetch_repository_args ${git_global_options} fetch)
+      if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "1.8.4")
+        list(APPEND project_git_fetch_repository_args "--depth=${project_git_clone_repository_DEPTH}")
+      endif()
+      list(APPEND project_git_fetch_repository_args "-n" # No tags
+           "origin" ${project_git_clone_repository_GIT_BRANCH})
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n"
-                origin ${project_git_clone_repository_GIT_BRANCH}
+        COMMAND ${GIT_EXECUTABLE} ${project_git_fetch_repository_args}
         RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
         WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                           ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -568,8 +573,10 @@ function(project_git_clone_repository)
           message(WARNING "Only git 2.25.0 or upper support git set-url ...")
         endif()
       endif()
-      set(project_git_clone_repository_submodule_args submodule update --init -f --depth
-                                                      ${project_git_clone_repository_DEPTH})
+      set(project_git_clone_repository_submodule_args submodule update --init -f)
+      if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "1.8.4")
+        list(APPEND project_git_clone_repository_submodule_args --depth ${project_git_clone_repository_DEPTH})
+      endif()
       if(project_git_clone_repository_SUBMODULE_RECURSIVE)
         list(APPEND project_git_clone_repository_submodule_args "--recursive")
       endif()
