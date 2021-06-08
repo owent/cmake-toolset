@@ -562,7 +562,8 @@ function(project_git_clone_repository)
           foreach(RESET_SUBMODULE_URL ${project_git_clone_repository_RESET_SUBMODULE_URLS})
             if(RESET_SUBMODULE_URL MATCHES "([^:]+):(.+)")
               execute_process(
-                COMMAND ${GIT_EXECUTABLE} ${git_global_options} "set-url" "--" "${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}"
+                COMMAND ${GIT_EXECUTABLE} ${git_global_options} submodule "set-url" "--" "${CMAKE_MATCH_1}"
+                        "${CMAKE_MATCH_2}"
                 WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
                                   ${PROJECT_BUILD_TOOLS_CMAKE_EXECUTE_PROCESS_OUTPUT_OPTIONS})
             else()
