@@ -2,6 +2,8 @@ include_guard(GLOBAL)
 
 include(ProjectBuildTools)
 
+get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${CMAKE_CURRENT_LIST_DIR}/../" ABSOLUTE CACHE)
+
 option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ENABLE_PACKAGE_REGISTRY "Enable export(PACKAGE)" OFF)
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ENABLE_PACKAGE_REGISTRY)
   set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY OFF)
@@ -145,7 +147,7 @@ endif()
 if(NOT project_third_party_get_build_dir_HASH)
   execute_process(
     COMMAND ${GIT_EXECUTABLE} log -n 1 "--format=%H" --encoding=UTF-8
-    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/../"
+    WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}"
     OUTPUT_VARIABLE project_third_party_get_build_dir_HASH)
 endif()
 
