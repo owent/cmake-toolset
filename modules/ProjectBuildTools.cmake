@@ -402,6 +402,8 @@ function(project_git_clone_repository)
     endforeach()
   endif()
 
+  # Patch for `FindGit.cmake` on windows
+  find_program(GIT_EXECUTABLE NAMES git git.cmd)
   find_package(Git)
   if(NOT GIT_FOUND AND NOT Git_FOUND)
     message(FATAL_ERROR "git not found")

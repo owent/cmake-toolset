@@ -139,6 +139,8 @@ macro(project_third_party_append_find_root_args VARNAME)
   endif()
 endmacro()
 
+# Patch for `FindGit.cmake` on windows
+find_program(GIT_EXECUTABLE NAMES git git.cmd)
 find_package(Git)
 if(NOT GIT_FOUND AND NOT Git_FOUND)
   message(FATAL_ERROR "git is required to use ports")
