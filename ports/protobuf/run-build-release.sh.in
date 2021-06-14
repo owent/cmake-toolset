@@ -100,9 +100,9 @@ if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x
 
     if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
         if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
         else
-            "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
         fi
     fi
 
