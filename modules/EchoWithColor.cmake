@@ -14,6 +14,8 @@
 # Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE
 # for details.
 
+include_guard(GLOBAL)
+
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12")
   find_package(Python3 COMPONENTS Interpreter)
   # Patch for python3 binary

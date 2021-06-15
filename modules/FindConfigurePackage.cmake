@@ -67,6 +67,8 @@
 #
 # Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE for details.
 
+include_guard(GLOBAL)
+
 include("${CMAKE_CURRENT_LIST_DIR}/ProjectBuildTools.cmake")
 
 function(FindConfigurePackageDownloadFile from to)

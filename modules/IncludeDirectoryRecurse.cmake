@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 # include_directory_recurse [dir1 [dir2 [...]]]
 macro(include_directory_recurse)
   foreach(basedir ${ARGV})
