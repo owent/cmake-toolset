@@ -139,6 +139,8 @@ macro(project_third_party_append_find_root_args VARNAME)
   endif()
 endmacro()
 
+# Patch for `FindGit.cmake` on windows
+find_program(GIT_EXECUTABLE NAMES git git.cmd)
 find_package(Git)
 if(NOT GIT_FOUND AND NOT Git_FOUND)
   message(FATAL_ERROR "git is required to use ports")
@@ -272,27 +274,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
-    find_package(UnixCommands)
-    if(BASH)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_BASH
-          "${BASH}"
-          CACHE FILEPATH "PATH of bash")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_CP
-          "${CP}"
-          CACHE FILEPATH "PATH of cp")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_GZIP
-          "${GZIP}"
-          CACHE FILEPATH "PATH of gzip")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_MV
-          "${MV}"
-          CACHE FILEPATH "PATH of mv")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_RM
-          "${RM}"
-          CACHE FILEPATH "PATH of rm")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_TAR
-          "${TAR}"
-          CACHE FILEPATH "PATH of tar")
-    endif()
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_BASH bash)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_CP cp)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_CP)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_GZIP gzip)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_GZIP)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_MV mv)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_MV)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_RM rm)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_TAR NAMES tar gtar)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
@@ -322,7 +315,7 @@ endfunction()
 function(project_third_party_port_declare PORT_NAME)
   set(optionArgs APPEND_BUILD_OPTIONS)
   set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR)
-  set(multiValueArgs BUILD_OPTIONS)
+  set(multiValueArgs BUILD_OPTIONS PATCH_FILE)
   cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
                         "${ARGN}")
   string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
@@ -362,7 +355,7 @@ function(project_third_party_port_declare PORT_NAME)
         PARENT_SCOPE)
   endif()
 
-  if(NOT ${PORT_NAME}_SRC_DIRECTORY_NAME)
+  if(NOT ${FULL_PORT_NAME}_SRC_DIRECTORY_NAME)
     if(NOT project_third_party_port_declare_SRC_DIRECTORY_NAME)
       set(${FULL_PORT_NAME}_SRC_DIRECTORY_NAME "${PORT_NAME}-${${FULL_PORT_NAME}_VERSION}")
     else()

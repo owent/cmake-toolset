@@ -70,7 +70,12 @@ if(Jemalloc_FOUND)
   if(NOT TARGET jemalloc)
     add_library(jemalloc UNKNOWN IMPORTED)
     set_target_properties(jemalloc PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Jemalloc_INCLUDE_DIRS})
-    set_target_properties(jemalloc PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
-                                                                                           ${Jemalloc_LIBRARYIES})
+    if(Jemalloc_LIBRARYIES_PIC)
+      set_target_properties(jemalloc PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
+                                                                                             ${Jemalloc_LIBRARYIES_PIC})
+    else()
+      set_target_properties(jemalloc PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
+                                                                                             ${Jemalloc_LIBRARYIES})
+    endif()
   endif()
 endif()
