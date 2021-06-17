@@ -274,27 +274,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
-    find_package(UnixCommands)
-    if(BASH)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_BASH
-          "${BASH}"
-          CACHE FILEPATH "PATH of bash")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_CP
-          "${CP}"
-          CACHE FILEPATH "PATH of cp")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_GZIP
-          "${GZIP}"
-          CACHE FILEPATH "PATH of gzip")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_MV
-          "${MV}"
-          CACHE FILEPATH "PATH of mv")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_RM
-          "${RM}"
-          CACHE FILEPATH "PATH of rm")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_TAR
-          "${TAR}"
-          CACHE FILEPATH "PATH of tar")
-    endif()
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_BASH bash)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_CP cp)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_CP)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_GZIP gzip)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_GZIP)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_MV mv)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_MV)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_RM rm)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
+    find_program(ATFRAMEWORK_CMAKE_TOOLSET_TAR NAMES tar gtar)
+    mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
