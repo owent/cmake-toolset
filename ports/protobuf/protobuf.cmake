@@ -121,7 +121,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
     project_build_tools_append_cmake_options_for_lib(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS)
 
-    if(NOT PROJECT_PREBUILT_PLATFORM_NAME STREQUAL PROJECT_PREBUILT_HOST_PLATFORM_NAME)
+    if(CMAKE_CROSSCOMPILING)
       list(APPEND CMAKE_PROGRAM_PATH
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}")
     endif()
@@ -246,32 +246,48 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     endif()
 
-    # prefer to find protoc from host prebuilt directory
-    if(NOT "${PROJECT_PREBUILT_PLATFORM_NAME}" STREQUAL "${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
-      find_program(
-        Protobuf_PROTOC_EXECUTABLE
-        NAMES protoc protoc.exe
-        PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
-        NO_DEFAULT_PATH)
-      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE}")
-
-      # Set protoc and libprotoc to hosted targets
-      if(Protobuf_PROTOC_EXECUTABLE AND NOT TARGET protobuf::protoc)
-        add_executable(protobuf::protoc IMPORTED)
-        set_target_properties(
-          protobuf::protoc
-          PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE}"
-                     IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_EXECUTABLE}"
-                     IMPORTED_LOCATION_RELWITHDEBINFO "${Protobuf_PROTOC_EXECUTABLE}"
-                     IMPORTED_LOCATION_MINSIZEREL "${Protobuf_PROTOC_EXECUTABLE}"
-                     IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_EXECUTABLE}"
-                     IMPORTED_LOCATION_NOCONFIG "${Protobuf_PROTOC_EXECUTABLE}")
-      endif()
-    endif()
     if($ENV{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL})
       find_package(Protobuf)
     else()
       find_package(Protobuf CONFIG)
+    endif()
+    # prefer to find protoc from host prebuilt directory
+    if(CMAKE_CROSSCOMPILING)
+      find_program(
+        Protobuf_PROTOC_EXECUTABLE_HOST
+        NAMES protoc protoc.exe
+        PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
+        NO_DEFAULT_PATH)
+      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE_HOST}")
+      if(DEFINED Protobuf_PROTOC_EXECUTABLE)
+        set(Protobuf_PROTOC_EXECUTABLE "${Protobuf_PROTOC_EXECUTABLE_HOST}")
+      endif()
+      if(DEFINED CACHE{Protobuf_PROTOC_EXECUTABLE})
+        set(Protobuf_PROTOC_EXECUTABLE
+            "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+            CACHE PATH "host protoc" FORCE)
+      endif()
+      if(DEFINED PROTOBUF_PROTOC_EXECUTABLE)
+        set(PROTOBUF_PROTOC_EXECUTABLE "${Protobuf_PROTOC_EXECUTABLE_HOST}")
+      endif()
+      if(DEFINED CACHE{PROTOBUF_PROTOC_EXECUTABLE})
+        set(PROTOBUF_PROTOC_EXECUTABLE
+            "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+            CACHE PATH "host protoc" FORCE)
+      endif()
+
+      # Set protoc and libprotoc to hosted targets
+      if(NOT TARGET protobuf::protoc)
+        add_executable(protobuf::protoc IMPORTED)
+      endif()
+      set_target_properties(
+        protobuf::protoc
+        PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+                   IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+                   IMPORTED_LOCATION_RELWITHDEBINFO "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+                   IMPORTED_LOCATION_MINSIZEREL "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+                   IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_EXECUTABLE_HOST}"
+                   IMPORTED_LOCATION_NOCONFIG "${Protobuf_PROTOC_EXECUTABLE_HOST}")
     endif()
     project_third_party_protobuf_import()
   endif()
