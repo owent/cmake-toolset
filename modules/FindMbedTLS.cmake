@@ -78,5 +78,5 @@ if(MbedTLS_FOUND)
 
   add_library(mbedtls UNKNOWN IMPORTED)
   set_target_properties(mbedtls PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${MbedTLS_INCLUDE_DIRS})
-  set_target_properties(mbedtls PROPERTIES INTERFACE_LINK_LIBRARIES ${MbedTLS_LIBRARIES})
+  set_target_properties(mbedtls PROPERTIES IMPORTED_LOCATION ${MbedTLS_LIBRARIES})
 endif()
