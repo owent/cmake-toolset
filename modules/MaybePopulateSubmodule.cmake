@@ -3,6 +3,8 @@
 
 #]===]
 
+include_guard(GLOBAL)
+
 include("${CMAKE_CURRENT_LIST_DIR}/ProjectBuildTools.cmake")
 
 function(MaybePopulateSubmodule VARNAME SUBMODULE_PATH LOCAL_PATH)
