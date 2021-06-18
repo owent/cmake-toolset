@@ -7,7 +7,7 @@ include_guard(GLOBAL)
 
 include("${CMAKE_CURRENT_LIST_DIR}/ProjectBuildTools.cmake")
 
-function(MaybePopulateSubmodule VARNAME SUBMODULE_PATH LOCAL_PATH)
+function(maybe_populate_submodule VARNAME SUBMODULE_PATH LOCAL_PATH)
   if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
     include(CMakeParseArguments)
   endif()
