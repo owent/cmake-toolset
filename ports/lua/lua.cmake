@@ -65,9 +65,6 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     endif()
   endif()
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME)
-    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
-         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
-
     project_build_tools_patch_default_imported_config(lua::liblua-dynamic lua::liblua-static lua::liblua lua::lua
                                                       lua::luac)
   endif()

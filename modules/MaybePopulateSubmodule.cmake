@@ -54,7 +54,6 @@ function(maybe_populate_submodule VARNAME SUBMODULE_PATH LOCAL_PATH)
                   "${maybe_poptlate_submodule_SET_URL}"
           WORKING_DIRECTORY "${maybe_poptlate_submodule_WORKING_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-        endforeach()
       else()
         message(WARNING "Only git 2.25.0 or upper support git set-url ...")
       endif()

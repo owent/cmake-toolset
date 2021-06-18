@@ -5,13 +5,9 @@ macro(PROJECT_THIRD_PARTY_YAML_CPP_IMPORT)
   if(TARGET yaml-cpp::yaml-cpp)
     message(STATUS "Dependency(${PROJECT_NAME}): yaml-cpp using target yaml-cpp::yaml-cpp")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_LINK_NAME yaml-cpp::yaml-cpp)
-    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
-         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_LINK_NAME})
   elseif(TARGET yaml-cpp)
     message(STATUS "Dependency(${PROJECT_NAME}): yaml-cpp using target yaml-cpp")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_LINK_NAME yaml-cpp)
-    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES
-         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_LINK_NAME})
   endif()
 endmacro()
 
