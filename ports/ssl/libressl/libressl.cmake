@@ -34,20 +34,14 @@ macro(PROJECT_THIRD_PARTY_LIBRESSL_IMPORT)
 
     if(TARGET LibreSSL::TLS)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME LibreSSL::TLS)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES LibreSSL::TLS)
 
       if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         project_build_tools_patch_imported_link_interface_libraries(LibreSSL::Crypto ADD_LIBRARIES Bcrypt)
         project_build_tools_patch_imported_link_interface_libraries(LibreSSL::TLS ADD_LIBRARIES Bcrypt)
       endif()
     else()
-      if(LIBRESSL_INCLUDE_DIR)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS ${LIBRESSL_INCLUDE_DIR})
-      endif()
-
       if(LIBRESSL_LIBRARIES)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME ${LIBRESSL_LIBRARIES})
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES ${LIBRESSL_LIBRARIES})
       endif()
     endif()
 

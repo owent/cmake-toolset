@@ -10,7 +10,7 @@
 
 This is a cmake script set for atframework.It contains some utility functions and it can works with [vcpkg][1].
 
-It's recommanded to use [vcpkg][1] if you just want a package manager on x86/x86_64 platform.
+It's recommanded to use [vcpkg][1] if you do not need cross-compiling and has GCC 6+/Visual Studio 2015 Update 3+ with the English language pack/macOS 10.15+.
 But if you want a special version of some packages or just download packages from custom mirrors, you can use this toolset.
 
 > E.g.: If you want to use openssl 1.1.0k and use options ```no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers```
@@ -125,13 +125,6 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/<package dir>[/package sub dir]/<which package you need>.cmake")
 ```
-
-### Output
-
-+ Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_INCLUDE_DIRS``` : Directories to include of all imported packages.
-+ Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PUBLIC_LINK_NAMES``` : Public libraries and targets to link of all imported packages.
-+ Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_INTERFACE_LINK_NAMES``` : Interface libraries and targets to link of all imported packages.
-+ Variable: ```ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN``` : Executable file patterns of all imported packages.
 
 ### Package - jemalloc
 

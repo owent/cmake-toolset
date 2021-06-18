@@ -24,11 +24,6 @@ macro(PROJECT_THIRD_PARTY_LZ4_IMPORT)
     echowithcolor(COLOR GREEN
                   "-- Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN}")
   endif()
-
-  if(TARGET lz4::lz4cli OR TARGET lz4::lz4c)
-    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COPY_EXECUTABLE_PATTERN
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/bin/lz4*")
-  endif()
 endmacro()
 
 if(NOT TARGET lz4::lz4_static
