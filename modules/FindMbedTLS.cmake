@@ -75,4 +75,8 @@ if(MbedTLS_FOUND)
   if(NOT MbedTLS_CRYPTO_LIBRARIES)
     set(MbedTLS_CRYPTO_LIBRARIES ${MbedTLS_TLS_LIBRARIES})
   endif()
+
+  add_library(mbedtls UNKNOWN IMPORTED)
+  set_target_properties(mbedtls PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${MbedTLS_INCLUDE_DIRS})
+  set_target_properties(mbedtls PROPERTIES INTERFACE_LINK_LIBRARIES ${MbedTLS_LIBRARIES})
 endif()
