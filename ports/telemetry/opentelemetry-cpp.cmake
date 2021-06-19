@@ -13,7 +13,8 @@ macro(PROJECT_THIRD_PARTY_OPENTELEMETRY_CPP_IMPORT)
   endif()
   if(OPENTELEMETRY_CPP_LIBRARIES)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES ${OPENTELEMETRY_CPP_LIBRARIES})
-    set(_IMPLICIT_OPENTELEMETRY_CPP_TARGETS opentelemetry-cpp::resources opentelemetry-cpp::proto)
+    set(_IMPLICIT_OPENTELEMETRY_CPP_TARGETS opentelemetry-cpp::resources opentelemetry-cpp::proto
+                                            opentelemetry-cpp::otlp_recordable)
     foreach(_IMPLICIT_OPENTELEMETRY_CPP_TARGET IN LISTS _IMPLICIT_OPENTELEMETRY_CPP_TARGETS)
       if(TARGET ${_IMPLICIT_OPENTELEMETRY_CPP_TARGET}
          AND NOT ${_IMPLICIT_OPENTELEMETRY_CPP_TARGET} IN_LIST
@@ -158,7 +159,9 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS "-DWITH_PROMETHEUS=OFF")
     endif()
 
-    if(MSVC)
+    if(WIN32
+       OR MINGW
+       OR CYGWIN)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
@@ -171,7 +174,9 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     endif()
 
     # opentelemetry do not support export DLL APIs now
-    if(MSVC)
+    if(WIN32
+       OR MINGW
+       OR CYGWIN)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF")
     else()
       project_third_party_append_build_shared_lib_var(
@@ -184,7 +189,9 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE}")
     endif()
 
-    if(MINGW OR MSVC)
+    if(WIN32
+       OR MINGW
+       OR CYGWIN)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES "tools/vcpkg")
 
       set(PATCH_BACKUP_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
