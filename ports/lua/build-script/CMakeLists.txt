@@ -46,8 +46,8 @@ endforeach()
 list(APPEND PROJECT_LUA_SRC_LIST ${PROJECT_LUA_ALL_HEADER})
 
 set(PROJECT_LUA_EXPORT_NAME "${PROJECT_NAME}-target")
-set(PROJECT_LUA_PUBLIC_HEADERS "${LUA_TOP_SOURCE_DIR}/lua.h" "${LUA_TOP_SOURCE_DIR}/luaconf.h"
-                               "${LUA_TOP_SOURCE_DIR}/lauxlib.h")
+set(PROJECT_LUA_PUBLIC_HEADERS "${LUA_TOP_SOURCE_DIR}/lua.h" "${LUA_TOP_SOURCE_DIR}/lualib.h"
+                               "${LUA_TOP_SOURCE_DIR}/luaconf.h" "${LUA_TOP_SOURCE_DIR}/lauxlib.h")
 
 if(BUILD_STATIC_LIBS)
   add_library("${PROJECT_NAME}_STATIC" STATIC ${PROJECT_LUA_SRC_LIST})
