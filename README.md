@@ -135,6 +135,16 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/<package dir>[/package sub dir]/
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
 ```
 
+### Package - algorithm - xxhash
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_VERSION "v0.8.0")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_GIT_URL "https://github.com/Cyan4973/xxHash.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_BUILD_OPTIONS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
+```
+
 ### Package - fmtlib/std::format
 
 ```cmake
@@ -410,7 +420,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
 
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION "v2")
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owt5008137/libcopp.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owent/libcopp.git")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
 ```
 

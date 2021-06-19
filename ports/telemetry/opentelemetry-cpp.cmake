@@ -38,7 +38,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
 
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
-    project_third_party_port_declare(opentelemetry_cpp VERSION "v0.7.0" GIT_URL
+    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.0.0-rc2" GIT_URL
                                      "https://github.com/open-telemetry/opentelemetry-cpp.git")
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE
