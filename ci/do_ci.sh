@@ -137,12 +137,19 @@ elif [[ "$1" == "msvc2017.test" ]]; then
   cd test/build_jobs_dir ;
   cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON ;
   cmake --build . -j || cmake --build .;
-elif [[ "$1" == "android.test" ]]; then
+elif [[ "$1" == "android.arm64.test" ]]; then
   echo "$1";
   mkdir -p test/build_jobs_dir ;
   cd test/build_jobs_dir ;
   bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a -- -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON ;
   cd build_jobs_arm64-v8a ;
+  cmake --build . -j || cmake --build .;
+elif [[ "$1" == "android.x86_64.test" ]]; then
+  echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  bash ../../ci/cmake_android_wrapper.sh -r .. -a x86_64 -- -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON ;
+  cd build_jobs_x86_64 ;
   cmake --build . -j || cmake --build .;
 elif [[ "$1" == "ios.test" ]]; then
   echo "$1";
@@ -150,5 +157,12 @@ elif [[ "$1" == "ios.test" ]]; then
   cd test/build_jobs_dir ;
   bash ../../ci/cmake_ios_wrapper.sh -r .. -a arm64 -- -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON ;
   cd build_jobs_arm64 ;
+  cmake --build . -j || cmake --build .;
+elif [[ "$1" == "iphone_simulator.test" ]]; then
+  echo "$1";
+  mkdir -p test/build_jobs_dir ;
+  cd test/build_jobs_dir ;
+  bash ../../ci/cmake_ios_wrapper.sh -r .. -a x86_64 -- -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON ;
+  cd build_jobs_x86_64 ;
   cmake --build . -j || cmake --build .;
 fi

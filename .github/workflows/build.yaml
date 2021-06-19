@@ -171,8 +171,8 @@ jobs:
         shell: bash
         run: |
           bash ci/do_ci.sh clang.test ;
-  android_test:
-    name: "android.test"
+  android_arm64_test:
+    name: "android.arm64.test"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -180,7 +180,17 @@ jobs:
       - name: CI Job
         shell: bash
         run: |
-          bash ci/do_ci.sh android.test ;
+          bash ci/do_ci.sh android.arm64.test ;
+  android_x86_64_test:
+    name: "android.x86_64.test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: CI Job
+        shell: bash
+        run: |
+          bash ci/do_ci.sh android.x86_64.test ;
   # Build libuv on ios has some problem now.
   ios_test:
     name: "ios.test"
@@ -192,3 +202,13 @@ jobs:
         shell: bash
         run: |
           bash ci/do_ci.sh ios.test ;
+  iphone_simulator_test:
+    name: "ios.test"
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: CI Job
+        shell: bash
+        run: |
+          bash ci/do_ci.sh iphone_simulator.test ;
