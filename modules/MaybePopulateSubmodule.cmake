@@ -16,6 +16,13 @@ function(maybe_populate_submodule VARNAME SUBMODULE_PATH LOCAL_PATH)
   set(multiValueArgs PATCH_FILES GIT_CONFIG)
   cmake_parse_arguments(maybe_poptlate_submodule "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+  if(LOCAL_PATH MATCHES "(.*)[\\\\/]+$")
+    set(LOCAL_PATH ${CMAKE_MATCH_1})
+  endif()
+  if(SUBMODULE_PATH MATCHES "(.*)[\\\\/]+$")
+    set(SUBMODULE_PATH ${CMAKE_MATCH_1})
+  endif()
+
   set(${VARNAME}_REPO_DIR
       "${LOCAL_PATH}"
       CACHE PATH "PATH to ${SUBMODULE_PATH}")
@@ -24,16 +31,23 @@ function(maybe_populate_submodule VARNAME SUBMODULE_PATH LOCAL_PATH)
     set(maybe_poptlate_submodule_CHECK_PATH ".git")
   endif()
 
-  if(NOT EXISTS "${${VARNAME}_REPO_DIR}/${maybe_poptlate_submodule_CHECK_PATH}")
-    if(EXISTS "${${VARNAME}_REPO_DIR}")
+  if(NOT maybe_poptlate_submodule_WORKING_DIRECTORY)
+    string(FIND "${LOCAL_PATH}" "${SUBMODULE_PATH}" LOCAL_PATH_WITHOUT_SUBMODULE_PATH REVERSE)
+    if(LOCAL_PATH_WITHOUT_SUBMODULE_PATH LESS 0)
+      set(maybe_poptlate_submodule_WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+    else()
+      string(SUBSTRING "${LOCAL_PATH}" 0 ${LOCAL_PATH_WITHOUT_SUBMODULE_PATH}
+                       maybe_poptlate_submodule_WORKING_DIRECTORY)
+    endif()
+  endif()
+
+  if(NOT EXISTS "${${VARNAME}_REPO_DIR}/${maybe_poptlate_submodule_CHECK_PATH}" OR maybe_poptlate_submodule_FORCE_RESET)
+    if(EXISTS "${${VARNAME}_REPO_DIR}" AND NOT EXISTS "${${VARNAME}_REPO_DIR}/${maybe_poptlate_submodule_CHECK_PATH}")
       file(REMOVE_RECURSE "${${VARNAME}_REPO_DIR}")
     endif()
 
     if(NOT maybe_poptlate_submodule_DEPTH)
       set(maybe_poptlate_submodule_DEPTH 100)
-    endif()
-    if(NOT maybe_poptlate_submodule_WORKING_DIRECTORY)
-      get_filename_component(maybe_poptlate_submodule_WORKING_DIRECTORY ${LOCAL_PATH} DIRECTORY)
     endif()
     set(git_global_options -c "advice.detachedHead=false" -c "init.defaultBranch=main")
     if(maybe_poptlate_submodule_GIT_CONFIG)
