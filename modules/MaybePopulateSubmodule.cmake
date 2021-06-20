@@ -20,12 +20,17 @@ function(maybe_populate_submodule VARNAME SUBMODULE_PATH LOCAL_PATH)
       "${LOCAL_PATH}"
       CACHE PATH "PATH to ${SUBMODULE_PATH}")
 
+  if(NOT maybe_poptlate_submodule_CHECK_PATH)
+    set(maybe_poptlate_submodule_CHECK_PATH ".git")
+  endif()
+
   if(NOT EXISTS "${${VARNAME}_REPO_DIR}/${maybe_poptlate_submodule_CHECK_PATH}")
+    if(EXISTS "${${VARNAME}_REPO_DIR}")
+      file(REMOVE_RECURSE "${${VARNAME}_REPO_DIR}")
+    endif()
+
     if(NOT maybe_poptlate_submodule_DEPTH)
       set(maybe_poptlate_submodule_DEPTH 100)
-    endif()
-    if(NOT maybe_poptlate_submodule_CHECK_PATH)
-      set(maybe_poptlate_submodule_CHECK_PATH ".git")
     endif()
     if(NOT maybe_poptlate_submodule_WORKING_DIRECTORY)
       get_filename_component(maybe_poptlate_submodule_WORKING_DIRECTORY ${LOCAL_PATH} DIRECTORY)
