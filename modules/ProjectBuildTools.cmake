@@ -6,6 +6,8 @@
 
 include_guard(GLOBAL)
 
+include("${CMAKE_CURRENT_LIST_DIR}/AtframeworkToolsetCommonDefinitions.cmake")
+
 set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
     CMAKE_C_FLAGS
     CMAKE_C_FLAGS_DEBUG
@@ -130,8 +132,9 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
 endif()
 
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
-  cmake_parse_arguments(project_build_tools_append_cmake_inherit_options
-                        "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE" "" "" ${ARGN})
+  cmake_parse_arguments(
+    project_build_tools_append_cmake_inherit_options
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;APPEND_SYSTEM_LINKS" "" "" ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
   if(DEFINED CACHE{CMAKE_MAKE_PROGRAM})
     list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
@@ -155,7 +158,21 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
 
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
     if(DEFINED CACHE{${VAR_NAME}})
-      string(REPLACE ";" "\\\\;" VAR_VALUE "$CACHE{${VAR_NAME}}")
+      if(DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_VALUE)
+        string(REPLACE ";" "\\\\;" VAR_VALUE
+                       "$CACHE{${VAR_NAME}}${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_VALUE}")
+      else()
+        string(REPLACE ";" "\\\\;" VAR_VALUE "$CACHE{${VAR_NAME}}")
+      endif()
+      if(DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_LIST
+         AND PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_LIST)
+        list(APPEND VAR_VALUE ${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_LIST})
+      endif()
+
+      if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
+         AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
+        list(APPEND VAR_VALUE ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+      endif()
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES VAR_VALUE)
       endif()

@@ -194,10 +194,9 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
        OR CYGWIN)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES "tools/vcpkg")
 
-      set(PATCH_BACKUP_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-      set(PATCH_BACKUP_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-      add_compiler_define_to_var(CMAKE_C_FLAGS "NOMINMAX")
-      add_compiler_define_to_var(CMAKE_CXX_FLAGS "NOMINMAX")
+      add_compiler_define_to_var(OPENTELEMETRY_CPP_PATCH_FLAGS "NOMINMAX")
+      set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS_VALUE " ${OPENTELEMETRY_CPP_PATCH_FLAGS}")
+      set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS_VALUE " ${OPENTELEMETRY_CPP_PATCH_FLAGS}")
     endif()
 
     # After all actived submodules, it's allowed to reset url of submodule
@@ -231,13 +230,13 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       GIT_ENABLE_SUBMODULE
       GIT_SUBMODULE_PATHS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_SUB_MODULES})
-    if(PATCH_BACKUP_CMAKE_C_FLAGS)
-      set(CMAKE_C_FLAGS "${PATCH_BACKUP_CMAKE_C_FLAGS}")
-      unset(PATCH_BACKUP_CMAKE_C_FLAGS)
-    endif()
-    if(PATCH_BACKUP_CMAKE_CXX_FLAGS)
-      set(CMAKE_CXX_FLAGS "${PATCH_BACKUP_CMAKE_CXX_FLAGS}")
-      unset(PATCH_BACKUP_CMAKE_CXX_FLAGS)
+
+    if(WIN32
+       OR MINGW
+       OR CYGWIN)
+      unset(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS_VALUE)
+      unset(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS_VALUE)
+      unset(OPENTELEMETRY_CPP_PATCH_FLAGS)
     endif()
 
     if(TARGET opentelemetry-cpp::api OR TARGET opentelemetry-cpp::sdk)
