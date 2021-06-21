@@ -556,7 +556,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     int main () { puts(typeid(int).name()); return 0; }" COMPILER_OPTIONS_TEST_RTTI)
 
   # For Windows.h
-  if(WIN32 OR MINGW)
+  if(WIN32
+     OR MINGW
+     OR CYGWIN)
     if(COMPILER_OPTION_WINDOWS_ENABLE_NOMINMAX)
       add_compiler_define("NOMINMAX")
     endif()
