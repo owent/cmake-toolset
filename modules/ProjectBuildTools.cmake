@@ -133,6 +133,9 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   cmake_parse_arguments(project_build_tools_append_cmake_inherit_options
                         "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE" "" "" ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
+  if(DEFINED CACHE{CMAKE_MAKE_PROGRAM})
+    list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
+  endif()
 
   set(project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
 
@@ -151,11 +154,11 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   endif()
 
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
-    if(DEFINED ${VAR_NAME})
+    if(DEFINED CACHE{${VAR_NAME}})
+      string(REPLACE ";" "\\\\;" VAR_VALUE "$CACHE{${VAR_NAME}}")
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
-        list(REMOVE_DUPLICATES ${VAR_NAME})
+        list(REMOVE_DUPLICATES VAR_VALUE)
       endif()
-      string(REPLACE ";" "\\\\;" VAR_VALUE "${${VAR_NAME}}")
       if(VAR_VALUE)
         # Patch for some version of cmake, the compiler testing will fail on some environments.
         if(MSVC AND VAR_NAME MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")

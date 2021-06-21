@@ -23,7 +23,7 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owt5008137/libcopp.git")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owent/libcopp.git")
     endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS)

@@ -66,19 +66,24 @@ endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
 
 # Test protobuf generator
-add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
-         "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb"
-  COMMAND
-    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC} --proto_path "${CMAKE_CURRENT_LIST_DIR}" -o
-    "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb" "--cpp_out=${CMAKE_CURRENT_BINARY_DIR}/"
-    "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
-  DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
-  COMMENT "Generate test_pb.pb,test_pb.pb.h,test_pb.pb.cc into ${CMAKE_CURRENT_BINARY_DIR}")
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
+           "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb"
+    COMMAND
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC} --proto_path "${CMAKE_CURRENT_LIST_DIR}" -o
+      "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb" "--cpp_out=${CMAKE_CURRENT_BINARY_DIR}/"
+      "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
+    COMMENT "Generate test_pb.pb,test_pb.pb.h,test_pb.pb.cc into ${CMAKE_CURRENT_BINARY_DIR}")
 
-add_executable(cmake-toolset-test "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
-                                  "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h" main.cpp)
-target_include_directories(cmake-toolset-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+  add_executable(cmake-toolset-test "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
+                                    "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h" main.cpp)
+  target_include_directories(cmake-toolset-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+  target_compile_definitions(cmake-toolset-test PRIVATE "HAVE_PROTOBUF=1")
+else()
+  add_executable(cmake-toolset-test main.cpp)
+endif()
 
 target_link_libraries(
   cmake-toolset-test
