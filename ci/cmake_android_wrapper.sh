@@ -8,7 +8,7 @@ ANDROID_TOOLCHAIN=clang ;
 ANDROID_STL=c++_shared ; #
 BUILD_TYPE="RelWithDebInfo" ;
 # OTHER_CFLAGS="-fPIC" ; # Android使用-DANDROID_PIE=YES
-OTHER_LD_FLAGS="-llog -lc";  # protobuf依赖liblog.so
+OTHER_LD_FLAGS="-llog;-lc";  # protobuf依赖liblog.so
 
 # ======================= options ======================= 
 while getopts "a:b:c:n:hl:r:t:-" OPTION; do
@@ -147,7 +147,7 @@ for ARCH in ${ARCHS}; do
         -DANDROID_ABI=$ARCH -DCMAKE_ANDROID_ARCH_ABI=$ARCH \
         -DANDROID_STL=$ANDROID_STL -DCMAKE_ANDROID_STL_TYPE=$ANDROID_STL \
         -DANDROID_PIE=YES \
-        -DCMAKE_C_STANDARD_LIBRARIES="$OTHER_LD_FLAGS" -DCMAKE_CXX_STANDARD_LIBRARIES="$OTHER_LD_FLAGS" $EXT_OPTIONS "$@";
+        "-DCMAKE_C_STANDARD_LIBRARIES=$OTHER_LD_FLAGS" "-DCMAKE_CXX_STANDARD_LIBRARIES=$OTHER_LD_FLAGS" $EXT_OPTIONS "$@";
     
     LAST_EXIT_CODE=$? ;
     if [[ $LAST_EXIT_CODE -ne 0 ]]; then
