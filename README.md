@@ -56,27 +56,27 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
 ## CI Job Matrix
 
-Name                    | Target System   | Toolchain         | Note
-------------------------|-----------------|-------------------|--------------------------------
-Format                  | -               |                   |
-gcc.static.test         | Linux           | GCC               | Static linking
-gcc.shared.test         | Linux           | GCC               | Dynamic linking
-gcc.libressl.test       | Linux           | GCC               | Using libressl for SSL porting
-gcc.mbedtls.test        | Linux           | GCC               | Using mbedtls for SSL porting
-gcc.4.8.test            | Linux           | GCC 4.8           | Legacy
-clang.test              | Linux           | Clang with libc++ |
-gcc.vcpkg.test          | Linux           | GCC With vcpkg    |
-msys2.mingw.static.test | Windows         | GCC               | Static linking
-msys2.mingw.shared.test | Windows         | GCC               | Dynamic linking
-msvc.static.test        | Windows         | MSVC              | Static linking
-msvc.shared.test        | Windows         | MSVC              | Dynamic linking
-msvc.vcpkg.test         | Windows         | MSVC With vcpkg   |
-msvc2017.test           | Windows         | MSVC              | Legacy
-macos.appleclang.test   | macOS           | Clang with libc++ |
-android.arm64.test      | Android         | Clang with libc++ | ```-DANDROID_ABI=arm64-v8a```
-android.x86_64.test     | Android         | Clang with libc++ | ```-DANDROID_ABI=x86_64```
-ios.test                | iOS             | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=arm64```
-iphone_simulator.test   | iPhoneSimulator | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=x86_64```
+| Name                    | Target System   | Toolchain         | Note                                   |
+| ----------------------- | --------------- | ----------------- | -------------------------------------- |
+| Format                  | -               |                   |
+| gcc.static.test         | Linux           | GCC               | Static linking                         |
+| gcc.shared.test         | Linux           | GCC               | Dynamic linking                        |
+| gcc.libressl.test       | Linux           | GCC               | Using libressl for SSL porting         |
+| gcc.mbedtls.test        | Linux           | GCC               | Using mbedtls for SSL porting          |
+| gcc.4.8.test            | Linux           | GCC 4.8           | Legacy                                 |
+| clang.test              | Linux           | Clang with libc++ |
+| gcc.vcpkg.test          | Linux           | GCC With vcpkg    |
+| msys2.mingw.static.test | Windows         | GCC               | Static linking                         |
+| msys2.mingw.shared.test | Windows         | GCC               | Dynamic linking                        |
+| msvc.static.test        | Windows         | MSVC              | Static linking                         |
+| msvc.shared.test        | Windows         | MSVC              | Dynamic linking                        |
+| msvc.vcpkg.test         | Windows         | MSVC With vcpkg   |
+| msvc2017.test           | Windows         | MSVC              | Legacy                                 |
+| macos.appleclang.test   | macOS           | Clang with libc++ |
+| android.arm64.test      | Android         | Clang with libc++ | ```-DANDROID_ABI=arm64-v8a```          |
+| android.x86_64.test     | Android         | Clang with libc++ | ```-DANDROID_ABI=x86_64```             |
+| ios.test                | iOS             | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=arm64```  |
+| iphone_simulator.test   | iPhoneSimulator | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=x86_64``` |
 
 ## Utility Scripts
 
@@ -88,19 +88,26 @@ iphone_simulator.test   | iPhoneSimulator | Clang with libc++ | ```-DCMAKE_OSX_A
 4. Add ```/Zc:__cplusplus``` for MSVC to make ```__cplusplus == _MSVC_LANG``` .
 5. Set the default value of ```CMAKE_BUILD_TYPE``` to ```RelWithDebInfo``` .
 6. Macro: ```add_compiler_flags_to_var(<VAR_NAME> [options...])```
-7. Macro: ```add_compiler_define([KEY=VALUE...])```
-8. Macro: ```add_linker_flags_for_runtime([LDFLAGS...])```
-9. Macro: ```add_linker_flags_for_all([LDFLAGS...])```
-10. Function: ```add_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])```
-11. Function: ```remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])```
-12. Function: ```add_target_link_flags(<TARGET> [LDFLAGS...])```
-13. Variable ```COMPILER_OPTIONS_TEST_STD_COROUTINE``` : ```TRUE``` when toolchain support C++20 Coroutine.
-14. Variable ```COMPILER_OPTIONS_TEST_STD_COROUTINE_TS``` : ```TRUE``` when toolchain experimental support C++20 Coroutine.
-15. Variable ```COMPILER_OPTIONS_TEST_EXCEPTION``` : ```TRUE``` when toolchain enable exception support.
-16. Variable ```COMPILER_OPTIONS_TEST_STD_EXCEPTION_PTR``` : ```TRUE``` when toolchain support C++11 ```std::exception_ptr``` .
-17. Variable ```COMPILER_OPTIONS_TEST_RTTI``` : ```TRUE``` when toolchain enable runtime type information.
-18. Variable ```COMPILER_STRICT_CFLAGS``` : flags of all but compatible warnings and turn warning to error.
-19. Variable ```COMPILER_STRICT_EXTRA_CFLAGS``` : flags of all extra warnings.
+7. Macro: ```add_compiler_flags_to_var_unique(<VAR_NAME> [options...])```
+8. Macro: ```add_compiler_flags_to_inherit_var(<VAR_NAME> [options...])```
+9. Macro: ```add_compiler_flags_to_inherit_var_unique(<VAR_NAME> [options...])```
+10. Macro: ```add_list_flags_to_var(<VAR_NAME> [options...])```
+11. Macro: ```add_list_flags_to_var_unique(<VAR_NAME> [options...])```
+12. Macro: ```add_list_flags_to_var(<VAR_NAME> [options...])```
+13. Macro: ```add_list_flags_to_var_unique(<VAR_NAME> [options...])```
+14. Macro: ```add_compiler_define([KEY=VALUE...])```
+15. Macro: ```add_linker_flags_for_runtime([LDFLAGS...])```
+16. Macro: ```add_linker_flags_for_all([LDFLAGS...])```
+17. Function: ```add_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])```
+18. Function: ```remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])```
+19. Function: ```add_target_link_flags(<TARGET> [LDFLAGS...])```
+20. Variable ```COMPILER_OPTIONS_TEST_STD_COROUTINE``` : ```TRUE``` when toolchain support C++20 Coroutine.
+21. Variable ```COMPILER_OPTIONS_TEST_STD_COROUTINE_TS``` : ```TRUE``` when toolchain experimental support C++20 Coroutine.
+22. Variable ```COMPILER_OPTIONS_TEST_EXCEPTION``` : ```TRUE``` when toolchain enable exception support.
+23. Variable ```COMPILER_OPTIONS_TEST_STD_EXCEPTION_PTR``` : ```TRUE``` when toolchain support C++11 ```std::exception_ptr``` .
+24. Variable ```COMPILER_OPTIONS_TEST_RTTI``` : ```TRUE``` when toolchain enable runtime type information.
+25. Variable ```COMPILER_STRICT_CFLAGS``` : flags of all but compatible warnings and turn warning to error.
+26. Variable ```COMPILER_STRICT_EXTRA_CFLAGS``` : flags of all extra warnings.
 
 ### ```TargetOption.cmake```
 
@@ -469,6 +476,129 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/prometheus-cpp.cmake")
 #   "-Dprotobuf_MODULE_COMPATIBLE=ON" "-DBUILD_TESTING=OFF" "-DWITH_EXAMPLES=OFF")
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/opentelemetry-cpp.cmake")
+```
+
+## Custom ports
+
+### Add custom ports from git as subdirectory
+
+```cmake
+include_guard(GLOBAL)
+
+macro(PROJECT_<PACKAGE NAME:UPPERCASE>_IMPORT)
+  if(TARGET <target to link>)
+    echowithcolor(COLOR GREEN "-- Dependency: <target to link> found.(Target: <target to link>)")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_LINK_NAME <target to link>)
+  endif()
+endmacro()
+
+if(NOT TARGET <target to link>)
+  project_third_party_port_declare(<package name>
+    VERSION "<package version>"
+    GIT_URL "<git url>")
+
+  project_git_clone_repository(
+    URL "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_GIT_URL}" REPO_DIRECTORY
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_SRC_DIRECTORY_NAME}" TAG
+    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_VERSION}")
+
+  add_subdirectory(
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_SRC_DIRECTORY_NAME}"
+    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_DIR}")
+  project_<package name:lowercase>_import()
+else()
+  project_<package name:lowercase>_import()
+endif()
+```
+
+### Add custom ports from submodule as subdirectory
+
+```cmake
+include_guard(GLOBAL)
+
+macro(PROJECT_<PACKAGE NAME:UPPERCASE>_IMPORT)
+  if(TARGET <target to link>)
+    echowithcolor(COLOR GREEN "-- Dependency: <target to link> found.(Target: <target to link>)")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_LINK_NAME <target to link>)
+  endif()
+endmacro()
+
+if(NOT TARGET <target to link>)
+  if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/_deps/<package name>")
+    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/<package name>")
+  endif()
+  maybe_populate_submodule(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE> "<submodule path>" "${PROJECT_SOURCE_DIR}/<submodule path>")
+  add_subdirectory("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_REPO_DIR}"
+                   "${CMAKE_CURRENT_BINARY_DIR}/_deps/<package name>")
+  project_<package name:lowercase>_import()
+else()
+  project_<package name:lowercase>_import()
+endif()
+```
+
+### Add custom ports from git and install it
+
+```cmake
+include_guard(GLOBAL)
+
+macro(PROJECT_<PACKAGE NAME:UPPERCASE>_IMPORT)
+  if(TARGET <target to link>)
+    echowithcolor(COLOR GREEN "-- Dependency: <target to link> found.(Target: <target to link>)")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_LINK_NAME <target to link>)
+  endif()
+endmacro()
+
+if(NOT TARGET <target to link>)
+  project_third_party_port_declare(<package name>
+    VERSION "<package version>"
+    GIT_URL "<git url>"
+    BUILD_OPTIONS
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      # Other default options
+  )
+
+  project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_OPTIONS
+                                                    BUILD_SHARED_LIBS)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_FILE
+     AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_FILE}")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_OPTIONS GIT_PATCH_FILES
+         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_FILE}")
+  else()
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_OPTIONS)
+  endif()
+
+  find_configure_package(
+      PACKAGE
+      <package name>
+      BUILD_WITH_CMAKE
+      CMAKE_INHIRT_BUILD_ENV
+      # CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS    # For CXX only project
+      # CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS  # For C only project
+      # CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS
+      # CMAKE_INHERIT_FIND_ROOT_PATH              # Need to find dependency from install path
+      # CMAKE_INHERIT_SYSTEM_LINKS                # Nedd to link system libraries
+      CMAKE_FLAGS
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_OPTIONS}
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_OPTIONS}
+      WORKING_DIRECTORY
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
+      BUILD_DIRECTORY
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_DIR}"
+      PREFIX_DIRECTORY
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+      SRC_DIRECTORY_NAME
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_SRC_DIRECTORY_NAME}"
+      PROJECT_DIRECTORY
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_SRC_DIRECTORY_NAME}" # Where to find CMakeLists.txt
+      GIT_BRANCH
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_VERSION}"
+      GIT_URL
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_GIT_URL}")
+
+    project_third_party_<target to link>_import()
+else()
+  project_<package name:lowercase>_import()
+endif()
 ```
 
 [1]: https://github.com/microsoft/vcpkg

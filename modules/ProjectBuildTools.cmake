@@ -157,12 +157,13 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   endif()
 
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
-    if(DEFINED CACHE{${VAR_NAME}})
-      if(DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_VALUE)
-        string(REPLACE ";" "\\\\;" VAR_VALUE
-                       "$CACHE{${VAR_NAME}}${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_VALUE}")
+    if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
+      if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} AND DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
+        set(VAR_VALUE "${COMPILER_OPTION_INHERIT_${VAR_NAME}}${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}}")
+      elseif(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME})
+        set(VAR_VALUE "${COMPILER_OPTION_INHERIT_${VAR_NAME}}")
       else()
-        string(REPLACE ";" "\\\\;" VAR_VALUE "$CACHE{${VAR_NAME}}")
+        set(VAR_VALUE "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}}")
       endif()
       if(DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_LIST
          AND PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}_LIST)
@@ -171,11 +172,12 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
 
       if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
-        list(APPEND VAR_VALUE ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
+        list(APPEND VAR_VALUE "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
       endif()
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES VAR_VALUE)
       endif()
+      string(REPLACE ";" "\\\\;" VAR_VALUE "${VAR_VALUE}")
       if(VAR_VALUE)
         # Patch for some version of cmake, the compiler testing will fail on some environments.
         if(MSVC AND VAR_NAME MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")
