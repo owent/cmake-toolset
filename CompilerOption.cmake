@@ -3,6 +3,8 @@ include_guard(GLOBAL)
 # default configure, can be load multiple times and in different paths
 # ######################################################################################################################
 if(NOT DEFINED __COMPILER_OPTION_LOADED)
+  include("${CMAKE_CURRENT_LIST_DIR}/modules/ProjectBuildTools.cmake")
+
   include(CheckCXXSourceCompiles)
   set(__COMPILER_OPTION_LOADED 1)
   cmake_policy(PUSH)
@@ -15,6 +17,16 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # See Windows.h for more details
   option(COMPILER_OPTION_WINDOWS_ENABLE_NOMINMAX "Add #define NOMINMAX." ON)
   option(COMPILER_OPTION_WINDOWS_ENABLE_WIN32_LEAN_AND_MEAN "Add #define WIN32_LEAN_AND_MEAN." OFF)
+
+  # Auto inherit options from commandline
+  foreach(COMPILER_OPTION_INHERIT_VAR_NAME
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+    if(DEFINED CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}})
+      set(COMPILER_OPTION_INHERIT_${COMPILER_OPTION_INHERIT_VAR_NAME} "$CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}}")
+    endif()
+  endforeach()
+  unset(COMPILER_OPTION_INHERIT_VAR_NAME)
 
   set(CMAKE_POSITION_INDEPENDENT_CODE
       ON
@@ -179,7 +191,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     if(NOT ${VARNAME})
       set(${VARNAME} ${STDVERSION})
     endif()
-  endmacro(try_set_compiler_lang_standard)
+  endmacro()
 
   function(add_target_properties TARGET_NAME PROPERTY_NAME)
     get_target_property(PROPERTY_OLD_VALUES ${TARGET_NAME} ${PROPERTY_NAME})
