@@ -93,8 +93,8 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 9. Macro: ```add_compiler_flags_to_inherit_var_unique(<VAR_NAME> [options...])```
 10. Macro: ```add_list_flags_to_var(<VAR_NAME> [options...])```
 11. Macro: ```add_list_flags_to_var_unique(<VAR_NAME> [options...])```
-12. Macro: ```add_list_flags_to_var(<VAR_NAME> [options...])```
-13. Macro: ```add_list_flags_to_var_unique(<VAR_NAME> [options...])```
+12. Macro: ```add_list_flags_to_inherit_var(<VAR_NAME> [options...])```
+13. Macro: ```add_list_flags_to_inherit_var_unique(<VAR_NAME> [options...])```
 14. Macro: ```add_compiler_define([KEY=VALUE...])```
 15. Macro: ```add_linker_flags_for_runtime([LDFLAGS...])```
 16. Macro: ```add_linker_flags_for_all([LDFLAGS...])```
@@ -571,10 +571,10 @@ if(NOT TARGET <target to link>)
       PACKAGE
       <package name>
       BUILD_WITH_CMAKE
-      CMAKE_INHIRT_BUILD_ENV
-      # CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS    # For CXX only project
-      # CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS  # For C only project
-      # CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS
+      CMAKE_INHERIT_BUILD_ENV
+      # CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS    # For CXX only project
+      # CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS  # For C only project
+      # CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
       # CMAKE_INHERIT_FIND_ROOT_PATH              # Need to find dependency from install path
       # CMAKE_INHERIT_SYSTEM_LINKS                # Nedd to link system libraries
       CMAKE_FLAGS
