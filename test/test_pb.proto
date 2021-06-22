@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package cmake_toolset;
+
+message test_message {
+  int32 i32 = 1;
+  int64 i64 = 2;
+  string str = 3;
+}

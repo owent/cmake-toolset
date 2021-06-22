@@ -55,7 +55,7 @@ if(NOT TARGET flatbuffers::flatbuffers)
       PACKAGE
       Flatbuffers
       BUILD_WITH_CMAKE
-      CMAKE_INHIRT_BUILD_ENV
+      CMAKE_INHERIT_BUILD_ENV
       MSVC_CONFIGURE
       ${CMAKE_BUILD_TYPE}
       CMAKE_FLAGS

@@ -19,8 +19,11 @@
 #   Libsodium_LIBRARIES         - List of all libraries when using mbemtls.
 #   Libsodium_FOUND             - True if mbemtls found.
 #
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
 # ::
 #
+# sodium::sodium
 #
 # Hints
 # ^^^^^
@@ -64,4 +67,18 @@ find_package_handle_standard_args(
 
 if(Libsodium_FOUND)
   set(LIBSODIUM_FOUND ${Libsodium_FOUND})
+  if(NOT TARGET libsodium::libsodium)
+    add_library(libsodium::libsodium UNKNOWN IMPORTED)
+    set_target_properties(libsodium::libsodium PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Libsodium_INCLUDE_DIRS}")
+    set_target_properties(libsodium::libsodium PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;ASM"
+                                                          IMPORTED_LOCATION "${Libsodium_LIBRARIES}")
+    if(MSVC)
+      target_link_libraries(libsodium::libsodium PUBLIC advapi32)
+    else()
+      find_package(Threads)
+      if(CMAKE_USE_PTHREADS_INIT AND THREADS_PREFER_PTHREAD_FLAG)
+        target_compile_options(libsodium::libsodium INTERFACE ${THREADS_PREFER_PTHREAD_FLAG})
+      endif()
+    endif()
+  endif()
 endif()

@@ -13,11 +13,12 @@
 #   CONFIGURE_FLAGS [configure options...]
 #   CMAKE_FLAGS [cmake options...]
 #   FIND_PACKAGE_FLAGS [options will be passed into find_package(...)]
-#   CMAKE_INHIRT_BUILD_ENV
-#   CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS
-#   CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
-#   CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS
-#   CMAKE_INHIRT_FIND_ROOT_PATH
+#   CMAKE_INHERIT_BUILD_ENV
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
+#   CMAKE_INHERIT_FIND_ROOT_PATH
+#   CMAKE_INHERIT_SYSTEM_LINKS
 #   SCONS_FLAGS [scons options...]
 #   CUSTOM_BUILD_COMMAND [custom build cmd...]
 #   MAKE_FLAGS [make options...]
@@ -166,11 +167,12 @@ macro(FindConfigurePackage)
       BUILD_WITH_CMAKE
       BUILD_WITH_SCONS
       BUILD_WITH_CUSTOM_COMMAND
-      CMAKE_INHIRT_BUILD_ENV
-      CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS
-      CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS
-      CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS
-      CMAKE_INHIRT_FIND_ROOT_PATH
+      CMAKE_INHERIT_BUILD_ENV
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
+      CMAKE_INHERIT_FIND_ROOT_PATH
+      CMAKE_INHERIT_SYSTEM_LINKS
       GIT_ENABLE_SUBMODULE
       GIT_SUBMODULE_RECURSIVE)
   set(oneValueArgs
@@ -466,26 +468,30 @@ macro(FindConfigurePackage)
         set(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
             -Wno-dev "-DCMAKE_INSTALL_PREFIX=${FindConfigurePackage_PREFIX_DIRECTORY}")
 
-        if(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV)
-          set(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV OFF)
+        if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV)
+          set(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV OFF)
           set(project_build_tools_append_cmake_inherit_options_CALL_VARS
               FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR)
-          if(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV_DISABLE_C_FLAGS)
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_C_FLAGS)
           endif()
-          if(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV_DISABLE_CXX_FLAGS)
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_CXX_FLAGS)
           endif()
-          if(FindConfigurePackage_CMAKE_INHIRT_BUILD_ENV_DISABLE_ASM_FLAGS)
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_ASM_FLAGS)
           endif()
+          if(FindConfigurePackage_CMAKE_INHERIT_SYSTEM_LINKS)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS APPEND_SYSTEM_LINKS)
+          endif()
+
           project_build_tools_append_cmake_inherit_options(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           project_build_tools_append_cmake_cxx_standard_options(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
         endif()
-        if(FindConfigurePackage_CMAKE_INHIRT_FIND_ROOT_PATH)
+        if(FindConfigurePackage_CMAKE_INHERIT_FIND_ROOT_PATH)
           list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
                                "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
           list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR

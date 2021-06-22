@@ -6,6 +6,8 @@
 
 include_guard(GLOBAL)
 
+include("${CMAKE_CURRENT_LIST_DIR}/AtframeworkToolsetCommonDefinitions.cmake")
+
 set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
     CMAKE_C_FLAGS
     CMAKE_C_FLAGS_DEBUG
@@ -129,10 +131,39 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE)
 endif()
 
+macro(project_build_tools_append_space_flags_to_var VARNAME)
+  foreach(def ${ARGN})
+    if(${VARNAME})
+      set(${VARNAME} "${${VARNAME}} ${def}")
+    else()
+      set(${VARNAME} ${def})
+    endif()
+  endforeach()
+endmacro()
+
+macro(project_build_tools_append_space_flags_to_var_unique VARNAME)
+  foreach(def ${ARGN})
+    if(${VARNAME} AND NOT "${${VARNAME}}" STREQUAL "${def}")
+      string(FIND "${${VARNAME}}" "${def} " add_compiler_flags_to_var_unique_FIND_POSL)
+      string(FIND "${${VARNAME}}" " ${def}" add_compiler_flags_to_var_unique_FIND_POSR)
+      if(add_compiler_flags_to_var_unique_FIND_POSL LESS 0 AND add_compiler_flags_to_var_unique_FIND_POSR LESS 0)
+        set(${VARNAME} "${${VARNAME}} ${def}")
+      endif()
+    else()
+      set(${VARNAME} ${def})
+    endif()
+  endforeach()
+  unset(add_compiler_flags_to_var_unique_FIND_POS)
+endmacro()
+
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
-  cmake_parse_arguments(project_build_tools_append_cmake_inherit_options
-                        "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE" "" "" ${ARGN})
+  cmake_parse_arguments(
+    project_build_tools_append_cmake_inherit_options
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;APPEND_SYSTEM_LINKS" "" "" ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
+  if(DEFINED CACHE{CMAKE_MAKE_PROGRAM})
+    list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
+  endif()
 
   set(project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
 
@@ -151,22 +182,49 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   endif()
 
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
-    if(DEFINED ${VAR_NAME})
-      if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
-        list(REMOVE_DUPLICATES ${VAR_NAME})
+    unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
+    if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
+      if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} AND DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
+        string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                       "${COMPILER_OPTION_INHERIT_${VAR_NAME}}${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}}")
+      elseif(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME})
+        string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                       "${COMPILER_OPTION_INHERIT_${VAR_NAME}}")
+      else()
+        string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                       "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}}")
       endif()
-      string(REPLACE ";" "\\\\;" VAR_VALUE "${${VAR_NAME}}")
-      if(VAR_VALUE)
-        # Patch for some version of cmake, the compiler testing will fail on some environments.
-        if(MSVC AND VAR_NAME MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")
-          list(APPEND ${OUTVAR} "-D${VAR_NAME}= ${VAR_VALUE}")
-        else()
-          list(APPEND ${OUTVAR} "-D${VAR_NAME}=${VAR_VALUE}")
-        endif()
+
+      if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
+         AND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS
+         AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
+        project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
+                                                             "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
+      endif()
+      if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
+        list(REMOVE_DUPLICATES project_build_tools_append_cmake_inherit_VAR_VALUE)
+      endif()
+      string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                     "${project_build_tools_append_cmake_inherit_VAR_VALUE}")
+    elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS) # Add system links into standard libraries even not set
+      if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
+         AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
+        project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
+                                                             "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
+        string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                       "${project_build_tools_append_cmake_inherit_VAR_VALUE}")
+      endif()
+    endif()
+    if(project_build_tools_append_cmake_inherit_VAR_VALUE)
+      # Patch for some version of cmake, the compiler testing will fail on some environments.
+      if(MSVC AND VAR_NAME MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")
+        list(APPEND ${OUTVAR} "-D${VAR_NAME}= ${project_build_tools_append_cmake_inherit_VAR_VALUE}")
+      else()
+        list(APPEND ${OUTVAR} "-D${VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}")
       endif()
     endif()
   endforeach()
-  unset(VAR_VALUE)
+  unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
 
   if(CMAKE_GENERATOR_PLATFORM)
     list(APPEND ${OUTVAR} "-A" "${CMAKE_GENERATOR_PLATFORM}")

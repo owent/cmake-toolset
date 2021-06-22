@@ -11,6 +11,5 @@ include("${CMAKE_CURRENT_LIST_DIR}/TargetOption.cmake")
 
 # Port configure must be imported after TargetOption.cmake
 include("${CMAKE_CURRENT_LIST_DIR}/modules/EchoWithColor.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/modules/ProjectBuildTools.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/modules/FindConfigurePackage.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ports/Configure.cmake")

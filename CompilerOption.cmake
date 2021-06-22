@@ -3,6 +3,8 @@ include_guard(GLOBAL)
 # default configure, can be load multiple times and in different paths
 # ######################################################################################################################
 if(NOT DEFINED __COMPILER_OPTION_LOADED)
+  include("${CMAKE_CURRENT_LIST_DIR}/modules/ProjectBuildTools.cmake")
+
   include(CheckCXXSourceCompiles)
   set(__COMPILER_OPTION_LOADED 1)
   cmake_policy(PUSH)
@@ -15,6 +17,16 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # See Windows.h for more details
   option(COMPILER_OPTION_WINDOWS_ENABLE_NOMINMAX "Add #define NOMINMAX." ON)
   option(COMPILER_OPTION_WINDOWS_ENABLE_WIN32_LEAN_AND_MEAN "Add #define WIN32_LEAN_AND_MEAN." OFF)
+
+  # Auto inherit options from commandline
+  foreach(COMPILER_OPTION_INHERIT_VAR_NAME
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+    if(DEFINED CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}})
+      set(COMPILER_OPTION_INHERIT_${COMPILER_OPTION_INHERIT_VAR_NAME} "$CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}}")
+    endif()
+  endforeach()
+  unset(COMPILER_OPTION_INHERIT_VAR_NAME)
 
   set(CMAKE_POSITION_INDEPENDENT_CODE
       ON
@@ -33,26 +45,56 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
   # utility functions and macros
   macro(add_compiler_flags_to_var VARNAME)
-    foreach(def ${ARGN})
-      if(${VARNAME})
-        set(${VARNAME} "${${VARNAME}} ${def}")
-      else()
-        set(${VARNAME} ${def})
-      endif()
-    endforeach()
-  endmacro(add_compiler_flags_to_var)
+    project_build_tools_append_space_flags_to_var(${VARNAME} "${ARGN}")
+  endmacro()
 
   macro(add_compiler_flags_to_var_unique VARNAME)
-    foreach(def ${ARGN})
-      if(${VARNAME})
+    project_build_tools_append_space_flags_to_var_unique(${VARNAME} "${ARGN}")
+  endmacro()
+
+  macro(add_compiler_flags_to_inherit_var VARNAME)
+    add_compiler_flags_to_var(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      add_compiler_flags_to_var(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
+  macro(add_compiler_flags_to_inherit_var_unique VARNAME)
+    add_compiler_flags_to_var_unique(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      add_compiler_flags_to_var_unique(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
+  macro(add_list_flags_to_var VARNAME)
+    list(APPEND ${VARNAME} "${ARGN}")
+  endmacro()
+
+  macro(add_list_flags_to_var_unique VARNAME)
+    if(${VARNAME})
+      foreach(def ${ARGN})
         if(NOT "${def}" IN_LIST ${VARNAME})
-          set(${VARNAME} "${${VARNAME}} ${def}")
+          list(APPEND ${VARNAME} "${def}")
         endif()
-      else()
-        set(${VARNAME} ${def})
-      endif()
-    endforeach()
-  endmacro(add_compiler_flags_to_var_unique)
+      endforeach()
+    else()
+      list(APPEND ${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
+  macro(add_list_flags_to_inherit_var VARNAME)
+    add_list_flags_to_var(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      add_list_flags_to_var(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
+  macro(add_list_flags_to_inherit_var_unique VARNAME)
+    add_list_flags_to_var_unique(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      add_list_flags_to_var_unique(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
 
   macro(list_append_unescape VARNAME)
     string(REPLACE ";" "\\;" list_append_unescape_VAL "${ARGN}")
@@ -116,7 +158,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         set(CMAKE_SHARED_LINKER_FLAGS "${def}")
       endif()
     endforeach()
-  endmacro(add_linker_flags_for_runtime)
+  endmacro()
 
   macro(add_linker_flags_for_all)
     foreach(def ${ARGN})
@@ -127,23 +169,23 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         set(CMAKE_STATIC_LINKER_FLAGS "${def}")
       endif()
     endforeach()
-  endmacro(add_linker_flags_for_all)
+  endmacro()
 
   macro(try_set_compiler_lang_standard VARNAME STDVERSION)
     if(NOT ${VARNAME})
       set(${VARNAME} ${STDVERSION})
     endif()
-  endmacro(try_set_compiler_lang_standard)
+  endmacro()
 
   function(add_target_properties TARGET_NAME PROPERTY_NAME)
     get_target_property(PROPERTY_OLD_VALUES ${TARGET_NAME} ${PROPERTY_NAME})
     if(PROPERTY_OLD_VALUES)
-      list(APPEND PROPERTY_OLD_VALUES ${ARGN})
+      list(APPEND PROPERTY_OLD_VALUES "${ARGN}")
     else()
-      set(PROPERTY_OLD_VALUES ${ARGN})
+      set(PROPERTY_OLD_VALUES "${ARGN}")
     endif()
     set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} "${PROPERTY_OLD_VALUES}")
-  endfunction(add_target_properties)
+  endfunction()
 
   function(remove_target_properties TARGET_NAME PROPERTY_NAME)
     get_target_property(PROPERTY_OLD_VALUES ${TARGET_NAME} ${PROPERTY_NAME})
@@ -157,34 +199,34 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
   function(add_target_link_flags TARGET_NAME)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
-      add_target_properties(${TARGET_NAME} LINK_OPTIONS ${ARGN})
+      add_target_properties(${TARGET_NAME} LINK_OPTIONS "${ARGN}")
     else()
-      add_target_properties(${TARGET_NAME} LINK_FLAGS ${ARGN})
+      add_target_properties(${TARGET_NAME} LINK_FLAGS "${ARGN}")
     endif()
-  endfunction(add_target_link_flags)
+  endfunction()
 
   # ================== system checking ==================
   if(ANDROID)
     if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
     endif()
     if(ANDROID_LLVM_TOOLCHAIN_PREFIX)
       get_filename_component(ANDROID_LLVM_TOOLCHAIN_ROOT "${ANDROID_LLVM_TOOLCHAIN_PREFIX}" DIRECTORY)
       if(ANDROID_LLVM_TOOLCHAIN_ROOT AND EXISTS
                                          "${ANDROID_LLVM_TOOLCHAIN_ROOT}/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}")
-        add_compiler_flags_to_var_unique(
+        add_compiler_flags_to_inherit_var_unique(
           CMAKE_SHARED_LINKER_FLAGS
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
         )
-        add_compiler_flags_to_var_unique(
+        add_compiler_flags_to_inherit_var_unique(
           CMAKE_MODULE_LINKER_FLAGS
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
         )
-        add_compiler_flags_to_var_unique(
+        add_compiler_flags_to_inherit_var_unique(
           CMAKE_EXE_LINKER_FLAGS
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
           "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
@@ -237,7 +279,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       message(
         STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.4.0")
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS -std=c++0x)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -std=c++0x)
       message(STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , using -std=c++0x.")
     endif()
 
@@ -277,7 +319,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
     unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES)
     if(COMPILER_OPTION_CLANG_ENABLE_LIBCXX AND COMPILER_CLANG_TEST_LIBCXX)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS -stdlib=libc++)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -stdlib=libc++)
       message(STATUS "Clang use stdlib=libc++")
       list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS c++ c++abi)
     else()
@@ -334,7 +376,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
     unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES)
     if(COMPILER_OPTION_CLANG_ENABLE_LIBCXX AND COMPILER_CLANG_TEST_LIBCXX)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS -stdlib=libc++)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -stdlib=libc++)
       message(STATUS "AppleClang use stdlib=libc++")
       list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS c++ c++abi)
     else()
@@ -364,7 +406,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     add_linker_flags_for_runtime(/ignore:4217)
 
     if(NOT VCPKG_TOOLCHAIN)
-      add_compiler_flags_to_var_unique(
+      add_compiler_flags_to_inherit_var_unique(
         CMAKE_CXX_FLAGS
         /nologo
         /DWIN32
@@ -373,8 +415,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         /GR
         /MP
         /EHsc)
-      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
-      add_compiler_flags_to_var_unique(CMAKE_RC_FLAGS "-c65001" "/DWIN32")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_RC_FLAGS "-c65001" "/DWIN32")
     endif()
 
     try_set_compiler_lang_standard(CMAKE_C_STANDARD 11)
@@ -387,11 +429,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
     # https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warnings-by-compiler-version
     # https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019#microsoft-specific-predefined-macros
-    # if (MSVC_VERSION GREATER_EQUAL 1910) add_compiler_flags_to_var(CMAKE_CXX_FLAGS /std:c++17) message(STATUS "MSVC
-    # ${MSVC_VERSION} found. using /std:c++17") endif() set __cplusplus to standard value, @see
+    # if (MSVC_VERSION GREATER_EQUAL 1910) add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS /std:c++17)
+    # message(STATUS "MSVC ${MSVC_VERSION} found. using /std:c++17") endif() set __cplusplus to standard value, @see
     # https://docs.microsoft.com/zh-cn/cpp/build/reference/zc-cplusplus
     if(MSVC_VERSION GREATER_EQUAL 1914 AND COMPILER_OPTION_MSVC_ZC_CPP)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS /Zc:__cplusplus)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS /Zc:__cplusplus)
     endif()
 
     # C++20 coroutine precondition
@@ -405,7 +447,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
   if(MSVC)
     if(NOT VCPKG_TOOLCHAIN)
-      add_compiler_flags_to_var_unique(
+      add_compiler_flags_to_inherit_var_unique(
         CMAKE_CXX_FLAGS_DEBUG
         /Od
         /D_DEBUG
@@ -413,7 +455,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         /Ob0
         /Od
         /RTC1)
-      add_compiler_flags_to_var_unique(
+      add_compiler_flags_to_inherit_var_unique(
         CMAKE_C_FLAGS_DEBUG
         /Od
         /D_DEBUG
@@ -421,30 +463,31 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         /Ob0
         /Od
         /RTC1)
-      add_compiler_flags_to_var_unique(CMAKE_CXX_FLAGS_RELEASE /O2 /Oi /Gy /DNDEBUG /Z7)
-      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS_RELEASE /O2 /Oi /Gy /DNDEBUG /Z7)
-      add_compiler_flags_to_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO /O2 /Oi /Gy /DNDEBUG /Z7)
-      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS_RELWITHDEBINFO /O2 /Oi /Gy /DNDEBUG /Z7)
-      add_compiler_flags_to_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL /Ox /Gy /DNDEBUG /Z7)
-      add_compiler_flags_to_var_unique(CMAKE_C_FLAGS_MINSIZEREL /Ox /Gy /DNDEBUG /Z7)
-      string(APPEND CMAKE_STATIC_LINKER_FLAGS_RELEASE_INIT " /nologo ")
-      add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/nologo" "/DEBUG" "/INCREMENTAL:NO"
-                                       "/OPT:REF" "/OPT:ICF")
-      add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS_RELEASE "/nologo" "/DEBUG" "/INCREMENTAL:NO" "/OPT:REF"
-                                       "/OPT:ICF")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELEASE /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS_RELEASE /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS_RELWITHDEBINFO /O2 /Oi /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL /Ox /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS_MINSIZEREL /Ox /Gy /DNDEBUG /Z7)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_STATIC_LINKER_FLAGS_RELEASE_INIT " /nologo ")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/nologo" "/DEBUG" "/INCREMENTAL:NO"
+                                               "/OPT:REF" "/OPT:ICF")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS_RELEASE "/nologo" "/DEBUG" "/INCREMENTAL:NO"
+                                               "/OPT:REF" "/OPT:ICF")
 
-      string(APPEND CMAKE_STATIC_LINKER_FLAGS_DEBUG_INIT " /nologo ")
-      string(APPEND CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT " /nologo ")
-      string(APPEND CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT " /nologo ")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_STATIC_LINKER_FLAGS_DEBUG_INIT " /nologo ")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT " /nologo ")
+      add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT " /nologo ")
     endif()
   else()
     if(NOT EMSCRIPTEN)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -ggdb)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
     endif()
-    # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG -ggdb) add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE)
-    # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
-    # add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL)
+    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -ggdb)
+    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELEASE)
+    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
+    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL)
   endif()
 
   # ================== support checking ==================
@@ -476,15 +519,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
             CACHE STRING "")
       else()
         if(VCPKG_CRT_LINKAGE STREQUAL "static")
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG /MTd)
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE /MT)
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO /MT)
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL /MT)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG /MTd)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELEASE /MT)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO /MT)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL /MT)
         else()
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_DEBUG /MDd)
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELEASE /MD)
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_RELWITHDEBINFO /MD)
-          add_compiler_flags_to_var(CMAKE_CXX_FLAGS_MINSIZEREL /MD)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG /MDd)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELEASE /MD)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO /MD)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL /MD)
         endif()
       endif()
 
@@ -512,13 +555,13 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # check add c++20 coroutine flags
   if(NOT MSVC)
     if(COMPILER_OPTIONS_TEST_STD_COROUTINE)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS -fcoroutines)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -fcoroutines)
     elseif(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS -fcoroutines-ts)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -fcoroutines-ts)
     endif()
   else()
     if(COMPILER_OPTIONS_TEST_STD_COROUTINE OR COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
-      add_compiler_flags_to_var(CMAKE_CXX_FLAGS /await)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS /await)
     endif()
   endif()
 
@@ -556,7 +599,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     int main () { puts(typeid(int).name()); return 0; }" COMPILER_OPTIONS_TEST_RTTI)
 
   # For Windows.h
-  if(WIN32 OR MINGW)
+  if(WIN32
+     OR MINGW
+     OR CYGWIN)
     if(COMPILER_OPTION_WINDOWS_ENABLE_NOMINMAX)
       add_compiler_define("NOMINMAX")
     endif()
