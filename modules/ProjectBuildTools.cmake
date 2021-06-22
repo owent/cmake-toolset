@@ -172,7 +172,7 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
 
       if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
-        list(APPEND VAR_VALUE "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
+        list(APPEND VAR_VALUE ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS})
       endif()
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES VAR_VALUE)
