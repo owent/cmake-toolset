@@ -32,13 +32,16 @@ This toolset also works with iOS toolchain and Android NDK.
 
 ## Quick Start
 
-```bash
+```cmake
 cmake_minimum_required(VERSION 3.16.0)
 cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0067 NEW)
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0091 NEW)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.19.0")
+  cmake_policy(SET CMP0111 NEW)
+endif()
 
 set(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -52,6 +55,17 @@ FetchContent_Populate(
     GIT_SHALLOW TRUE)
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
+```
+
+Or using toolchain
+
+```bash
+cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_TOOLSET_DIR/Toolchain.cmake [other options...]
+
+# With vcpkg on x64-linux
+cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_TOOLSET_DIR/Toolchain.cmake  \
+  -DATFRAMEWORK_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake          \
+  -DVCPKG_TARGET_TRIPLET=x64-linux [other options...]
 ```
 
 ## CI Job Matrix

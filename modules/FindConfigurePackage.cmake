@@ -135,15 +135,13 @@ elseif(
   (CMAKE_MAKE_PROGRAM STREQUAL "make")
   OR (CMAKE_MAKE_PROGRAM STREQUAL "gmake")
   OR (CMAKE_MAKE_PROGRAM STREQUAL "ninja"))
-  include(ProcessorCount)
-  ProcessorCount(CPU_CORE_NUM)
+  cmake_host_system_information(RESULT CPU_CORE_NUM QUERY NUMBER_OF_PHYSICAL_CORES)
   set(FindConfigurePackageCMakeBuildMultiJobs
       "--" "-j${CPU_CORE_NUM}"
       CACHE INTERNAL "Build options for multi-jobs")
   unset(CPU_CORE_NUM)
 elseif(CMAKE_MAKE_PROGRAM STREQUAL "xcodebuild")
-  include(ProcessorCount)
-  ProcessorCount(CPU_CORE_NUM)
+  cmake_host_system_information(RESULT CPU_CORE_NUM QUERY NUMBER_OF_PHYSICAL_CORES)
   set(FindConfigurePackageCMakeBuildMultiJobs
       "--" "-jobs" ${CPU_CORE_NUM}
       CACHE INTERNAL "Build options for multi-jobs")
