@@ -1,6 +1,8 @@
 .vscode
 .clion
 .vs
+.pyc
+__pycache__
 
 CMakeLists.txt.user
 CMakeCache.txt

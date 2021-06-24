@@ -124,6 +124,10 @@ for ARCH in ${ARCHS}; do
     mkdir -p "$WORKING_DIR/lib/$ARCH";
 
     EXT_OPTIONS="";
+    if [[ "${ANDROID_TOOLCHAIN:0:5}" == "clang" ]]; then
+        EXT_OPTIONS="$EXT_OPTIONS -DANDROID_LD=lld";
+    fi
+    
     # 64 bits must at least using android-21
     # @see $ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake
     echo $ARCH | grep -E '64(-v8a)?$' ;
