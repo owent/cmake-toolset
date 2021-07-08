@@ -311,10 +311,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
       check_cxx_source_compiles(
         "#include <iostream>
-       int main() {
-         std::cout<< __cplusplus<< std::endl;
-         return 0;
-       }
+         int main() {
+           std::cout<< __cplusplus<< std::endl;
+           return 0;
+         }
         "
         COMPILER_CLANG_TEST_LIBCXX)
       set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
@@ -326,12 +326,23 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         message(STATUS "Clang use stdlib=libc++")
         list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS c++ c++abi)
       else()
-        include(CheckCXXSymbolExists)
-        check_cxx_symbol_exists(_LIBCPP_VERSION "cstddef" COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBCXX)
+        check_cxx_source_compiles(
+          "#include <cstddef>
+           int main() {
+             std::cout<< _LIBCPP_VERSION<< std::endl;
+             return 0;
+           }"
+          COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBCXX)
         if(COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBCXX)
           set(COMPILER_CLANG_TEST_DEFAULT_STDLIB "libc++")
         else()
-          check_cxx_symbol_exists(__GLIBCXX__ "cstddef" COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBSTDCXX)
+          check_cxx_source_compiles(
+            "#include <cstddef>
+             int main() {
+               std::cout<< __GLIBCXX__<< std::endl;
+               return 0;
+             }"
+            COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBSTDCXX)
           if(COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBSTDCXX)
             set(COMPILER_CLANG_TEST_DEFAULT_STDLIB "libstdc++")
           else()
@@ -385,10 +396,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
       check_cxx_source_compiles(
         "#include <iostream>
-       int main() {
-         std::cout<< __cplusplus<< std::endl;
-         return 0;
-      }"
+         int main() {
+           std::cout<< __cplusplus<< std::endl;
+           return 0;
+         }"
         COMPILER_CLANG_TEST_LIBCXX)
       set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
       set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
@@ -399,12 +410,23 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         message(STATUS "AppleClang use stdlib=libc++")
         list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS c++ c++abi)
       else()
-        include(CheckCXXSymbolExists)
-        check_cxx_symbol_exists(_LIBCPP_VERSION "cstddef" COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBCXX)
+        check_cxx_source_compiles(
+          "#include <cstddef>
+           int main() {
+             std::cout<< _LIBCPP_VERSION<< std::endl;
+             return 0;
+           }"
+          COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBCXX)
         if(COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBCXX)
           set(COMPILER_CLANG_TEST_DEFAULT_STDLIB "libc++")
         else()
-          check_cxx_symbol_exists(__GLIBCXX__ "cstddef" COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBSTDCXX)
+          check_cxx_source_compiles(
+            "#include <cstddef>
+             int main() {
+               std::cout<< __GLIBCXX__<< std::endl;
+               return 0;
+             }"
+            COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBSTDCXX)
           if(COMPILER_CLANG_TEST_DEFAULT_STDLIB_LIBSTDCXX)
             set(COMPILER_CLANG_TEST_DEFAULT_STDLIB "libstdc++")
           else()
