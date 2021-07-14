@@ -6,6 +6,7 @@
 
 include_guard(GLOBAL)
 
+include(GNUInstallDirs)
 include("${CMAKE_CURRENT_LIST_DIR}/AtframeworkToolsetCommonDefinitions.cmake")
 
 set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
