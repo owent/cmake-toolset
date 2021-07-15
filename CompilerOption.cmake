@@ -310,22 +310,24 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       endif()
     else()
       # Test libc++ and libc++abi
-      set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-      set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
-      set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
-      check_cxx_source_compiles(
-        "#include <iostream>
-         int main() {
-           std::cout<< __cplusplus<< std::endl;
-           return 0;
-         }
-        "
-        COMPILER_CLANG_TEST_LIBCXX)
-      set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
-      set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
-      unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
-      unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES)
+      if(NOT ANDROID)
+        set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+        set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+        set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
+        list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
+        check_cxx_source_compiles(
+          "#include <iostream>
+          int main() {
+            std::cout<< __cplusplus<< std::endl;
+            return 0;
+          }
+          "
+          COMPILER_CLANG_TEST_LIBCXX)
+        set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
+        set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
+        unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
+        unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES)
+      endif()
       if(COMPILER_OPTION_CLANG_ENABLE_LIBCXX AND COMPILER_CLANG_TEST_LIBCXX)
         add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -stdlib=libc++)
         message(STATUS "Clang use stdlib=libc++")
@@ -333,6 +335,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       else()
         check_cxx_source_compiles(
           "#include <cstddef>
+           #include <iostream>
            int main() {
              std::cout<< _LIBCPP_VERSION<< std::endl;
              return 0;
@@ -343,6 +346,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         else()
           check_cxx_source_compiles(
             "#include <cstddef>
+             #include <iostream>
              int main() {
                std::cout<< __GLIBCXX__<< std::endl;
                return 0;
@@ -400,21 +404,23 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         set(COMPILER_CLANG_TEST_LIBCXX OFF)
       endif()
     else()
-      set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-      set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
-      set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
-      check_cxx_source_compiles(
-        "#include <iostream>
-         int main() {
-           std::cout<< __cplusplus<< std::endl;
-           return 0;
-         }"
-        COMPILER_CLANG_TEST_LIBCXX)
-      set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
-      set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
-      unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
-      unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES)
+      if(NOT ANDROID)
+        set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+        set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+        set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
+        list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
+        check_cxx_source_compiles(
+          "#include <iostream>
+          int main() {
+            std::cout<< __cplusplus<< std::endl;
+            return 0;
+          }"
+          COMPILER_CLANG_TEST_LIBCXX)
+        set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
+        set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
+        unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
+        unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES)
+      endif()
       if(COMPILER_OPTION_CLANG_ENABLE_LIBCXX AND COMPILER_CLANG_TEST_LIBCXX)
         add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -stdlib=libc++)
         message(STATUS "AppleClang use stdlib=libc++")
@@ -422,6 +428,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       else()
         check_cxx_source_compiles(
           "#include <cstddef>
+          #include <iostream>
            int main() {
              std::cout<< _LIBCPP_VERSION<< std::endl;
              return 0;
@@ -432,6 +439,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         else()
           check_cxx_source_compiles(
             "#include <cstddef>
+             #include <iostream>
              int main() {
                std::cout<< __GLIBCXX__<< std::endl;
                return 0;
