@@ -3,7 +3,10 @@ include_guard(GLOBAL)
 
 # =========== third party gsl-lite ==================
 macro(PROJECT_THIRD_PARTY_GSL_LITE_IMPORT)
-  if(TARGET gsl::gsl-lite)
+  if(TARGET gsl::gsl-lite-v1)
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): gsl::gsl-lite-v1 using target gsl::gsl-lite-v1")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GSL_LITE_LINK_NAME gsl::gsl-lite-v1)
+  elseif(TARGET gsl::gsl-lite)
     echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): gsl::gsl-lite using target gsl::gsl-lite")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GSL_LITE_LINK_NAME gsl::gsl-lite)
   endif()
