@@ -25,7 +25,7 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
   endif()
 
   if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
-    project_third_party_port_declare(benchmark VERSION "v1.5.5" GIT_URL "https://github.com/google/benchmark.git")
+    project_third_party_port_declare(benchmark VERSION "v1.5.6" GIT_URL "https://github.com/google/benchmark.git")
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_DIR)
       project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_DIR "benchmark"

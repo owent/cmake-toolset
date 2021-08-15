@@ -360,11 +360,17 @@ endfunction()
 
 function(project_third_party_port_declare PORT_NAME)
   set(optionArgs APPEND_BUILD_OPTIONS)
-  set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR)
+  set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR PORT_PREFIX)
   set(multiValueArgs BUILD_OPTIONS PATCH_FILE)
   cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
                         "${ARGN}")
-  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  if(project_third_party_port_declare_PORT_PREFIX)
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${project_third_party_port_declare_PORT_PREFIX}_${PORT_NAME}"
+                   FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  endif()
+
   string(REGEX REPLACE "[-\\.]" "_" FULL_PORT_NAME "${FULL_PORT_NAME}")
 
   if(NOT ${FULL_PORT_NAME}_VERSION AND project_third_party_port_declare_VERSION)
