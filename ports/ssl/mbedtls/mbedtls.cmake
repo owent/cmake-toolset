@@ -45,7 +45,12 @@ macro(PROJECT_THIRD_PARTY_MBEDTLS_IMPORT)
   endif()
 endmacro()
 
-if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
+if(NOT
+   (TARGET MbedTLS::mbedtls
+    OR TARGET mbedtls_static
+    OR TARGET mbedtls
+    OR mbedTLS_FOUND
+    OR MbedTLS_FOUND))
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v3.0.0")
   endif()
@@ -60,8 +65,14 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
   endif()
 
   if(VCPKG_TOOLCHAIN)
-    find_package(mbedtls QUIET)
-    project_third_party_mbedtls_import()
+    find_package(MbedTLS QUIET)
+    if(TARGET MbedTLS::mbedtls
+       OR TARGET mbedtls_static
+       OR TARGET mbedtls
+       OR mbedTLS_FOUND
+       OR MbedTLS_FOUND)
+      project_third_party_mbedtls_import()
+    endif()
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
