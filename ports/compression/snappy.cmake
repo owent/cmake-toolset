@@ -45,7 +45,7 @@ if(NOT TARGET Snappy::snappy)
 
     find_configure_package(
       PACKAGE
-      snappy
+      Snappy
       BUILD_WITH_CMAKE
       CMAKE_INHERIT_BUILD_ENV
       CMAKE_INHERIT_FIND_ROOT_PATH
