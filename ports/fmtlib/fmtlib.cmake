@@ -66,8 +66,9 @@ int main() {
        AND (NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD
             OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT))
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION)
-        # fmt.dev 8.0.0+ require CXX23 detector, which is supported from cmake 3.20.0
-        if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0")
+        # fmt.dev 8.0.0+ require CXX23 detector, which is supported from cmake 3.20.0 Current cmake 3.21.0 do not
+        # support compiler extensions of CXX23 for AppleClang
+        if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0" AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION "8.0.1")
         else()
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION "7.1.3")
