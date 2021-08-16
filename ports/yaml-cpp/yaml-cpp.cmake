@@ -24,11 +24,7 @@ if(NOT TARGET yaml-cpp::yaml-cpp
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION)
     # yaml-cpp 0.7.0+ require CXX23 detector, which is supported from cmake 3.20.0 Current cmake 3.21.0 do not support
     # compiler extensions of CXX23 for AppleClang
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0" AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION "0.7.0")
-    else()
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION "0.6.3")
-    endif()
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION "0.7.0")
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL "https://github.com/jbeder/yaml-cpp.git")

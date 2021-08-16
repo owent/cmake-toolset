@@ -392,14 +392,17 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wno-implicit-fallthrough)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "6.0")
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21.0")
-        try_set_compiler_lang_standard(CMAKE_C_STANDARD 23)
-      else()
-        try_set_compiler_lang_standard(CMAKE_C_STANDARD 11)
-      endif()
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0")
-        try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 23)
-      elseif(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
+      # Current cmake (3.21.0) do not support cxx23 for AppleClang now ================================================
+      # if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21.0") ==============================================================
+      # try_set_compiler_lang_standard(CMAKE_C_STANDARD 23) ===========================================================
+      # else() ========================================================================================================
+      try_set_compiler_lang_standard(CMAKE_C_STANDARD 11)
+      # endif() =======================================================================================================
+
+      # if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0") ==============================================================
+      # try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 23) =========================================================
+      # else ==========================================================================================================
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
         try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 20)
       elseif(CMAKE_VERSION VERSION_GREATER_EQUAL "3.8.0")
         try_set_compiler_lang_standard(CMAKE_CXX_STANDARD 17)
