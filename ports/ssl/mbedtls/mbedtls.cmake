@@ -3,12 +3,18 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_MBEDTLS_IMPORT)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
-    if(TARGET mbedtls_static)
+    if(TARGET MbedTLS::mbedtls)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME MbedTLS::mbedtls)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND TRUE)
+      echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): MbedTLS found target MbedTLS::mbedtls")
+    elseif(TARGET mbedtls_static)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME mbedtls_static)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND TRUE)
+      echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): MbedTLS found target mbedtls_static")
     elseif(TARGET mbedtls)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME mbedtls)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND TRUE)
+      echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): MbedTLS found target mbedtls")
     elseif(mbedTLS_FOUND OR MbedTLS_FOUND)
       add_library(mbedtls UNKNOWN IMPORTED)
       if(MBEDTLS_INCLUDE_DIR)
@@ -28,6 +34,7 @@ macro(PROJECT_THIRD_PARTY_MBEDTLS_IMPORT)
       else()
         message(FATAL_ERROR "Library not found for mbedtls")
       endif()
+      echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): MbedTLS found libraries and create target mbedtls")
 
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND TRUE)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME mbedtls)
@@ -42,9 +49,16 @@ macro(PROJECT_THIRD_PARTY_MBEDTLS_IMPORT)
   endif()
 endmacro()
 
-if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
+if(NOT
+   (TARGET MbedTLS::mbedtls
+    OR TARGET mbedtls_static
+    OR TARGET mbedtls
+    OR mbedTLS_FOUND
+    OR MbedTLS_FOUND))
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v2.26.0")
+    # libcurl do not support mbedtls 3.0+ now ===================================
+    # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v3.0.0")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v2.27.0")
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_GIT_URL)
@@ -57,8 +71,14 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
   endif()
 
   if(VCPKG_TOOLCHAIN)
-    find_package(mbedtls QUIET)
-    project_third_party_mbedtls_import()
+    find_package(MbedTLS QUIET)
+    if(TARGET MbedTLS::mbedtls
+       OR TARGET mbedtls_static
+       OR TARGET mbedtls
+       OR mbedTLS_FOUND
+       OR MbedTLS_FOUND)
+      project_third_party_mbedtls_import()
+    endif()
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)

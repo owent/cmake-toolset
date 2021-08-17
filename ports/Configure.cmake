@@ -191,11 +191,11 @@ if(WIN32
    AND NOT CYGWIN)
   message(
     STATUS
-      "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset-${project_third_party_get_build_dir_HASH}"
+      "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}"
   )
 endif()
 
-macro(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
+function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
   if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES "[0-9A-Fa-f]+")
     string(SUBSTRING "${PORT_VERSION}" 0 12 project_third_party_get_build_dir_PORT_VERSION)
@@ -207,18 +207,16 @@ macro(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
      AND NOT MINGW
      AND NOT CYGWIN)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_USER_BASE}/cmake-toolset-${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
-    )
+        "${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
+        PARENT_SCOPE)
   else()
     set(${OUTPUT_VARNAME}
         "${CMAKE_CURRENT_BINARY_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
-    )
+        PARENT_SCOPE)
   endif()
-  unset(project_third_party_get_build_dir_PORT_VERSION_LEN)
-  unset(project_third_party_get_build_dir_PORT_VERSION)
-endmacro()
+endfunction()
 
-macro(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
+function(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
   if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES "[0-9A-Fa-f]+")
     string(SUBSTRING "${PORT_VERSION}" 0 12 project_third_party_get_build_dir_PORT_VERSION)
@@ -230,16 +228,38 @@ macro(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSI
      AND NOT MINGW
      AND NOT CYGWIN)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_USER_BASE}/cmake-toolset-${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
-    )
+        "${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
+        PARENT_SCOPE)
   else()
     set(${OUTPUT_VARNAME}
         "${CMAKE_CURRENT_BINARY_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
-    )
+        PARENT_SCOPE)
   endif()
-  unset(project_third_party_get_build_dir_PORT_VERSION_LEN)
-  unset(project_third_party_get_build_dir_PORT_VERSION)
-endmacro()
+endfunction()
+
+function(project_third_party_cleanup_old_build_tree BASE_DIR)
+  file(GLOB project_third_party_old_build_dirs "${BASE_DIR}/cmake-toolset/*" "${BASE_DIR}/cmake-toolset-*")
+
+  string(TIMESTAMP current_time "%s" UTC)
+
+  foreach(old_build_dir IN LISTS project_third_party_old_build_dirs)
+    if(IS_DIRECTORY "${old_build_dir}")
+      get_filename_component(old_build_dir_parent "${old_build_dir}" DIRECTORY)
+      if(EXISTS "${old_build_dir_parent}/.git")
+        message(STATUS "Ignore cleanup ${old_build_dir} because ${old_build_dir_parent}/.git exists")
+      else()
+        file(TIMESTAMP "${old_build_dir}" old_build_dir_time "%s" UTC)
+        math(EXPR old_build_dir_time_offset "${current_time}-${old_build_dir_time}")
+        if(old_build_dir_time_offset GREATER 2592000) # 30 days
+          file(TIMESTAMP "${old_build_dir}" old_build_dir_modify_time "%Y-%m-%d %H:%M:%S")
+          message(STATUS "Cleanup old build tree ${old_build_dir}, last modified on ${old_build_dir_modify_time}")
+          file(REMOVE_RECURSE "${old_build_dir}")
+        endif()
+      endif()
+    endif()
+  endforeach()
+endfunction()
+project_third_party_cleanup_old_build_tree("${project_third_party_get_build_dir_USER_BASE}")
 
 macro(ATFRAMEWORK_CMAKE_TOOLSET_FIND_BASH_TOOLS)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_BASH bash)
@@ -340,11 +360,17 @@ endfunction()
 
 function(project_third_party_port_declare PORT_NAME)
   set(optionArgs APPEND_BUILD_OPTIONS)
-  set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR)
+  set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR PORT_PREFIX)
   set(multiValueArgs BUILD_OPTIONS PATCH_FILE)
   cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
                         "${ARGN}")
-  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  if(project_third_party_port_declare_PORT_PREFIX)
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${project_third_party_port_declare_PORT_PREFIX}_${PORT_NAME}"
+                   FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  endif()
+
   string(REGEX REPLACE "[-\\.]" "_" FULL_PORT_NAME "${FULL_PORT_NAME}")
 
   if(NOT ${FULL_PORT_NAME}_VERSION AND project_third_party_port_declare_VERSION)

@@ -61,7 +61,7 @@ elseif(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_DISABLED)
   endif()
 endif()
 
-if(NOT OPENSSL_FOUND AND NOT MBEDTLS_FOUND)
+if(NOT OPENSSL_FOUND AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
   message(FATAL_ERROR "Dependency: must at least have one of openssl,libressl or mbedtls.")
 endif()
 
