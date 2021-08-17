@@ -40,9 +40,15 @@ if(NOT absl_FOUND)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
                                                                           "-DBUILD_TESTING=OFF")
+      # abseil do not set export, which may lead to unresolved external symbol
+      if(MSVC)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
+             "-DABSL_BUILD_DLL=OFF")
+      else()
+        project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS
+                                                        BUILD_SHARED_LIBS)
+      endif()
     endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
 
     # Other flags for find_configure_package
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)
