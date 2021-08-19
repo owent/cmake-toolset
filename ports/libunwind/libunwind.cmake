@@ -52,6 +52,8 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     "--enable-debug-frame"
     "--enable-block-signals"
     "--with-pic=yes"
+    "--disable-tests"
+    "--disable-documentation"
     WORKING_DIRECTORY
     "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY
