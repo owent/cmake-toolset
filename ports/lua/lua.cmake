@@ -24,9 +24,8 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     endif()
   elseif(LUA_FOUND)
     add_library(lua::liblua UNKNOWN IMPORTED)
-    set_target_properties(lua::liblua PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${LUA_INCLUDE_DIR})
-    set_target_properties(lua::liblua PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
-                                                                                              ${LUA_LIBRARIES})
+    set_target_properties(lua::liblua PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}")
+    set_target_properties(lua::liblua PROPERTIES IMPORTED_LOCATION "${LUA_LIBRARIES}")
 
     if(ANDROID)
       list(APPEND PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "log" "m" "c")
@@ -56,8 +55,10 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     unset(PROJECT_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES)
     unset(PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS)
     echowithcolor(
-      COLOR GREEN
-      "-- Dependency(${PROJECT_NAME}): Lua found ${LUA_VERSION_STRING}(module) and redirect to target lua::liblua")
+      COLOR
+      GREEN
+      "-- Dependency(${PROJECT_NAME}): Lua found ${LUA_VERSION_STRING}(module) and redirect to target lua::liblua(${LUA_LIBRARIES})"
+    )
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME lua::liblua)
     if(NOT TARGET lua)
       add_library(lua INTERFACE IMPORTED)
