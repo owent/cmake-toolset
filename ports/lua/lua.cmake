@@ -22,11 +22,20 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
       add_library(lua INTERFACE IMPORTED)
       set_target_properties(lua PROPERTIES INTERFACE_LINK_LIBRARIES lua::liblua)
     endif()
+  elseif(TARGET unofficial-lua::lua)
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Lua found target unofficial-lua::lua")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME unofficial-lua::lua)
+    if(NOT TARGET lua)
+      add_library(lua INTERFACE IMPORTED)
+      set_target_properties(lua PROPERTIES INTERFACE_LINK_LIBRARIES unofficial-lua::lua)
+    endif()
+  elseif(TARGET lua)
+    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Lua found target lua")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME lua)
   elseif(LUA_FOUND)
     add_library(lua::liblua UNKNOWN IMPORTED)
-    set_target_properties(lua::liblua PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${LUA_INCLUDE_DIR})
-    set_target_properties(lua::liblua PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
-                                                                                              ${LUA_LIBRARIES})
+    set_target_properties(lua::liblua PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}")
+    set_target_properties(lua::liblua PROPERTIES IMPORTED_LOCATION "${LUA_LIBRARIES}")
 
     if(ANDROID)
       list(APPEND PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "log" "m" "c")
@@ -56,8 +65,10 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     unset(PROJECT_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES)
     unset(PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS)
     echowithcolor(
-      COLOR GREEN
-      "-- Dependency(${PROJECT_NAME}): Lua found ${LUA_VERSION_STRING}(module) and redirect to target lua::liblua")
+      COLOR
+      GREEN
+      "-- Dependency(${PROJECT_NAME}): Lua found ${LUA_VERSION_STRING}(module) and redirect to target lua::liblua(${LUA_LIBRARIES})"
+    )
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME lua::liblua)
     if(NOT TARGET lua)
       add_library(lua INTERFACE IMPORTED)
@@ -70,10 +81,23 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
   endif()
 endmacro()
 
+# Try to use unofficial-lua-config.cmake in vcpkg
+if(VCPKG_TOOLCHAIN
+   AND NOT TARGET lua::liblua-static
+   AND NOT TARGET lua::liblua-dynamic
+   AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
+   AND NOT LUA_FOUND)
+  find_package(unofficial-lua QUIET CONFIG)
+endif()
+
 # Try to use lua-config.cmake
 if(NOT TARGET lua::liblua-static
    AND NOT TARGET lua::liblua-dynamic
    AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
    AND NOT LUA_FOUND)
   find_package(lua QUIET CONFIG)
 endif()
@@ -82,6 +106,8 @@ endif()
 if(NOT TARGET lua::liblua-static
    AND NOT TARGET lua::liblua-dynamic
    AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
    AND NOT LUA_FOUND)
   find_package(Lua QUIET MODULE)
 endif()
@@ -89,6 +115,8 @@ endif()
 if(NOT TARGET lua::liblua-static
    AND NOT TARGET lua::liblua-dynamic
    AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
    AND NOT LUA_FOUND)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION "v5.4.3")
@@ -152,6 +180,8 @@ if(NOT TARGET lua::liblua-static
   if(NOT TARGET lua::liblua-dynamic
      AND NOT TARGET lua::liblua-static
      AND NOT TARGET lua::liblua
+     AND NOT TARGET unofficial-lua::lua
+     AND NOT TARGET lua
      AND NOT LUA_FOUND)
     message(FATAL_ERROR "-- Dependency(${PROJECT_NAME}): lua not found")
   endif()
