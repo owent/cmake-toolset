@@ -56,7 +56,7 @@ if(NOT TARGET GTest::gtest
     project_third_party_port_declare(
       gtest
       VERSION
-      "release-1.11.0"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_DEFAULT_VERSION}"
       GIT_URL
       "https://github.com/google/googletest.git"
       BUILD_OPTIONS
