@@ -52,7 +52,7 @@ if(NOT Libwebsockets_FOUND
     project_third_party_libwebsockets_import()
     if(NOT Libwebsockets_FOUND)
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_VERSION)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_VERSION "v4.2.1")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_VERSION "v4.2.2")
       endif()
 
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_GIT_URL)
@@ -138,8 +138,9 @@ if(NOT Libwebsockets_FOUND
         unset(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS_RELEASE)
       endif()
 
-      project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-                                                      LWS_WITH_SHARED BUILD_SHARED_LIBS)
+      project_third_party_append_build_shared_lib_var(
+        "libwebsockets" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS LWS_WITH_SHARED
+        BUILD_SHARED_LIBS)
 
       project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS)
 

@@ -38,27 +38,20 @@ if(NOT TARGET c-ares::cares
      AND NOT TARGET c-ares::cares_shared
      AND NOT CARES_FOUND)
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION "1.17.2")
-    endif()
+    project_third_party_port_declare(
+      cares
+      VERSION
+      "1.17.2"
+      GIT_URL
+      "https://github.com/c-ares/c-ares.git"
+      BUILD_OPTIONS
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      "-DCARES_STATIC_PIC=ON")
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_GIT_URL "https://github.com/c-ares/c-ares.git")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-                                                                    "-DCARES_STATIC_PIC=ON")
-    endif()
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_DIR "c-ares"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION})
-    endif()
-
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS
-                                                    CARES_SHARED BUILD_SHARED_LIBS)
-    project_third_party_append_build_static_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS
-                                                    CARES_STATIC)
+    project_third_party_append_build_shared_lib_var(
+      "cares" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS CARES_SHARED BUILD_SHARED_LIBS)
+    project_third_party_append_build_static_lib_var(
+      "cares" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS CARES_STATIC)
 
     string(REPLACE "." "_" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_DEFAULT_VERSION
                    "cares-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION}")

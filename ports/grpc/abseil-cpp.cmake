@@ -28,15 +28,6 @@ if(NOT absl_FOUND)
 
     endif()
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_GIT_URL "https://github.com/abseil/abseil-cpp.git")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_DIR "abseil-cpp"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION})
-    endif()
-
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
                                                                           "-DBUILD_TESTING=OFF")
@@ -45,10 +36,12 @@ if(NOT absl_FOUND)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
              "-DABSL_BUILD_DLL=OFF")
       else()
-        project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS
-                                                        BUILD_SHARED_LIBS)
+        project_third_party_append_build_shared_lib_var(
+          "abseil" "GRPC" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS BUILD_SHARED_LIBS)
       endif()
     endif()
+
+    project_third_party_port_declare(abseil PORT_PREFIX "GRPC" GIT_URL "https://github.com/abseil/abseil-cpp.git")
 
     # Other flags for find_configure_package
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)

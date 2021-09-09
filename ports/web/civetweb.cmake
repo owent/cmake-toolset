@@ -46,23 +46,6 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
   find_package(civetweb QUIET CONFIG)
   project_third_party_civetweb_import()
   if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_VERSION "v1.14")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_GIT_URL "https://github.com/civetweb/civetweb.git")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR "civetweb"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_VERSION})
-    endif()
-
-    if(NOT EXISTS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR})
-      file(MAKE_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_DIR})
-    endif()
-
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS
           "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
@@ -88,8 +71,10 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
       # TODO CIVETWEB_ENABLE_LUA,CIVETWEB_ENABLE_LUA_SHARED
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS "-DCIVETWEB_ENABLE_LUA=OFF")
     endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
+    project_third_party_port_declare(civetweb VERSION "v1.15" GIT_URL "https://github.com/civetweb/civetweb.git")
+
+    project_third_party_append_build_shared_lib_var(
+      "civetweb" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
     find_configure_package(
       PACKAGE

@@ -86,8 +86,8 @@ if(NOT CURL_EXECUTABLE)
     if(ANDROID)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DBUILD_SHARED_LIBS=OFF")
     else()
-      project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS
-                                                      BUILD_SHARED_LIBS)
+      project_third_party_append_build_shared_lib_var(
+        "libcurl" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS BUILD_SHARED_LIBS)
     endif()
 
     if(CMAKE_CROSSCOMPILING)

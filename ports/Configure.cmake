@@ -126,8 +126,14 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE AND NOT PROJECT_FIND_CO
 endif()
 
 # Utility macros for build third party libraries
-macro(project_third_party_append_build_shared_lib_var LISTNAME)
-  if(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
+macro(project_third_party_append_build_shared_lib_var PORT_NAME PORT_PREFIX LISTNAME)
+  if(PORT_PREFIX AND NOT "${PORT_PREFIX}" STREQUAL "")
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_PREFIX}_${PORT_NAME}" FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  endif()
+
+  if((BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY) AND NOT ${FULL_PORT_NAME}_USE_STATIC)
     foreach(VARNAME ${ARGN})
       list(APPEND ${LISTNAME} "-D${VARNAME}=ON")
     endforeach()
@@ -136,10 +142,18 @@ macro(project_third_party_append_build_shared_lib_var LISTNAME)
       list(APPEND ${LISTNAME} "-D${VARNAME}=OFF")
     endforeach()
   endif()
+
+  unset(FULL_PORT_NAME)
 endmacro()
 
-macro(project_third_party_append_build_static_lib_var LISTNAME)
-  if(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
+macro(project_third_party_append_build_static_lib_var PORT_NAME PORT_PREFIX LISTNAME)
+  if(PORT_PREFIX AND NOT "${PORT_PREFIX}" STREQUAL "")
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_PREFIX}_${PORT_NAME}" FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  endif()
+
+  if((BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY) AND NOT ${FULL_PORT_NAME}_USE_STATIC)
     foreach(VARNAME ${ARGN})
       list(APPEND ${LISTNAME} "-D${VARNAME}=OFF")
     endforeach()
@@ -148,6 +162,8 @@ macro(project_third_party_append_build_static_lib_var LISTNAME)
       list(APPEND ${LISTNAME} "-D${VARNAME}=ON")
     endforeach()
   endif()
+
+  unset(FULL_PORT_NAME)
 endmacro()
 
 macro(project_third_party_append_find_root_args VARNAME)
@@ -417,4 +433,22 @@ function(project_third_party_port_declare PORT_NAME)
         "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}"
         PARENT_SCOPE)
   endif()
+
+  if(NOT DEFINED ${FULL_PORT_NAME}_USE_STATIC)
+    if(DEFINED CACHE{${FULL_PORT_NAME}_USE_STATIC})
+      set(${FULL_PORT_NAME}_USE_STATIC
+          $CACHE{${FULL_PORT_NAME}_USE_STATIC}
+          PARENT_SCOPE)
+    elseif(DEFINED ENV{${FULL_PORT_NAME}_USE_STATIC})
+      set(${FULL_PORT_NAME}_USE_STATIC
+          $ENV{${FULL_PORT_NAME}_USE_STATIC}
+          PARENT_SCOPE)
+    else()
+      set(${FULL_PORT_NAME}_USE_STATIC
+          FALSE
+          PARENT_SCOPE)
+    endif()
+  endif()
+
+  unset(FULL_PORT_NAME)
 endfunction()

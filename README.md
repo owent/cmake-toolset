@@ -607,7 +607,8 @@ if(NOT TARGET <target to link>)
       # Other default options
   )
 
-  project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_OPTIONS
+  project_third_party_append_build_shared_lib_var(<package name> "[PREFIX, left empty string for none]"
+                                                    ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_FILE
      AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_FILE}")

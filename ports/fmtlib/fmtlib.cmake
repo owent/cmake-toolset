@@ -65,27 +65,22 @@ int main() {
        AND NOT TARGET fmt::fmt
        AND (NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD
             OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT))
-      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION)
-        # fmt.dev 8.0.0+ require CXX23 detector, which is supported from cmake 3.20.0 Current cmake 3.21.0 do not
-        # support compiler extensions of CXX23 for AppleClang if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0" AND NOT
-        # CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION "8.0.1")
-        # else() set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION "7.1.3") endif()
-      endif()
-      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_GIT_URL)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_GIT_URL "https://github.com/fmtlib/fmt.git")
-      endif()
-      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_DIR)
-        project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_DIR "fmtlib"
-                                          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_VERSION})
-      endif()
-      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_OPTIONS)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_OPTIONS
-            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DFMT_DOC=OFF" "-DFMT_INSTALL=ON" "-DFMT_TEST=OFF" "-DFMT_FUZZ=OFF"
-            "-DFMT_CUDA_TEST=OFF")
-      endif()
-      project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_OPTIONS
-                                                      BUILD_SHARED_LIBS)
+      project_third_party_port_declare(
+        fmtlib
+        VERSION
+        "8.0.1"
+        GIT_URL
+        "https://github.com/fmtlib/fmt.git"
+        BUILD_OPTIONS
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+        "-DFMT_DOC=OFF"
+        "-DFMT_INSTALL=ON"
+        "-DFMT_TEST=OFF"
+        "-DFMT_FUZZ=OFF"
+        "-DFMT_CUDA_TEST=OFF")
+
+      project_third_party_append_build_shared_lib_var(
+        "fmtlib" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
       set(FMT_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})
       set(Fmt_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})

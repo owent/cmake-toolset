@@ -19,27 +19,21 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
   endif()
 
   if(NOT TARGET nlohmann_json::nlohmann_json)
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_VERSION "v3.9.1")
-    endif()
+    project_third_party_port_declare(
+      nlohmann_json
+      VERSION
+      "v3.10.2"
+      GIT_URL
+      "https://github.com/nlohmann/json.git"
+      BUILD_OPTIONS
+      "-DJSON_Install=ON"
+      "-DJSON_BuildTests=OFF")
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_GIT_URL "https://github.com/nlohmann/json.git")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_DIR "nlohmann_json"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_VERSION})
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS "-DJSON_Install=ON" "-DJSON_BuildTests=OFF")
-    endif()
     if(MSVC)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
+    project_third_party_append_build_shared_lib_var(
+      "nlohmann_json" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
     find_configure_package(
       PACKAGE

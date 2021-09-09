@@ -51,7 +51,7 @@ if(NOT TARGET GTest::gtest
     project_third_party_port_declare(
       gtest
       VERSION
-      "release-1.10.0"
+      "release-1.11.0"
       GIT_URL
       "https://github.com/google/googletest.git"
       BUILD_OPTIONS
@@ -65,11 +65,10 @@ if(NOT TARGET GTest::gtest
     if(MSVC)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
     endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
+    project_third_party_append_build_shared_lib_var(
+      "gtest" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE
-       AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE}")
+    if(EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE}")
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS GIT_PATCH_FILES
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_PATCH_FILE}")
     endif()

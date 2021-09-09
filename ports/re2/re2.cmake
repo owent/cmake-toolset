@@ -19,24 +19,17 @@ if(NOT TARGET re2::re2)
   endif()
 
   if(NOT TARGET re2::re2)
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_VERSION "2021-08-01")
-    endif()
+    project_third_party_port_declare(
+      re2
+      VERSION
+      "2021-09-01"
+      GIT_URL
+      "https://github.com/google/re2.git"
+      BUILD_OPTIONS
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      "-DRE2_BUILD_TESTING=OFF")
 
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_GIT_URL "https://github.com/google/re2.git")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_DIR "re2"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_VERSION})
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-                                                                  "-DRE2_BUILD_TESTING=OFF")
-    endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS
+    project_third_party_append_build_shared_lib_var("re2" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
 
     find_configure_package(
