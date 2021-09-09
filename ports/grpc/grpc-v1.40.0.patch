@@ -5,9 +5,9 @@ index 028cc29..bf23050 100644
 @@ -245,7 +245,7 @@ static void txtenc_map(txtenc *e, const upb_map *map, const upb_fielddef *f) {
    }
  }
-
+ 
 -#define CHK(x) do { if (!(x)) { return false; } } while(0)
 +#define CHK(x) do { if (!(x)) { return NULL; } } while(0)
-
+ 
  static const char *txtenc_parsevarint(const char *ptr, const char *limit,
                                        uint64_t *val) {
