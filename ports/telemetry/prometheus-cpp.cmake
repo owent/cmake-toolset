@@ -23,23 +23,6 @@ if(NOT TARGET prometheus-cpp::core)
   find_package(prometheus-cpp QUIET CONFIG)
   project_third_party_prometheus_cpp_import()
   if(NOT TARGET prometheus-cpp::core)
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION "v0.12.3")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_GIT_URL)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_GIT_URL "https://github.com/jupp0r/prometheus-cpp.git")
-    endif()
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR "prometheus-cpp"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_VERSION})
-    endif()
-
-    if(NOT EXISTS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR})
-      file(MAKE_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR})
-    endif()
-
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS
           "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DENABLE_TESTING=OFF" "-DUSE_THIRDPARTY_LIBRARIES=OFF"
@@ -54,9 +37,11 @@ if(NOT TARGET prometheus-cpp::core)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS "-DENABLE_PUSH=ON")
       endif()
     endif()
+    project_third_party_port_declare(prometheus_cpp VERSION "v0.12.3" GIT_URL
+                                     "https://github.com/jupp0r/prometheus-cpp.git")
 
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
+    project_third_party_append_build_shared_lib_var(
+      "prometheus_cpp" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
     # Other flags for find_configure_package
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)

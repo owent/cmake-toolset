@@ -25,15 +25,6 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
   endif()
 
   if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
-    project_third_party_port_declare(benchmark VERSION "v1.5.6" GIT_URL "https://github.com/google/benchmark.git")
-
-    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_DIR)
-      project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_DIR "benchmark"
-                                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_VERSION})
-    endif()
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_PATCH_FILE
-        "${CMAKE_CURRENT_LIST_DIR}/benchmark-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_VERSION}.patch")
-
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
           "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DBENCHMARK_ENABLE_TESTING=OFF" "-DBENCHMARK_ENABLE_LTO=OFF"
@@ -51,8 +42,14 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DBENCHMARK_USE_LIBCXX=OFF")
       endif()
     endif()
-    project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
-                                                    BUILD_SHARED_LIBS)
+
+    project_third_party_port_declare(benchmark VERSION "v1.6.0" GIT_URL "https://github.com/google/benchmark.git")
+
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_PATCH_FILE
+        "${CMAKE_CURRENT_LIST_DIR}/benchmark-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_VERSION}.patch")
+
+    project_third_party_append_build_shared_lib_var(
+      "benchmark" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
     # Using our gtest source
     file(GLOB ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_FIND_GTEST_SRCS

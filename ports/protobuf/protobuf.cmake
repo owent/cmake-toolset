@@ -93,8 +93,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
           "-Dprotobuf_BUILD_TESTS=OFF" "-Dprotobuf_BUILD_EXAMPLES=OFF" "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF")
 
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS)
-        project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS
-                                                        protobuf_BUILD_SHARED_LIBS BUILD_SHARED_LIBS)
+        project_third_party_append_build_shared_lib_var(
+          "protobuf" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS protobuf_BUILD_SHARED_LIBS
+          BUILD_SHARED_LIBS)
       else()
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS "-Dprotobuf_BUILD_SHARED_LIBS=OFF"
              "-DBUILD_SHARED_LIBS=OFF")
@@ -173,8 +174,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF")
 
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS)
-        project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS
-                                                        protobuf_BUILD_SHARED_LIBS BUILD_SHARED_LIBS)
+        project_third_party_append_build_shared_lib_var(
+          "protobuf" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS protobuf_BUILD_SHARED_LIBS
+          BUILD_SHARED_LIBS)
       else()
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS "-Dprotobuf_BUILD_SHARED_LIBS=OFF"
              "-DBUILD_SHARED_LIBS=OFF")

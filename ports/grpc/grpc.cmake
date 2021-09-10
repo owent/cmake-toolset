@@ -49,7 +49,7 @@ if(NOT TARGET gRPC::grpc++_alts
       if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.33.2")
       else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.39.1")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.40.0")
       endif()
     endif()
 
@@ -73,8 +73,8 @@ if(NOT TARGET gRPC::grpc++_alts
     if(MSVC)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF")
     else()
-      project_third_party_append_build_shared_lib_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-                                                      BUILD_SHARED_LIBS)
+      project_third_party_append_build_shared_lib_var(
+        "grpc" "GRPC" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS BUILD_SHARED_LIBS)
     endif()
 
     list(
