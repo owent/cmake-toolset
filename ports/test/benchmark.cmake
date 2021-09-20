@@ -41,6 +41,11 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
       else()
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DBENCHMARK_USE_LIBCXX=OFF")
       endif()
+
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_APPEND_DEFAULT_BUILD_OPTIONS)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS
+             ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_APPEND_DEFAULT_BUILD_OPTIONS})
+      endif()
     endif()
 
     project_third_party_port_declare(benchmark VERSION "v1.6.0" GIT_URL "https://github.com/google/benchmark.git")

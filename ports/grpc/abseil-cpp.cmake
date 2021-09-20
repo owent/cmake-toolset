@@ -39,6 +39,11 @@ if(NOT absl_FOUND)
         project_third_party_append_build_shared_lib_var(
           "abseil" "GRPC" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS BUILD_SHARED_LIBS)
       endif()
+
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_APPEND_DEFAULT_BUILD_OPTIONS)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS
+             ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_APPEND_DEFAULT_BUILD_OPTIONS})
+      endif()
     endif()
 
     project_third_party_port_declare(abseil PORT_PREFIX "GRPC" GIT_URL "https://github.com/abseil/abseil-cpp.git")
