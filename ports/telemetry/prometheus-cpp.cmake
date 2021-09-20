@@ -36,6 +36,11 @@ if(NOT TARGET prometheus-cpp::core)
       if(CURL_FOUND)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS "-DENABLE_PUSH=ON")
       endif()
+
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_APPEND_DEFAULT_BUILD_OPTIONS)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS
+             ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_APPEND_DEFAULT_BUILD_OPTIONS})
+      endif()
     endif()
     project_third_party_port_declare(prometheus_cpp VERSION "v0.12.3" GIT_URL
                                      "https://github.com/jupp0r/prometheus-cpp.git")

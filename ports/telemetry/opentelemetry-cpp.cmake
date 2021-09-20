@@ -39,7 +39,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
 
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
-    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.0.0-rc4" GIT_URL
+    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.0.0" GIT_URL
                                      "https://github.com/open-telemetry/opentelemetry-cpp.git")
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_PATCH_FILE
@@ -108,6 +108,11 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_PROMETHEUS AND TARGET
                                                                                                  prometheus-cpp::core)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_PROMETHEUS ON)
+      endif()
+
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_APPEND_DEFAULT_BUILD_OPTIONS)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS
+             ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_APPEND_DEFAULT_BUILD_OPTIONS})
       endif()
     endif()
 

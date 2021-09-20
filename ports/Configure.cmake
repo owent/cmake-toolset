@@ -402,13 +402,26 @@ function(project_third_party_port_declare PORT_NAME)
   endif()
   if(NOT ${FULL_PORT_NAME}_BUILD_OPTIONS AND project_third_party_port_declare_BUILD_OPTIONS)
     if(project_third_party_port_declare_APPEND_BUILD_OPTIONS)
-      set(${FULL_PORT_NAME}_BUILD_OPTIONS
-          ${${FULL_PORT_NAME}_BUILD_OPTIONS} ${project_third_party_port_declare_BUILD_OPTIONS}
-          PARENT_SCOPE)
+      if(${FULL_PORT_NAME}_APPEND_DEFAULT_BUILD_OPTIONS)
+        set(${FULL_PORT_NAME}_BUILD_OPTIONS
+            ${${FULL_PORT_NAME}_BUILD_OPTIONS} ${project_third_party_port_declare_BUILD_OPTIONS}
+            ${${FULL_PORT_NAME}_APPEND_DEFAULT_BUILD_OPTIONS}
+            PARENT_SCOPE)
+      else()
+        set(${FULL_PORT_NAME}_BUILD_OPTIONS
+            ${${FULL_PORT_NAME}_BUILD_OPTIONS} ${project_third_party_port_declare_BUILD_OPTIONS}
+            PARENT_SCOPE)
+      endif()
     else()
-      set(${FULL_PORT_NAME}_BUILD_OPTIONS
-          "${project_third_party_port_declare_BUILD_OPTIONS}"
-          PARENT_SCOPE)
+      if(${FULL_PORT_NAME}_APPEND_DEFAULT_BUILD_OPTIONS)
+        set(${FULL_PORT_NAME}_BUILD_OPTIONS
+            ${project_third_party_port_declare_BUILD_OPTIONS} ${${FULL_PORT_NAME}_APPEND_DEFAULT_BUILD_OPTIONS}
+            PARENT_SCOPE)
+      else()
+        set(${FULL_PORT_NAME}_BUILD_OPTIONS
+            ${project_third_party_port_declare_BUILD_OPTIONS}
+            PARENT_SCOPE)
+      endif()
     endif()
   endif()
 
