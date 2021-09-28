@@ -47,6 +47,16 @@ jobs:
         shell: bash
         run: |
           bash ci/do_ci.sh gcc.libressl.test ;
+  gcc_boringssl_test:
+    name: "gcc.boringssl.test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: CI Job
+        shell: bash
+        run: |
+          bash ci/do_ci.sh gcc.boringssl.test ;
   gcc_mbedtls_test:
     name: "gcc.mbedtls.test"
     runs-on: ubuntu-latest
