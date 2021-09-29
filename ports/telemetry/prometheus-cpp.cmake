@@ -6,7 +6,7 @@ include_guard(GLOBAL)
 # =========== third party prometheus-cpp ==================
 macro(PROJECT_THIRD_PARTY_PROMETHEUS_CPP_IMPORT)
   if(TARGET prometheus-cpp::core)
-  message(STATUS "Dependency(${PROJECT_NAME}): prometheus-cpp found target prometheus-cpp::core")
+    message(STATUS "Dependency(${PROJECT_NAME}): prometheus-cpp found target prometheus-cpp::core")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME prometheus-cpp::core)
     if(TARGET prometheus-cpp::pull)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME prometheus-cpp::pull)
