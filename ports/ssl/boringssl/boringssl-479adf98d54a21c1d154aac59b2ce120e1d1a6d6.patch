@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 893bca753..9d92e15dd 100644
+index 893bca7..9d92e15 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -562,7 +562,7 @@ endif()
@@ -24,8 +24,30 @@ index 893bca753..9d92e15dd 100644
 +
 +install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 +
+diff --git a/crypto/pkcs8/pkcs12_test.cc b/crypto/pkcs8/pkcs12_test.cc
+index e67630d..1641a6c 100644
+--- a/crypto/pkcs8/pkcs12_test.cc
++++ b/crypto/pkcs8/pkcs12_test.cc
+@@ -34,7 +34,7 @@ std::string GetTestData(const char *path);
+ static const char kPassword[] = "foo";
+ 
+ // kUnicodePassword is the password for unicode_password.p12
+-static const char kUnicodePassword[] = u8"Hello, 世界";
++static const char* kUnicodePassword = reinterpret_cast<const char*>(u8"Hello, 世界");
+ 
+ static bssl::Span<const uint8_t> StringToBytes(const std::string &str) {
+   return bssl::MakeConstSpan(reinterpret_cast<const uint8_t *>(str.data()),
+@@ -391,7 +391,7 @@ TEST(PKCS12Test, RoundTrip) {
+                 {bssl::Span<const uint8_t>(kTestCert2)}, 0, 0, 0, 0);
+ 
+   // Test some Unicode.
+-  TestRoundTrip(kPassword, u8"Hello, 世界!",
++  TestRoundTrip(kPassword, reinterpret_cast<const char*>(u8"Hello, 世界!"),
+                 bssl::Span<const uint8_t>(kTestKey),
+                 bssl::Span<const uint8_t>(kTestCert),
+                 {bssl::Span<const uint8_t>(kTestCert2)}, 0, 0, 0, 0);
 diff --git a/crypto/x509v3/internal.h b/crypto/x509v3/internal.h
-index e510b4092..bd004847f 100644
+index e510b40..bd00484 100644
 --- a/crypto/x509v3/internal.h
 +++ b/crypto/x509v3/internal.h
 @@ -58,7 +58,7 @@ int x509v3_cache_extensions(X509 *x);
@@ -37,3 +59,16 @@ index e510b4092..bd004847f 100644
  
  
  #if defined(__cplusplus)
+diff --git a/decrepit/ripemd/ripemd_test.cc b/decrepit/ripemd/ripemd_test.cc
+index 0700bae..2eeb382 100644
+--- a/decrepit/ripemd/ripemd_test.cc
++++ b/decrepit/ripemd/ripemd_test.cc
+@@ -109,7 +109,7 @@ TEST(RIPEMDTest, RunTest) {
+       0x37, 0xf9, 0x7f, 0x68, 0xf0, 0x83, 0x25, 0xdc, 0x15, 0x28};
+ 
+   if (OPENSSL_memcmp(digest, kMillionADigest, sizeof(digest)) != 0) {
+-    fprintf(stderr, u8"Digest incorrect for “million a's” test: ");
++    fprintf(stderr, "%s", reinterpret_cast<const char*>(u8"Digest incorrect for “million a's” test: "));
+     hexdump(stderr, "", digest, sizeof(digest));
+     ok = 0;
+   }

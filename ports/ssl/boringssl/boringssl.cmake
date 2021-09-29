@@ -4,7 +4,92 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_BORINGSSL_IMPORT)
   if(OPENSSL_FOUND OR OpenSSL_FOUND)
+    if(NOT OPENSSL_VERSION AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/base.h")
+      function(from_hex HEX DEC)
+        string(TOUPPER "${HEX}" HEX)
+        set(_res 0)
+        string(LENGTH "${HEX}" _strlen)
+
+        while(_strlen GREATER 0)
+          math(EXPR _res "${_res} * 16")
+          string(SUBSTRING "${HEX}" 0 1 NIBBLE)
+          string(SUBSTRING "${HEX}" 1 -1 HEX)
+          if(NIBBLE STREQUAL "A")
+            math(EXPR _res "${_res} + 10")
+          elseif(NIBBLE STREQUAL "B")
+            math(EXPR _res "${_res} + 11")
+          elseif(NIBBLE STREQUAL "C")
+            math(EXPR _res "${_res} + 12")
+          elseif(NIBBLE STREQUAL "D")
+            math(EXPR _res "${_res} + 13")
+          elseif(NIBBLE STREQUAL "E")
+            math(EXPR _res "${_res} + 14")
+          elseif(NIBBLE STREQUAL "F")
+            math(EXPR _res "${_res} + 15")
+          else()
+            math(EXPR _res "${_res} + ${NIBBLE}")
+          endif()
+
+          string(LENGTH "${HEX}" _strlen)
+        endwhile()
+
+        set(${DEC}
+            ${_res}
+            PARENT_SCOPE)
+      endfunction()
+      file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/base.h" openssl_version_str
+           REGEX "^#[\t ]*define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])+.*")
+      if(openssl_version_str)
+        string(
+          REGEX
+          REPLACE
+            "^.*OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F]).*$"
+            "\\1;\\2;\\3;\\4;\\5"
+            OPENSSL_VERSION_LIST
+            "${openssl_version_str}")
+        list(GET OPENSSL_VERSION_LIST 0 OPENSSL_VERSION_MAJOR)
+        list(GET OPENSSL_VERSION_LIST 1 OPENSSL_VERSION_MINOR)
+        from_hex("${OPENSSL_VERSION_MINOR}" OPENSSL_VERSION_MINOR)
+        list(GET OPENSSL_VERSION_LIST 2 OPENSSL_VERSION_FIX)
+        from_hex("${OPENSSL_VERSION_FIX}" OPENSSL_VERSION_FIX)
+        list(GET OPENSSL_VERSION_LIST 3 OPENSSL_VERSION_PATCH)
+
+        if(NOT OPENSSL_VERSION_PATCH STREQUAL "00")
+          from_hex("${OPENSSL_VERSION_PATCH}" _tmp)
+          # 96 is the ASCII code of 'a' minus 1
+          math(EXPR OPENSSL_VERSION_PATCH_ASCII "${_tmp} + 96")
+          unset(_tmp)
+          # Once anyone knows how OpenSSL would call the patch versions beyond 'z' this should be updated to handle
+          # that, too. This has not happened yet so it is simply ignored here for now.
+          string(ASCII "${OPENSSL_VERSION_PATCH_ASCII}" OPENSSL_VERSION_PATCH_STRING)
+        endif()
+
+        set(OPENSSL_VERSION
+            "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}"
+            CACHE STRING "OpenSSL version of boringssl")
+        file(APPEND "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" "/** For CMake: FindOpenSSL.cmake
+${openssl_version_str}
+**/")
+      else()
+        # Since OpenSSL 3.0.0, the new version format is MAJOR.MINOR.PATCH and a new OPENSSL_VERSION_STR macro contains
+        # exactly that
+        file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/base.h" OPENSSL_VERSION_STR
+             REGEX "^#[\t ]*define[\t ]+OPENSSL_VERSION_STR[\t ]+\"([0-9])+\\.([0-9])+\\.([0-9])+\".*")
+        string(REGEX REPLACE "^.*OPENSSL_VERSION_STR[\t ]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\".*$" "\\1" OPENSSL_VERSION_STR
+                             "${OPENSSL_VERSION_STR}")
+
+        set(OPENSSL_VERSION
+            "${OPENSSL_VERSION_STR}"
+            CACHE STRING "OpenSSL version of boringssl")
+
+            file(APPEND "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" "/** For CMake: FindOpenSSL.cmake
+${OPENSSL_VERSION_STR}
+**/")
+        unset(OPENSSL_VERSION_STR)
+      endif()
+    endif()
     echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): boringssl found.(openssl: ${OPENSSL_VERSION})")
+
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
       if(TARGET OpenSSL::Crypto)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto)
@@ -89,11 +174,24 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_PATCH_FILE}")
   endif()
 
+  set(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ${CMAKE_FIND_ROOT_PATH_MODE_PROGRAM})
+  set(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ${CMAKE_FIND_ROOT_PATH_MODE_LIBRARY})
+  set(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ${CMAKE_FIND_ROOT_PATH_MODE_INCLUDE})
+  set(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ${CMAKE_FIND_ROOT_PATH_MODE_PACKAGE})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
   find_configure_package(
     PACKAGE
     OpenSSL
     BUILD_WITH_CMAKE
+    FIND_PACKAGE_FLAGS
+    NO_DEFAULT_PATH
+    ONLY_CMAKE_FIND_ROOT_PATH
     CMAKE_INHERIT_BUILD_ENV
+    CMAKE_INHERIT_FIND_ROOT_PATH
+    CMAKE_INHERIT_SYSTEM_LINKS
     CMAKE_FLAGS
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_BUILD_OPTIONS}
     WORKING_DIRECTORY
@@ -110,6 +208,14 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_VERSION}"
     GIT_URL
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_GIT_URL}")
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM})
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_LIBRARY})
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_INCLUDE})
+  set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PACKAGE})
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM)
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_LIBRARY)
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_INCLUDE)
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PACKAGE)
 
   if(OPENSSL_FOUND OR OpenSSL_FOUND)
     project_third_party_boringssl_import()
