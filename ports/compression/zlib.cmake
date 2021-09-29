@@ -5,7 +5,7 @@ include_guard(GLOBAL)
 macro(PROJECT_THIRD_PARTY_ZLIB_IMPORT)
   if(TARGET ZLIB::ZLIB)
     # find static library first
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): zlib found.(${ZLIB_LIBRARIES})")
+    message(STATUS "Dependency(${PROJECT_NAME}): zlib found.(${ZLIB_LIBRARIES})")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME ZLIB::ZLIB)
 
     if(ZLIB_INCLUDE_DIRS)

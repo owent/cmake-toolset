@@ -65,9 +65,10 @@ macro(PROJECT_THIRD_PARTY_BORINGSSL_IMPORT)
         endif()
 
         set(OPENSSL_VERSION
-            "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}"
-            CACHE STRING "OpenSSL version of boringssl")
-        file(APPEND "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" "/** For CMake: FindOpenSSL.cmake
+            "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
+        file(
+          APPEND "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h"
+          "/** For CMake: FindOpenSSL.cmake
 ${openssl_version_str}
 **/")
       else()
@@ -78,17 +79,17 @@ ${openssl_version_str}
         string(REGEX REPLACE "^.*OPENSSL_VERSION_STR[\t ]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\".*$" "\\1" OPENSSL_VERSION_STR
                              "${OPENSSL_VERSION_STR}")
 
-        set(OPENSSL_VERSION
-            "${OPENSSL_VERSION_STR}"
-            CACHE STRING "OpenSSL version of boringssl")
+        set(OPENSSL_VERSION "${OPENSSL_VERSION_STR}")
 
-            file(APPEND "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" "/** For CMake: FindOpenSSL.cmake
+        file(
+          APPEND "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h"
+          "/** For CMake: FindOpenSSL.cmake
 ${OPENSSL_VERSION_STR}
 **/")
         unset(OPENSSL_VERSION_STR)
       endif()
     endif()
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): boringssl found.(openssl: ${OPENSSL_VERSION})")
+    message(STATUS "Dependency(${PROJECT_NAME}): boringssl found.(openssl: ${OPENSSL_VERSION})")
 
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
       if(TARGET OpenSSL::Crypto)
@@ -182,13 +183,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+  list(APPEND CMAKE_STAGING_PREFIX "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   find_configure_package(
     PACKAGE
     OpenSSL
     BUILD_WITH_CMAKE
-    FIND_PACKAGE_FLAGS
-    NO_DEFAULT_PATH
-    ONLY_CMAKE_FIND_ROOT_PATH
     CMAKE_INHERIT_BUILD_ENV
     CMAKE_INHERIT_FIND_ROOT_PATH
     CMAKE_INHERIT_SYSTEM_LINKS
@@ -208,6 +207,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_VERSION}"
     GIT_URL
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_GIT_URL}")
+  list(POP_BACK CMAKE_STAGING_PREFIX)
   set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_PROGRAM})
   set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_LIBRARY})
   set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ${ATFRAMEWORK_CMAKE_TOOLSET_BACKUP_CMAKE_FIND_ROOT_PATH_MODE_INCLUDE})
@@ -221,5 +221,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     project_third_party_boringssl_import()
   else()
     echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): build boringssl failed.")
+    message(FATAL_ERROR "boringssl is required.")
   endif()
 endif()

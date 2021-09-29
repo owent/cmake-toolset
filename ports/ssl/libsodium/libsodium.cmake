@@ -4,13 +4,13 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_LIBSODIUM_IMPORT)
   if(TARGET sodium) # Official Findsodium.cmake
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Libsodium found target sodium")
+    message(STATUS "Dependency(${PROJECT_NAME}): Libsodium found target sodium")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_LINK_NAME sodium)
   elseif(TARGET unofficial-sodium::sodium) # vcpkg porting
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Libsodium found target unofficial-sodium::sodium")
+    message(STATUS "Dependency(${PROJECT_NAME}): Libsodium found target unofficial-sodium::sodium")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_LINK_NAME unofficial-sodium::sodium)
   elseif(TARGET libsodium::libsodium) # Our porting
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Libsodium found target libsodium::libsodium")
+    message(STATUS "Dependency(${PROJECT_NAME}): Libsodium found target libsodium::libsodium")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_LINK_NAME libsodium::libsodium)
   endif()
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_LINK_NAME)

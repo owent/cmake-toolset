@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_OPENSSL_IMPORT)
   if(OPENSSL_FOUND OR OpenSSL_FOUND)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): openssl found.(${OPENSSL_VERSION})")
+    message(STATUS "Dependency(${PROJECT_NAME}): openssl found.(${OPENSSL_VERSION})")
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
       if(TARGET OpenSSL::Crypto)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto)
@@ -165,7 +165,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   if(NOT OPENSSL_FOUND
      AND NOT OpenSSL_FOUND
      AND PERL_FOUND)
-    echowithcolor(COLOR GREEN "-- Try to configure and use openssl")
+    message(STATUS "Try to configure and use openssl")
     unset(OPENSSL_FOUND CACHE)
     unset(OPENSSL_EXECUTABLE CACHE)
     unset(OPENSSL_INCLUDE_DIR CACHE)
