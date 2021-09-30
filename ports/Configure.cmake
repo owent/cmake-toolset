@@ -84,6 +84,25 @@ if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR IN_LIST CMAKE_PREFIX_PATH)
     list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   endif()
 endif()
+if(UNIX)
+  set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
+  if(ENV{PKG_CONFIG_PATH})
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(ENV{PKG_CONFIG_PATH}
+          "$ENV{PKG_CONFIG_PATH}:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/pkgconfig:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/pkgconfig"
+      )
+    else()
+      set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/pkgconfig")
+    endif()
+  else()
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set(ENV{PKG_CONFIG_PATH}
+          "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/pkgconfig:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/pkgconfig")
+    else()
+      set(ENV{PKG_CONFIG_PATH} "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/pkgconfig")
+    endif()
+  endif()
+endif()
 mark_as_advanced(PROJECT_THIRD_PARTY_PACKAGE_DIR PROJECT_THIRD_PARTY_INSTALL_DIR)
 
 # Some libraries maybe has wrong RPATH

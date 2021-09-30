@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 
 macro(PROJECT_THIRD_PARTY_JEMALLOC_IMPORT)
   if(TARGET jemalloc)
-    message(STATUS "Dependency(${PROJECT_NAME}): jemalloc using target jemalloc")
+    message(STATUS "Dependency(${PROJECT_NAME}): jemalloc found(using target jemalloc)")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_LINK_NAME jemalloc)
   endif()
 endmacro()
