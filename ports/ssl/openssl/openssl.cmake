@@ -87,10 +87,10 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
         "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
         "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
+        # "--api=1.1.1"
         "--release"
-        # "--api=1.1.1" # libwebsockets and atframe_utils has warnings of using deprecated APIs, maybe it can be remove
-        # later "no-deprecated" # libcurl and gRPC requires openssl's API of 1.1.0 and 1.0.2, so we can not disable
-        # deprecated APIS here
+        # "no-deprecated" # libcurl and gRPC requires openssl's API of 1.1.0 and 1.0.2, so we can not disable deprecated
+        # APIS here
         "no-dso"
         "no-tests"
         "no-external-tests"
@@ -99,9 +99,12 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "no-md4"
         "no-mdc2"
         "no-rc2"
-        "no-ssl2"
         "no-ssl3"
         "no-weak-ssl-ciphers")
+    # No deprecated options
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION VERSION_GREATER_EQUAL "3.0.0")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-ssl2")
+    endif()
     if(NOT ANDROID
        AND NOT MSVC
        AND CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -209,11 +212,13 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh")
       file(
         APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh"
+        "set -x${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
         "source \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       )
       file(
         APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
         "source \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+        "set -x${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
       )
       project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh")
       project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh")
