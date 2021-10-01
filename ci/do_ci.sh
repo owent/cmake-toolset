@@ -100,7 +100,9 @@ elif [[ "$1" == "msys2.mingw.static.test" ]]; then
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
   # export LDFLAGS="$LDFLAGS -ladvapi32 -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc"
-  cmake .. -G "MinGW Makefiles" -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON 2>&1
+  cmake .. -G "MinGW Makefiles" -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON              \
+    -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY \
+    2>&1
   cmake --build . -j || cmake --build .
   sleep 180
 elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
@@ -114,7 +116,8 @@ elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
   # export LDFLAGS="$LDFLAGS -ladvapi32 -liphlpapi -lpsapi -luser32 -luserenv -lws2_32 -lgcc"
-  cmake .. -G "MinGW Makefiles" -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DBUILD_SHARED_LIBS=ON -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
+  cmake .. -G "MinGW Makefiles" -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DBUILD_SHARED_LIBS=ON -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
+    -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER  -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY  -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY  -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
   cmake --build . -j || cmake --build .
 elif [[ "$1" == "msvc.static.test" ]]; then
   echo "$1"
