@@ -10,7 +10,7 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
       STATUS
         "Dependency(${PROJECT_NAME}): Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLAT_BUFFERS_LINK_NAME flatbuffers::flatbuffers)
-    project_third_party_libwebsockets_patch_imported_target(flatbuffers::flatbuffers)
+    project_build_tools_patch_default_imported_config(flatbuffers::flatbuffers)
   endif()
 
   if(TARGET flatbuffers::flatc AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_EXECUTABLE)
