@@ -184,8 +184,14 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
 
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
     unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
-    if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
-      if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} AND DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
+    if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME}
+       OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}
+       OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE_${VAR_NAME})
+      if(DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE_${VAR_NAME})
+        string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                       "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE_${VAR_NAME}}")
+      elseif(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME} AND DEFINED
+                                                             PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME})
         string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
                        "${COMPILER_OPTION_INHERIT_${VAR_NAME}}${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}}")
       elseif(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME})

@@ -83,14 +83,20 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
 
   # "no-hw" and "no-engine" is recommanded by openssl only for mobile devices @see
   # https://wiki.openssl.org/index.php/Compilation_and_Installation
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS
+      "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}" "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl")
+  # FindOpenSSL.cmake only use lib as PATH_SUFFIX, and do not use pkg-config on no-unix like system
+  if(NOT UNIX)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS
+         "--libdir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+  endif()
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-        "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}" "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
+        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS}
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS})
   else()
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
-        "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
-        "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
+        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS}
         # "--api=1.1.1"
         "--release"
         # "no-deprecated" # libcurl and gRPC requires openssl's API of 1.1.0 and 1.0.2, so we can not disable deprecated
@@ -322,11 +328,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
 
       # We must use make here even if parent project use ninja or other make program here
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh" "make"
-        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_MULTI_CORE})
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
+        "${CMAKE_MAKE_PROGRAM}" ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_MULTI_CORE})
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh" "make" "install_sw"
-        "install_ssldirs")
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
+        "${CMAKE_MAKE_PROGRAM}" "install_sw" "install_ssldirs")
 
       # build & install
       execute_process(
