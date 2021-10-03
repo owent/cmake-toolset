@@ -27,11 +27,11 @@ endfunction()
 
 macro(PROJECT_THIRD_PARTY_LIBWEBSOCKETS_IMPORT)
   if(TARGET websockets)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): libwebsockets found target websockets")
+    message(STATUS "Dependency(${PROJECT_NAME}): libwebsockets found target websockets")
     project_third_party_libwebsockets_patch_imported_target(websockets)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LINK_NAME websockets)
   elseif(TARGET websockets_shared)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): libwebsockets found target  websockets_shared")
+    message(STATUS "Dependency(${PROJECT_NAME}): libwebsockets found target  websockets_shared")
     project_third_party_libwebsockets_patch_imported_target(websockets_shared)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LINK_NAME websockets_shared)
   endif()
@@ -94,6 +94,7 @@ if(NOT Libwebsockets_FOUND
             "-DCMAKE_INSTALL_PREFIX=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
             "-DLWS_STATIC_PIC=ON"
             "-DLWS_LINK_TESTAPPS_DYNAMIC=OFF"
+            "-DLWS_SUPPRESS_DEPRECATED_API_WARNINGS=ON"
             "-DLWS_WITHOUT_DAEMONIZE=ON"
             "-DLWS_WITHOUT_TESTAPPS=ON"
             "-DLWS_WITHOUT_TEST_CLIENT=ON"
@@ -187,6 +188,15 @@ if(NOT Libwebsockets_FOUND
                 OR OPENSSL_LIBRARIES))
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
                "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}")
+        endif()
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL OR OPENSSL_VERSION VERSION_GREATER_EQUAL "3.0.0")
+          list(
+            APPEND
+            ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+            "-DLWS_WITH_BORINGSSL=ON"
+            "-DLWS_OPENSSL_INCLUDE_DIRS=${OPENSSL_INCLUDE_DIR}"
+            "-DLWS_OPENSSL_LIBRARIES=${OPENSSL_SSL_LIBRARY}\;${OPENSSL_CRYPTO_LIBRARY}"
+            "-DOPENSSL_VERSION=${OPENSSL_VERSION}")
         endif()
         if(MSVC OR ANDROID)
           # Some version of libwebsockets have compiling problems.

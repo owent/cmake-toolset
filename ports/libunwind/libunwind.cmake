@@ -32,7 +32,7 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
          "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}/configure"
   )
     execute_process(
-      COMMAND make distclean
+      COMMAND "${CMAKE_MAKE_PROGRAM}" distclean
       WORKING_DIRECTORY
         "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}"
         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -54,6 +54,8 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     "--with-pic=yes"
     "--disable-tests"
     "--disable-documentation"
+    "--disable-minidebuginfo" # This will use liblzma(7-Zip) on system and may cause linking error. We can enable this
+                              # after add liblzma into compression ports
     WORKING_DIRECTORY
     "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY

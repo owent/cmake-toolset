@@ -4,7 +4,7 @@ include_guard(GLOBAL)
 # =========== third party Microsoft.GSL ==================
 macro(PROJECT_THIRD_PARTY_MICROSOFT_GSL_IMPORT)
   if(TARGET Microsoft.GSL::GSL)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): Microsoft.GSL using target Microsoft.GSL::GSL")
+    message(STATUS "Dependency(${PROJECT_NAME}): Microsoft.GSL using target Microsoft.GSL::GSL")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MICROSOFT_GSL_LINK_NAME Microsoft.GSL::GSL)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GSL_LINK_NAME Microsoft.GSL::GSL)
   endif()

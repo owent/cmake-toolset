@@ -27,10 +27,10 @@ endfunction()
 
 macro(PROJECT_THIRD_PARTY_CIVETWEB_IMPORT)
   if(TARGET civetweb::civetweb-cpp)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb-cpp")
+    message(STATUS "Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb-cpp")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_LINK_NAME civetweb::civetweb-cpp)
   elseif(TARGET civetweb::civetweb)
-    echowithcolor(COLOR GREEN "-- Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb")
+    message(STATUS "Dependency(${PROJECT_NAME}): civetweb found target civetweb::civetweb")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_LINK_NAME civetweb::civetweb)
   endif()
 

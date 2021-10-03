@@ -11,3 +11,23 @@ index eabcb90..542d390 100644
  endif(MSVC)
  
  if (MINGW)
+diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
+index fb810a8..2cde19b 100644
+--- a/lib/event-libs/libuv/CMakeLists.txt
++++ b/lib/event-libs/libuv/CMakeLists.txt
+@@ -47,6 +47,7 @@ message("libuv include dir: ${LIBUV_INCLUDE_DIRS}")
+ message("libuv libraries: ${LIBUV_LIBRARIES}")
+ 
+ include_directories("${LIBUV_INCLUDE_DIRS}")
++list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBUV_INCLUDE_DIRS}")
+ 
+ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   # libuv changed the location in 1.21.0. Retain both
+@@ -54,6 +55,7 @@ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   if (NOT LWS_HAVE_UV_VERSION_H)
+     CHECK_INCLUDE_FILE(uv/version.h LWS_HAVE_NEW_UV_VERSION_H)
+   endif()
++	list(POP_BACK CMAKE_REQUIRED_INCLUDES)
+   
+   if (LWS_WITH_EVLIB_PLUGINS AND LWS_WITH_LIBUV)
+ 

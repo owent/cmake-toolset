@@ -53,7 +53,7 @@ endmacro()
 
 if(NOT CURL_EXECUTABLE)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION "7.78.0")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION "7.79.1")
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_GIT_URL)
@@ -102,10 +102,21 @@ if(NOT CURL_EXECUTABLE)
 
     if(OPENSSL_FOUND)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DCMAKE_USE_OPENSSL=ON")
-      if(OPENSSL_ROOT_DIR
-         AND (TARGET OpenSSL::SSL
-              OR TARGET OpenSSL::Crypto
-              OR OPENSSL_LIBRARIES))
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL OR OPENSSL_VERSION VERSION_GREATER_EQUAL "3.0.0")
+        list(
+          APPEND
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS
+          "-DOPENSSL_ROOT_DIR=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+          "-DOPENSSL_VERSION=${OPENSSL_VERSION}"
+          "-DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}"
+          "-DOPENSSL_SSL_LIBRARY=${OPENSSL_SSL_LIBRARY}"
+          "-DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}"
+          "-DOPENSSL_LIBRARIES=${OPENSSL_SSL_LIBRARY}\\\;${OPENSSL_CRYPTO_LIBRARY}")
+      elseif(
+        OPENSSL_ROOT_DIR
+        AND (TARGET OpenSSL::SSL
+             OR TARGET OpenSSL::Crypto
+             OR OPENSSL_LIBRARIES))
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}")
       endif()
       if(DEFINED OPENSSL_USE_STATIC_LIBS)
@@ -152,8 +163,7 @@ if(NOT CURL_EXECUTABLE)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_GIT_URL}")
 
     if(CURL_FOUND)
-      echowithcolor(COLOR GREEN
-                    "-- Dependency(${PROJECT_NAME}): libcurl found.(${CURL_INCLUDE_DIRS}|${CURL_LIBRARIES})")
+      message(STATUS "Dependency(${PROJECT_NAME}): libcurl found.(${CURL_INCLUDE_DIRS}|${CURL_LIBRARIES})")
     else()
       echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): libcurl is required")
       message(FATAL_ERROR "libcurl not found")
@@ -161,7 +171,7 @@ if(NOT CURL_EXECUTABLE)
 
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_STATIC_LINK_NAMES)
     if(TARGET CURL::libcurl)
-      echowithcolor(COLOR GREEN "-- Libcurl: use target CURL::libcurl")
+      message(STATUS "Libcurl: use target CURL::libcurl")
     else()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TEST_SRC
           "#include <curl/curl.h>
@@ -247,7 +257,7 @@ if(NOT CURL_EXECUTABLE)
           message(STATUS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TRY_COMPILE_STA_MSG})
           message(FATAL_ERROR "Libcurl: try compile with ${CURL_LIBRARIES} failed")
         else()
-          echowithcolor(COLOR GREEN "-- Libcurl: use static symbols")
+          message(STATUS "Libcurl: use static symbols")
           if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TRY_RUN_OUT)
             message(STATUS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TRY_RUN_OUT})
           endif()
@@ -262,7 +272,7 @@ if(NOT CURL_EXECUTABLE)
                        INTERFACE_LINK_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_STATIC_LINK_NAMES})
         endif()
       else()
-        echowithcolor(COLOR GREEN "-- Libcurl: use dynamic symbols")
+        message(STATUS "Libcurl: use dynamic symbols")
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TRY_RUN_OUT)
           message(STATUS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TRY_RUN_OUT})
         endif()

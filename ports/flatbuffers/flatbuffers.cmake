@@ -6,14 +6,16 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
   if(TARGET flatbuffers::flatbuffers)
     get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR flatbuffers::flatbuffers
                         INTERFACE_INCLUDE_DIRECTORIES)
-    echowithcolor(
-      COLOR GREEN
-      "-- Dependency(${PROJECT_NAME}): Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})")
+    message(
+      STATUS
+        "Dependency(${PROJECT_NAME}): Flatbuffer found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_INC_DIR})")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLAT_BUFFERS_LINK_NAME flatbuffers::flatbuffers)
+    project_build_tools_patch_default_imported_config(flatbuffers::flatbuffers)
   endif()
 
-  if(TARGET flatbuffers::flatc AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
-    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME flatbuffers::flatc)
+  if(TARGET flatbuffers::flatc AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_EXECUTABLE)
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFER_EXECUTABLE
+                                              flatbuffers::flatc)
   endif()
 endmacro()
 
