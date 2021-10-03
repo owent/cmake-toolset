@@ -77,6 +77,7 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 | gcc.static.test         | Linux           | GCC               | Static linking                         |
 | gcc.shared.test         | Linux           | GCC               | Dynamic linking                        |
 | gcc.libressl.test       | Linux           | GCC               | Using libressl for SSL porting         |
+| gcc.boringssl.test      | Linux           | GCC               | Using boringssl for SSL porting        |
 | gcc.mbedtls.test        | Linux           | GCC               | Using mbedtls for SSL porting          |
 | gcc.4.8.test            | Linux           | GCC 4.8           | Legacy                                 |
 | clang.test              | Linux           | Clang with libc++ |
@@ -313,7 +314,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
 ```
 
-### Package - crypto(openssl/libressl/mbedtls/libsodium)
+### Package - crypto(openssl/boringssl/libressl/mbedtls/libsodium)
 
 ```cmake
 # ============ crypto - openssl ============
@@ -323,12 +324,12 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_MBEDTLS)
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_DISABLED)
 
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION "1.1.1k")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION "3.0.0")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL "https://github.com/openssl/openssl.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
+#   # "--api=1.1.1"
 #   "--release"
-#   # "--api=1.1.1" # libwebsockets and atframe_utils has warnings of using deprecated APIs,
-#   # maybe it can be remove later "no-deprecated" # libcurl and gRPC requires openssl's API of
+#   # libcurl and gRPC requires openssl's API of
 #   # 1.1.0 and 1.0.2, so we can not disable deprecated APIS here
 #   "no-dso"
 #   "no-tests"
@@ -342,6 +343,12 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
 #   "no-ssl3"
 #   "no-weak-ssl-ciphers"
 #   "enable-static-engine")
+
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_VERSION "479adf98d54a21c1d154aac59b2ce120e1d1a6d6")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_GIT_URL "https://github.com/google/boringssl.git")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BORINGSSL_BUILD_OPTIONS
+#   "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DBUILD_SHARED_LIBS=OFF" "-DGO_EXECUTABLE=${GO_EXECUTABLE}"
+#   "-DPERL_EXECUTABLE=${PERL_EXECUTABLE}")
 
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_VERSION "3.3.1")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_TAR_URL_BASE "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL")
