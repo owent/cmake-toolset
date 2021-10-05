@@ -84,12 +84,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   # "no-hw" and "no-engine" is recommanded by openssl only for mobile devices @see
   # https://wiki.openssl.org/index.php/Compilation_and_Installation
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS
-      "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}" "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl")
-  # FindOpenSSL.cmake only use lib as PATH_SUFFIX, and do not use pkg-config on no-unix like system
-  if(NOT UNIX)
-    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS
-         "--libdir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-  endif()
+      "--prefix=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+      "--openssldir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/ssl"
+      # FindOpenSSL.cmake only use lib as PATH_SUFFIX, and do not use pkg-config on no-unix like system So we should
+      # always install libraries into <prefix>/lib
+      "--libdir=${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS}
