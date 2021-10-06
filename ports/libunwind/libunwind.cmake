@@ -37,6 +37,23 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
         "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}"
         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
   endif()
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS
+      "--enable-shared=no"
+      "--enable-static=yes"
+      "--enable-coredump"
+      "--enable-ptrace"
+      "--enable-debug-frame"
+      "--enable-block-signals"
+      "--with-pic=yes"
+      "--disable-tests"
+      "--disable-documentation"
+      "--disable-minidebuginfo" # This will use liblzma(7-Zip) on system and may cause linking error. We can enable this
+                                # after add liblzma into compression ports
+  )
+  if(NOT TARGET ZLIB::ZLIB)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS "--disable-zlibdebuginfo")
+  endif()
+
   find_configure_package(
     PACKAGE
     Libunwind
@@ -45,17 +62,7 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     bash
     "./autogen.sh"
     CONFIGURE_FLAGS
-    "--enable-shared=no"
-    "--enable-static=yes"
-    "--enable-coredump"
-    "--enable-ptrace"
-    "--enable-debug-frame"
-    "--enable-block-signals"
-    "--with-pic=yes"
-    "--disable-tests"
-    "--disable-documentation"
-    "--disable-minidebuginfo" # This will use liblzma(7-Zip) on system and may cause linking error. We can enable this
-                              # after add liblzma into compression ports
+    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS}
     WORKING_DIRECTORY
     "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
     BUILD_DIRECTORY

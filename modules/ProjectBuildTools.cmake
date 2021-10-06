@@ -211,8 +211,6 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES project_build_tools_append_cmake_inherit_VAR_VALUE)
       endif()
-      string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
-                     "${project_build_tools_append_cmake_inherit_VAR_VALUE}")
     elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS) # Add system links into standard libraries even not set
       if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
