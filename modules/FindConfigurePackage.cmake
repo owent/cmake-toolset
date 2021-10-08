@@ -433,20 +433,30 @@ macro(FindConfigurePackage)
         else()
           set(FindConfigurePackageCMakeBuildParallelFlags "-j")
         endif()
+        if(CMAKE_MAKE_PROGRAM MATCHES "make(.exe)?$")
+          set(FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE "${CMAKE_MAKE_PROGRAM}")
+        else()
+          set(FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE "make")
+        endif()
         execute_process(
-          COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "make" ${FindConfigurePackage_MAKE_FLAGS}
-                  ${FindConfigurePackage_INSTALL_TARGET} ${FindConfigurePackageCMakeBuildParallelFlags}
+          COMMAND
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" ${FindConfigurePackage_MAKE_FLAGS}
+            ${FindConfigurePackage_INSTALL_TARGET} ${FindConfigurePackageCMakeBuildParallelFlags}
           WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
           RESULT_VARIABLE RUN_MAKE_RESULT)
         if(NOT RUN_MAKE_RESULT EQUAL 0 AND FindConfigurePackageCMakeBuildParallelFlags)
           execute_process(
-            COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "make"
-                    ${FindConfigurePackage_MAKE_FLAGS} ${FindConfigurePackage_INSTALL_TARGET}
+            COMMAND
+              "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+              "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" ${FindConfigurePackage_MAKE_FLAGS}
+              ${FindConfigurePackage_INSTALL_TARGET}
             WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                               ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
             RESULT_VARIABLE RUN_MAKE_RESULT)
         endif()
+        unset(FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE)
         unset(FindConfigurePackageCMakeBuildParallelFlags)
         unset(RUN_MAKE_RESULT)
 

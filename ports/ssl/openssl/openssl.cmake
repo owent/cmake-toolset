@@ -326,12 +326,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS})
 
       # We must use make here even if parent project use ninja or other make program here
+      if(CMAKE_MAKE_PROGRAM MATCHES "make(.exe)?$")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_MAKE "${CMAKE_MAKE_PROGRAM}")
+      else()
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_MAKE "make")
+      endif()
       project_expand_list_for_command_line_to_file(
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
-        "${CMAKE_MAKE_PROGRAM}" ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_MULTI_CORE})
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_MAKE}"
+        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_MULTI_CORE})
       project_expand_list_for_command_line_to_file(
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
-        "${CMAKE_MAKE_PROGRAM}" "install_sw" "install_ssldirs")
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_MAKE}" "install_sw" "install_ssldirs")
 
       # build & install
       execute_process(
