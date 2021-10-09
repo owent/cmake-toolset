@@ -62,7 +62,9 @@ endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/gsl-lite.cmake")
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/fmtlib/fmtlib.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
+if(COMPILER_OPTIONS_TEST_EXCEPTION)
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
+endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/rapidjson.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/nlohmann_json.cmake")
 

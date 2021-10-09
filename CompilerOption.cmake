@@ -524,13 +524,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     add_linker_flags_for_runtime(/ignore:4217)
 
     if(NOT VCPKG_TOOLCHAIN)
-      add_compiler_flags_to_inherit_var_unique(
-        CMAKE_CXX_FLAGS
-        /nologo
-        /DWIN32
-        /D_WINDOWS
-        "/utf-8"
-        /MP)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
       add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
       add_compiler_flags_to_inherit_var_unique(CMAKE_RC_FLAGS "-c65001" "/DWIN32")
     endif()
