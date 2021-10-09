@@ -433,11 +433,7 @@ macro(FindConfigurePackage)
         else()
           set(FindConfigurePackageCMakeBuildParallelFlags "-j")
         endif()
-        if(CMAKE_MAKE_PROGRAM MATCHES "make(.exe)?$")
-          set(FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE "${CMAKE_MAKE_PROGRAM}")
-        else()
-          set(FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE "make")
-        endif()
+        project_build_tools_find_make_program(FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE)
         execute_process(
           COMMAND
             "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"

@@ -416,6 +416,53 @@ else()
   set(PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL "\n")
 endif()
 
+function(project_build_tools_find_make_program OUTVAR)
+  if(CMAKE_MAKE_PROGRAM MATCHES "make(.exe)?$")
+    set(${OUTVAR}
+        "${CMAKE_MAKE_PROGRAM}"
+        PARENT_SCOPE)
+  else()
+    unset(_make_executable)
+    if(MINGW)
+      find_program(
+        _make_executable mingw32-make.exe
+        PATHS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
+              c:/MinGW/bin /MinGW/bin "[HKEY_CURRENT_USER\\Software\\CodeBlocks;Path]/MinGW/bin")
+    endif()
+    if(NOT _make_executable AND MSYS)
+      find_program(
+        _make_executable make
+        PATHS
+          "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MSYS-1.0_is1;Inno Setup: App Path]/bin"
+          "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\MinGW;InstallLocation]/bin"
+          c:/msys/1.0/bin
+          /msys/1.0/bin)
+    endif()
+    if(NOT _make_executable)
+      find_program(_make_executable NAMES gmake make smake)
+      if(NOT _make_executable AND CMAKE_HOST_APPLE)
+        execute_process(
+          COMMAND xcrun --find make
+          OUTPUT_VARIABLE _xcrun_out
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          ERROR_VARIABLE _xcrun_err)
+        if(_xcrun_out)
+          set(_make_executable "${_xcrun_out}")
+        endif()
+      endif()
+    endif()
+    set(${OUTVAR}
+        "${_make_executable}"
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_find_nmake_program OUTVAR)
+  set(${OUTVAR}
+      "nmake"
+      PARENT_SCOPE)
+endfunction()
+
 function(project_git_clone_repository)
   if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
     include(CMakeParseArguments)
