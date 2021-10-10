@@ -7,12 +7,14 @@ macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
     if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
       if(TARGET protobuf::libprotobuf)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf)
+        target_compile_definitions(protobuf::libprotobuf INTERFACE "GOOGLE_PROTOBUF_NO_RTTI")
       else()
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf-lite)
       endif()
 
-      if(TARGET protobuf::libprotobuf)
+      if(TARGET protobuf::libprotobuf-lite)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf-lite)
+        target_compile_definitions(protobuf::libprotobuf-lite INTERFACE "GOOGLE_PROTOBUF_NO_RTTI")
       else()
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf)
       endif()
@@ -117,8 +119,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
     endif()
 
+    if(NOT COMPILER_OPTIONS_TEST_RTTI)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BACKUP_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+      add_compiler_define_to_var(CMAKE_CXX_FLAGS "GOOGLE_PROTOBUF_NO_RTTI")
+    endif()
+
     project_build_tools_append_cmake_options_for_lib(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     project_third_party_append_find_root_args(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS)
+
+    if(NOT COMPILER_OPTIONS_TEST_RTTI)
+      set(CMAKE_CXX_FLAGS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BACKUP_CMAKE_CXX_FLAGS}")
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BACKUP_CMAKE_CXX_FLAGS)
+    endif()
 
     if(CMAKE_CROSSCOMPILING)
       list(APPEND CMAKE_PROGRAM_PATH

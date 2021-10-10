@@ -15,6 +15,18 @@ if [[ "$1" == "format" ]]; then
     exit 1
   fi
   exit 0
+elif [[ "$1" == "gcc.no-rtti.test" ]]; then
+  echo "$1"
+  mkdir -p test/build_jobs_dir
+  cd test/build_jobs_dir
+  cmake .. -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON -DCOMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF
+  cmake --build . -j || cmake --build .
+elif [[ "$1" == "gcc.no-exceptions.test" ]]; then
+  echo "$1"
+  mkdir -p test/build_jobs_dir
+  cd test/build_jobs_dir
+  cmake .. -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON -DCOMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION=OFF
+  cmake --build . -j || cmake --build .
 elif [[ "$1" == "gcc.static.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir

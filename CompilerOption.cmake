@@ -11,6 +11,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   cmake_policy(SET CMP0067 NEW)
 
   option(COMPILER_OPTION_CLANG_ENABLE_LIBCXX "Try to use libc++ when using clang." ON)
+  option(COMPILER_OPTION_DEFAULT_ENABLE_RTTI "Enable RTTI." ON)
+  option(COMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION "Enable Exception." ON)
   if(MSVC)
     option(COMPILER_OPTION_MSVC_ZC_CPP
            "Add /Zc:__cplusplus for MSVC (let __cplusplus be equal to _MSVC_LANG) when it support." ON)
@@ -522,15 +524,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     add_linker_flags_for_runtime(/ignore:4217)
 
     if(NOT VCPKG_TOOLCHAIN)
-      add_compiler_flags_to_inherit_var_unique(
-        CMAKE_CXX_FLAGS
-        /nologo
-        /DWIN32
-        /D_WINDOWS
-        "/utf-8"
-        /GR
-        /MP
-        /EHsc)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
       add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
       add_compiler_flags_to_inherit_var_unique(CMAKE_RC_FLAGS "-c65001" "/DWIN32")
     endif()
@@ -570,6 +564,21 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   endif()
 
   if(MSVC)
+    if(NOT CMAKE_CXX_FLAGS MATCHES "/EH")
+      if(COMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION)
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "/EHsc")
+      else()
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "/D_HAS_EXCEPTIONS=0")
+      endif()
+    endif()
+    if(NOT CMAKE_CXX_FLAGS MATCHES "/GR")
+      if(COMPILER_OPTION_DEFAULT_ENABLE_RTTI)
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "/GR")
+      else()
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "/GR-")
+      endif()
+    endif()
+
     if(NOT VCPKG_TOOLCHAIN)
       add_compiler_flags_to_inherit_var_unique(
         CMAKE_CXX_FLAGS_DEBUG
@@ -621,6 +630,20 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS_DEBUG_INIT " /nologo ")
     endif()
   else()
+    if(NOT CMAKE_CXX_FLAGS MATCHES "-f(no-)?exceptions")
+      if(COMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION)
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "-fexceptions")
+      else()
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "-fno-exceptions")
+      endif()
+    endif()
+    if(NOT CMAKE_CXX_FLAGS MATCHES "-f(no-)?rtti")
+      if(COMPILER_OPTION_DEFAULT_ENABLE_RTTI)
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "-frtti")
+      else()
+        add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "-fno-rtti")
+      endif()
+    endif()
     if(NOT EMSCRIPTEN)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -ggdb)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)

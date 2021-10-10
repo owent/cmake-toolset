@@ -85,6 +85,38 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
     exit $LastExitCode
   }
 }
+elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
+  Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
+  Write-Output $args
+  New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
+  Set-Location "test/build_jobs_dir"
+  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release  `
+    "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCOMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF"
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+  & cmake --build . -j || cmake --build .
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+}
+elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
+  Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
+  Write-Output $args
+  New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
+  Set-Location "test/build_jobs_dir"
+  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release  `
+    "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCOMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION=OFF"
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+  & cmake --build . -j || cmake --build .
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+}
 elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
   Write-Output $args
