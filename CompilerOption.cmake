@@ -729,6 +729,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endif()
 
+  if(MSVC)
+    set(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} /we4530 /we4541")
+  endif()
   # Check if exception enabled
   check_cxx_source_compiles("int main () { try { throw 123; } catch (...) {} return 0; }"
                             COMPILER_OPTIONS_TEST_EXCEPTION)
@@ -760,7 +764,23 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   check_cxx_source_compiles(
     "#include <typeinfo>
     #include <cstdio>
-    int main () { puts(typeid(int).name()); return 0; }" COMPILER_OPTIONS_TEST_RTTI)
+    struct base_type {
+      virtual ~base_type() {}
+    };
+    struct derived_type : public base_type {
+      virtual ~derived_type() {}
+    };
+    int main () {
+      derived_type d;
+      base_type* b = dynamic_cast<base_type*>(&d);
+      puts(typeid(*b).name()); return 0;
+    }"
+    COMPILER_OPTIONS_TEST_RTTI)
+
+  if(MSVC)
+    set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS}")
+    unset(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS)
+  endif()
 
   # For Windows.h
   if(WIN32
@@ -775,4 +795,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   endif()
   # Features test finished
   cmake_policy(POP)
+
+  # Store all flags into Cache variables
+  foreach(COMPILER_OPTION_INHERIT_VAR_NAME
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+    if(DEFINED CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}} AND DEFINED ${COMPILER_OPTION_INHERIT_VAR_NAME})
+      set(${COMPILER_OPTION_INHERIT_VAR_NAME}
+          "${${COMPILER_OPTION_INHERIT_VAR_NAME}}"
+          CACHE STRING "Update cached ${COMPILER_OPTION_INHERIT_VAR_NAME}" FORCE)
+    endif()
+  endforeach()
 endif()
