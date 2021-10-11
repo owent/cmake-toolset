@@ -251,6 +251,14 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
     list(APPEND ${OUTVAR}
          "-DCMAKE_POLICY_DEFAULT_CMP0091=${project_build_tools_append_cmake_inherit_options_POLICY_VALUE}")
   endif()
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0")
+    unset(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
+    cmake_policy(GET CMP0117 project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
+    if(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
+      list(APPEND ${OUTVAR}
+           "-DCMAKE_POLICY_DEFAULT_CMP0117=${project_build_tools_append_cmake_inherit_options_POLICY_VALUE}")
+    endif()
+  endif()
   unset(project_build_tools_append_cmake_inherit_options_POLICY_VALUE)
 
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
