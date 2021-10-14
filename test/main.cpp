@@ -1,3 +1,5 @@
+// Copyright 2021 atframework
+
 #include <iostream>
 
 #if defined(HAVE_PROTOBUF) && HAVE_PROTOBUF

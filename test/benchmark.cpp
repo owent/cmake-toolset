@@ -1,6 +1,8 @@
-#include <atomic>
+// Copyright 2021 atframework
 
 #include <benchmark/benchmark.h>
+
+#include <atomic>
 
 static void BM_SomeFunction(benchmark::State& state) {
   std::atomic<int> a;
