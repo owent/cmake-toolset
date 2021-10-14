@@ -75,15 +75,32 @@ include("${CMAKE_CURRENT_LIST_DIR}/ProjectBuildTools.cmake")
 function(FindConfigurePackageDownloadFile from to)
   find_program(WGET_FULL_PATH wget)
   if(WGET_FULL_PATH)
-    execute_process(COMMAND ${WGET_FULL_PATH} --no-check-certificate -v ${from} -O ${to}
-                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+    execute_process(
+      COMMAND "${WGET_FULL_PATH}" "--no-check-certificate" "-t" "${PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES}" "-v"
+              "${from}" "-O" "${to}" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
   else()
     find_program(CURL_FULL_PATH curl)
     if(CURL_FULL_PATH)
-      execute_process(COMMAND ${CURL_FULL_PATH} --insecure -L ${from} -o ${to}
-                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      execute_process(COMMAND "${CURL_FULL_PATH}" "--insecure" "--retry" "${PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES}"
+                              "-L" "${from}" "-o" "${to}" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     else()
-      file(DOWNLOAD ${from} ${to} SHOW_PROGRESS)
+      set(FindConfigurePackageDownloadFile_RETRY_TIMES 0)
+      while(FindConfigurePackageDownloadFile_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
+        if(FindConfigurePackageDownloadFile_RETRY_TIMES GREATER 0)
+          message(
+            STATUS
+              "Retry to download file from ${from} for the ${FindConfigurePackageDownloadFile_RETRY_TIMES} time(s).")
+        endif()
+        math(EXPR FindConfigurePackageDownloadFile_RETRY_TIMES "${FindConfigurePackageDownloadFile_RETRY_TIMES} + 1"
+             OUTPUT_FORMAT DECIMAL)
+        file(
+          DOWNLOAD "${from}" "${to}"
+          SHOW_PROGRESS
+          TLS_VERIFY OFF)
+        if(EXISTS "${to}")
+          break()
+        endif()
+      endwhile()
     endif()
   endif()
 endfunction()

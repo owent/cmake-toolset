@@ -130,11 +130,15 @@ if(NOT CURL_EXECUTABLE)
       endif()
     endif()
 
-    if(TARGET c-ares::cares
-       OR TARGET c-ares::cares_static
-       OR TARGET c-ares::cares_shared
-       OR CARES_FOUND)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DENABLE_ARES=ON")
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DISABLE_ARES)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DENABLE_THREADED_RESOLVER=ON")
+    else()
+      if(TARGET c-ares::cares
+         OR TARGET c-ares::cares_static
+         OR TARGET c-ares::cares_shared
+         OR CARES_FOUND)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DENABLE_ARES=ON")
+      endif()
     endif()
 
     find_configure_package(

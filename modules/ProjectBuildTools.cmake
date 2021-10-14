@@ -132,6 +132,10 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.18")
   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE)
 endif()
 
+if(NOT PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
+  set(PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES 3)
+endif()
+
 macro(project_build_tools_append_space_flags_to_var VARNAME)
   foreach(def ${ARGN})
     if(${VARNAME})
@@ -639,32 +643,58 @@ function(project_git_clone_repository)
       endif()
       list(APPEND project_git_fetch_repository_args "-n" # No tags
            "origin" ${project_git_clone_repository_GIT_BRANCH})
-      execute_process(
-        COMMAND ${GIT_EXECUTABLE} ${project_git_fetch_repository_args}
-        RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
-        WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                          ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      set(project_git_fetch_repository_RETRY_TIMES 0)
+      while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
+        if(project_git_fetch_repository_RETRY_TIMES GREATER 0)
+          message(
+            STATUS
+              "Retry to fetch ${project_git_clone_repository_GIT_BRANCH} from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
+          )
+        endif()
+        math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
+             OUTPUT_FORMAT DECIMAL)
+        execute_process(
+          COMMAND ${GIT_EXECUTABLE} ${project_git_fetch_repository_args}
+          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        if(project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
+          break()
+        endif()
+      endwhile()
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
             "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
       endif()
     else()
-      if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
-        execute_process(
-          COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n"
-                  origin ${project_git_clone_repository_COMMIT}
-          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
-          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      else()
-        message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
-        execute_process(
-          COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "-n" origin ${project_git_clone_repository_COMMIT}
-          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
-          WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
-                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      endif()
+      set(project_git_fetch_repository_RETRY_TIMES 0)
+      while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
+        if(project_git_fetch_repository_RETRY_TIMES GREATER 0)
+          message(
+            STATUS
+              "Retry to fetch ${project_git_clone_repository_COMMIT} from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
+          )
+        endif()
+        if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
+          execute_process(
+            COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "--deepen=${project_git_clone_repository_DEPTH}" "-n"
+                    origin ${project_git_clone_repository_COMMIT}
+            RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+            WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        else()
+          message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
+          execute_process(
+            COMMAND ${GIT_EXECUTABLE} ${git_global_options} fetch "-n" origin ${project_git_clone_repository_COMMIT}
+            RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+            WORKING_DIRECTORY ${project_git_clone_repository_REPO_DIRECTORY}
+                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        endif()
+        if(project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
+          break()
+        endif()
+      endwhile()
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
