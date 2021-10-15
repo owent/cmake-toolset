@@ -70,7 +70,7 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
-  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/bin" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib64" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib"
+  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
   & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -91,7 +91,7 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
-  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/bin" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib64" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib"
+  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
   & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -113,7 +113,7 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
-  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/bin" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib64" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib"
+  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
   & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -135,7 +135,7 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
-  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/bin" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib64" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib"
+  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
   & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -157,7 +157,7 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
-  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/bin" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib64" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib"
+  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
   & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -177,7 +177,7 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
-  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/bin" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib64" + [IO.Path]::PathSeparator + "${Env:THIRD_PARTY_PREBUILT_PATH}/lib"
+  $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
   & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
