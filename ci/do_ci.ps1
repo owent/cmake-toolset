@@ -55,23 +55,27 @@ if ($IsWindows) {
   }
 }
 
+if (!(Test-Path Env:CI_BUILD_CONFIGURE_TYPE)) {
+  $Env:CI_BUILD_CONFIGURE_TYPE = "Release"
+}
+
 if ( $RUN_MODE -eq "msvc.static.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release `
+  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
-  & cmake --build . -j || cmake --build .
+  & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
-  & ctest . -V -C Release
+  & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -81,18 +85,18 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release  `
+  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
-  & cmake --build . -j || cmake --build .
+  & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
-  & ctest . -V -C Release
+  & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -102,19 +106,19 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release  `
+  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
-  & cmake --build . -j || cmake --build .
+  & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
-  & ctest . -V -C Release
+  & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -124,19 +128,19 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release  `
+  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
-  & cmake --build . -j || cmake --build .
+  & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
-  & ctest . -V -C Release
+  & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -148,17 +152,17 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location -Verbose "test/build_jobs_dir"
   & cmake .. -G "Visual Studio 16 2019" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
-    -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
+    -DVCPKG_TARGET_TRIPLET=x64-windows "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
-  & cmake --build . -j || cmake --build .
+  & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
-  & ctest . -V -C Release
+  & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -168,17 +172,17 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
+  & cmake .. -G "Visual Studio 15 2017 Win64" "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
-  & cmake --build . -j || cmake --build .
+  & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib64" + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/lib"
-  & ctest . -V -C Release
+  & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }

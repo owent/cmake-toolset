@@ -4,6 +4,10 @@ cd "$(cd "$(dirname $0)" && pwd)/.."
 
 set -ex
 
+if [[ "x$CI_BUILD_CONFIGURE_TYPE" == "x" ]]; then
+  export CI_BUILD_CONFIGURE_TYPE="Release"
+fi
+
 if [[ "$1" == "format" ]]; then
   python3 -m pip install --user -r ./ci/requirements.txt
   bash ./ci/format.sh
@@ -171,18 +175,18 @@ elif [[ "$1" == "msvc.static.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
-  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
-  cmake --build . -j || cmake --build .
+  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
+  cmake --build . -j --config $CI_BUILD_CONFIGURE_TYPE || cmake --build . --config $CI_BUILD_CONFIGURE_TYPE
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
-  ctest . -V -C Release
+  ctest . -V -C $CI_BUILD_CONFIGURE_TYPE
 elif [[ "$1" == "msvc.shared.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
-  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
-  cmake --build . -j || cmake --build .
+  cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
+  cmake --build . -j --config $CI_BUILD_CONFIGURE_TYPE || cmake --build . --config $CI_BUILD_CONFIGURE_TYPE
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
@@ -194,22 +198,22 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
   cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows \
-    -DCMAKE_BUILD_TYPE=Release -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
-  cmake --build . -j || cmake --build .
+    -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
+  cmake --build . -j --config $CI_BUILD_CONFIGURE_TYPE || cmake --build . --config $CI_BUILD_CONFIGURE_TYPE
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
-  ctest . -V -C Release
+  ctest . -V -C $CI_BUILD_CONFIGURE_TYPE
 elif [[ "$1" == "msvc2017.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
-  cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
-  cmake --build . -j || cmake --build .
+  cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
+  cmake --build . -j --config $CI_BUILD_CONFIGURE_TYPE || cmake --build . --config $CI_BUILD_CONFIGURE_TYPE
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
-  ctest . -V -C Release
+  ctest . -V -C $CI_BUILD_CONFIGURE_TYPE
 elif [[ "$1" == "android.arm64.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
