@@ -1,6 +1,14 @@
 // Copyright 2021 atframework
 
 #include <iostream>
+#include <string>
+
+#if defined(HAVE_OPENTELEMETRY_CPP) && HAVE_OPENTELEMETRY_CPP
+#  include "opentelemetry/exporters/ostream/span_exporter.h"
+#  include "opentelemetry/sdk/trace/batch_span_processor.h"
+#  include "opentelemetry/sdk/trace/tracer_provider.h"
+#  include "opentelemetry/trace/provider.h"
+#endif
 
 #if defined(HAVE_PROTOBUF) && HAVE_PROTOBUF
 
@@ -50,6 +58,59 @@
 
 #endif
 
+#if defined(HAVE_OPENTELEMETRY_CPP) && HAVE_OPENTELEMETRY_CPP
+
+constexpr int kOpentelemetryNumSpans = 3;
+
+namespace {
+
+static void OpentelemetryInitTracer() {
+  auto exporter =
+      std::unique_ptr<opentelemetry::sdk::trace::SpanExporter>(new opentelemetry::exporter::trace::OStreamSpanExporter);
+
+  // CONFIGURE BATCH SPAN PROCESSOR PARAMETERS
+
+  opentelemetry::sdk::trace::BatchSpanProcessorOptions options{};
+  // We make the queue size `kOpentelemetryNumSpans`*2+5 because when the queue is half full, a preemptive notif
+  // is sent to start an export call, which we want to avoid in this simple example.
+  options.max_queue_size = kOpentelemetryNumSpans * 2 + 1;
+  // Time interval (in ms) between two consecutive exports.
+  options.schedule_delay_millis = std::chrono::milliseconds(3000);
+  // We export `kOpentelemetryNumSpans` after every `schedule_delay_millis` milliseconds.
+  options.max_export_batch_size = kOpentelemetryNumSpans;
+
+  auto processor = std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor>(
+      new opentelemetry::sdk::trace::BatchSpanProcessor(std::move(exporter), options));
+
+  auto provider = nostd::shared_ptr<opentelemetry::trace::TracerProvider>(
+      new opentelemetry::sdk::trace::TracerProvider(std::move(processor)));
+  // Set the global trace provider.
+  opentelemetry::trace::Provider::SetTracerProvider(provider);
+}
+
+nostd::shared_ptr<opentelemetry::trace::Tracer> GetTracer() {
+  auto provider = opentelemetry::trace::Provider::GetTracerProvider();
+  return provider->GetTracer("cmake-toolset-test");
+}
+
+static void OpentelemetryStartAndEndSpans() {
+  for (int i = 1; i <= kOpentelemetryNumSpans; ++i) {
+    std::string msg = "cmake-toolset-test-batch: ";
+    msg += static_cast<char>(i + '0');
+    GetTracer()->StartSpan(msg);
+  }
+}
+
+static void OpentelemetryTest() {
+  OpentelemetryInitTracer();
+  OpentelemetryStartAndEndSpans();
+  OpentelemetryStartAndEndSpans();
+  OpentelemetryStartAndEndSpans();
+}
+
+}  // namespace
+#endif
+
 int main() {
 #if defined(HAVE_PROTOBUF) && HAVE_PROTOBUF
   cmake_toolset::test_message msg;
@@ -60,6 +121,9 @@ int main() {
   std::cout << msg.DebugString() << std::endl;
 #else
   std::cout << "Hello World!" << std::endl;
+#endif
+#if defined(HAVE_OPENTELEMETRY_CPP) && HAVE_OPENTELEMETRY_CPP
+  OpentelemetryTest();
 #endif
   return 0;
 }

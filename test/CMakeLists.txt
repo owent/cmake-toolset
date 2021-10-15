@@ -167,6 +167,10 @@ else()
   add_executable(cmake-toolset-test main.cpp)
 endif()
 
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES)
+  target_compile_definitions(cmake-toolset-test PRIVATE "HAVE_OPENTELEMETRY_CPP=1")
+endif()
+
 add_test(NAME cmake-toolset.main-test COMMAND cmake-toolset-test)
 
 target_link_libraries(
