@@ -69,6 +69,10 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
+  & ctest . -V -C Release
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
 }
 elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
@@ -100,6 +104,10 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
+  & ctest . -V -C Release
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
 }
 elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
@@ -113,6 +121,10 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
     exit $LastExitCode
   }
   & cmake --build . -j || cmake --build .
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+  & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -132,6 +144,10 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
+  & ctest . -V -C Release
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
 }
 elseif ( $RUN_MODE -eq "msvc2017.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
@@ -143,6 +159,10 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
     exit $LastExitCode
   }
   & cmake --build . -j || cmake --build .
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+  & ctest . -V -C Release
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
