@@ -82,6 +82,13 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endmacro()
 
+  macro(set_compiler_flags_to_inherit_var VARNAME)
+    set(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      set(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
   macro(add_compiler_flags_to_var VARNAME)
     project_build_tools_append_space_flags_to_var(${VARNAME} "${ARGN}")
   endmacro()
