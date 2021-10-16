@@ -1,7 +1,27 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 893bca7..9d92e15 100644
+index 893bca753..56c90c637 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -117,7 +117,7 @@ endif()
+ if(CMAKE_COMPILER_IS_GNUCXX OR CLANG)
+   # Note clang-cl is odd and sets both CLANG and MSVC. We base our configuration
+   # primarily on our normal Clang one.
+-  set(C_CXX_FLAGS "-Werror -Wformat=2 -Wsign-compare -Wmissing-field-initializers -Wwrite-strings -Wvla")
++  set(C_CXX_FLAGS "-Wformat=2 -Wsign-compare -Wmissing-field-initializers -Wwrite-strings -Wvla")
+   if(MSVC)
+     # clang-cl sets different default warnings than clang. It also treats -Wall
+     # as -Weverything, to match MSVC. Instead -W3 is the alias for -Wall.
+@@ -238,8 +238,8 @@ elseif(MSVC)
+                             ${MSVC_DISABLED_WARNINGS_LIST})
+   string(REPLACE "C" " -w4" MSVC_LEVEL4_WARNINGS_STR
+                             ${MSVC_LEVEL4_WARNINGS_LIST})
+-  set(CMAKE_C_FLAGS   "-utf-8 -Wall -WX ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
+-  set(CMAKE_CXX_FLAGS "-utf-8 -Wall -WX ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
++  set(CMAKE_C_FLAGS   "-utf-8 -Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
++  set(CMAKE_CXX_FLAGS "-utf-8 -Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
+ endif()
+ 
+ if(WIN32)
 @@ -562,7 +562,7 @@ endif()
  
  # Add minimal googletest targets. The provided one has many side-effects, and
@@ -25,7 +45,7 @@ index 893bca7..9d92e15 100644
 +install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 +
 diff --git a/crypto/pkcs8/pkcs12_test.cc b/crypto/pkcs8/pkcs12_test.cc
-index e67630d..1641a6c 100644
+index e67630d62..1641a6c6d 100644
 --- a/crypto/pkcs8/pkcs12_test.cc
 +++ b/crypto/pkcs8/pkcs12_test.cc
 @@ -34,7 +34,7 @@ std::string GetTestData(const char *path);
@@ -47,7 +67,7 @@ index e67630d..1641a6c 100644
                  bssl::Span<const uint8_t>(kTestCert),
                  {bssl::Span<const uint8_t>(kTestCert2)}, 0, 0, 0, 0);
 diff --git a/crypto/x509v3/internal.h b/crypto/x509v3/internal.h
-index e510b40..bd00484 100644
+index e510b4092..bd004847f 100644
 --- a/crypto/x509v3/internal.h
 +++ b/crypto/x509v3/internal.h
 @@ -58,7 +58,7 @@ int x509v3_cache_extensions(X509 *x);
@@ -60,7 +80,7 @@ index e510b40..bd00484 100644
  
  #if defined(__cplusplus)
 diff --git a/decrepit/ripemd/ripemd_test.cc b/decrepit/ripemd/ripemd_test.cc
-index 0700bae..2eeb382 100644
+index 0700baee0..2eeb38210 100644
 --- a/decrepit/ripemd/ripemd_test.cc
 +++ b/decrepit/ripemd/ripemd_test.cc
 @@ -109,7 +109,7 @@ TEST(RIPEMDTest, RunTest) {

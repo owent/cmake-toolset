@@ -17,6 +17,8 @@ endif()
 
 project(cmake-toolset-test)
 
+enable_testing()
+
 if(NOT DEFINED __COMPILER_OPTION_LOADED)
   set(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL TRUE)
   if(MSVC)
@@ -165,6 +167,12 @@ else()
   add_executable(cmake-toolset-test main.cpp)
 endif()
 
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES)
+  target_compile_definitions(cmake-toolset-test PRIVATE "HAVE_OPENTELEMETRY_CPP=1")
+endif()
+
+add_test(NAME cmake-toolset.main-test COMMAND cmake-toolset-test)
+
 target_link_libraries(
   cmake-toolset-test
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES}
@@ -202,6 +210,7 @@ message(STATUS "CMAKE_TOOLSE_TEST_LINK_LIBRARIES=${CMAKE_TOOLSE_TEST_LINK_LIBRAR
 if(TARGET GTest::gtest_main)
   add_executable(cmake-toolset-gtest gtest.cpp)
   target_link_libraries(cmake-toolset-gtest GTest::gtest_main)
+  add_test(NAME cmake-toolset.gtest-test COMMAND cmake-toolset-test)
 else()
   message(FATAL_ERROR "Build GTest failed")
 endif()
@@ -209,6 +218,7 @@ endif()
 if(TARGET benchmark::benchmark)
   add_executable(cmake-toolset-benchmark benchmark.cpp)
   target_link_libraries(cmake-toolset-benchmark benchmark::benchmark)
+  add_test(NAME cmake-toolset.benchmark-test COMMAND cmake-toolset-test)
 else()
   message(FATAL_ERROR "Build benchmark failed")
 endif()

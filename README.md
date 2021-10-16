@@ -69,7 +69,7 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
   -DVCPKG_TARGET_TRIPLET=x64-linux [other options...]
 ```
 
-## CI Job Matrix
+## CI Job Status
 
 | Name                    | Target System   | Toolchain         | Note                                   |
 | ----------------------- | --------------- | ----------------- | -------------------------------------- |
@@ -659,6 +659,10 @@ else()
   project_<package name:lowercase>_import()
 endif()
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 [1]: https://github.com/microsoft/vcpkg
 [2]: https://github.com/atframework/cmake-toolset

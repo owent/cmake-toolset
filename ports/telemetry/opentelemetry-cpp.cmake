@@ -62,9 +62,10 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL OFF)
           endif()
         elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-          if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.3")
-            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL OFF)
-          endif()
+          # Microsoft.GSL seems to has some problems with default copy constructor and STL(libc++) on macOS. We always
+          # disable it. if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.3")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL OFF)
+          # endif()
         elseif(MSVC)
           if(MSVC_VERSION LESS 1916)
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL OFF)
@@ -128,8 +129,11 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL ON)
       elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10")
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL ON)
-      elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10.3")
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL ON)
+        # Microsoft.GSL seems to has some problems with default copy constructor and STL(libc++) on macOS. We always
+        # disable it.
+
+        # elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL
+        # "10.3") set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_STL ON)
       endif()
     endif()
 

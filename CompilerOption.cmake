@@ -82,6 +82,13 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endmacro()
 
+  macro(set_compiler_flags_to_inherit_var VARNAME)
+    set(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      set(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
   macro(add_compiler_flags_to_var VARNAME)
     project_build_tools_append_space_flags_to_var(${VARNAME} "${ARGN}")
   endmacro()
@@ -644,14 +651,38 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "-fno-rtti")
       endif()
     endif()
-    if(NOT EMSCRIPTEN)
+    if(APPLE)
+      if(NOT CMAKE_LIBTOOL OR NOT EXISTS CMAKE_LIBTOOL)
+        find_program(CMAKE_LIBTOOL NAMES libtool)
+      endif()
+
+      get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+      if(CMAKE_LIBTOOL)
+        set(CMAKE_LIBTOOL
+            ${CMAKE_LIBTOOL}
+            CACHE PATH "libtool executable")
+        message(STATUS "Found libtool - ${CMAKE_LIBTOOL}")
+
+        execute_process(
+          COMMAND ${CMAKE_LIBTOOL} -V
+          OUTPUT_VARIABLE LIBTOOL_V_OUTPUT
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if("${LIBTOOL_V_OUTPUT}" MATCHES ".*cctools-([0-9.]+).*")
+          string(REGEX REPLACE ".*cctools-([0-9.]+).*" "\\1" LIBTOOL_VERSION ${LIBTOOL_V_OUTPUT})
+          if(NOT LIBTOOL_VERSION VERSION_LESS "862")
+            set(LIBTOOL_NO_WARNING_FLAG "-no_warning_for_no_symbols")
+          endif()
+        endif()
+
+        if(LIBTOOL_NO_WARNING_FLAG)
+          add_compiler_flags_to_inherit_var_unique(CMAKE_C_CREATE_STATIC_LIBRARY "${LIBTOOL_NO_WARNING_FLAG}")
+          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_CREATE_STATIC_LIBRARY "${LIBTOOL_NO_WARNING_FLAG}")
+        endif()
+      endif()
+    elseif(NOT EMSCRIPTEN)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -ggdb)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
     endif()
-    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -ggdb)
-    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELEASE)
-    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
-    # add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_MINSIZEREL)
   endif()
 
   # ================== support checking ==================

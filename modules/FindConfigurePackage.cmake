@@ -506,9 +506,11 @@ macro(FindConfigurePackage)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS APPEND_SYSTEM_LINKS)
           endif()
 
-          project_build_tools_append_cmake_inherit_options(
-            ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
-          project_build_tools_append_cmake_cxx_standard_options(
+          # project_build_tools_append_cmake_inherit_options(
+          # ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
+          # project_build_tools_append_cmake_cxx_standard_options(
+          # ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
+          project_build_tools_append_cmake_options_for_lib(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
         endif()
