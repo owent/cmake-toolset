@@ -12,6 +12,7 @@
 
 #if defined(HAVE_PROTOBUF) && HAVE_PROTOBUF
 
+// There ares some warnings in prorobuf generated codes, we just disable these warnings
 #  if defined(_MSC_VER)
 #    pragma warning(push)
 #    if ((defined(__cplusplus) && __cplusplus >= 201704L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201704L))
@@ -105,7 +106,10 @@ static void OpentelemetryTest() {
   OpentelemetryInitTracer();
   OpentelemetryStartAndEndSpans();
   OpentelemetryStartAndEndSpans();
+
+  // Create enough spans to let BatchSpanProcessor to submit spans
   OpentelemetryStartAndEndSpans();
+  // We should see the spans exported by OStreamSpanExporter here
 }
 
 }  // namespace
@@ -113,6 +117,7 @@ static void OpentelemetryTest() {
 
 int main() {
 #if defined(HAVE_PROTOBUF) && HAVE_PROTOBUF
+  // Test protobuf
   cmake_toolset::test_message msg;
   msg.set_i32(123);
   msg.set_i64(123000);
@@ -123,6 +128,7 @@ int main() {
   std::cout << "Hello World!" << std::endl;
 #endif
 #if defined(HAVE_OPENTELEMETRY_CPP) && HAVE_OPENTELEMETRY_CPP
+  // Test opentelemetry
   OpentelemetryTest();
 #endif
   return 0;

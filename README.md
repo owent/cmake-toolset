@@ -71,28 +71,32 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 
 ## CI Job Status
 
-| Name                    | Target System   | Toolchain         | Note                                   |
-| ----------------------- | --------------- | ----------------- | -------------------------------------- |
-| Format                  | -               |                   |
-| gcc.static.test         | Linux           | GCC               | Static linking                         |
-| gcc.shared.test         | Linux           | GCC               | Dynamic linking                        |
-| gcc.libressl.test       | Linux           | GCC               | Using libressl for SSL porting         |
-| gcc.boringssl.test      | Linux           | GCC               | Using boringssl for SSL porting        |
-| gcc.mbedtls.test        | Linux           | GCC               | Using mbedtls for SSL porting          |
-| gcc.4.8.test            | Linux           | GCC 4.8           | Legacy                                 |
-| clang.test              | Linux           | Clang with libc++ |
-| gcc.vcpkg.test          | Linux           | GCC With vcpkg    |
-| msys2.mingw.static.test | Windows         | GCC               | Static linking                         |
-| msys2.mingw.shared.test | Windows         | GCC               | Dynamic linking                        |
-| msvc.static.test        | Windows         | MSVC              | Static linking                         |
-| msvc.shared.test        | Windows         | MSVC              | Dynamic linking                        |
-| msvc.vcpkg.test         | Windows         | MSVC With vcpkg   |
-| msvc2017.test           | Windows         | MSVC              | Legacy                                 |
-| macos.appleclang.test   | macOS           | Clang with libc++ |
-| android.arm64.test      | Android         | Clang with libc++ | ```-DANDROID_ABI=arm64-v8a```          |
-| android.x86_64.test     | Android         | Clang with libc++ | ```-DANDROID_ABI=x86_64```             |
-| ios.test                | iOS             | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=arm64```  |
-| iphone_simulator.test   | iPhoneSimulator | Clang with libc++ | ```-DCMAKE_OSX_ARCHITECTURES=x86_64``` |
+| Name                    | Target System   | Toolchain              | Note                                   |
+| ----------------------- | --------------- | ---------------------- | -------------------------------------- |
+| Format                  | -               |                        |
+| gcc.no-rtti.test        | Linux           | GCC Without RTTI       | With `-fno-rtti` for C++               |
+| gcc.no-exceptions.test  | Linux           | GCC Without Exception  | With `-fno-exceptions` for C++         |
+| gcc.static.test         | Linux           | GCC                    | Static linking                         |
+| gcc.shared.test         | Linux           | GCC                    | Dynamic linking                        |
+| gcc.libressl.test       | Linux           | GCC                    | Using libressl for SSL porting         |
+| gcc.boringssl.test      | Linux           | GCC                    | Using boringssl for SSL porting        |
+| gcc.mbedtls.test        | Linux           | GCC                    | Using mbedtls for SSL porting          |
+| gcc.4.8.test            | Linux           | GCC 4.8                | Legacy                                 |
+| clang.test              | Linux           | Clang with libc++      |
+| gcc.vcpkg.test          | Linux           | GCC With vcpkg         |
+| msys2.mingw.static.test | Windows         | GCC                    | Static linking                         |
+| msys2.mingw.shared.test | Windows         | GCC                    | Dynamic linking                        |
+| msvc.static.test        | Windows         | MSVC                   | Static linking                         |
+| msvc.shared.test        | Windows         | MSVC                   | Dynamic linking                        |
+| msvc.no-rtti.test       | Linux           | MSVC Without RTTI      | With `/GR-` for C++                    |
+| msvc.no-exceptions.test | Linux           | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++ |
+| msvc.vcpkg.test         | Windows         | MSVC With vcpkg        |
+| msvc2017.test           | Windows         | MSVC                   | Legacy                                 |
+| macos.appleclang.test   | macOS           | Clang with libc++      |
+| android.arm64.test      | Android         | Clang with libc++      | ```-DANDROID_ABI=arm64-v8a```          |
+| android.x86_64.test     | Android         | Clang with libc++      | ```-DANDROID_ABI=x86_64```             |
+| ios.test                | iOS             | Clang with libc++      | ```-DCMAKE_OSX_ARCHITECTURES=arm64```  |
+| iphone_simulator.test   | iPhoneSimulator | Clang with libc++      | ```-DCMAKE_OSX_ARCHITECTURES=x86_64``` |
 
 ## Utility Scripts
 
@@ -329,8 +333,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS
 #   # "--api=1.1.1"
 #   "--release"
-#   # libcurl and gRPC requires openssl's API of
-#   # 1.1.0 and 1.0.2, so we can not disable deprecated APIS here
+#   # libcurl and gRPC requires openssl's API of 1.1.0 and 1.0.2, so we can not disable deprecated APIS here
 #   "no-dso"
 #   "no-tests"
 #   "no-external-tests"

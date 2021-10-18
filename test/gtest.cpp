@@ -6,6 +6,9 @@
 
 namespace {
 
-TEST(LinkWithGTest, Zero) { EXPECT_EQ(1, 1); }
+TEST(LinkWithGTest, Zero) {
+  // Test for gtest_main
+  EXPECT_EQ(1, 1);
+}
 
 }  // namespace

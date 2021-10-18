@@ -5,6 +5,7 @@
 #include <atomic>
 
 static void BM_SomeFunction(benchmark::State& state) {
+  // Test for benchmark_main
   std::atomic<int> a;
   ++a;
 }
