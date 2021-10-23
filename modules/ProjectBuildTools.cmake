@@ -415,6 +415,11 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_VAR_NAME)
   unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
 
+  # vcpkg
+  if(VCPKG_HOST_TRIPLET)
+    list(APPEND ${OUTVAR} "-DVCPKG_TARGET_TRIPLET=${VCPKG_HOST_TRIPLET}")
+  endif()
+
   if(CMAKE_HOST_GENERATOR_PLATFORM)
     list(APPEND ${OUTVAR} "-A" "${CMAKE_HOST_GENERATOR_PLATFORM}")
   elseif(MSVC AND CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE)
