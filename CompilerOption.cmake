@@ -652,7 +652,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       if(NOT DEFINED CACHE{CMAKE_MSVC_RUNTIME_LIBRARY})
         set_compiler_flags_to_inherit_var(
           CMAKE_MSVC_RUNTIME_LIBRARY
-          "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>" CACHE STRING "")
+          "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>")
       endif()
     else()
       if(VCPKG_CRT_LINKAGE STREQUAL "static")
