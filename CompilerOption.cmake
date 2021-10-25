@@ -706,8 +706,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         endif()
 
         if(LIBTOOL_NO_WARNING_FLAG)
-          add_compiler_flags_to_inherit_var_unique(CMAKE_C_CREATE_STATIC_LIBRARY "${LIBTOOL_NO_WARNING_FLAG}")
-          add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_CREATE_STATIC_LIBRARY "${LIBTOOL_NO_WARNING_FLAG}")
+          set_compiler_flags_to_inherit_var(CMAKE_C_ARCHIVE_FINISH
+                                            "<CMAKE_RANLIB> ${LIBTOOL_NO_WARNING_FLAG} -c <TARGET>")
+          set_compiler_flags_to_inherit_var(CMAKE_CXX_ARCHIVE_FINISH
+                                            "<CMAKE_RANLIB> ${LIBTOOL_NO_WARNING_FLAG} -c <TARGET>")
         endif()
       endif()
     elseif(NOT EMSCRIPTEN)
