@@ -40,7 +40,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
         if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
             if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-                & "@CMAKE_COMMAND@" --build . --target install --config Debug -j || & "@CMAKE_COMMAND@" --build . --target install --config Debug
+                & "@CMAKE_COMMAND@" --build . --target install --config Debug -j
             }
             else {
                 & "@CMAKE_COMMAND@" --build . --target install --config Debug
@@ -50,7 +50,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
             }
         }
         if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-            & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+            & "@CMAKE_COMMAND@" --build . --target install --config Release -j
         }
         else {
             & "@CMAKE_COMMAND@" --build . --target install --config Release
@@ -60,7 +60,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         }
         if (("@CMAKE_BUILD_TYPE@" -ne "") -and ("@CMAKE_BUILD_TYPE@" -ne "Release")) {
             if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-                & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+                & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j
             }
             else {
                 & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
@@ -99,7 +99,7 @@ else {
 
 if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MSVC@".ToLower() -eq "1")) {
     if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-        & "@CMAKE_COMMAND@" --build . --target install --config Debug -j || & "@CMAKE_COMMAND@" --build . --target install --config Debug
+        & "@CMAKE_COMMAND@" --build . --target install --config Debug -j
     }
     else {
         & "@CMAKE_COMMAND@" --build . --target install --config Debug
@@ -110,7 +110,7 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
     }
 
     if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-        & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+        & "@CMAKE_COMMAND@" --build . --target install --config Release -j
     }
     else {
         & "@CMAKE_COMMAND@" --build . --target install --config Release
@@ -122,7 +122,7 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
 
     if (("@CMAKE_BUILD_TYPE@" -ne "") -and ("@CMAKE_BUILD_TYPE@" -ne "Release")) {
         if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-            & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
+            & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j
         }
         else {
             & "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@"
@@ -131,7 +131,7 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
 }
 else {
     if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-        & "@CMAKE_COMMAND@" --build . --target install --config Release -j || & "@CMAKE_COMMAND@" --build . --target install --config Release
+        & "@CMAKE_COMMAND@" --build . --target install --config Release -j
     }
     else {
         & "@CMAKE_COMMAND@" --build . --target install --config Release
