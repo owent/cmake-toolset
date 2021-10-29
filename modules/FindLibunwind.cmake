@@ -76,15 +76,17 @@ if(NOT Libunwind_FOUND)
   if(NOT Libunwind_LIBRARY_EXTRA AND ${CMAKE_SYSTEM_PROCESSOR} EQUAL ${CMAKE_HOST_SYSTEM_PROCESSOR})
     find_library(Libunwind_LIBRARY_EXTRA NAMES unwind-generic ${_LIBUNWIND_SEARCH_LIB})
   endif()
+  unset(_Libunwind_LIBRARIES)
   if(Libunwind_LIBRARY_EXTRA)
-    set(Libunwind_LIBRARIES
-        ${Libunwind_LIBRARY_EXTRA} ${Libunwind_LIBRARY}
-        CACHE FILEPATH "Path of libunwind libraries." FORCE)
-  else()
-    set(Libunwind_LIBRARIES
-        ${Libunwind_LIBRARY}
-        CACHE FILEPATH "Path of libunwind libraries." FORCE)
+    list(APPEND _Libunwind_LIBRARIES ${Libunwind_LIBRARY_EXTRA})
   endif()
+  if(Libunwind_LIBRARY)
+    list(APPEND _Libunwind_LIBRARIES ${Libunwind_LIBRARY})
+  endif()
+  set(Libunwind_LIBRARIES
+      ${_Libunwind_LIBRARIES}
+      CACHE FILEPATH "Path of libunwind libraries." FORCE)
+  unset(_Libunwind_LIBRARIES)
   get_filename_component(Libunwind_LIBRARY_DIRS ${Libunwind_LIBRARY} DIRECTORY CACHE)
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Libunwind REQUIRED_VARS Libunwind_INCLUDE_DIRS Libunwind_LIBRARIES)
