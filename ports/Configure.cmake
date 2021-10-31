@@ -6,11 +6,11 @@ get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${CMAKE_CURRENT_LIST_DIR}/
 
 option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ENABLE_PACKAGE_REGISTRY "Enable export(PACKAGE)" OFF)
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ENABLE_PACKAGE_REGISTRY)
-  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_NO_PACKAGE_REGISTRY OFF)
-  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_PACKAGE_REGISTRY ON)
+  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_NO_PACKAGE_REGISTRY OFF) # cmake_policy(SET CMP0090 OLD)
+  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_PACKAGE_REGISTRY ON) # cmake_policy(SET CMP0090 NEW)
 else()
-  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
-  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_PACKAGE_REGISTRY OFF)
+  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON) # cmake_policy(SET CMP0090 OLD)
+  set_compiler_flags_to_inherit_var(CMAKE_EXPORT_PACKAGE_REGISTRY OFF) # cmake_policy(SET CMP0090 NEW)
 endif()
 
 # Migrate from PROJECT_3RD_PARTY_PACKAGE_DIR
