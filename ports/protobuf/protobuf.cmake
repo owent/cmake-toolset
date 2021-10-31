@@ -256,11 +256,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.bat" @ONLY
           NEWLINE_STYLE CRLF)
 
-        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-          echowithcolor(
-            COLOR RED "-- Dependency(${PROJECT_NAME}): powershell-core or powershell is required to configure protobuf")
-          message(FATAL_ERROR "powershell-core or powershell is required")
-        endif()
         # build
         execute_process(
           COMMAND
