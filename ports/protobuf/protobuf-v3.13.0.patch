@@ -1,0 +1,20 @@
+diff --git a/cmake/protobuf-module.cmake.in b/cmake/protobuf-module.cmake.in
+index 74c5488..809715b 100644
+--- a/cmake/protobuf-module.cmake.in
++++ b/cmake/protobuf-module.cmake.in
+@@ -144,6 +144,7 @@ get_target_property(Protobuf_INCLUDE_DIRS protobuf::libprotobuf
+   INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ # Set the protoc Executable
++if (NOT Protobuf_PROTOC_EXECUTABLE AND TARGET protobuf::protoc)
+ get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+   IMPORTED_LOCATION_RELEASE)
+ if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+@@ -154,6 +155,7 @@ if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+   get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+     IMPORTED_LOCATION_NOCONFIG)
+ endif()
++endif()
+ 
+ # Version info variable
+ set(Protobuf_VERSION "@protobuf_VERSION@")

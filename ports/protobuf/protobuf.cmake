@@ -30,10 +30,40 @@ macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
                                                 protobuf::protoc)
     elseif(Protobuf_PROTOC_EXECUTABLE)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC ${Protobuf_PROTOC_EXECUTABLE})
-    else()
+    elseif(PROTOBUF_PROTOC_EXECUTABLE)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC ${PROTOBUF_PROTOC_EXECUTABLE})
+    else()
+      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC protoc)
     endif()
     project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}")
+
+    if(NOT TARGET protobuf::protoc)
+      add_executable(protobuf::protoc IMPORTED)
+      set_target_properties(
+        protobuf::protoc
+        PROPERTIES IMPORTED_LOCATION "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_RELEASE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_RELWITHDEBINFO "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_MINSIZEREL "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_DEBUG "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_NOCONFIG "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}")
+    endif()
+    if(CMAKE_CROSSCOMPILING)
+      # Set protoc and libprotoc to hosted targets
+      set_target_properties(
+        protobuf::protoc
+        PROPERTIES IMPORTED_LOCATION "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_RELEASE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_RELWITHDEBINFO "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_MINSIZEREL "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_DEBUG "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+                   IMPORTED_LOCATION_NOCONFIG "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}")
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): peorobuf executable for crosscompiling(Also reset target protobuf::protoc):
+  ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
+      )
+    endif()
   endif()
 endmacro()
 
@@ -53,7 +83,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
       # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION "v3.17.3")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION "v3.19.0")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION "v3.19.1")
 
       if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0")
@@ -256,11 +286,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_SCRIPT_DIR}/run-build-release.bat" @ONLY
           NEWLINE_STYLE CRLF)
 
-        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-          echowithcolor(
-            COLOR RED "-- Dependency(${PROJECT_NAME}): powershell-core or powershell is required to configure protobuf")
-          message(FATAL_ERROR "powershell-core or powershell is required")
-        endif()
         # build
         execute_process(
           COMMAND
@@ -272,48 +297,26 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     endif()
 
+    # prefer to find protoc from host prebuilt directory
+    if(CMAKE_CROSSCOMPILING)
+      find_program(
+        Protobuf_PROTOC_EXECUTABLE
+        NAMES protoc protoc.exe
+        PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
+        NO_DEFAULT_PATH)
+      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE}")
+      set(Protobuf_PROTOC_EXECUTABLE
+          "${Protobuf_PROTOC_EXECUTABLE}"
+          CACHE PATH "host protoc" FORCE)
+      set(PROTOBUF_PROTOC_EXECUTABLE
+          "${Protobuf_PROTOC_EXECUTABLE}"
+          CACHE PATH "host protoc" FORCE)
+    endif()
+
     if($ENV{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL})
       find_package(Protobuf)
     else()
       find_package(Protobuf CONFIG)
-    endif()
-    # prefer to find protoc from host prebuilt directory
-    if(CMAKE_CROSSCOMPILING)
-      find_program(
-        Protobuf_PROTOC_EXECUTABLE_HOST
-        NAMES protoc protoc.exe
-        PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
-        NO_DEFAULT_PATH)
-      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE_HOST}")
-      if(DEFINED Protobuf_PROTOC_EXECUTABLE)
-        set(Protobuf_PROTOC_EXECUTABLE "${Protobuf_PROTOC_EXECUTABLE_HOST}")
-      endif()
-      if(DEFINED CACHE{Protobuf_PROTOC_EXECUTABLE})
-        set(Protobuf_PROTOC_EXECUTABLE
-            "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-            CACHE PATH "host protoc" FORCE)
-      endif()
-      if(DEFINED PROTOBUF_PROTOC_EXECUTABLE)
-        set(PROTOBUF_PROTOC_EXECUTABLE "${Protobuf_PROTOC_EXECUTABLE_HOST}")
-      endif()
-      if(DEFINED CACHE{PROTOBUF_PROTOC_EXECUTABLE})
-        set(PROTOBUF_PROTOC_EXECUTABLE
-            "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-            CACHE PATH "host protoc" FORCE)
-      endif()
-
-      # Set protoc and libprotoc to hosted targets
-      if(NOT TARGET protobuf::protoc)
-        add_executable(protobuf::protoc IMPORTED)
-      endif()
-      set_target_properties(
-        protobuf::protoc
-        PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-                   IMPORTED_LOCATION_RELEASE "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-                   IMPORTED_LOCATION_RELWITHDEBINFO "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-                   IMPORTED_LOCATION_MINSIZEREL "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-                   IMPORTED_LOCATION_DEBUG "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-                   IMPORTED_LOCATION_NOCONFIG "${Protobuf_PROTOC_EXECUTABLE_HOST}")
     endif()
     project_third_party_protobuf_import()
   endif()
