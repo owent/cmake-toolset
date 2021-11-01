@@ -297,35 +297,26 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     endif()
 
+    # prefer to find protoc from host prebuilt directory
+    if(CMAKE_CROSSCOMPILING)
+      find_program(
+        Protobuf_PROTOC_EXECUTABLE
+        NAMES protoc protoc.exe
+        PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
+        NO_DEFAULT_PATH)
+      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE}")
+      set(Protobuf_PROTOC_EXECUTABLE
+          "${Protobuf_PROTOC_EXECUTABLE}"
+          CACHE PATH "host protoc" FORCE)
+      set(PROTOBUF_PROTOC_EXECUTABLE
+          "${Protobuf_PROTOC_EXECUTABLE}"
+          CACHE PATH "host protoc" FORCE)
+    endif()
+
     if($ENV{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_LOCAL})
       find_package(Protobuf)
     else()
       find_package(Protobuf CONFIG)
-    endif()
-    # prefer to find protoc from host prebuilt directory
-    if(CMAKE_CROSSCOMPILING)
-      find_program(
-        Protobuf_PROTOC_EXECUTABLE_HOST
-        NAMES protoc protoc.exe
-        PATHS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR}/${CMAKE_INSTALL_BINDIR}"
-        NO_DEFAULT_PATH)
-      message(STATUS "Cross Compiling: using hosted protoc: ${Protobuf_PROTOC_EXECUTABLE_HOST}")
-      if(DEFINED Protobuf_PROTOC_EXECUTABLE)
-        set(Protobuf_PROTOC_EXECUTABLE "${Protobuf_PROTOC_EXECUTABLE_HOST}")
-      endif()
-      if(DEFINED CACHE{Protobuf_PROTOC_EXECUTABLE})
-        set(Protobuf_PROTOC_EXECUTABLE
-            "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-            CACHE PATH "host protoc" FORCE)
-      endif()
-      if(DEFINED PROTOBUF_PROTOC_EXECUTABLE)
-        set(PROTOBUF_PROTOC_EXECUTABLE "${Protobuf_PROTOC_EXECUTABLE_HOST}")
-      endif()
-      if(DEFINED CACHE{PROTOBUF_PROTOC_EXECUTABLE})
-        set(PROTOBUF_PROTOC_EXECUTABLE
-            "${Protobuf_PROTOC_EXECUTABLE_HOST}"
-            CACHE PATH "host protoc" FORCE)
-      endif()
     endif()
     project_third_party_protobuf_import()
   endif()
