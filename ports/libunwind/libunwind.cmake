@@ -5,8 +5,7 @@ macro(PROJECT_THIRD_PARTY_LIBUNWIND_IMPORT)
     message(STATUS "Dependency(${PROJECT_NAME}): libunwind found and using target: Libunwind::libunwind")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_LINK_NAME Libunwind::libunwind)
   elseif(Libunwind_FOUND)
-    message(
-      STATUS "Dependency(${PROJECT_NAME}): libunwind found and using
+    message(STATUS "Dependency(${PROJECT_NAME}): libunwind found and using
 --   - ${Libunwind_INCLUDE_DIRS}
 --   - ${Libunwind_LIBRARIES}")
     if(TARGET PkgConfig::Libunwind)
@@ -15,9 +14,8 @@ macro(PROJECT_THIRD_PARTY_LIBUNWIND_IMPORT)
     else()
       add_library(Libunwind::libunwind UNKNOWN IMPORTED)
       set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Libunwind_INCLUDE_DIRS}")
-      # if(Libunwind_LIBRARY_DIRS)
-      #   set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_DIRECTORIES "${Libunwind_LIBRARY_DIRS}")
-      # endif()
+      # if(Libunwind_LIBRARY_DIRS) set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_DIRECTORIES
+      # "${Libunwind_LIBRARY_DIRS}") endif()
 
       if(Libunwind_LIBRARIES)
         list(GET Libunwind_LIBRARIES 0 Libunwind_LIBRARIES_LOCATION)

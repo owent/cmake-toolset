@@ -80,7 +80,9 @@ if(PKG_CONFIG_FOUND)
       endif()
     endforeach()
     set(Libunwind_LIBRARIES ${_Libunwind_LIBRARYS_PKGCONFIG})
-    set(Libunwind_LIBRARIES ${_Libunwind_LIBRARYS_PKGCONFIG} CACHE INTERNAL "unwind" FORCE)
+    set(Libunwind_LIBRARIES
+        ${_Libunwind_LIBRARYS_PKGCONFIG}
+        CACHE INTERNAL "unwind" FORCE)
     unset(_Libunwind_LIBRARYS_PKGCONFIG)
   endif()
 endif()
@@ -194,9 +196,8 @@ if(Libunwind_FOUND)
     else()
       add_library(Libunwind::libunwind UNKNOWN IMPORTED)
       set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Libunwind_INCLUDE_DIRS}")
-      # if(Libunwind_LIBRARY_DIRS)
-      #   set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_DIRECTORIES "${Libunwind_LIBRARY_DIRS}")
-      # endif()
+      # if(Libunwind_LIBRARY_DIRS) set_target_properties(Libunwind::libunwind PROPERTIES INTERFACE_LINK_DIRECTORIES
+      # "${Libunwind_LIBRARY_DIRS}") endif()
 
       if(Libunwind_LIBRARIES)
         list(GET Libunwind_LIBRARIES 0 Libunwind_LIBRARIES_LOCATION)
