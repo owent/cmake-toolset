@@ -38,7 +38,7 @@ if(NOT TARGET uv_a
     project_third_party_port_declare(
       libuv
       VERSION
-      "v1.42.0"
+      0f696da5f0328dde1f9cc0372692ce22f0d17100 # v1.42.0 with patch for.new mingw
       GIT_URL
       "https://github.com/libuv/libuv.git"
       BUILD_OPTIONS
