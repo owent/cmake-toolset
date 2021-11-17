@@ -314,8 +314,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.8.0")
       # GCC < 4.8 doesn't support the address sanitizer -fsanitize=address require -lasan be placed before -lstdc++,
       # every target shoud add this
-      add_compile_options(-Wno-unused-local-typedefs)
-      message(STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} Found, -Wno-unused-local-typedefs added.")
+      check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+      if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+        list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+      endif()
     endif()
 
     # See https://gcc.gnu.org/projects/cxx-status.html for detail
@@ -341,6 +343,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+
+    check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+    if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+      list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+    endif()
 
     # See https://clang.llvm.org/cxx_status.html and https://clang.llvm.org/c_status.html
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "13.0")
@@ -439,6 +446,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wno-implicit-fallthrough)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+
+    check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+    if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+      list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+    endif()
 
     # See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0")
