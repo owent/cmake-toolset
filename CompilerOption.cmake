@@ -262,34 +262,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   endfunction()
 
   # ================== system checking ==================
-  if(ANDROID)
-    if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-    endif()
-    if(ANDROID_LLVM_TOOLCHAIN_PREFIX)
-      get_filename_component(ANDROID_LLVM_TOOLCHAIN_ROOT "${ANDROID_LLVM_TOOLCHAIN_PREFIX}" DIRECTORY)
-      if(ANDROID_LLVM_TOOLCHAIN_ROOT AND EXISTS
-                                         "${ANDROID_LLVM_TOOLCHAIN_ROOT}/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}")
-        add_compiler_flags_to_inherit_var_unique(
-          CMAKE_SHARED_LINKER_FLAGS
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
-        )
-        add_compiler_flags_to_inherit_var_unique(
-          CMAKE_MODULE_LINKER_FLAGS
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
-        )
-        add_compiler_flags_to_inherit_var_unique(
-          CMAKE_EXE_LINKER_FLAGS
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
-        )
-      endif()
-    endif()
-  endif()
+  # if(ANDROID) if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+  # add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+  # add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+  # add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib") endif()
+  # endif()
 
   # ================== compiler flags ==================
   # Auto compiler options, support gcc,MSVC,Clang,AppleClang
