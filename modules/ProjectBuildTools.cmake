@@ -1064,10 +1064,15 @@ function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME
   endif()
 endfunction()
 
-macro(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
-  get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} IMPORTED_LOCATION)
+function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
+  if(CMAKE_BUILD_TYPE)
+    string(TOUPPER "IMPORTED_LOCATION_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_IMPORTED_LOCATION)
+    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${TRY_SPECIFY_IMPORTED_LOCATION})
+  endif()
   if(NOT ${OUTPUT_VAR_NAME})
-    unset(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS)
+    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} IMPORTED_LOCATION)
+  endif()
+  if(NOT ${OUTPUT_VAR_NAME})
     get_target_property(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
                         IMPORTED_CONFIGURATIONS)
     foreach(project_build_tools_get_imported_location_IMPORTED_CONFIGURATION IN
@@ -1078,10 +1083,13 @@ macro(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
         break()
       endif()
     endforeach()
-    unset(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS)
-    unset(project_build_tools_get_imported_location_IMPORTED_CONFIGURATION)
   endif()
-endmacro()
+  if(${OUTPUT_VAR_NAME})
+    set(${OUTPUT_VAR_NAME}
+        ${${OUTPUT_VAR_NAME}}
+        PARENT_SCOPE)
+  endif()
+endfunction()
 
 function(project_build_tools_patch_default_imported_config)
   set(PATCH_VARS
