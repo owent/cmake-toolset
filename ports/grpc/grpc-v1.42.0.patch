@@ -20,7 +20,7 @@ index 6ea2527..c97bdec 100644
  }
  
 -#define CHK(x) do { if (!(x)) { return false; } } while(0)
-+#define CHK(x) do { if (!(x)) { return nullptr; } } while(0)
++#define CHK(x) do { if (!(x)) { return NULL; } } while(0)
  
  static const char *txtenc_parsevarint(const char *ptr, const char *limit,
                                        uint64_t *val) {
