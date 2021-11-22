@@ -11,8 +11,21 @@ index 8ca5f06..38e3a67 100644
        return {
            parent_->config_->discovery_mechanisms()[index_].cluster_name,
            parent_->config_->discovery_mechanisms()[index_].eds_service_name};
+diff --git a/src/core/ext/xds/xds_api.h b/src/core/ext/xds/xds_api.h
+index f521f5a..cec0489 100644
+--- a/src/core/ext/xds/xds_api.h
++++ b/src/core/ext/xds/xds_api.h
+@@ -55,6 +55,8 @@ class XdsApi {
+   struct Duration {
+     int64_t seconds = 0;
+     int32_t nanos = 0;
++
++    Duration() = default; // https://stackoverflow.com/questions/53408962/try-to-understand-compiler-error-message-default-member-initializer-required-be
+     bool operator==(const Duration& other) const {
+       return seconds == other.seconds && nanos == other.nanos;
+     }
 diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
-index 6ea2527..c97bdec 100644
+index 6ea2527..0d789ca 100644
 --- a/third_party/upb/upb/text_encode.c
 +++ b/third_party/upb/upb/text_encode.c
 @@ -273,7 +273,7 @@ static void txtenc_map(txtenc *e, const upb_map *map, const upb_fielddef *f) {
