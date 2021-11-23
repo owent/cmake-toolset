@@ -5,6 +5,7 @@ include_guard(GLOBAL)
 if(NOT DEFINED __COMPILER_OPTION_LOADED)
   include("${CMAKE_CURRENT_LIST_DIR}/modules/ProjectBuildTools.cmake")
 
+  include(CheckCCompilerFlag)
   include(CheckCXXSourceCompiles)
   set(__COMPILER_OPTION_LOADED 1)
   cmake_policy(PUSH)
@@ -262,34 +263,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   endfunction()
 
   # ================== system checking ==================
-  if(ANDROID)
-    if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-      add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
-    endif()
-    if(ANDROID_LLVM_TOOLCHAIN_PREFIX)
-      get_filename_component(ANDROID_LLVM_TOOLCHAIN_ROOT "${ANDROID_LLVM_TOOLCHAIN_PREFIX}" DIRECTORY)
-      if(ANDROID_LLVM_TOOLCHAIN_ROOT AND EXISTS
-                                         "${ANDROID_LLVM_TOOLCHAIN_ROOT}/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}")
-        add_compiler_flags_to_inherit_var_unique(
-          CMAKE_SHARED_LINKER_FLAGS
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
-        )
-        add_compiler_flags_to_inherit_var_unique(
-          CMAKE_MODULE_LINKER_FLAGS
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
-        )
-        add_compiler_flags_to_inherit_var_unique(
-          CMAKE_EXE_LINKER_FLAGS
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/"
-          "-L${ANDROID_NDK}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/${ANDROID_TOOLCHAIN_NAME}/${ANDROID_PLATFORM_LEVEL}"
-        )
-      endif()
-    endif()
-  endif()
+  # if(ANDROID) if(ANDROID_SYSTEM_LIBRARY_PATH AND EXISTS "${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+  # add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+  # add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib")
+  # add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${ANDROID_SYSTEM_LIBRARY_PATH}/usr/lib") endif()
+  # endif()
 
   # ================== compiler flags ==================
   # Auto compiler options, support gcc,MSVC,Clang,AppleClang
@@ -297,7 +275,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
 
-    include(CheckCCompilerFlag)
     check_c_compiler_flag(-rdynamic LD_FLAGS_RDYNAMIC_AVAILABLE)
     if(LD_FLAGS_RDYNAMIC_AVAILABLE)
       message(STATUS "Check Flag: -rdynamic -- yes")
@@ -314,8 +291,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.8.0")
       # GCC < 4.8 doesn't support the address sanitizer -fsanitize=address require -lasan be placed before -lstdc++,
       # every target shoud add this
-      add_compile_options(-Wno-unused-local-typedefs)
-      message(STATUS "GCC Version ${CMAKE_CXX_COMPILER_VERSION} Found, -Wno-unused-local-typedefs added.")
+      check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+      if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+        list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+      endif()
     endif()
 
     # See https://gcc.gnu.org/projects/cxx-status.html for detail
@@ -341,6 +320,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+
+    check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+    if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+      list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+    endif()
 
     # See https://clang.llvm.org/cxx_status.html and https://clang.llvm.org/c_status.html
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "13.0")
@@ -439,6 +423,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wno-implicit-fallthrough)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+
+    check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+    if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
+      list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+    endif()
 
     # See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0")

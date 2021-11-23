@@ -1,17 +1,29 @@
 diff --git a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc b/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
-index ff936b9..59820d2 100644
+index 8ca5f06..38e3a67 100644
 --- a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
 +++ b/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
-@@ -139,7 +139,8 @@ class XdsClusterResolverLb : public LoadBalancingPolicy {
+@@ -139,7 +139,7 @@ class XdsClusterResolverLb : public LoadBalancingPolicy {
      // to use for LRS load reporting. Caller must ensure that config_ is set
      // before calling.
      std::pair<absl::string_view, absl::string_view> GetLrsClusterKey() const {
 -      if (!parent_->is_xds_uri_) return {parent_->server_name_, nullptr};
-+      if (!parent_->is_xds_uri_)
-+        return {parent_->server_name_, absl::string_view{}};
++      if (!parent_->is_xds_uri_) return {parent_->server_name_, absl::string_view{}};
        return {
            parent_->config_->discovery_mechanisms()[index_].cluster_name,
            parent_->config_->discovery_mechanisms()[index_].eds_service_name};
+diff --git a/src/core/ext/xds/xds_api.h b/src/core/ext/xds/xds_api.h
+index f521f5a..4e353e3 100644
+--- a/src/core/ext/xds/xds_api.h
++++ b/src/core/ext/xds/xds_api.h
+@@ -55,6 +55,8 @@ class XdsApi {
+   struct Duration {
+     int64_t seconds = 0;
+     int32_t nanos = 0;
++    // https://stackoverflow.com/questions/53408962/try-to-understand-compiler-error-message-default-member-initializer-required-be
++    Duration(): seconds(0), nanos(0) {}
+     bool operator==(const Duration& other) const {
+       return seconds == other.seconds && nanos == other.nanos;
+     }
 diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
 index 6ea2527..0d789ca 100644
 --- a/third_party/upb/upb/text_encode.c
