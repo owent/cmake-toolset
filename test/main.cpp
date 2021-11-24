@@ -83,13 +83,13 @@ static void OpentelemetryInitTracer() {
   auto processor = std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor>(
       new opentelemetry::sdk::trace::BatchSpanProcessor(std::move(exporter), options));
 
-  auto provider = nostd::shared_ptr<opentelemetry::trace::TracerProvider>(
+  auto provider = opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>(
       new opentelemetry::sdk::trace::TracerProvider(std::move(processor)));
   // Set the global trace provider.
   opentelemetry::trace::Provider::SetTracerProvider(provider);
 }
 
-nostd::shared_ptr<opentelemetry::trace::Tracer> GetTracer() {
+opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer> GetTracer() {
   auto provider = opentelemetry::trace::Provider::GetTracerProvider();
   return provider->GetTracer("cmake-toolset-test");
 }

@@ -32,7 +32,15 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
 
     if [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ]] && [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" ]]; then
 
-        env CC= CXX= SDKROOT= @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
+        BACKUP_ASM="$ASM"
+        BACKUP_CC="$CC"
+        BACKUP_CXX="$CXX"
+        BACKUP_SDKROOT="$SDKROOT"
+        unset ASM
+        unset CC
+        unset CXX
+        unset SDKROOT
+        @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
 
         if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
@@ -62,6 +70,18 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
 
         fi
 
+        if [[ "x$BACKUP_ASM" != "x" ]]; then
+            export ASM="$BACKUP_ASM"
+        fi
+        if [[ "x$BACKUP_CC" != "x" ]]; then
+            export CC="$BACKUP_CC"
+        fi
+        if [[ "x$BACKUP_CXX" != "x" ]]; then
+            export CXX="$BACKUP_CXX"
+        fi
+        if [[ "x$BACKUP_SDKROOT" != "x" ]]; then
+            export SDKROOT="$BACKUP_SDKROOT"
+        fi
     fi
 
     export PATH="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:$PATH" ;
