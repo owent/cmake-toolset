@@ -34,9 +34,10 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
     }
 
     if (!(Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ) -and !(Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" )) {
-        $ENV:BACKUP_CC = $ENV:CC
-        $ENV:BACKUP_CXX = $ENV:CXX
-        $ENV:BACKUP_SDKROOT = $ENV:SDKROOT
+        $BACKUP_ASM = $ENV:ASM
+        $BACKUP_CC = $ENV:CC
+        $BACKUP_CXX = $ENV:CXX
+        $BACKUP_SDKROOT = $ENV:SDKROOT
         $ENV:CC = $null
         $ENV:CXX = $null
         $ENV:SDKROOT = $null
@@ -72,9 +73,10 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
         }
-        $ENV:CC = $ENV:BACKUP_CC
-        $ENV:CXX = $ENV:BACKUP_CXX
-        $ENV:SDKROOT = $ENV:BACKUP_SDKROOT
+        $ENV:ASM = $BACKUP_ASM
+        $ENV:CC = $BACKUP_CC
+        $ENV:CXX = $BACKUP_CXX
+        $ENV:SDKROOT = $BACKUP_SDKROOT
     }
 
     $ENV:PATH = "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin" + [IO.Path]::PathSeparator + "$ENV:PATH"

@@ -32,9 +32,10 @@ if (Test-Path "CMakeCache.txt") {
 }
 
 if (!(Test-Path "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ) -and !(Test-Path "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin.exe" )) {
-    $ENV:BACKUP_CC = $ENV:CC
-    $ENV:BACKUP_CXX = $ENV:CXX
-    $ENV:BACKUP_SDKROOT = $ENV:SDKROOT
+    $BACKUP_ASM = $ENV:ASM
+    $BACKUP_CC = $ENV:CC
+    $BACKUP_CXX = $ENV:CXX
+    $BACKUP_SDKROOT = $ENV:SDKROOT
     $ENV:CC = $null
     $ENV:CXX = $null
     $ENV:SDKROOT = $null
@@ -70,7 +71,8 @@ if (!(Test-Path "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ) -
     if ( $LastExitCode -ne 0 ) {
         exit $LastExitCode
     }
-    $ENV:CC = $ENV:BACKUP_CC
-    $ENV:CXX = $ENV:BACKUP_CXX
-    $ENV:SDKROOT = $ENV:BACKUP_SDKROOT
+    $ENV:ASM = $BACKUP_ASM
+    $ENV:CC = $BACKUP_CC
+    $ENV:CXX = $BACKUP_CXX
+    $ENV:SDKROOT = $BACKUP_SDKROOT
 }
