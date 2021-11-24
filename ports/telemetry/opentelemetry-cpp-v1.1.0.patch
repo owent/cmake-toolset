@@ -1,13 +1,19 @@
 diff --git a/exporters/prometheus/CMakeLists.txt b/exporters/prometheus/CMakeLists.txt
-index 3ef8e03..0cbbc1a 100755
+index 3ef8e03..9b2c92e 100755
 --- a/exporters/prometheus/CMakeLists.txt
 +++ b/exporters/prometheus/CMakeLists.txt
-@@ -26,7 +26,7 @@ target_include_directories(
+@@ -26,7 +26,13 @@ target_include_directories(
    PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
           "$<INSTALL_INTERFACE:include>")
  
 -set(PROMETHEUS_EXPORTER_TARGETS prometheus_exporter_deprecated pull core)
 +set(PROMETHEUS_EXPORTER_TARGETS prometheus_exporter_deprecated)
++if(TARGET pull)
++  list(APPEND PROMETHEUS_EXPORTER_TARGETS pull)
++endif()
++if(TARGET core)
++  list(APPEND PROMETHEUS_EXPORTER_TARGETS core)
++endif()
  target_link_libraries(
    prometheus_exporter_deprecated
    PUBLIC opentelemetry_metrics_deprecated prometheus-cpp::pull
