@@ -36,9 +36,11 @@ if (!(Test-Path "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ) -
     $BACKUP_CC = $ENV:CC
     $BACKUP_CXX = $ENV:CXX
     $BACKUP_SDKROOT = $ENV:SDKROOT
+    $BACKUP_DEVROOT = $ENV:DEVROOT
     $ENV:CC = $null
     $ENV:CXX = $null
     $ENV:SDKROOT = $null
+    $ENV:DEVROOT = $null
     & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
     if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
         if ($ALLOW_PARALLEL_BUILD_FLAGS) {
@@ -75,4 +77,5 @@ if (!(Test-Path "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ) -
     $ENV:CC = $BACKUP_CC
     $ENV:CXX = $BACKUP_CXX
     $ENV:SDKROOT = $BACKUP_SDKROOT
+    $ENV:DEVROOT = $BACKUP_DEVROOT
 }

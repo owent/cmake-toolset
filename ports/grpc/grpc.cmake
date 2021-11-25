@@ -90,7 +90,7 @@ if(NOT TARGET gRPC::grpc++_alts
     # Build host architecture grpc first
     if(CMAKE_CROSSCOMPILING)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR
-          "${CMAKE_CURRENT_BINARY_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}")
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS "${CMAKE_COMMAND}"
                                                                       "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host")
       message(STATUS "Dependency(${PROJECT_NAME}): Try to build grpc fo host architecture when crossing compiling")

@@ -33,9 +33,7 @@ if [[ ! -e "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ]] && [[
     unset CC
     unset CXX
     unset SDKROOT
-
-    set
-    
+    unset DEVROOT
     @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
 
     if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then

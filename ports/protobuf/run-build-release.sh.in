@@ -36,10 +36,12 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
         BACKUP_CC="$CC"
         BACKUP_CXX="$CXX"
         BACKUP_SDKROOT="$SDKROOT"
+        BACKUP_DEVROOT="$DEVROOT"
         unset ASM
         unset CC
         unset CXX
         unset SDKROOT
+        unset DEVROOT
         @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
 
         if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
@@ -81,6 +83,9 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
         fi
         if [[ "x$BACKUP_SDKROOT" != "x" ]]; then
             export SDKROOT="$BACKUP_SDKROOT"
+        fi
+        if [[ "x$BACKUP_DEVROOT" != "x" ]]; then
+            export DEVROOT="$BACKUP_DEVROOT"
         fi
     fi
 
