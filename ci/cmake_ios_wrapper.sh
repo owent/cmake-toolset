@@ -112,6 +112,8 @@ for ARCH in ${ARCHS}; do
   export SDKROOT="${DEVROOT}/SDKs/${PLATFORM}${SDKVERSION}.sdk"
   mkdir -p "$WORKING_DIR/build_jobs_$ARCH"
   cd "$WORKING_DIR/build_jobs_$ARCH"
+  echo "PWD=$PWD"
+  echo "HOST_BUILD_DIR=$WORKING_DIR/build_jobs_host"
 
   # For openssl
   export CROSS_TOP="${DEVROOT}"
