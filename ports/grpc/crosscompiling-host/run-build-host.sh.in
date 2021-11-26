@@ -29,11 +29,7 @@ if [[ -e "CMakeCache.txt" ]]; then
 fi
 
 if [[ ! -e "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ]] && [[ ! -e "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin.exe" ]]; then
-    unset ASM
-    unset CC
-    unset CXX
-    unset SDKROOT
-    unset DEVROOT
+    source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_BASH@"
     @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW" ;
 
     if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
@@ -64,4 +60,5 @@ if [[ ! -e "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ]] && [[
 
     fi
 
+    source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_BASH@"
 fi

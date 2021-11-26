@@ -60,6 +60,14 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR)
         CACHE PATH "Host target build directory when crossing compilling" FORCE)
   endif()
 endif()
+set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_BASH
+    "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/reset-host-build-envs.sh")
+set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_BASH
+    "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/restore-host-build-envs.sh")
+set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_PWSH
+    "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/reset-host-build-envs.ps1")
+set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_PWSH
+    "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/restore-host-build-envs.ps1")
 set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE
     OFF
     CACHE BOOL "Disable parallel building for some packages to reduce memory usage")
