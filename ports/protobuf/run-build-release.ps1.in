@@ -34,15 +34,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
     }
 
     if (!(Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ) -and !(Test-Path "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" )) {
-        $BACKUP_ASM = $ENV:ASM
-        $BACKUP_CC = $ENV:CC
-        $BACKUP_CXX = $ENV:CXX
-        $BACKUP_SDKROOT = $ENV:SDKROOT
-        $BACKUP_DEVROOT = $ENV:DEVROOT
-        $ENV:CC = $null
-        $ENV:CXX = $null
-        $ENV:SDKROOT = $null
-        $ENV:DEVROOT = $null
+        . "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_PWSH@"
         & @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW"
         if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
             if ($ALLOW_PARALLEL_BUILD_FLAGS) {
@@ -75,11 +67,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
         }
-        $ENV:ASM = $BACKUP_ASM
-        $ENV:CC = $BACKUP_CC
-        $ENV:CXX = $BACKUP_CXX
-        $ENV:SDKROOT = $BACKUP_SDKROOT
-        $ENV:SDEVROOT = $BACKUP_DEVROOT
+        . "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_PWSH@"
     }
 
     $ENV:PATH = "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin" + [IO.Path]::PathSeparator + "$ENV:PATH"

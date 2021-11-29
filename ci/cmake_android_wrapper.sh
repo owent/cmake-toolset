@@ -120,6 +120,8 @@ for ARCH in ${ARCHS}; do
   echo "Please stand by..."
   mkdir -p "$WORKING_DIR/build_jobs_$ARCH"
   cd "$WORKING_DIR/build_jobs_$ARCH"
+  echo "PWD=$PWD"
+  echo "HOST_BUILD_DIR=$WORKING_DIR/build_jobs_host"
 
   mkdir -p "$WORKING_DIR/lib/$ARCH"
 

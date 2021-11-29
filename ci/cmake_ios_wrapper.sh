@@ -112,6 +112,8 @@ for ARCH in ${ARCHS}; do
   export SDKROOT="${DEVROOT}/SDKs/${PLATFORM}${SDKVERSION}.sdk"
   mkdir -p "$WORKING_DIR/build_jobs_$ARCH"
   cd "$WORKING_DIR/build_jobs_$ARCH"
+  echo "PWD=$PWD"
+  echo "HOST_BUILD_DIR=$WORKING_DIR/build_jobs_host"
 
   # For openssl
   export CROSS_TOP="${DEVROOT}"
@@ -127,6 +129,7 @@ for ARCH in ${ARCHS}; do
 
   # add -DCMAKE_OSX_DEPLOYMENT_TARGET=7.1 to specify the min SDK version
   # export IPHONEOS_DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET}
+  set -x
   cmake "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
     -DCMAKE_OSX_SYSROOT=$SDKROOT -DCMAKE_SYSROOT=$SDKROOT \
     -DCMAKE_OSX_ARCHITECTURES=$ARCH \
@@ -144,6 +147,7 @@ for ARCH in ${ARCHS}; do
     echo "run cmake failed"
     exit $LAST_EXIT_CODE
   fi
+  set +x
 done
 
 # Run lipo -create SRCS -output DST to archive all .a into one
