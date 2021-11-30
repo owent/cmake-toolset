@@ -166,17 +166,16 @@ if(NOT CURL_EXECUTABLE)
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_GIT_URL}")
 
-    if(CURL_FOUND)
-      message(STATUS "Dependency(${PROJECT_NAME}): libcurl found.(${CURL_INCLUDE_DIRS}|${CURL_LIBRARIES})")
-    else()
+    if(NOT CURL_FOUND)
       echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): libcurl is required")
       message(FATAL_ERROR "libcurl not found")
     endif()
 
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_STATIC_LINK_NAMES)
     if(TARGET CURL::libcurl)
-      message(STATUS "Libcurl: use target CURL::libcurl")
+      message(STATUS "Dependency(${PROJECT_NAME}): libcurl found target: CURL::libcurl")
     else()
+      message(STATUS "Dependency(${PROJECT_NAME}): libcurl found.(${CURL_INCLUDE_DIRS}|${CURL_LIBRARIES})")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TEST_SRC
           "#include <curl/curl.h>
             #include <stdio.h>

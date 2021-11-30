@@ -365,7 +365,7 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
     list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_HOST_TOOLCHAIN_FILE}")
   endif()
 
-  foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
+  foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_host_options_VARS})
     unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
     if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME}
        OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}
@@ -385,7 +385,7 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
                        "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}}")
       endif()
 
-      if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
+      if(project_build_tools_append_cmake_host_options_APPEND_SYSTEM_LINKS
          AND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
         project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
@@ -395,7 +395,7 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
         list(REMOVE_DUPLICATES project_build_tools_append_cmake_inherit_VAR_VALUE)
       endif()
     elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS) # Add system links into standard libraries even not set
-      if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
+      if(project_build_tools_append_cmake_host_options_APPEND_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
         project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
                                                              "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
@@ -445,11 +445,11 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
   # Policy
   project_build_tools_append_cmake_inherit_policy(${OUTVAR})
 
-  unset(project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
-  unset(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS)
-  unset(project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS)
-  unset(project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
-  unset(project_build_tools_append_cmake_inherit_options_VARS)
+  unset(project_build_tools_append_cmake_host_options_DISABLE_C_FLAGS)
+  unset(project_build_tools_append_cmake_host_options_DISABLE_CXX_FLAGS)
+  unset(project_build_tools_append_cmake_host_options_DISABLE_ASM_FLAGS)
+  unset(project_build_tools_append_cmake_host_options_DISABLE_TOOLCHAIN_FILE)
+  unset(project_build_tools_append_cmake_host_options_VARS)
 endmacro()
 
 macro(project_build_tools_append_cmake_build_type_for_lib OUTVAR)
