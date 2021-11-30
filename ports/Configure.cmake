@@ -291,15 +291,17 @@ if(NOT GIT_FOUND AND NOT Git_FOUND)
   message(FATAL_ERROR "git is required to use ports")
 endif()
 
-if(NOT project_third_party_get_build_dir_HASH)
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} log -n 1 "--format=%H" --encoding=UTF-8
-    WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}"
-    OUTPUT_VARIABLE project_third_party_get_build_dir_HASH)
-endif()
+execute_process(
+  COMMAND ${GIT_EXECUTABLE} log -n 1 "--format=%H" --encoding=UTF-8
+  WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}"
+  OUTPUT_VARIABLE ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
 
 if(NOT project_third_party_get_build_dir_HASH)
-  file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
+    set(project_third_party_get_build_dir_HASH "${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
+  else()
+    file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)
+  endif()
 endif()
 string(SUBSTRING "${project_third_party_get_build_dir_HASH}" 0 8 project_third_party_get_build_dir_HASH)
 if(DEFINED ENV{HOME})
@@ -319,6 +321,7 @@ if(WIN32
       "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}"
   )
 endif()
+message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH=${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
 
 function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
