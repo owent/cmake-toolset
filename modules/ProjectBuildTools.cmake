@@ -348,8 +348,7 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
     list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
   endif()
 
-  set(project_build_tools_append_cmake_host_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
-                                                         PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON)
+  set(project_build_tools_append_cmake_host_options_VARS PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON)
 
   if(NOT project_build_tools_append_cmake_host_options_DISABLE_C_FLAGS)
     list(APPEND project_build_tools_append_cmake_host_options_VARS PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_C)

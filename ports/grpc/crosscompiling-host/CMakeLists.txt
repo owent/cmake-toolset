@@ -67,7 +67,8 @@ add_custom_command(
 add_executable(
   "${PROJECT_NAME}-client-test"
   "${CMAKE_CURRENT_BINARY_DIR}/helloworld.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/helloworld.pb.h"
-  "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.h" client-main.cpp)
+  "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.h"
+  client-main.cpp)
 target_include_directories("${PROJECT_NAME}-client-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 target_link_libraries(
@@ -90,7 +91,8 @@ target_compile_options("${PROJECT_NAME}-client-test" PRIVATE "${PROJECT_BUILD_TO
 add_executable(
   "${PROJECT_NAME}-server-test"
   "${CMAKE_CURRENT_BINARY_DIR}/helloworld.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/helloworld.pb.h"
-  "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.h" server-main.cpp)
+  "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.cc" "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.h"
+  server-main.cpp)
 target_include_directories("${PROJECT_NAME}-server-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 target_link_libraries(

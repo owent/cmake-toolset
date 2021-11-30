@@ -13,7 +13,10 @@ macro(PROJECT_THIRD_PARTY_PROMETHEUS_CPP_IMPORT)
     if(TARGET prometheus-cpp::push)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME prometheus-cpp::push)
     endif()
-    message(STATUS "Dependency(${PROJECT_NAME}): prometheus-cpp found target ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME}")
+    message(
+      STATUS
+        "Dependency(${PROJECT_NAME}): prometheus-cpp found target ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME}"
+    )
     project_build_tools_patch_default_imported_config(prometheus-cpp::core prometheus-cpp::pull prometheus-cpp::push)
   endif()
 endmacro()
