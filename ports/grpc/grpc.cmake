@@ -322,3 +322,7 @@ if(NOT TARGET gRPC::grpc++_alts
 else()
   project_third_party_grpc_import()
 endif()
+
+if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): grpc build success but failed to find grpc_cpp_plugin.")
+endif()

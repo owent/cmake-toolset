@@ -68,6 +68,8 @@ done
 
 shift $(($OPTIND - 1))
 
+HOST_CC="$(which clang 2>/dev/null)"
+HOST_CXX="$(which clang++ 2>/dev/null)"
 echo "Ready to build for ios"
 echo "WORKING_DIR=${WORKING_DIR}"
 echo "ARCHS=${ARCHS}"
@@ -76,6 +78,8 @@ echo "SDKVERSION=${SDKVERSION}"
 echo "DEPLOYMENT_TARGET=${DEPLOYMENT_TARGET}"
 echo "cmake options=$@"
 echo "SOURCE=$SOURCE_DIR"
+echo "HOST_CC=$HOST_CC"
+echo "HOST_CXX=$HOST_CXX"
 
 ##########
 if [ ! -e "$SOURCE_DIR/CMakeLists.txt" ]; then
@@ -121,6 +125,14 @@ for ARCH in ${ARCHS}; do
 
   if [[ $(echo $DEPLOYMENT_TARGET | cut -d. -f 1) -lt 11 ]]; then
     EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_CXX_STANDARD=14"
+  fi
+
+  if [[ "x$HOST_CC" != "x" ]]; then
+    EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_HOST_C_COMPILER=$HOST_CC"
+  fi
+
+  if [[ "x$HOST_CXX" != "x" ]]; then
+    EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_HOST_CXX_COMPILER=$HOST_CXX"
   fi
 
   # for CACHE_SRC in $(find "$SOURCE_DIR/protocol" -name "*.pb.h") ; do
