@@ -19,10 +19,35 @@ index 9ca31ac..a789e29 100644
  endif ()
  # Path to main configure script
  set(protobuf_CONFIGURE_SCRIPT "../configure.ac")
+diff --git a/cmake/install.cmake b/cmake/install.cmake
+index be47c54..4091bc8 100644
+--- a/cmake/install.cmake
++++ b/cmake/install.cmake
+@@ -6,9 +6,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf-lite.pc.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc @ONLY)
+ 
+ set(_protobuf_libraries libprotobuf-lite libprotobuf)
+-if (protobuf_BUILD_PROTOC_BINARIES)
++if (protobuf_BUILD_LIBPROTOC)
+     list(APPEND _protobuf_libraries libprotoc)
+-endif (protobuf_BUILD_PROTOC_BINARIES)
++endif (protobuf_BUILD_LIBPROTOC)
+ 
+ foreach(_library ${_protobuf_libraries})
+   set_property(TARGET ${_library}
 diff --git a/cmake/protobuf-module.cmake.in b/cmake/protobuf-module.cmake.in
-index 74c5488..809715b 100644
+index 74c5488..5b3e8c3 100644
 --- a/cmake/protobuf-module.cmake.in
 +++ b/cmake/protobuf-module.cmake.in
+@@ -94,7 +94,7 @@ function(_protobuf_find_libraries name filename)
+   elseif(${name}_LIBRARY)
+     # Honor cache entry used by CMake 3.5 and lower.
+     set(${name}_LIBRARIES "${${name}_LIBRARY}" PARENT_SCOPE)
+-  else()
++  elseif(TARGET protobuf::lib${filename})
+     get_target_property(${name}_LIBRARY_RELEASE protobuf::lib${filename}
+       LOCATION_RELEASE)
+     get_target_property(${name}_LIBRARY_DEBUG protobuf::lib${filename}
 @@ -144,6 +144,7 @@ get_target_property(Protobuf_INCLUDE_DIRS protobuf::libprotobuf
    INTERFACE_INCLUDE_DIRECTORIES)
  
