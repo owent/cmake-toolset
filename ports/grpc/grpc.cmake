@@ -159,8 +159,10 @@ if(NOT TARGET gRPC::grpc++_alts
       endif()
 
       foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS)
-        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD "\"${CMD_ARG}\"")
+        string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
+        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD "\"${CMD_ARG_UNESCAPE}\"")
       endforeach()
+      unset(CMD_ARG_UNESCAPE)
 
       # Build host
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH
