@@ -49,7 +49,7 @@ index 71325c3..ee3147d 100644
  // Windows declares several inconvenient macro names.  We #undef them and then
  // restore them in port_undef.inc.
 -#ifdef _MSC_VER
-+#ifdef defined(_MSC_VER)
++#if defined(_MSC_VER)
  #pragma push_macro("CREATE_NEW")
  #undef CREATE_NEW
  #pragma push_macro("DELETE")
@@ -71,7 +71,7 @@ index 579eb41..adeee5c 100644
  
  // Restore macro that may have been #undef'd in port_def.inc.
 -#ifdef _MSC_VER
-+#ifdef defined(_MSC_VER)
++#if defined(_MSC_VER)
  #pragma pop_macro("CREATE_NEW")
  #pragma pop_macro("DELETE")
  #pragma pop_macro("DOUBLE_CLICK")
