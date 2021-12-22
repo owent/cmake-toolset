@@ -76,7 +76,7 @@ if(NOT TARGET zstd::libzstd_shared
       PORT_PREFIX
       "COMPRESSION"
       VERSION
-      "v1.5.0"
+      "v1.5.1"
       GIT_URL
       "https://github.com/facebook/zstd.git")
 
