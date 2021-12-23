@@ -705,6 +705,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -ggdb)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELWITHDEBINFO -ggdb)
     endif()
+    add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_DEBUG -O0)
   endif()
 
   # ================== support checking ==================
