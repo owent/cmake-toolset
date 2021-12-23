@@ -686,9 +686,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         execute_process(
           COMMAND ${CMAKE_LIBTOOL} -V
           OUTPUT_VARIABLE LIBTOOL_V_OUTPUT
-          OUTPUT_STRIP_TRAILING_WHITESPACE)
+          ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
         if("${LIBTOOL_V_OUTPUT}" MATCHES ".*cctools-([0-9.]+).*")
-          string(REGEX REPLACE ".*cctools-([0-9.]+).*" "\\1" LIBTOOL_VERSION ${LIBTOOL_V_OUTPUT})
+          string(REGEX REPLACE ".*cctools-([0-9.]+).*" "\\1" LIBTOOL_VERSION "${LIBTOOL_V_OUTPUT}")
           if(NOT LIBTOOL_VERSION VERSION_LESS "862")
             set(LIBTOOL_NO_WARNING_FLAG "-no_warning_for_no_symbols")
           endif()

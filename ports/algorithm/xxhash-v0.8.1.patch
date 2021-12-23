@@ -1,0 +1,26 @@
+diff --git a/cmake_unofficial/CMakeLists.txt b/cmake_unofficial/CMakeLists.txt
+index d5456b0..aed0db5 100644
+--- a/cmake_unofficial/CMakeLists.txt
++++ b/cmake_unofficial/CMakeLists.txt
+@@ -122,7 +122,7 @@ if(NOT XXHASH_BUNDLED_MODE)
+     install(TARGETS xxhsum
+       EXPORT xxHashTargets
+       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+-    install(FILES "${XXHASH_DIR}/xxhsum.1"
++    install(FILES "${XXHASH_DIR}/cli/xxhsum.1"
+       DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+   endif(XXHASH_BUILD_XXHSUM)
+ 
+diff --git a/xxhash.h b/xxhash.h
+index 08ab794..c1ddf4b 100644
+--- a/xxhash.h
++++ b/xxhash.h
+@@ -1005,7 +1005,7 @@ struct XXH64_state_s {
+    XXH64_hash_t reserved64;   /*!< Reserved field. Do not read or write to it, it may be removed. */
+ };   /* typedef'd to XXH64_state_t */
+ 
+-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* >= C11 */
++#if !defined(_MSC_VER) && defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* >= C11 */
+ #  include <stdalign.h>
+ #  define XXH_ALIGN(n)      alignas(n)
+ #elif defined(__cplusplus) && (__cplusplus >= 201103L) /* >= C++11 */

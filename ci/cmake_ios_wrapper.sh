@@ -89,6 +89,7 @@ fi
 
 SOURCE_DIR="$(cd $SOURCE_DIR && pwd)"
 mkdir -p "$WORKING_DIR/lib"
+HOST_PYTHON3_EXECUTABLE="$(which python3)"
 
 for ARCH in ${ARCHS}; do
   echo "================== Compling $ARCH =================="
@@ -107,6 +108,10 @@ for ARCH in ${ARCHS}; do
     else
       EXT_OPTIONS="$EXT_OPTIONS -DCMAKE_SYSTEM_PROCESSOR=aarch64"
     fi
+  fi
+
+  if [[ "x$HOST_PYTHON3_EXECUTABLE" != "x" ]]; then
+    EXT_OPTIONS="$EXT_OPTIONS -DPython3_EXECUTABLE=$HOST_PYTHON3_EXECUTABLE"
   fi
 
   echo "Building for ${PLATFORM} ${SDKVERSION} ${ARCH}"
