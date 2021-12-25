@@ -291,10 +291,7 @@ if(NOT GIT_FOUND AND NOT Git_FOUND)
   message(FATAL_ERROR "git is required to use ports")
 endif()
 
-execute_process(
-  COMMAND ${GIT_EXECUTABLE} log -n 1 "--format=%H" --encoding=UTF-8
-  WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}"
-  OUTPUT_VARIABLE ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
+project_git_get_ambiguous_name(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}")
 
 if(NOT project_third_party_get_build_dir_HASH)
   if(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
