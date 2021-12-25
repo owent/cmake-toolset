@@ -677,11 +677,13 @@ function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
     COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD
     WORKING_DIRECTORY "${GIT_WORKSPACE}"
     OUTPUT_VARIABLE OUTPUT_VAR_VALUE
-    ERROR_QUIET COMMAND_ECHO STDOUT)
+    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if (OUTPUT_VAR_VALUE)
-    set(${OUTPUT_VAR_NAME} "${OUTPUT_VAR_VALUE}" PARENT_SCOPE)
-  endif ()
+  if(OUTPUT_VAR_VALUE)
+    set(${OUTPUT_VAR_NAME}
+        "${OUTPUT_VAR_VALUE}"
+        PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(project_git_clone_repository)
