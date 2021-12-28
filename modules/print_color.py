@@ -6,6 +6,7 @@ import os
 import ctypes
 import platform
 import cgi
+import re
 
 console_encoding = sys.getfilesystemencoding()
 
@@ -66,11 +67,15 @@ class Win32ConsoleColor:
         print_style.FC_BLACK: FOREGROUND_BLACK,
         print_style.FC_BLUE: FOREGROUND_BLUE | FOREGROUND_INTENSITY,
         print_style.FC_GREEN: FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        print_style.FC_CYAN: FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+        print_style.FC_CYAN:
+        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
         print_style.FC_RED: FOREGROUND_RED | FOREGROUND_INTENSITY,
-        print_style.FC_MAGENTA: FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
-        print_style.FC_YELLOW: FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
-        print_style.FC_WHITE: FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED,
+        print_style.FC_MAGENTA:
+        FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
+        print_style.FC_YELLOW:
+        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
+        print_style.FC_WHITE:
+        FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED,
         print_style.BC_BLACK: FOREGROUND_BLACK,
         print_style.BC_BLUE: BACKGROUND_BLUE,
         print_style.BC_GREEN: BACKGROUND_GREEN,
@@ -78,7 +83,8 @@ class Win32ConsoleColor:
         print_style.BC_RED: BACKGROUND_RED,
         print_style.BC_MAGENTA: BACKGROUND_RED | BACKGROUND_BLUE,
         print_style.BC_YELLOW: BACKGROUND_RED | BACKGROUND_GREEN,
-        print_style.BC_WHITE: BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE,
+        print_style.BC_WHITE:
+        BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE,
         print_style.FW_BOLD: BACKGROUND_INTENSITY,
     }
 
@@ -86,11 +92,9 @@ class Win32ConsoleColor:
     std_err_handle = None
 
     def get_cmd_color(self, handle=std_out_handle):
-        return (
-            Win32ConsoleColor.FOREGROUND_RED
-            | Win32ConsoleColor.FOREGROUND_GREEN
-            | Win32ConsoleColor.FOREGROUND_BLUE
-        )
+        return (Win32ConsoleColor.FOREGROUND_RED
+                | Win32ConsoleColor.FOREGROUND_GREEN
+                | Win32ConsoleColor.FOREGROUND_BLUE)
 
     def set_cmd_color(self, color, handle=std_out_handle):
         """(color) -> bit
@@ -152,7 +156,8 @@ class TermColor:
             style.append(TermColor.COLOR_MAP[opt])
 
         if len(style) > 0:
-            sys.stdout.write("\033[" + ";".join(style) + "m" + text + "\033[0m")
+            sys.stdout.write("\033[" + ";".join(style) + "m" + text +
+                             "\033[0m")
         else:
             sys.stdout.write(text)
 
@@ -162,7 +167,8 @@ class TermColor:
             style.append(TermColor.COLOR_MAP[opt])
 
         if len(style) > 0:
-            sys.stderr.write("\033[" + ";".join(style) + "m" + text + "\033[0m")
+            sys.stderr.write("\033[" + ";".join(style) + "m" + text +
+                             "\033[0m")
         else:
             sys.stderr.write(text)
 
@@ -193,14 +199,14 @@ class HtmlColor:
         style = []
         for opt in options:
             if print_style.theme:
-                style.append(HtmlColor.COLOR_MAP[opt].format(print_style.theme + "-"))
+                style.append(
+                    HtmlColor.COLOR_MAP[opt].format(print_style.theme + "-"))
             else:
                 style.append(HtmlColor.COLOR_MAP[opt].format(""))
 
         if len(style) > 0:
-            sys.stdout.write(
-                '<span style="' + " ".join(style) + '">' + cgi.escape(text) + "</span>"
-            )
+            sys.stdout.write('<span style="' + " ".join(style) + '">' +
+                             cgi.escape(text) + "</span>")
         else:
             sys.stdout.write(cgi.escape(text))
 
@@ -208,14 +214,14 @@ class HtmlColor:
         style = []
         for opt in options:
             if print_style.theme:
-                style.append(HtmlColor.COLOR_MAP[opt].format(print_style.theme + "-"))
+                style.append(
+                    HtmlColor.COLOR_MAP[opt].format(print_style.theme + "-"))
             else:
                 style.append(HtmlColor.COLOR_MAP[opt].format(""))
 
         if len(style) > 0:
-            sys.stderr.write(
-                '<span style="' + " ".join(style) + '">' + cgi.escape(text) + "</span>"
-            )
+            sys.stderr.write('<span style="' + " ".join(style) + '">' +
+                             cgi.escape(text) + "</span>")
         else:
             sys.stderr.write(cgi.escape(text))
 
@@ -230,30 +236,61 @@ class NoneColor:
         sys.stderr.write(text)
 
 
+def cprintf_resolve_auto_mode():
+    # set by environment variable
+    if os.getenv("CPRINTF_MODE"):
+        return os.getenv("CPRINTF_MODE")
+    term_name = os.getenv("TERM")
+    if not term_name:
+        term_name = ""
+    if "dump" == term_name:
+        return "none"
+    if re.search('-256(color)?$', term_name, re.IGNORECASE):
+        return "term"
+    if re.search('^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux',
+                 term_name, re.IGNORECASE):
+        return "term"
+    if os.getenv("COLORTERM"):
+        return "term"
+    if os.getenv("TF_BUILD") and os.getenv("AGENT_NAME"):
+        return "term"
+    if os.getenv("CI"):
+        for known_ci in [
+                'TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI',
+                'GITHUB_ACTIONS', 'BUILDKITE', 'DRONE'
+        ]:
+            if os.getenv(known_ci):
+                return "term"
+        ci_name = os.getenv("CI_NAME")
+        if ci_name and ci_name.lower() == "codeship":
+            return "term"
+        return "none"
+    if os.getenv("TEAMCITY_VERSION"):
+        TEAMCITY_VERSION = os.getenv("TEAMCITY_VERSION")
+        if re.search('^(9\.(0*[1-9]\d*)\.|\d{2,}\.)', TEAMCITY_VERSION,
+                     re.IGNORECASE):
+            return "term"
+        else:
+            return "none"
+    if os.getenv("TERM_PROGRAM"):
+        if re.search('(iTerm.app|Apple_Terminal)', os.getenv("TERM_PROGRAM"),
+                     re.IGNORECASE):
+            return "term"
+
+    if "windows" == platform.system().lower():
+        ostype_name = os.getenv("OSTYPE")
+        if ostype_name:
+            ostype_name = ostype_name.lower()
+        if "msys" == ostype_name or "cygwin" == ostype_name:
+            return "none"
+        return "win32_console"
+    return "none"
+
+
 def cprintf_set_mode(mode_name="auto"):
     mode_name = mode_name.lower()
     if not mode_name or mode_name == "auto":
-        # set by environment variable
-        if os.getenv("CPRINTF_MODE"):
-            cprintf_set_mode(os.getenv("CPRINTF_MODE"))
-        elif "windows" == platform.system().lower():
-            ostype_name = os.getenv("OSTYPE")
-            if ostype_name:
-                ostype_name = ostype_name.lower()
-            if "msys" == ostype_name or "cygwin" == ostype_name:
-                cprintf_set_mode("term")
-                return
-            term_name = os.getenv("TERM")
-            if term_name:
-                term_name = term_name.lower()
-                if "xterm" == term_name[0:5] or "vt" == term_name[0:2]:
-                    cprintf_set_mode("term")
-                    return
-            cprintf_set_mode("win32_console")
-        elif os.getenv("ANSI_COLORS_DISABLED") is None:
-            cprintf_set_mode("term")
-        else:
-            cprintf_set_mode("none")
+        cprintf_set_mode(cprintf_resolve_auto_mode())
 
     elif mode_name == "none":
         print_style.engine = NoneColor
@@ -267,11 +304,9 @@ def cprintf_set_mode(mode_name="auto"):
         for information on Windows APIs.
         """
         Win32ConsoleColor.std_out_handle = ctypes.windll.kernel32.GetStdHandle(
-            Win32ConsoleColor.STD_OUTPUT_HANDLE
-        )
+            Win32ConsoleColor.STD_OUTPUT_HANDLE)
         Win32ConsoleColor.std_err_handle = ctypes.windll.kernel32.GetStdHandle(
-            Win32ConsoleColor.STD_ERROR_HANDLE
-        )
+            Win32ConsoleColor.STD_ERROR_HANDLE)
 
         print_style.engine = Win32ConsoleColor
 
@@ -318,7 +353,6 @@ def cprintf_stderr(options, fmt, *text):
 
 
 cprintf_set_mode("auto")
-
 """ run as a executable """
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -338,7 +372,8 @@ if __name__ == "__main__":
         "-c",
         "--color",
         action="append",
-        help="set font color.(any of: black, blue, green, cyan, red, magenta, yellow, white)",
+        help=
+        "set font color.(any of: black, blue, green, cyan, red, magenta, yellow, white)",
         metavar="<color>",
         dest="color",
     )
@@ -346,7 +381,8 @@ if __name__ == "__main__":
         "-b",
         "--background-color",
         action="append",
-        help="set background color.(any of: black, blue, green, cyan, red, magenta, yellow, white)",
+        help=
+        "set background color.(any of: black, blue, green, cyan, red, magenta, yellow, white)",
         metavar="<background color>",
         dest="background_color",
     )
@@ -378,14 +414,16 @@ if __name__ == "__main__":
     parser.add_option(
         "-e",
         action="store_true",
-        help="enable interpretation of backslash escapes(just like echo command in unix like system)",
+        help=
+        "enable interpretation of backslash escapes(just like echo command in unix like system)",
         dest="interp_bse",
         default=False,
     )
     parser.add_option(
         "-E",
         action="store_false",
-        help="disable interpretation of backslash escapes(just like echo command in unix like system)",
+        help=
+        "disable interpretation of backslash escapes(just like echo command in unix like system)",
         dest="interp_bse",
     )
     parser.add_option(
