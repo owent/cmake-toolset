@@ -668,9 +668,61 @@ function(project_build_tools_find_nmake_program OUTVAR)
 endfunction()
 
 function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
+  if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
+    include(CMakeParseArguments)
+  endif()
+  set(optionArgs ENABLE_TAG_NAME ENABLE_TAG_OFFSET ENABLE_BRANCH_NAME)
+  set(oneValueArgs "")
+  set(multiValueArgs "")
+  cmake_parse_arguments(project_git_get_ambiguous_name "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   find_package(Git)
   if(NOT GIT_FOUND AND NOT Git_FOUND)
     message(FATAL_ERROR "git not found")
+  endif()
+
+  if(project_git_get_ambiguous_name_ENABLE_TAG_NAME)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --tags --exact-match HEAD
+      WORKING_DIRECTORY "${GIT_WORKSPACE}"
+      RESULT_VARIABLE OUTPUT_RESULT
+      OUTPUT_VARIABLE OUTPUT_VAR_VALUE
+      ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(OUTPUT_VAR_VALUE AND OUTPUT_RESULT EQUAL 0)
+      set(${OUTPUT_VAR_NAME}
+          "${OUTPUT_VAR_VALUE}"
+          PARENT_SCOPE)
+      return()
+    endif()
+  endif()
+
+  if(project_git_get_ambiguous_name_ENABLE_TAG_NAME AND project_git_get_ambiguous_name_ENABLE_TAG_OFFSET)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --tags HEAD
+      WORKING_DIRECTORY "${GIT_WORKSPACE}"
+      RESULT_VARIABLE OUTPUT_RESULT
+      OUTPUT_VARIABLE OUTPUT_VAR_VALUE
+      ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(OUTPUT_VAR_VALUE AND OUTPUT_RESULT EQUAL 0)
+      set(${OUTPUT_VAR_NAME}
+          "${OUTPUT_VAR_VALUE}"
+          PARENT_SCOPE)
+      return()
+    endif()
+  endif()
+
+  if(project_git_get_ambiguous_name_ENABLE_BRANCH_NAME)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --contains --all HEAD
+      WORKING_DIRECTORY "${GIT_WORKSPACE}"
+      RESULT_VARIABLE OUTPUT_RESULT
+      OUTPUT_VARIABLE OUTPUT_VAR_VALUE
+      ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(OUTPUT_VAR_VALUE AND OUTPUT_RESULT EQUAL 0)
+      set(${OUTPUT_VAR_NAME}
+          "${OUTPUT_VAR_VALUE}"
+          PARENT_SCOPE)
+      return()
+    endif()
   endif()
 
   execute_process(
