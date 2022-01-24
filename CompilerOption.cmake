@@ -610,7 +610,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         /D_DEBUG
         /Z7
         /Ob0
-        /Od
         /RTC1)
       add_compiler_flags_to_inherit_var_unique(
         CMAKE_C_FLAGS_DEBUG
@@ -618,7 +617,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         /D_DEBUG
         /Z7
         /Ob0
-        /Od
         /RTC1)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS_RELEASE /O2 /Oi /DNDEBUG /Z7)
       add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS_RELEASE /O2 /Oi /DNDEBUG /Z7)
