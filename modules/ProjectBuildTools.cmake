@@ -668,9 +668,6 @@ function(project_build_tools_find_nmake_program OUTVAR)
 endfunction()
 
 function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
-  if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
-    include(CMakeParseArguments)
-  endif()
   set(optionArgs ENABLE_TAG_NAME ENABLE_TAG_OFFSET ENABLE_BRANCH_NAME)
   set(oneValueArgs "")
   set(multiValueArgs "")
@@ -739,9 +736,6 @@ function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
 endfunction()
 
 function(project_git_clone_repository)
-  if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
-    include(CMakeParseArguments)
-  endif()
   set(optionArgs ENABLE_SUBMODULE SUBMODULE_RECURSIVE REQUIRED FORCE_RESET)
   set(oneValueArgs
       URL
@@ -1432,4 +1426,47 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     endif()
     # For android-ndk-r23
   endif()
+endfunction()
+
+function(project_build_tools_copy_directory_if_different DESTINATION SOURCE_DIR)
+  cmake_parse_arguments(project_build_tools_copy_directory_if_different "" "OUTPUT_CMAKE_COMMAND" "FILES" ${ARGN})
+  set(COPY_FILES ${project_build_tools_copy_directory_if_different_FILES})
+  list(SORT COPY_FILES)
+  set(LAST_CREATED_DIR ".")
+  unset(FINAL_GENERATED_COPY_COMMANDS)
+  foreach(FILE_PATH ${COPY_FILES})
+    file(RELATIVE_PATH RELATIVE_FILE_PATH "${SOURCE_DIR}" "${FILE_PATH}")
+    get_filename_component(FINAL_DESTINATION_DIR "${DESTINATION}/${RELATIVE_FILE_PATH}" DIRECTORY)
+    if(NOT LAST_CREATED_DIR STREQUAL FINAL_DESTINATION_DIR)
+      if(NOT EXISTS "${FINAL_DESTINATION_DIR}")
+        file(MAKE_DIRECTORY "${FINAL_DESTINATION_DIR}")
+      endif()
+      set(LAST_CREATED_DIR "${FINAL_DESTINATION_DIR}")
+
+      if(FINAL_GENERATED_COPY_COMMANDS)
+        list(APPEND FINAL_GENERATED_COPY_COMMANDS "${LAST_CREATED_DIR}")
+      endif()
+      list(
+        APPEND
+        FINAL_GENERATED_COPY_COMMANDS
+        "COMMAND"
+        "${CMAKE_COMMAND}"
+        "-E"
+        "copy_if_different"
+        "${FILE_PATH}")
+    else()
+      list(APPEND FINAL_GENERATED_COPY_COMMANDS "${FILE_PATH}")
+    endif()
+    if(FINAL_GENERATED_COPY_COMMANDS)
+      list(APPEND FINAL_GENERATED_COPY_COMMANDS "${LAST_CREATED_DIR}")
+
+      if(project_build_tools_copy_directory_if_different_OUTPUT_CMAKE_COMMAND)
+        set(${project_build_tools_copy_directory_if_different_OUTPUT_CMAKE_COMMAND}
+            ${FINAL_GENERATED_COPY_COMMANDS}
+            PARENT_SCOPE)
+      else()
+        execute_process(${FINAL_GENERATED_COPY_COMMANDS} ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      endif()
+    endif()
+  endforeach()
 endfunction()
