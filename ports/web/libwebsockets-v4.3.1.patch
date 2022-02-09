@@ -11,6 +11,17 @@ index c4cd294..7c1c57d 100644
  	# Unbreak MSVC broken preprocessor __VA_ARGS__ behaviour
  	add_compile_options(/Zc:preprocessor /experimental:preprocessor /wd5105)
  endif(MSVC)
+diff --git a/cmake/libwebsockets-config.cmake.in b/cmake/libwebsockets-config.cmake.in
+index 6247b2c..8ba97e6 100644
+--- a/cmake/libwebsockets-config.cmake.in
++++ b/cmake/libwebsockets-config.cmake.in
+@@ -32,6 +32,5 @@ endforeach()
+ 
+ include(CheckIncludeFile)
+ include(CheckCSourceCompiles)
+-include(LwsCheckRequirements)
+ set(requirements 1)
+ 
 diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
 index fb810a8..2cde19b 100644
 --- a/lib/event-libs/libuv/CMakeLists.txt
