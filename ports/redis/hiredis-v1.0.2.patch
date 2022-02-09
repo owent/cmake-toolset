@@ -1,0 +1,45 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f86c9b7..4adf027 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,6 +22,7 @@ MESSAGE("Detected version: ${VERSION}")
+ 
+ PROJECT(hiredis VERSION "${VERSION}")
+ 
++SET(CMAKE_C_STANDARD 99)
+ SET(ENABLE_EXAMPLES OFF CACHE BOOL "Enable building hiredis examples")
+ 
+ SET(hiredis_sources
+@@ -46,7 +47,8 @@ SET_TARGET_PROPERTIES(hiredis
+     PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+     VERSION "${HIREDIS_SONAME}")
+ IF(WIN32 OR MINGW)
+-    TARGET_LINK_LIBRARIES(hiredis PRIVATE ws2_32)
++    TARGET_LINK_LIBRARIES(hiredis PUBLIC ws2_32 crypt32)
++    TARGET_LINK_LIBRARIES(hiredis_static PUBLIC ws2_32 crypt32)
+ ENDIF()
+ 
+ TARGET_INCLUDE_DIRECTORIES(hiredis PUBLIC $<INSTALL_INTERFACE:.> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+@@ -112,7 +114,8 @@ IF(ENABLE_SSL)
+     TARGET_INCLUDE_DIRECTORIES(hiredis_ssl PRIVATE "${OPENSSL_INCLUDE_DIR}")
+     TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE ${OPENSSL_LIBRARIES})
+     IF (WIN32 OR MINGW)
+-        TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl PUBLIC hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl_static PUBLIC hiredis_static)
+     ENDIF()
+     CONFIGURE_FILE(hiredis_ssl.pc.in hiredis_ssl.pc @ONLY)
+ 
+diff --git a/hiredis.h b/hiredis.h
+index 3bc46d9..0307727 100644
+--- a/hiredis.h
++++ b/hiredis.h
+@@ -255,7 +255,7 @@ typedef struct redisContext {
+     } unix_sock;
+ 
+     /* For non-blocking connect */
+-    struct sockadr *saddr;
++    struct sockaddr *saddr;
+     size_t addrlen;
+ 
+     /* Optional data and corresponding destructor users can use to provide

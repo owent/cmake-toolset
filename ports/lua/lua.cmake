@@ -118,25 +118,19 @@ if(NOT TARGET lua::liblua-static
    AND NOT TARGET unofficial-lua::lua
    AND NOT TARGET lua
    AND NOT LUA_FOUND)
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION "v5.4.3")
-  endif()
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL "https://github.com/lua/lua.git")
-  endif()
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR)
-    project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR "lua"
-                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION})
-  endif()
   project_third_party_port_declare(
     lua
     VERSION
-    "v5.4.3"
+    "v5.4.4"
     GIT_URL
     "https://github.com/lua/lua.git"
     BUILD_OPTIONS
     "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
     "-DCMAKE_DEBUG_POSTFIX=d")
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR)
+    project_third_party_get_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR "lua"
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION})
+  endif()
 
   project_third_party_append_build_shared_lib_var("lua" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_OPTIONS
                                                   BUILD_SHARED_LIBS)
