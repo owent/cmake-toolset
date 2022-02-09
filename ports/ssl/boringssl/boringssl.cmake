@@ -181,7 +181,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   project_third_party_port_declare(
     boringssl
     VERSION
-    "479adf98d54a21c1d154aac59b2ce120e1d1a6d6"
+    "4fb158925f7753d80fb858cb0239dff893ef9f15"
     GIT_URL
     "https://github.com/google/boringssl.git"
     BUILD_OPTIONS

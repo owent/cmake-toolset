@@ -1,0 +1,103 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2525e21..9feba35 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -661,3 +661,10 @@ if(WIN32)
+   target_link_libraries(bssl ws2_32)
+ endif()
+ 
++include(GNUInstallDirs)
++install(TARGETS bssl crypto ssl
++  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
++
++install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ce74106..b4063a4 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -117,7 +117,7 @@ endif()
+ if(CMAKE_COMPILER_IS_GNUCXX OR CLANG)
+   # Note clang-cl is odd and sets both CLANG and MSVC. We base our configuration
+   # primarily on our normal Clang one.
+-  set(C_CXX_FLAGS "-Werror -Wformat=2 -Wsign-compare -Wmissing-field-initializers -Wwrite-strings -Wvla -Wshadow")
++  set(C_CXX_FLAGS "-Wformat=2 -Wsign-compare -Wmissing-field-initializers -Wwrite-strings -Wvla -Wshadow")
+   if(MSVC)
+     # clang-cl sets different default warnings than clang. It also treats -Wall
+     # as -Weverything, to match MSVC. Instead -W3 is the alias for -Wall.
+@@ -233,8 +233,8 @@ elseif(MSVC)
+                             ${MSVC_DISABLED_WARNINGS_LIST})
+   string(REPLACE "C" " -w4" MSVC_LEVEL4_WARNINGS_STR
+                             ${MSVC_LEVEL4_WARNINGS_LIST})
+-  set(CMAKE_C_FLAGS   "-utf-8 -Wall -WX ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
+-  set(CMAKE_CXX_FLAGS "-utf-8 -Wall -WX ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
++  set(CMAKE_C_FLAGS   "-utf-8 -Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
++  set(CMAKE_CXX_FLAGS "-utf-8 -Wall ${MSVC_DISABLED_WARNINGS_STR} ${MSVC_LEVEL4_WARNINGS_STR}")
+ endif()
+ 
+ if(WIN32)
+@@ -553,7 +553,7 @@ endif()
+ 
+ # Add minimal googletest targets. The provided one has many side-effects, and
+ # googletest has a very straightforward build.
+-add_library(boringssl_gtest third_party/googletest/src/gtest-all.cc)
++add_library(boringssl_gtest STATIC third_party/googletest/src/gtest-all.cc)
+ target_include_directories(boringssl_gtest PRIVATE third_party/googletest)
+ 
+ include_directories(third_party/googletest/include)
+@@ -639,4 +639,4 @@ add_custom_target(
+               ${HANDSHAKER_ARGS} ${RUNNER_ARGS}
+     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+     DEPENDS all_tests bssl_shim handshaker fips_specific_tests_if_any
+-    USES_TERMINAL)
++    USES_TERMINAL)
+\ No newline at end of file
+diff --git a/src/crypto/pkcs8/pkcs12_test.cc b/src/crypto/pkcs8/pkcs12_test.cc
+index e67630d..d7c5604 100644
+--- a/src/crypto/pkcs8/pkcs12_test.cc
++++ b/src/crypto/pkcs8/pkcs12_test.cc
+@@ -34,7 +34,7 @@ std::string GetTestData(const char *path);
+ static const char kPassword[] = "foo";
+ 
+ // kUnicodePassword is the password for unicode_password.p12
+-static const char kUnicodePassword[] = u8"Hello, 世界";
++static const char kUnicodePassword[] = reinterpret_cast<const char*>(u8"Hello, 世界");
+ 
+ static bssl::Span<const uint8_t> StringToBytes(const std::string &str) {
+   return bssl::MakeConstSpan(reinterpret_cast<const uint8_t *>(str.data()),
+@@ -391,7 +391,7 @@ TEST(PKCS12Test, RoundTrip) {
+                 {bssl::Span<const uint8_t>(kTestCert2)}, 0, 0, 0, 0);
+ 
+   // Test some Unicode.
+-  TestRoundTrip(kPassword, u8"Hello, 世界!",
++  TestRoundTrip(kPassword, reinterpret_cast<const char*>(u8"Hello, 世界!"),
+                 bssl::Span<const uint8_t>(kTestKey),
+                 bssl::Span<const uint8_t>(kTestCert),
+                 {bssl::Span<const uint8_t>(kTestCert2)}, 0, 0, 0, 0);
+diff --git a/src/decrepit/ripemd/ripemd_test.cc b/src/decrepit/ripemd/ripemd_test.cc
+index 0700bae..51a1eef 100644
+--- a/src/decrepit/ripemd/ripemd_test.cc
++++ b/src/decrepit/ripemd/ripemd_test.cc
+@@ -109,7 +109,7 @@ TEST(RIPEMDTest, RunTest) {
+       0x37, 0xf9, 0x7f, 0x68, 0xf0, 0x83, 0x25, 0xdc, 0x15, 0x28};
+ 
+   if (OPENSSL_memcmp(digest, kMillionADigest, sizeof(digest)) != 0) {
+-    fprintf(stderr, u8"Digest incorrect for “million a's” test: ");
++    fprintf(stderr, reinterpret_cast<const char*>(u8"Digest incorrect for “million a's” test: "));
+     hexdump(stderr, "", digest, sizeof(digest));
+     ok = 0;
+   }
+diff --git a/src/third_party/googletest/test/googletest-printers-test.cc b/src/third_party/googletest/test/googletest-printers-test.cc
+index bf1e0b5..aac5386 100644
+--- a/src/third_party/googletest/test/googletest-printers-test.cc
++++ b/src/third_party/googletest/test/googletest-printers-test.cc
+@@ -747,7 +747,7 @@ TEST(PrintArrayTest, WConstCharArrayWithTerminatingNul) {
+ #ifdef __cpp_char8_t
+ // char8_t array.
+ TEST(PrintArrayTest, Char8Array) {
+-  const char8_t a[] = u8"Hello, world!";
++  const char8_t a[] = reinterpret_cast<const char8_t*>(u8"Hello, world!");
+   EXPECT_EQ(
+       "{ U+0048, U+0065, U+006C, U+006C, U+006F, U+002C, U+0020, U+0077, "
+       "U+006F, U+0072, U+006C, U+0064, U+0021, U+0000 }",
