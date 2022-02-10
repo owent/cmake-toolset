@@ -1470,3 +1470,84 @@ function(project_build_tools_copy_directory_if_different DESTINATION SOURCE_DIR)
     endif()
   endforeach()
 endfunction()
+
+function(project_build_tools_set_export_declaration OUTPUT_VARNAME)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel|XL|XLClang")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__attribute__((__dllexport__))"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          "__attribute__((visibility(\"default\")))"
+          PARENT_SCOPE)
+    endif()
+  elseif(MSVC)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__declspec(dllexport)"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          ""
+          PARENT_SCOPE)
+    endif()
+  elseif(SunPro)
+    set(${OUTPUT_VARNAME}
+        "__global"
+        PARENT_SCOPE)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(${OUTPUT_VARNAME}
+        "__declspec(dllexport)"
+        PARENT_SCOPE)
+  else()
+    set(${OUTPUT_VARNAME}
+        ""
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_set_import_declaration OUTPUT_VARNAME)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel|XL|XLClang")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__attribute__((__dllimport__))"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          ""
+          PARENT_SCOPE)
+    endif()
+  elseif(MSVC)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__declspec(dllimport)"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          ""
+          PARENT_SCOPE)
+    endif()
+  elseif(SunPro)
+    set(${OUTPUT_VARNAME}
+        "__global"
+        PARENT_SCOPE)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(${OUTPUT_VARNAME}
+        "__declspec(dllimport)"
+        PARENT_SCOPE)
+  else()
+    set(${OUTPUT_VARNAME}
+        ""
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_set_shared_library_declaration DEFINITION_VARNAME)
+  project_build_tools_set_export_declaration(EXPORT_DECLARATION)
+  project_build_tools_set_import_declaration(IMPORT_DECLARATION)
+  foreach(TARGET_NAME ${ARGN})
+    target_compile_definitions(${TARGET_NAME} INTERFACE "${DEFINITION_VARNAME}=${IMPORT_DECLARATION}")
+    target_compile_definitions(${TARGET_NAME} PRIVATE "${DEFINITION_VARNAME}=${EXPORT_DECLARATION}")
+  endforeach()
+endfunction()
