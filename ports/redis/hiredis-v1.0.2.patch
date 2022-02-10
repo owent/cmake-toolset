@@ -1,0 +1,85 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f86c9b7..6de97fd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,6 +22,7 @@ MESSAGE("Detected version: ${VERSION}")
+ 
+ PROJECT(hiredis VERSION "${VERSION}")
+ 
++SET(CMAKE_C_STANDARD 99)
+ SET(ENABLE_EXAMPLES OFF CACHE BOOL "Enable building hiredis examples")
+ 
+ SET(hiredis_sources
+@@ -41,19 +42,22 @@ IF(WIN32)
+ ENDIF()
+ 
+ ADD_LIBRARY(hiredis SHARED ${hiredis_sources})
++ADD_LIBRARY(hiredis_static STATIC ${hiredis_sources})
+ 
+-SET_TARGET_PROPERTIES(hiredis
++SET_TARGET_PROPERTIES(hiredis hiredis_static
+     PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+     VERSION "${HIREDIS_SONAME}")
+ IF(WIN32 OR MINGW)
+-    TARGET_LINK_LIBRARIES(hiredis PRIVATE ws2_32)
++    TARGET_LINK_LIBRARIES(hiredis PUBLIC ws2_32 crypt32)
++    TARGET_LINK_LIBRARIES(hiredis_static PUBLIC ws2_32 crypt32)
+ ENDIF()
+ 
+ TARGET_INCLUDE_DIRECTORIES(hiredis PUBLIC $<INSTALL_INTERFACE:.> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
++TARGET_INCLUDE_DIRECTORIES(hiredis_static PUBLIC $<INSTALL_INTERFACE:.> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ 
+ CONFIGURE_FILE(hiredis.pc.in hiredis.pc @ONLY)
+ 
+-INSTALL(TARGETS hiredis
++INSTALL(TARGETS hiredis hiredis_static
+     EXPORT hiredis-targets
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+@@ -99,24 +103,30 @@ IF(ENABLE_SSL)
+         ssl.c)
+     ADD_LIBRARY(hiredis_ssl SHARED
+             ${hiredis_ssl_sources})
++    ADD_LIBRARY(hiredis_ssl_static STATIC
++            ${hiredis_ssl_sources})
+ 
+     IF (APPLE)
+         SET_PROPERTY(TARGET hiredis_ssl PROPERTY LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup")
++        SET_PROPERTY(TARGET hiredis_ssl_static PROPERTY LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup")
+     ENDIF()
+ 
+-    SET_TARGET_PROPERTIES(hiredis_ssl
++    SET_TARGET_PROPERTIES(hiredis_ssl hiredis_ssl_static
+         PROPERTIES
+         WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+         VERSION "${HIREDIS_SONAME}")
+ 
+     TARGET_INCLUDE_DIRECTORIES(hiredis_ssl PRIVATE "${OPENSSL_INCLUDE_DIR}")
+     TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE ${OPENSSL_LIBRARIES})
++    TARGET_INCLUDE_DIRECTORIES(hiredis_ssl_static PRIVATE "${OPENSSL_INCLUDE_DIR}")
++    TARGET_LINK_LIBRARIES(hiredis_ssl_static PRIVATE ${OPENSSL_LIBRARIES})
+     IF (WIN32 OR MINGW)
+-        TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl PUBLIC hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl_static PUBLIC hiredis_static)
+     ENDIF()
+     CONFIGURE_FILE(hiredis_ssl.pc.in hiredis_ssl.pc @ONLY)
+ 
+-    INSTALL(TARGETS hiredis_ssl
++    INSTALL(TARGETS hiredis_ssl hiredis_ssl_static
+         EXPORT hiredis_ssl-targets
+         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+diff --git a/hiredis.h b/hiredis.h
+index 3bc46d9..0307727 100644
+--- a/hiredis.h
++++ b/hiredis.h
+@@ -255,7 +255,7 @@ typedef struct redisContext {
+     } unix_sock;
+ 
+     /* For non-blocking connect */
+-    struct sockadr *saddr;
++    struct sockaddr *saddr;
+     size_t addrlen;
+ 
+     /* Optional data and corresponding destructor users can use to provide

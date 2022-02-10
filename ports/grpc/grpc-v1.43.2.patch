@@ -1,0 +1,26 @@
+diff --git a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc b/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
+index 4aa11fd..cefb69a 100644
+--- a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
++++ b/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
+@@ -139,7 +139,7 @@ class XdsClusterResolverLb : public LoadBalancingPolicy {
+     // to use for LRS load reporting. Caller must ensure that config_ is set
+     // before calling.
+     std::pair<absl::string_view, absl::string_view> GetLrsClusterKey() const {
+-      if (!parent_->is_xds_uri_) return {parent_->server_name_, nullptr};
++      if (!parent_->is_xds_uri_) return {parent_->server_name_, absl::string_view{}};
+       return {
+           parent_->config_->discovery_mechanisms()[index_].cluster_name,
+           parent_->config_->discovery_mechanisms()[index_].eds_service_name};
+diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
+index 12840c0..39ce223 100644
+--- a/third_party/upb/upb/text_encode.c
++++ b/third_party/upb/upb/text_encode.c
+@@ -273,7 +273,7 @@ static void txtenc_map(txtenc *e, const upb_map *map, const upb_fielddef *f) {
+   }
+ }
+ 
+-#define CHK(x) do { if (!(x)) { return false; } } while(0)
++#define CHK(x) do { if (!(x)) { return NULL; } } while(0)
+ 
+ static const char *txtenc_parsevarint(const char *ptr, const char *limit,
+                                       uint64_t *val) {

@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b41e546..0d6a07d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -665,7 +665,7 @@ install(FILES ${PROJECT_BINARY_DIR}/libuv.pc ${PROJECT_BINARY_DIR}/libuv-static.
+ install(TARGETS uv EXPORT libuvConfig
+         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-install(TARGETS uv_a ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS uv_a EXPORT libuvConfig ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(EXPORT libuvConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libuv)
+ 
+ if(MSVC)

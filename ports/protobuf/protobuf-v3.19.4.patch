@@ -1,0 +1,67 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 51e8478..26daf09 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -182,7 +182,7 @@ else (protobuf_BUILD_SHARED_LIBS)
+   # making programmatic control difficult.  Prefer the functionality in newer
+   # CMake versions when available.
+   if(CMAKE_VERSION VERSION_GREATER 3.15 OR CMAKE_VERSION VERSION_EQUAL 3.15)
+-    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>)
++    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>")
+   else()
+     # In case we are building static libraries, link also the runtime library statically
+     # so that MSVCR*.DLL is not required at runtime.
+diff --git a/cmake/protobuf-module.cmake.in b/cmake/protobuf-module.cmake.in
+index 09b9d29..8787d65 100644
+--- a/cmake/protobuf-module.cmake.in
++++ b/cmake/protobuf-module.cmake.in
+@@ -134,6 +134,7 @@ get_target_property(Protobuf_INCLUDE_DIRS protobuf::libprotobuf
+   INTERFACE_INCLUDE_DIRECTORIES)
+ 
+ # Set the protoc Executable
++if (NOT Protobuf_PROTOC_EXECUTABLE AND TARGET protobuf::protoc)
+ get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+   IMPORTED_LOCATION_RELEASE)
+ if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+@@ -152,6 +153,7 @@ if(NOT EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+   get_target_property(Protobuf_PROTOC_EXECUTABLE protobuf::protoc
+     IMPORTED_LOCATION_NOCONFIG)
+ endif()
++endif()
+ 
+ # Version info variable
+ set(Protobuf_VERSION "@protobuf_VERSION@")
+diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
+index 37632cf..bc3ee59 100644
+--- a/src/google/protobuf/port_def.inc
++++ b/src/google/protobuf/port_def.inc
+@@ -617,7 +617,7 @@
+ #ifdef PROTOBUF_PRAGMA_INIT_SEG
+ #error PROTOBUF_PRAGMA_INIT_SEG was previously defined
+ #endif
+-#if _MSC_VER
++#if defined(_MSC_VER)
+ #define PROTOBUF_PRAGMA_INIT_SEG __pragma(init_seg(lib))
+ #else
+ #define PROTOBUF_PRAGMA_INIT_SEG
+@@ -784,7 +784,7 @@
+ #endif
+ 
+ // Silence some MSVC warnings in all our code.
+-#if _MSC_VER
++#if defined(_MSC_VER)
+ #pragma warning(push)
+ // For non-trivial unions
+ #pragma warning(disable : 4582)
+diff --git a/src/google/protobuf/port_undef.inc b/src/google/protobuf/port_undef.inc
+index 579eb41..2f5b0bb 100644
+--- a/src/google/protobuf/port_undef.inc
++++ b/src/google/protobuf/port_undef.inc
+@@ -140,6 +140,6 @@
+ #endif
+ 
+ // Pop the warning(push) from port_def.inc
+-#if _MSC_VER
++#if defined(_MSC_VER)
+ #pragma warning(pop)
+ #endif

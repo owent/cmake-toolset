@@ -53,7 +53,7 @@ if(NOT TARGET uv_a
     project_third_party_port_declare(
       libuv
       VERSION
-      "69b811f340f43ba5343eddbe167dd4882e136fe6" # "v1.42.0"
+      "v1.43.0"
       GIT_URL
       "https://github.com/libuv/libuv.git"
       BUILD_OPTIONS

@@ -216,7 +216,7 @@ macro(project_build_tools_append_space_flags_to_var_unique VARNAME)
         set(${VARNAME} "${${VARNAME}} ${def}")
       endif()
     else()
-      set(${VARNAME} ${def})
+      set(${VARNAME} "${def}")
     endif()
   endforeach()
   unset(add_compiler_flags_to_var_unique_FIND_POS)
@@ -668,9 +668,58 @@ function(project_build_tools_find_nmake_program OUTVAR)
 endfunction()
 
 function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
+  set(optionArgs ENABLE_TAG_NAME ENABLE_TAG_OFFSET ENABLE_BRANCH_NAME)
+  set(oneValueArgs "")
+  set(multiValueArgs "")
+  cmake_parse_arguments(project_git_get_ambiguous_name "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   find_package(Git)
   if(NOT GIT_FOUND AND NOT Git_FOUND)
     message(FATAL_ERROR "git not found")
+  endif()
+
+  if(project_git_get_ambiguous_name_ENABLE_TAG_NAME)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --tags --exact-match HEAD
+      WORKING_DIRECTORY "${GIT_WORKSPACE}"
+      RESULT_VARIABLE OUTPUT_RESULT
+      OUTPUT_VARIABLE OUTPUT_VAR_VALUE
+      ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(OUTPUT_VAR_VALUE AND OUTPUT_RESULT EQUAL 0)
+      set(${OUTPUT_VAR_NAME}
+          "${OUTPUT_VAR_VALUE}"
+          PARENT_SCOPE)
+      return()
+    endif()
+  endif()
+
+  if(project_git_get_ambiguous_name_ENABLE_TAG_NAME AND project_git_get_ambiguous_name_ENABLE_TAG_OFFSET)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --tags HEAD
+      WORKING_DIRECTORY "${GIT_WORKSPACE}"
+      RESULT_VARIABLE OUTPUT_RESULT
+      OUTPUT_VARIABLE OUTPUT_VAR_VALUE
+      ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(OUTPUT_VAR_VALUE AND OUTPUT_RESULT EQUAL 0)
+      set(${OUTPUT_VAR_NAME}
+          "${OUTPUT_VAR_VALUE}"
+          PARENT_SCOPE)
+      return()
+    endif()
+  endif()
+
+  if(project_git_get_ambiguous_name_ENABLE_BRANCH_NAME)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" describe --contains --all HEAD
+      WORKING_DIRECTORY "${GIT_WORKSPACE}"
+      RESULT_VARIABLE OUTPUT_RESULT
+      OUTPUT_VARIABLE OUTPUT_VAR_VALUE
+      ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(OUTPUT_VAR_VALUE AND OUTPUT_RESULT EQUAL 0)
+      set(${OUTPUT_VAR_NAME}
+          "${OUTPUT_VAR_VALUE}"
+          PARENT_SCOPE)
+      return()
+    endif()
   endif()
 
   execute_process(
@@ -687,9 +736,6 @@ function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
 endfunction()
 
 function(project_git_clone_repository)
-  if(CMAKE_VERSION VERSION_LESS_EQUAL "3.4")
-    include(CMakeParseArguments)
-  endif()
   set(optionArgs ENABLE_SUBMODULE SUBMODULE_RECURSIVE REQUIRED FORCE_RESET)
   set(oneValueArgs
       URL
@@ -1380,4 +1426,128 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     endif()
     # For android-ndk-r23
   endif()
+endfunction()
+
+function(project_build_tools_copy_directory_if_different DESTINATION SOURCE_DIR)
+  cmake_parse_arguments(project_build_tools_copy_directory_if_different "" "OUTPUT_CMAKE_COMMAND" "FILES" ${ARGN})
+  set(COPY_FILES ${project_build_tools_copy_directory_if_different_FILES})
+  list(SORT COPY_FILES)
+  set(LAST_CREATED_DIR ".")
+  unset(FINAL_GENERATED_COPY_COMMANDS)
+  foreach(FILE_PATH ${COPY_FILES})
+    file(RELATIVE_PATH RELATIVE_FILE_PATH "${SOURCE_DIR}" "${FILE_PATH}")
+    get_filename_component(FINAL_DESTINATION_DIR "${DESTINATION}/${RELATIVE_FILE_PATH}" DIRECTORY)
+    if(NOT LAST_CREATED_DIR STREQUAL FINAL_DESTINATION_DIR)
+      if(NOT EXISTS "${FINAL_DESTINATION_DIR}")
+        file(MAKE_DIRECTORY "${FINAL_DESTINATION_DIR}")
+      endif()
+      set(LAST_CREATED_DIR "${FINAL_DESTINATION_DIR}")
+
+      if(FINAL_GENERATED_COPY_COMMANDS)
+        list(APPEND FINAL_GENERATED_COPY_COMMANDS "${LAST_CREATED_DIR}")
+      endif()
+      list(
+        APPEND
+        FINAL_GENERATED_COPY_COMMANDS
+        "COMMAND"
+        "${CMAKE_COMMAND}"
+        "-E"
+        "copy_if_different"
+        "${FILE_PATH}")
+    else()
+      list(APPEND FINAL_GENERATED_COPY_COMMANDS "${FILE_PATH}")
+    endif()
+    if(FINAL_GENERATED_COPY_COMMANDS)
+      list(APPEND FINAL_GENERATED_COPY_COMMANDS "${LAST_CREATED_DIR}")
+
+      if(project_build_tools_copy_directory_if_different_OUTPUT_CMAKE_COMMAND)
+        set(${project_build_tools_copy_directory_if_different_OUTPUT_CMAKE_COMMAND}
+            ${FINAL_GENERATED_COPY_COMMANDS}
+            PARENT_SCOPE)
+      else()
+        execute_process(${FINAL_GENERATED_COPY_COMMANDS} ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      endif()
+    endif()
+  endforeach()
+endfunction()
+
+function(project_build_tools_set_export_declaration OUTPUT_VARNAME)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel|XL|XLClang")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__attribute__((__dllexport__))"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          "__attribute__((visibility(\"default\")))"
+          PARENT_SCOPE)
+    endif()
+  elseif(MSVC)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__declspec(dllexport)"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          ""
+          PARENT_SCOPE)
+    endif()
+  elseif(SunPro)
+    set(${OUTPUT_VARNAME}
+        "__global"
+        PARENT_SCOPE)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(${OUTPUT_VARNAME}
+        "__declspec(dllexport)"
+        PARENT_SCOPE)
+  else()
+    set(${OUTPUT_VARNAME}
+        ""
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_set_import_declaration OUTPUT_VARNAME)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel|XL|XLClang")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__attribute__((__dllimport__))"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          ""
+          PARENT_SCOPE)
+    endif()
+  elseif(MSVC)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(${OUTPUT_VARNAME}
+          "__declspec(dllimport)"
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          ""
+          PARENT_SCOPE)
+    endif()
+  elseif(SunPro)
+    set(${OUTPUT_VARNAME}
+        "__global"
+        PARENT_SCOPE)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(${OUTPUT_VARNAME}
+        "__declspec(dllimport)"
+        PARENT_SCOPE)
+  else()
+    set(${OUTPUT_VARNAME}
+        ""
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_set_shared_library_declaration DEFINITION_VARNAME)
+  project_build_tools_set_export_declaration(EXPORT_DECLARATION)
+  project_build_tools_set_import_declaration(IMPORT_DECLARATION)
+  foreach(TARGET_NAME ${ARGN})
+    target_compile_definitions(${TARGET_NAME} INTERFACE "${DEFINITION_VARNAME}=${IMPORT_DECLARATION}")
+    target_compile_definitions(${TARGET_NAME} PRIVATE "${DEFINITION_VARNAME}=${EXPORT_DECLARATION}")
+  endforeach()
 endfunction()
