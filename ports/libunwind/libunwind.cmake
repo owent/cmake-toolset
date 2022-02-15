@@ -94,8 +94,8 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     Libunwind
     BUILD_WITH_CONFIGURE
     AUTOGEN_CONFIGURE
-    bash
-    "./autogen.sh"
+    "autoreconf"
+    "-i"
     CONFIGURE_FLAGS
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS}
     WORKING_DIRECTORY
