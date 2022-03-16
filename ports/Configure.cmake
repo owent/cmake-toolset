@@ -242,7 +242,25 @@ macro(project_third_party_append_build_shared_lib_var PORT_NAME PORT_PREFIX LIST
     string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
   endif()
 
-  if((BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY) AND NOT ${FULL_PORT_NAME}_USE_STATIC)
+  if(DEFINED ${FULL_PORT_NAME}_USE_SHARED AND ${FULL_PORT_NAME}_USE_SHARED)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED TRUE)
+  elseif(DEFINED CACHE{${FULL_PORT_NAME}_USE_SHARED} AND $CACHE{${FULL_PORT_NAME}_USE_SHARED)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED TRUE)
+  elseif(DEFINED ENV{${FULL_PORT_NAME}_USE_SHARED} AND $ENV{${FULL_PORT_NAME}_USE_SHARED)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED TRUE)
+  elseif(DEFINED ${FULL_PORT_NAME}_USE_STATIC AND ${FULL_PORT_NAME}_USE_STATIC)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED FALSE)
+  elseif(DEFINED CACHE{${FULL_PORT_NAME}_USE_STATIC} AND $CACHE{${FULL_PORT_NAME}_USE_STATIC)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED FALSE)
+  elseif(DEFINED ENV{${FULL_PORT_NAME}_USE_STATIC} AND $ENV{${FULL_PORT_NAME}_USE_STATIC)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED FALSE)
+  elseif(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED TRUE)
+  else()
+    set(project_third_party_append_build_shared_lib_var_USE_SHARED FALSE)
+  endif()
+
+  if(project_third_party_append_build_shared_lib_var_USE_SHARED)
     foreach(VARNAME ${ARGN})
       list(APPEND ${LISTNAME} "-D${VARNAME}=ON")
     endforeach()
@@ -252,6 +270,7 @@ macro(project_third_party_append_build_shared_lib_var PORT_NAME PORT_PREFIX LIST
     endforeach()
   endif()
 
+  unset(project_third_party_append_build_shared_lib_var_USE_SHARED)
   unset(FULL_PORT_NAME)
 endmacro()
 
@@ -262,7 +281,25 @@ macro(project_third_party_append_build_static_lib_var PORT_NAME PORT_PREFIX LIST
     string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
   endif()
 
-  if((BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY) AND NOT ${FULL_PORT_NAME}_USE_STATIC)
+  if(DEFINED ${FULL_PORT_NAME}_USE_SHARED AND ${FULL_PORT_NAME}_USE_SHARED)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED TRUE)
+  elseif(DEFINED CACHE{${FULL_PORT_NAME}_USE_SHARED} AND $CACHE{${FULL_PORT_NAME}_USE_SHARED)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED TRUE)
+  elseif(DEFINED ENV{${FULL_PORT_NAME}_USE_SHARED} AND $ENV{${FULL_PORT_NAME}_USE_SHARED)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED TRUE)
+  elseif(DEFINED ${FULL_PORT_NAME}_USE_STATIC AND ${FULL_PORT_NAME}_USE_STATIC)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED FALSE)
+  elseif(DEFINED CACHE{${FULL_PORT_NAME}_USE_STATIC} AND $CACHE{${FULL_PORT_NAME}_USE_STATIC)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED FALSE)
+  elseif(DEFINED ENV{${FULL_PORT_NAME}_USE_STATIC} AND $ENV{${FULL_PORT_NAME}_USE_STATIC)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED FALSE)
+  elseif(BUILD_SHARED_LIBS OR ATFRAMEWORK_USE_DYNAMIC_LIBRARY)
+    set(project_third_party_append_build_static_lib_var_USE_SHARED TRUE)
+  else()
+    set(project_third_party_append_build_static_lib_var_USE_SHARED FALSE)
+  endif()
+
+  if(project_third_party_append_build_static_lib_var_USE_SHARED)
     foreach(VARNAME ${ARGN})
       list(APPEND ${LISTNAME} "-D${VARNAME}=OFF")
     endforeach()
@@ -272,6 +309,7 @@ macro(project_third_party_append_build_static_lib_var PORT_NAME PORT_PREFIX LIST
     endforeach()
   endif()
 
+  unset(project_third_party_append_build_static_lib_var_USE_SHARED)
   unset(FULL_PORT_NAME)
 endmacro()
 
@@ -498,7 +536,7 @@ endfunction()
 function(project_third_party_port_declare PORT_NAME)
   set(optionArgs APPEND_BUILD_OPTIONS)
   set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR PORT_PREFIX)
-  set(multiValueArgs BUILD_OPTIONS PATCH_FILE)
+  set(multiValueArgs BUILD_OPTIONS)
   cmake_parse_arguments(project_third_party_port_declare "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
                         "${ARGN}")
   if(project_third_party_port_declare_PORT_PREFIX)
@@ -577,9 +615,17 @@ function(project_third_party_port_declare PORT_NAME)
       set(${FULL_PORT_NAME}_USE_STATIC
           $ENV{${FULL_PORT_NAME}_USE_STATIC}
           PARENT_SCOPE)
-    else()
-      set(${FULL_PORT_NAME}_USE_STATIC
-          FALSE
+    endif()
+  endif()
+
+  if(NOT DEFINED ${FULL_PORT_NAME}_USE_SHARED)
+    if(DEFINED CACHE{${FULL_PORT_NAME}_USE_SHARED})
+      set(${FULL_PORT_NAME}_USE_SHARED
+          $CACHE{${FULL_PORT_NAME}_USE_SHARED}
+          PARENT_SCOPE)
+    elseif(DEFINED ENV{${FULL_PORT_NAME}_USE_SHARED})
+      set(${FULL_PORT_NAME}_USE_SHARED
+          $ENV{${FULL_PORT_NAME}_USE_SHARED}
           PARENT_SCOPE)
     endif()
   endif()
