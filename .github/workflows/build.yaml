@@ -203,7 +203,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('C:/vcpkg/installed/**') }}
   msvc2019_test:
     name: "msvc.2019.test"
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - name: Checkout
         uses: actions/checkout@v2

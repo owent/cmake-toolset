@@ -98,7 +98,6 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_PREFIX_OPTIONS}
         # "--api=1.1.1"
         "--release"
-        "pic"
         # "no-deprecated" # libcurl and gRPC requires openssl's API of 1.1.0 and 1.0.2, so we can not disable deprecated
         # APIS here
         "no-dso"
@@ -111,6 +110,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         "no-rc2"
         "no-ssl3"
         "no-weak-ssl-ciphers")
+    if(NOT MSVC)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "pic")
+    endif()
     # No deprecated options
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION VERSION_GREATER_EQUAL "3.0.0")
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENSSL_BUILD_OPTIONS "no-ssl2")
