@@ -53,6 +53,10 @@ if ($IsWindows) {
   foreach ($sdk in $(Get-ChildItem $winSDKDir | Sort-Object -Property Name)) {
     Write-Output "  - $sdk"
   }
+
+  if (!(Test-Path Env:CMAKE_GENERATOR)) {
+    $Env:CMAKE_GENERATOR = "Visual Studio 17 2022"
+  }
 }
 
 if (!(Test-Path Env:CI_BUILD_CONFIGURE_TYPE)) {
@@ -64,7 +68,7 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
+  & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -85,7 +89,7 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
+  & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -106,7 +110,7 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
+  & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF"
   if ( $LastExitCode -ne 0 ) {
@@ -128,7 +132,7 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 -DBUILD_SHARED_LIBS=ON "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
+  & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=ON "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION=OFF"
   if ( $LastExitCode -ne 0 ) {
@@ -151,7 +155,7 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv lua openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location -Verbose "test/build_jobs_dir"
-  & cmake .. -G "Visual Studio 16 2019" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
+  & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
     -DVCPKG_TARGET_TRIPLET=x64-windows "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode

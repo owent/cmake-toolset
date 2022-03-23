@@ -91,7 +91,7 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 | msvc.no-rtti.test       | Linux           | MSVC Without RTTI      | With `/GR-` for C++                                    |
 | msvc.no-exceptions.test | Linux           | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++ |
 | msvc.vcpkg.test         | Windows         | MSVC With vcpkg        | -                                                      |
-| msvc2017.test           | Windows         | MSVC                   | Legacy                                                 |
+| msvc.2019.test          | Windows         | MSVC                   | -                                                      |
 | macos.appleclang.test   | macOS           | Clang with libc++      | -                                                      |
 | android.arm64.test      | Android         | Clang with libc++      | `-DANDROID_ABI=arm64-v8a`                              |
 | android.x86_64.test     | Android         | Clang with libc++      | `-DANDROID_ABI=x86_64`                                 |
