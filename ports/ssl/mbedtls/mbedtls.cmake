@@ -56,7 +56,7 @@ if(NOT
     OR mbedTLS_FOUND
     OR MbedTLS_FOUND))
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION)
-    # libcurl do not support mbedtls 3.0+ now ===================================
+    # libcurl support mbedtls 3.0+ from 7.82.0 ===================================
     # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v3.1.0")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION "v2.28.0")
   endif()
