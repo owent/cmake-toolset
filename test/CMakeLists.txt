@@ -96,7 +96,10 @@ if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
 endif()
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/tbb.cmake")
+if(COMPILER_OPTIONS_TEST_EXCEPTION)
+  # tbb do not support -fno-exceptions now
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/tbb.cmake")
+endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
 

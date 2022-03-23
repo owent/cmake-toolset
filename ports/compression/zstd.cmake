@@ -24,8 +24,19 @@ macro(PROJECT_THIRD_PARTY_ZSTD_IMPORT)
       STATUS "Dependency(${PROJECT_NAME}): zstd found executable: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_BIN}")
   elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
     # Maybe zstd executable not exported, find it by library target
-    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LIB_PATH
-                                              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME})
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_TEST_LINK_NAMES
+        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME} zstd::libzstd_shared zstd::libzstd_static zstd::libzstd)
+    foreach(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_TEST_LINK_NAME IN
+            LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_TEST_LINK_NAMES)
+      project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LIB_PATH
+                                                ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_TEST_LINK_NAME})
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LIB_PATH)
+        break()
+      endif()
+    endforeach()
+
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_TEST_LINK_NAMES)
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_TEST_LINK_NAME)
     message(
       STATUS "Dependency(${PROJECT_NAME}): Try to find zstd from ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LIB_PATH}"
     )
