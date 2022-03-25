@@ -13,7 +13,7 @@ This is a cmake script set for atframework.It contains some utility functions an
 It's recommanded to use [vcpkg][1] if you do not need cross-compiling and has GCC 6+/Visual Studio 2015 Update 3+ with the English language pack/macOS 10.15+.
 But if you want a special version of some packages or just download packages from custom mirrors, you can use this toolset.
 
-> E.g.: If you want to use openssl 1.1.0k and use options ```no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers```
+> E.g.: If you want to use openssl 1.1.0k and use options `no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers`
 > Just add these codes below:
 >
 > ```cmake
@@ -71,71 +71,74 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 
 ## CI Job Status
 
-| Name                    | Target System   | Toolchain              | Note                                   |
-| ----------------------- | --------------- | ---------------------- | -------------------------------------- |
-| Format                  | -               |                        |
-| gcc.no-rtti.test        | Linux           | GCC Without RTTI       | With `-fno-rtti` for C++               |
-| gcc.no-exceptions.test  | Linux           | GCC Without Exception  | With `-fno-exceptions` for C++         |
-| gcc.static.test         | Linux           | GCC                    | Static linking                         |
-| gcc.shared.test         | Linux           | GCC                    | Dynamic linking                        |
-| gcc.libressl.test       | Linux           | GCC                    | Using libressl for SSL porting         |
-| gcc.boringssl.test      | Linux           | GCC                    | Using boringssl for SSL porting        |
-| gcc.mbedtls.test        | Linux           | GCC                    | Using mbedtls for SSL porting          |
-| gcc.4.8.test            | Linux           | GCC 4.8                | Legacy                                 |
-| clang.test              | Linux           | Clang with libc++      |
-| gcc.vcpkg.test          | Linux           | GCC With vcpkg         |
-| msys2.mingw.static.test | Windows         | GCC                    | Static linking                         |
-| msys2.mingw.shared.test | Windows         | GCC                    | Dynamic linking                        |
-| msvc.static.test        | Windows         | MSVC                   | Static linking                         |
-| msvc.shared.test        | Windows         | MSVC                   | Dynamic linking                        |
-| msvc.no-rtti.test       | Linux           | MSVC Without RTTI      | With `/GR-` for C++                    |
+| Name                    | Target System   | Toolchain              | Note                                                   |
+| ----------------------- | --------------- | ---------------------- | ------------------------------------------------------ |
+| Format                  | -               | -                      | -                                                      |
+| gcc.no-rtti.test        | Linux           | GCC Without RTTI       | With `-fno-rtti` for C++                               |
+| gcc.no-exceptions.test  | Linux           | GCC Without Exception  | With `-fno-exceptions` for C++                         |
+| gcc.static.test         | Linux           | GCC                    | Static linking                                         |
+| gcc.shared.test         | Linux           | GCC                    | Dynamic linking                                        |
+| gcc.libressl.test       | Linux           | GCC                    | Using libressl for SSL porting                         |
+| gcc.boringssl.test      | Linux           | GCC                    | Using boringssl for SSL porting                        |
+| gcc.mbedtls.test        | Linux           | GCC                    | Using mbedtls for SSL porting                          |
+| gcc.4.8.test            | Linux           | GCC 4.8                | Legacy                                                 |
+| clang.test              | Linux           | Clang with libc++      | -                                                      |
+| gcc.vcpkg.test          | Linux           | GCC With vcpkg         | -                                                      |
+| msys2.mingw.static.test | Windows         | GCC                    | Static linking                                         |
+| msys2.mingw.shared.test | Windows         | GCC                    | Dynamic linking                                        |
+| msvc.static.test        | Windows         | MSVC                   | Static linking                                         |
+| msvc.shared.test        | Windows         | MSVC                   | Dynamic linking                                        |
+| msvc.no-rtti.test       | Linux           | MSVC Without RTTI      | With `/GR-` for C++                                    |
 | msvc.no-exceptions.test | Linux           | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++ |
-| msvc.vcpkg.test         | Windows         | MSVC With vcpkg        |
-| msvc2017.test           | Windows         | MSVC                   | Legacy                                 |
-| macos.appleclang.test   | macOS           | Clang with libc++      |
-| android.arm64.test      | Android         | Clang with libc++      | ```-DANDROID_ABI=arm64-v8a```          |
-| android.x86_64.test     | Android         | Clang with libc++      | ```-DANDROID_ABI=x86_64```             |
-| ios.test                | iOS             | Clang with libc++      | ```-DCMAKE_OSX_ARCHITECTURES=arm64```  |
-| iphone_simulator.test   | iPhoneSimulator | Clang with libc++      | ```-DCMAKE_OSX_ARCHITECTURES=x86_64``` |
+| msvc.vcpkg.test         | Windows         | MSVC With vcpkg        | -                                                      |
+| msvc.2019.test          | Windows         | MSVC                   | -                                                      |
+| macos.appleclang.test   | macOS           | Clang with libc++      | -                                                      |
+| android.arm64.test      | Android         | Clang with libc++      | `-DANDROID_ABI=arm64-v8a`                              |
+| android.x86_64.test     | Android         | Clang with libc++      | `-DANDROID_ABI=x86_64`                                 |
+| ios.test                | iOS             | Clang with libc++      | `-DCMAKE_OSX_ARCHITECTURES=arm64`                      |
+| iphone_simulator.test   | iPhoneSimulator | Clang with libc++      | `-DCMAKE_OSX_ARCHITECTURES=x86_64`                     |
 
 ## Utility Scripts
 
-### ```CompilerOption.cmake```
+### `CompilerOption.cmake`
 
 1. Use lastest C++/C standard.
 2. Try to use libc++ and libc++abi when using clang or apple clang
-3. Set ```CMAKE_MSVC_RUNTIME_LIBRARY``` into ```MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>``` .
-4. Add ```/Zc:__cplusplus``` for MSVC to make ```__cplusplus == _MSVC_LANG``` .
-5. Set the default value of ```CMAKE_BUILD_TYPE``` to ```RelWithDebInfo``` .
-6. Macro: ```add_compiler_flags_to_var(<VAR_NAME> [options...])```
-7. Macro: ```add_compiler_flags_to_var_unique(<VAR_NAME> [options...])```
-8. Macro: ```add_compiler_flags_to_inherit_var(<VAR_NAME> [options...])```
-9. Macro: ```add_compiler_flags_to_inherit_var_unique(<VAR_NAME> [options...])```
-10. Macro: ```add_list_flags_to_var(<VAR_NAME> [options...])```
-11. Macro: ```add_list_flags_to_var_unique(<VAR_NAME> [options...])```
-12. Macro: ```add_list_flags_to_inherit_var(<VAR_NAME> [options...])```
-13. Macro: ```add_list_flags_to_inherit_var_unique(<VAR_NAME> [options...])```
-14. Macro: ```add_compiler_define([KEY=VALUE...])```
-15. Macro: ```add_linker_flags_for_runtime([LDFLAGS...])```
-16. Macro: ```add_linker_flags_for_all([LDFLAGS...])```
-17. Function: ```add_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])```
-18. Function: ```remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])```
-19. Function: ```add_target_link_flags(<TARGET> [LDFLAGS...])```
-20. Variable ```COMPILER_OPTIONS_TEST_STD_COROUTINE``` : ```TRUE``` when toolchain support C++20 Coroutine.
-21. Variable ```COMPILER_OPTIONS_TEST_STD_COROUTINE_TS``` : ```TRUE``` when toolchain experimental support C++20 Coroutine.
-22. Variable ```COMPILER_OPTIONS_TEST_EXCEPTION``` : ```TRUE``` when toolchain enable exception support.
-23. Variable ```COMPILER_OPTIONS_TEST_STD_EXCEPTION_PTR``` : ```TRUE``` when toolchain support C++11 ```std::exception_ptr``` .
-24. Variable ```COMPILER_OPTIONS_TEST_RTTI``` : ```TRUE``` when toolchain enable runtime type information.
-25. Variable ```COMPILER_STRICT_CFLAGS``` : flags of all but compatible warnings and turn warning to error.
-26. Variable ```COMPILER_STRICT_EXTRA_CFLAGS``` : flags of all extra warnings.
+3. Set `CMAKE_MSVC_RUNTIME_LIBRARY` into `MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>` .
+4. Add `/Zc:__cplusplus` for MSVC to make `__cplusplus == _MSVC_LANG` .
+5. Set the default value of `CMAKE_BUILD_TYPE` to `RelWithDebInfo` .
+6. Macro: `add_compiler_flags_to_var(<VAR_NAME> [options...])`
+7. Macro: `add_compiler_flags_to_var_unique(<VAR_NAME> [options...])`
+8. Macro: `add_compiler_flags_to_inherit_var(<VAR_NAME> [options...])`
+9. Macro: `add_compiler_flags_to_inherit_var_unique(<VAR_NAME> [options...])`
+10. Macro: `add_list_flags_to_var(<VAR_NAME> [options...])`
+11. Macro: `add_list_flags_to_var_unique(<VAR_NAME> [options...])`
+12. Macro: `add_list_flags_to_inherit_var(<VAR_NAME> [options...])`
+13. Macro: `add_list_flags_to_inherit_var_unique(<VAR_NAME> [options...])`
+14. Macro: `add_compiler_define([KEY=VALUE...])`
+15. Macro: `add_linker_flags_for_runtime([LDFLAGS...])`
+16. Macro: `add_linker_flags_for_runtime_unique([LDFLAGS...])`
+17. Macro: `add_linker_flags_for_all([LDFLAGS...])`
+18. Macro: `add_linker_flags_for_all_unique([LDFLAGS...])`
+19. Macro: `try_set_linker([LINKER <linker name or path...>] [LEGACY_LINKER_DIRECTORY <linker directory that contains ld>])`
+20. Function: `add_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
+21. Function: `remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
+22. Function: `add_target_link_flags(<TARGET> [LDFLAGS...])`
+23. Variable `COMPILER_OPTIONS_TEST_STD_COROUTINE` : `TRUE` when toolchain support C++20 Coroutine.
+24. Variable `COMPILER_OPTIONS_TEST_STD_COROUTINE_TS` : `TRUE` when toolchain experimental support C++20 Coroutine.
+25. Variable `COMPILER_OPTIONS_TEST_EXCEPTION` : `TRUE` when toolchain enable exception support.
+26. Variable `COMPILER_OPTIONS_TEST_STD_EXCEPTION_PTR` : `TRUE` when toolchain support C++11 `std::exception_ptr` .
+27. Variable `COMPILER_OPTIONS_TEST_RTTI` : `TRUE` when toolchain enable runtime type information.
+28. Variable `COMPILER_STRICT_CFLAGS` : flags of all but compatible warnings and turn warning to error.
+29. Variable `COMPILER_STRICT_EXTRA_CFLAGS` : flags of all extra warnings.
 
-### ```TargetOption.cmake```
+### `TargetOption.cmake`
 
-1. Variable ```PROJECT_PREBUILT_PLATFORM_NAME``` : Target platform name.
-2. Variable ```PROJECT_PREBUILT_HOST_PLATFORM_NAME``` : Host platform name.
-3. Set the default value of ```CMAKE_ARCHIVE_OUTPUT_DIRECTORY``` to ```${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}``` .
-4. Set the default value of ```CMAKE_LIBRARY_OUTPUT_DIRECTORY``` to ```${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}``` .
-5. Set the default value of ```CMAKE_RUNTIME_OUTPUT_DIRECTORY``` to ```${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}``` .
+1. Variable `PROJECT_PREBUILT_PLATFORM_NAME` : Target platform name.
+2. Variable `PROJECT_PREBUILT_HOST_PLATFORM_NAME` : Host platform name.
+3. Set the default value of `CMAKE_ARCHIVE_OUTPUT_DIRECTORY` to `${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}` .
+4. Set the default value of `CMAKE_LIBRARY_OUTPUT_DIRECTORY` to `${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}` .
+5. Set the default value of `CMAKE_RUNTIME_OUTPUT_DIRECTORY` to `${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}` .
 
 ## Crossing compiling
 
@@ -194,10 +197,10 @@ For example, if we want to use the same python3 executable on target and host bu
 
 ### Options and requirements
 
-+ Option(Optional): ```PROJECT_THIRD_PARTY_PACKAGE_DIR``` : Where to place package sources.
-+ Option(Optional): ```PROJECT_THIRD_PARTY_INSTALL_DIR``` : Where to place installed packages.
-+ Option(Optional): ```PROJECT_THIRD_PARTY_HOST_INSTALL_DIR``` : Where to place installed packages of host system.
-+ Option(Optional): ```FindConfigurePackageGitFetchDepth``` : Fetch depth og git repository.
++ Option(Optional): `PROJECT_THIRD_PARTY_PACKAGE_DIR` : Where to place package sources.
++ Option(Optional): `PROJECT_THIRD_PARTY_INSTALL_DIR` : Where to place installed packages.
++ Option(Optional): `PROJECT_THIRD_PARTY_HOST_INSTALL_DIR` : Where to place installed packages of host system.
++ Option(Optional): `FindConfigurePackageGitFetchDepth` : Fetch depth og git repository.
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")

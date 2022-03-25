@@ -1,6 +1,6 @@
 include_guard(GLOBAL)
 
-macro(PROJECT_THIRD_PARTY_xxhash_IMPORT)
+macro(PROJECT_THIRD_PARTY_XXHASH_IMPORT)
   if(TARGET xxHash::xxhash)
     message(STATUS "Dependency(${PROJECT_NAME}): xxHash using target xxHash::xxhash")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_LINK_NAME xxHash::xxhash)

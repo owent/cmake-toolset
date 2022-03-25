@@ -1,0 +1,21 @@
+diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
+index 9612375..a7789e5 100644
+--- a/third_party/upb/upb/text_encode.c
++++ b/third_party/upb/upb/text_encode.c
+@@ -291,11 +291,11 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+   }
+ }
+ 
+-#define CHK(x)      \
+-  do {              \
+-    if (!(x)) {     \
+-      return false; \
+-    }               \
++#define CHK(x)     \
++  do {             \
++    if (!(x)) {    \
++      return NULL; \
++    }              \
+   } while (0)
+ 
+ static const char* txtenc_parsevarint(const char* ptr, const char* limit,

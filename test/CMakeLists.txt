@@ -34,6 +34,18 @@ set(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
+find_program(PROJECT_FIND_LINKER_MOLD NAMES mold mold.exe)
+if(PROJECT_FIND_LINKER_MOLD)
+  get_filename_component(PROJECT_FIND_LINKER_MOLD_PREFIX_DIR "${PROJECT_FIND_LINKER_MOLD}" DIRECTORY)
+  get_filename_component(PROJECT_FIND_LINKER_MOLD_PREFIX_DIR "${PROJECT_FIND_LINKER_MOLD_PREFIX_DIR}" DIRECTORY)
+  if(EXISTS "${PROJECT_FIND_LINKER_MOLD_PREFIX_DIR}/libexec/mold/ld")
+    try_set_linker(LINKER "${PROJECT_FIND_LINKER_MOLD}" LEGACY_LINKER_DIRECTORY
+                   "${PROJECT_FIND_LINKER_MOLD_PREFIX_DIR}/libexec/mold")
+  else()
+    try_set_linker(LINKER "${PROJECT_FIND_LINKER_MOLD}")
+  endif()
+endif()
+
 if(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL)
   if(NOT COMPILER_OPTION_DEFAULT_ENABLE_RTTI)
     if(COMPILER_OPTIONS_TEST_RTTI)
@@ -75,23 +87,31 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
 if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
   if(NOT WIN32 AND NOT MINGW)
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+    # There is a BUG in gcc 4.6-4.8 and finxed in gcc 4.9 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58016
+    # https://gcc.gnu.org/gcc-4.9/changes.html
+    if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.9")
+      include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+    endif()
   endif()
 endif()
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
+if(COMPILER_OPTIONS_TEST_EXCEPTION)
+  # tbb do not support -fno-exceptions now
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/tbb.cmake")
+endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "8")
     include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
   endif()
-elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10")
     include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
   endif()
-elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10.3")
     include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
   endif()
@@ -196,6 +216,7 @@ target_link_libraries(
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME}
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME}
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_LINK_NAME}
+  ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_LINK_NAME}
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME}
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_SNAPPY_LINK_NAME}
   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME}

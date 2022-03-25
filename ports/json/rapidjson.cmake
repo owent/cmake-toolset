@@ -23,7 +23,7 @@ if(NOT TARGET rapidjson
   project_third_party_port_declare(
     rapidjson
     VERSION
-    "fd3dc29a5c2852df569e1ea81dbde2c412ac5051" # 2021-11-24
+    "8261c1ddf43f10de00fd8c9a67811d1486b2c784" # 2022-03-09
     GIT_URL
     "https://github.com/Tencent/rapidjson.git"
     BUILD_OPTIONS
