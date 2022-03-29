@@ -278,7 +278,7 @@ function(project_third_party_check_build_shared_lib PORT_NAME PORT_PREFIX VARNAM
 endfunction()
 
 macro(project_third_party_append_build_shared_lib_var PORT_NAME PORT_PREFIX LISTNAME)
-  project_third_party_check_build_shared_lib(${PORT_NAME} ${PORT_PREFIX}
+  project_third_party_check_build_shared_lib("${PORT_NAME}" "${PORT_PREFIX}"
                                              project_third_party_append_build_shared_lib_var_USE_SHARED)
   if(project_third_party_append_build_shared_lib_var_USE_SHARED)
     foreach(VARNAME ${ARGN})
@@ -294,7 +294,7 @@ macro(project_third_party_append_build_shared_lib_var PORT_NAME PORT_PREFIX LIST
 endmacro()
 
 macro(project_third_party_append_build_static_lib_var PORT_NAME PORT_PREFIX LISTNAME)
-  project_third_party_check_build_shared_lib(${PORT_NAME} ${PORT_PREFIX}
+  project_third_party_check_build_shared_lib("${PORT_NAME}" "${PORT_PREFIX}"
                                              project_third_party_append_build_static_lib_var_USE_SHARED)
 
   if(project_third_party_append_build_static_lib_var_USE_SHARED)
