@@ -28,12 +28,9 @@ if(NOT TARGET jemalloc)
       BUILD_OPTIONS
       "--enable-static=no"
       "--enable-prof"
-      "--enable-valgrind"
       "--enable-lazy-lock"
       "--enable-xmalloc"
-      "--enable-mremap"
-      "--enable-utrace"
-      "--enable-munmap")
+      "--enable-utrace")
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_MODE)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_MODE "release")
