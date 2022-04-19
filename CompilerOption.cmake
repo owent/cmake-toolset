@@ -431,6 +431,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
         set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
         list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
+        set(COMPILER_CLANG_TEST_LIBCXX_LINKS c++ c++abi)
         check_cxx_source_compiles(
           "#include <iostream>
           int main() {
@@ -439,6 +440,20 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
           }
           "
           COMPILER_CLANG_TEST_LIBCXX)
+        # libc++abi may be included in libc++
+        if (NOT COMPILER_CLANG_TEST_LIBCXX)
+          unset(COMPILER_CLANG_TEST_LIBCXX CACHE)
+          list(POP_BACK CMAKE_REQUIRED_LIBRARIES)
+          list(POP_BACK COMPILER_CLANG_TEST_LIBCXX_LINKS)
+          check_cxx_source_compiles(
+            "#include <iostream>
+            int main() {
+              std::cout<< __cplusplus<< std::endl;
+              return 0;
+            }
+            "
+            COMPILER_CLANG_TEST_LIBCXX)
+        endif()
         set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
         set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
         unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
@@ -447,7 +462,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       if(COMPILER_OPTION_CLANG_ENABLE_LIBCXX AND COMPILER_CLANG_TEST_LIBCXX)
         add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -stdlib=libc++)
         message(STATUS "Clang use stdlib=libc++")
-        list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS c++ c++abi)
+        list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS ${COMPILER_CLANG_TEST_LIBCXX_LINKS})
       else()
         check_cxx_source_compiles(
           "#include <cstddef>
@@ -534,6 +549,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         set(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
         set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -stdlib=libc++")
         list(APPEND CMAKE_REQUIRED_LIBRARIES c++ c++abi)
+        set(COMPILER_CLANG_TEST_LIBCXX_LINKS c++ c++abi)
         check_cxx_source_compiles(
           "#include <iostream>
           int main() {
@@ -541,6 +557,20 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
             return 0;
           }"
           COMPILER_CLANG_TEST_LIBCXX)
+        # libc++abi may be included in libc++
+        if (NOT COMPILER_CLANG_TEST_LIBCXX)
+          unset(COMPILER_CLANG_TEST_LIBCXX CACHE)
+          list(POP_BACK CMAKE_REQUIRED_LIBRARIES)
+          list(POP_BACK COMPILER_CLANG_TEST_LIBCXX_LINKS)
+          check_cxx_source_compiles(
+            "#include <iostream>
+            int main() {
+              std::cout<< __cplusplus<< std::endl;
+              return 0;
+            }
+            "
+            COMPILER_CLANG_TEST_LIBCXX)
+        endif()
         set(CMAKE_REQUIRED_FLAGS ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS})
         set(CMAKE_REQUIRED_LIBRARIES ${COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_LIBRARIES})
         unset(COMPILER_CLANG_TEST_BAKCUP_CMAKE_REQUIRED_FLAGS)
@@ -549,7 +579,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       if(COMPILER_OPTION_CLANG_ENABLE_LIBCXX AND COMPILER_CLANG_TEST_LIBCXX)
         add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS -stdlib=libc++)
         message(STATUS "AppleClang use stdlib=libc++")
-        list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS c++ c++abi)
+        list(APPEND COMPILER_OPTION_EXTERN_CXX_LIBS ${COMPILER_CLANG_TEST_LIBCXX_LINKS})
       else()
         check_cxx_source_compiles(
           "#include <cstddef>
