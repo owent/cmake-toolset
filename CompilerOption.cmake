@@ -441,7 +441,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
           "
           COMPILER_CLANG_TEST_LIBCXX)
         # libc++abi may be included in libc++
-        if (NOT COMPILER_CLANG_TEST_LIBCXX)
+        if(NOT COMPILER_CLANG_TEST_LIBCXX)
           unset(COMPILER_CLANG_TEST_LIBCXX CACHE)
           list(POP_BACK CMAKE_REQUIRED_LIBRARIES)
           list(POP_BACK COMPILER_CLANG_TEST_LIBCXX_LINKS)
@@ -558,7 +558,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
           }"
           COMPILER_CLANG_TEST_LIBCXX)
         # libc++abi may be included in libc++
-        if (NOT COMPILER_CLANG_TEST_LIBCXX)
+        if(NOT COMPILER_CLANG_TEST_LIBCXX)
           unset(COMPILER_CLANG_TEST_LIBCXX CACHE)
           list(POP_BACK CMAKE_REQUIRED_LIBRARIES)
           list(POP_BACK COMPILER_CLANG_TEST_LIBCXX_LINKS)
