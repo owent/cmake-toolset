@@ -1,0 +1,19 @@
+diff --git a/include/fmt/core.h b/include/fmt/core.h
+index 92a7aa1..5711dfe 100644
+--- a/include/fmt/core.h
++++ b/include/fmt/core.h
+@@ -1454,12 +1454,12 @@ template <typename Context> struct arg_mapper {
+ 
+ #if FMT_MSC_VER != 0 && FMT_MSC_VER < 1910
+   // Workaround a bug in MSVC.
+-  template <typename T> FMT_CONSTEXPR FMT_INLINE auto do_map(T&& val) -> T& {
++  template <typename T> FMT_CONSTEXPR FMT_INLINE auto do_map(T&& val) -> const T& {
+     return val;
+   }
+ #else
+   template <typename T, FMT_ENABLE_IF(formattable<T>::value)>
+-  FMT_CONSTEXPR FMT_INLINE auto do_map(T&& val) -> T& {
++  FMT_CONSTEXPR FMT_INLINE auto do_map(T&& val) -> const T& {
+     return val;
+   }
+   template <typename T, FMT_ENABLE_IF(!formattable<T>::value)>
