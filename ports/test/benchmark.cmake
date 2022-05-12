@@ -77,8 +77,11 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
       endif()
     endforeach()
 
-    if(MSVC)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=d")
+    if(WIN32
+       OR MINGW
+       OR CYGWIN)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=-dbg"
+           "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
     endif()
 
     # CMake options end, maybe need patch files
