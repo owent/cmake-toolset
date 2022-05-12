@@ -292,8 +292,7 @@ if(NOT TARGET gRPC::grpc++_alts
     if(WIN32
        OR MINGW
        OR CYGWIN)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=-dbg"
-                                                                        "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
+      list(APPEND "-DCMAKE_DEBUG_POSTFIX=-dbg" "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
     endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
