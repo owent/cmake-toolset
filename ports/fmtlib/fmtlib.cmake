@@ -127,6 +127,9 @@ int main() {
 
       if(fmt_FOUND)
         project_third_party_fmtlib_import()
+      else()
+        echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): fmtlib is required but not found")
+        message(FATAL_ERROR "fmtlib not found")
       endif()
     endif()
   endif()
