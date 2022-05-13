@@ -14,8 +14,8 @@ endmacro()
 
 option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD "Do not compile fmt.dev if has std::format" ON)
 
-# MSVC 1929 - VS 2019 (14.29) has wrong argument type for some functions of std::format
-# So we disable it for easier to use
+# MSVC 1929 - VS 2019 (14.29) has wrong argument type for some functions of std::format So we disable it for easier to
+# use
 if(MSVC AND MSVC_VERSION LESS 1930)
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_STD_BLACKLIST TRUE)
 else()
