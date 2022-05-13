@@ -38,7 +38,7 @@ index d6cf87f..855383b 100644
      if (HasMessageOwnedArenaTag()) {
        delete reinterpret_cast<Arena*>(ptr_ - kMessageOwnedArenaTagMask);
 diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
-index bdb2eec..dc03072 100644
+index 1e360cc..c627200 100644
 --- a/src/google/protobuf/port_def.inc
 +++ b/src/google/protobuf/port_def.inc
 @@ -608,7 +608,7 @@

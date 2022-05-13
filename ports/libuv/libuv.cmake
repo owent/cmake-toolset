@@ -58,8 +58,14 @@ if(NOT TARGET uv_a
       "https://github.com/libuv/libuv.git"
       BUILD_OPTIONS
       "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
-      "-DBUILD_TESTING=OFF"
-      "-DCMAKE_DEBUG_POSTFIX=d")
+      "-DBUILD_TESTING=OFF")
+
+    if(WIN32
+       OR MINGW
+       OR CYGWIN)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=-dbg"
+           "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
+    endif()
 
     project_third_party_append_build_shared_lib_var(
       "libuv" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS BUILD_SHARED_LIBS)
