@@ -28,7 +28,7 @@ if(NOT TARGET ZLIB::ZLIB)
     PORT_PREFIX
     "COMPRESSION"
     VERSION
-    "v1.2.11"
+    "v1.2.12"
     GIT_URL
     "https://github.com/madler/zlib.git"
     BUILD_OPTIONS
