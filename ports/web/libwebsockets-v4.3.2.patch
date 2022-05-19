@@ -1,0 +1,57 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 166d48a..bbf4bba 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -850,7 +850,7 @@ if (MSVC)
+ 	# Turn off pointless microsoft security warnings.
+ 	add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+ 	# Fail the build if any warnings
+-	add_compile_options(/W3 /WX)
++	# add_compile_options(/W3 /WX)
+ 	# Unbreak MSVC broken preprocessor __VA_ARGS__ behaviour
+ 	if (MSVC_VERSION GREATER 1925)
+ 		add_compile_options(/Zc:preprocessor /wd5105)
+diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
+index fb810a8..2cde19b 100644
+--- a/lib/event-libs/libuv/CMakeLists.txt
++++ b/lib/event-libs/libuv/CMakeLists.txt
+@@ -47,6 +47,7 @@ message("libuv include dir: ${LIBUV_INCLUDE_DIRS}")
+ message("libuv libraries: ${LIBUV_LIBRARIES}")
+ 
+ include_directories("${LIBUV_INCLUDE_DIRS}")
++list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBUV_INCLUDE_DIRS}")
+ 
+ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   # libuv changed the location in 1.21.0. Retain both
+@@ -54,6 +55,7 @@ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   if (NOT LWS_HAVE_UV_VERSION_H)
+     CHECK_INCLUDE_FILE(uv/version.h LWS_HAVE_NEW_UV_VERSION_H)
+   endif()
++	list(POP_BACK CMAKE_REQUIRED_INCLUDES)
+   
+   if (LWS_WITH_EVLIB_PLUGINS AND LWS_WITH_LIBUV)
+ 
+diff --git a/lib/roles/ws/client-parser-ws.c b/lib/roles/ws/client-parser-ws.c
+index f569532..ab30e05 100644
+--- a/lib/roles/ws/client-parser-ws.c
++++ b/lib/roles/ws/client-parser-ws.c
+@@ -476,7 +476,8 @@ ping_drop:
+ 
+ 		case LWSWSOPC_PONG:
+ 			lwsl_wsi_info(wsi, "Received pong");
+-			lwsl_hexdump_wsi_debug(wsi, &wsi->ws->rx_ubuf[LWS_PRE],
++			// Patch for bug of VS2017
++			lwsl_hexdump_wsi(wsi, LLL_DEBUG, &wsi->ws->rx_ubuf[LWS_PRE],
+ 				     wsi->ws->rx_ubuf_head);
+ 
+ 			lws_validity_confirmed(wsi);
+@@ -594,7 +595,8 @@ drain_extension:
+ 						(uint8_t *)"partial utf8", 12);
+ utf8_fail:
+ 					lwsl_wsi_info(wsi, "utf8 error");
+-					lwsl_hexdump_wsi_info(wsi, pmdrx.eb_out.token,
++					// Patch for bug of VS2017
++					lwsl_hexdump_wsi(wsi, LLL_INFO, pmdrx.eb_out.token,
+ 							  (unsigned int)pmdrx.eb_out.len);
+ 
+ 					return -1;
