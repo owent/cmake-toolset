@@ -140,6 +140,8 @@ if(NOT TARGET zstd::libzstd_shared
     find_configure_package(
       PACKAGE
       zstd
+      PORT_PREFIX
+      "COMPRESSION"
       BUILD_WITH_CMAKE
       CMAKE_INHERIT_BUILD_ENV
       CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS

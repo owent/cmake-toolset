@@ -192,6 +192,7 @@ macro(FindConfigurePackage)
       GIT_SUBMODULE_RECURSIVE)
   set(oneValueArgs
       PACKAGE
+      PORT_PREFIX
       WORKING_DIRECTORY
       BUILD_DIRECTORY
       PREFIX_DIRECTORY
@@ -235,6 +236,16 @@ macro(FindConfigurePackage)
 
   unset(FindConfigurePackage_BACKUP_CMAKE_FIND_ROOT_PATH)
   unset(FindConfigurePackage_BACKUP_CMAKE_PREFIX_PATH)
+
+  if(FindConfigurePackage_PORT_PREFIX AND NOT "${FindConfigurePackage_PORT_PREFIX}" STREQUAL "")
+    string(
+      TOUPPER
+        "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_PORT_PREFIX}_${FindConfigurePackage_PACKAGE}"
+        FindConfigurePackage_FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_PACKAGE}"
+                   FindConfigurePackage_FULL_PORT_NAME)
+  endif()
 
   # step 1. find using standard method
   find_package(${FindConfigurePackage_PACKAGE} QUIET ${FindConfigurePackage_FIND_PACKAGE_FLAGS})
@@ -411,6 +422,12 @@ macro(FindConfigurePackage)
           set(FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN
               "${FindConfigurePackage_PROJECT_DIRECTORY}/load-envs-run.sh")
           project_build_tools_generate_load_env_bash("${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+                   "export CFLAGS=\"\$CFLAGS -fvisibility-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+            endif()
+          endif()
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             execute_process(
@@ -425,6 +442,12 @@ macro(FindConfigurePackage)
           set(FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN
               "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}/load-envs-run.sh")
           project_build_tools_generate_load_env_bash("${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+                   "export CFLAGS=\"\$CFLAGS -fvisibility-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+            endif()
+          endif()
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             execute_process(
@@ -509,10 +532,43 @@ macro(FindConfigurePackage)
           # project_build_tools_append_cmake_inherit_options(
           # ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           # project_build_tools_append_cmake_cxx_standard_options(
-          # ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
+          # ${project_build_tools_append_cmake_inherit_options_CALL_VARS}) Special patchs
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_C_FLAGS
+                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS}")
+              set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_CXX_FLAGS
+                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS}")
+              set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS
+                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS} -fvisibility-hidden")
+              set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS
+                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS} -fvisibility-hidden")
+            endif()
+          endif()
           project_build_tools_append_cmake_options_for_lib(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_C_FLAGS)
+                set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS
+                    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_C_FLAGS}"
+                )
+              else()
+                unset(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS)
+              endif()
+              if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_CXX_FLAGS)
+                set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS
+                    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_CXX_FLAGS}"
+                )
+              else()
+                unset(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS)
+              endif()
+              unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_C_FLAGS)
+              unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_CXX_FLAGS)
+            endif()
+          endif()
+
         endif()
         if(FindConfigurePackage_CMAKE_INHERIT_FIND_ROOT_PATH)
           list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
