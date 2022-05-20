@@ -87,6 +87,8 @@ if(NOT TARGET lz4::lz4_static
     find_configure_package(
       PACKAGE
       lz4
+      PORT_PREFIX
+      "COMPRESSION"
       BUILD_WITH_CMAKE
       CMAKE_INHERIT_BUILD_ENV
       CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS

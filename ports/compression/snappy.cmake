@@ -47,6 +47,8 @@ if(NOT TARGET Snappy::snappy)
     find_configure_package(
       PACKAGE
       Snappy
+      PORT_PREFIX
+      "COMPRESSION"
       BUILD_WITH_CMAKE
       CMAKE_INHERIT_BUILD_ENV
       CMAKE_INHERIT_FIND_ROOT_PATH
