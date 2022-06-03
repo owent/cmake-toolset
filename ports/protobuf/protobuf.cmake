@@ -118,12 +118,21 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       project_third_party_get_host_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR "protobuf"
                                              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION})
     endif()
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS
-        OFF
-        CACHE
-          BOOL
-          "Allow build protobuf as dynamic(May cause duplicate symbol in global data base[File already exists in database])"
-    )
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS
+          ON
+          CACHE
+            BOOL
+            "Allow build protobuf as dynamic(Keep the global symbols unique when more than one modules depend protobuf)"
+      )
+    else()
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS
+          OFF
+          CACHE
+            BOOL
+            "Allow build protobuf as dynamic(May cause duplicate symbol in ELF/MACHO ABI[File already exists in database])"
+      )
+    endif()
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS
