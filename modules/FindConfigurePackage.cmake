@@ -425,7 +425,7 @@ macro(FindConfigurePackage)
           if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
             if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
               file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-                   "export CFLAGS=\"\$CFLAGS -fvisibility-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+                   "export CFLAGS=\"\$CFLAGS -fvisibility=hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
             endif()
           endif()
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
@@ -445,7 +445,7 @@ macro(FindConfigurePackage)
           if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
             if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
               file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-                   "export CFLAGS=\"\$CFLAGS -fvisibility-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+                   "export CFLAGS=\"\$CFLAGS -fvisibility=hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
             endif()
           endif()
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
@@ -540,9 +540,9 @@ macro(FindConfigurePackage)
               set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_BACKUP_CMAKE_CXX_FLAGS
                   "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS}")
               set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS
-                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS} -fvisibility-hidden")
+                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS} -fvisibility=hidden")
               set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS
-                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS} -fvisibility-hidden")
+                  "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS} -fvisibility=hidden")
             endif()
           endif()
           project_build_tools_append_cmake_options_for_lib(
