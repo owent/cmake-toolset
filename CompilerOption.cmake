@@ -802,45 +802,67 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # ================== support checking ==================
   # check c++20 coroutine
   if(NOT DEFINED COMPILER_OPTIONS_TEST_STD_COROUTINE)
-    set(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-    if(NOT MSVC)
-      # Try add coroutine
-      set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} -fcoroutines")
-      check_cxx_source_compiles(
-        "#include <coroutine>
+    # check C++20 coroutine without any explicit flags
+    unset(COMPILER_OPTIONS_STD_COROUTINE_FLAGS)
+    check_cxx_source_compiles(
+      "#include <coroutine>
          int main() {
            return std::suspend_always().await_ready()? 0: 1;
          }"
-        COMPILER_OPTIONS_TEST_STD_COROUTINE)
-      if(NOT COMPILER_OPTIONS_TEST_STD_COROUTINE)
-        set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} -fcoroutines-ts")
+      COMPILER_OPTIONS_TEST_STD_COROUTINE)
+    if(COMPILER_OPTIONS_TEST_STD_COROUTINE)
+      set(COMPILER_OPTIONS_STD_COROUTINE_FLAGS "")
+    else()
+      unset(COMPILER_OPTIONS_TEST_STD_COROUTINE)
+      unset(COMPILER_OPTIONS_TEST_STD_COROUTINE CACHE)
+      set(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+      if(NOT MSVC)
+        # Try add coroutine
+        set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} -fcoroutines")
         check_cxx_source_compiles(
-          "#include <experimental/coroutine>
+          "#include <coroutine>
+         int main() {
+           return std::suspend_always().await_ready()? 0: 1;
+         }"
+          COMPILER_OPTIONS_TEST_STD_COROUTINE)
+        if(COMPILER_OPTIONS_TEST_STD_COROUTINE)
+          set(COMPILER_OPTIONS_STD_COROUTINE_FLAGS "-fcoroutines")
+        elseif()
+          set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} -fcoroutines-ts")
+          check_cxx_source_compiles(
+            "#include <experimental/coroutine>
            int main() {
              return std::experimental::suspend_always().await_ready()? 0: 1;
            }"
-          COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
-      endif()
-    else()
-      # Try add coroutine
-      set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} /await")
-      check_cxx_source_compiles(
-        "#include <coroutine>
+            COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+          if(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+            set(COMPILER_OPTIONS_STD_COROUTINE_FLAGS "-fcoroutines-ts")
+          endif()
+        endif()
+      else()
+        # Try add coroutine
+        set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} /await")
+        check_cxx_source_compiles(
+          "#include <coroutine>
             int main() {
                 return std::suspend_always().await_ready()? 0: 1;
             }"
-        COMPILER_OPTIONS_TEST_STD_COROUTINE)
-      if(NOT COMPILER_OPTIONS_TEST_STD_COROUTINE)
-        check_cxx_source_compiles(
-          "#include <experimental/coroutine>
+          COMPILER_OPTIONS_TEST_STD_COROUTINE)
+        if(NOT COMPILER_OPTIONS_TEST_STD_COROUTINE)
+          check_cxx_source_compiles(
+            "#include <experimental/coroutine>
            int main() {
              return std::experimental::suspend_always().await_ready()? 0: 1;
            }"
-          COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+            COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+        endif()
+        if(COMPILER_OPTIONS_TEST_STD_COROUTINE OR COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+          set(COMPILER_OPTIONS_STD_COROUTINE_FLAGS "/await")
+        endif()
       endif()
+      set(CMAKE_REQUIRED_FLAGS ${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS})
+      unset(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS)
     endif()
-    set(CMAKE_REQUIRED_FLAGS ${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS})
-    unset(COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS)
   endif()
 
   # check add c++20 coroutine flags
