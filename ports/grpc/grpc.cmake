@@ -137,7 +137,7 @@ if(NOT TARGET gRPC::grpc++_alts
                                              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION})
       file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS "${CMAKE_COMMAND}"
-                                                                      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host")
+                                                                      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host")
       message(STATUS "Dependency(${PROJECT_NAME}): Try to build grpc fo host architecture when crossing compiling")
       project_build_tools_append_cmake_host_options(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS)
       # Vcpkg
@@ -180,7 +180,7 @@ if(NOT TARGET gRPC::grpc++_alts
          OR CMAKE_HOST_UNIX
          OR MSYS)
         configure_file(
-          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host/run-build-host.sh.in"
+          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host/run-build-host.sh.in"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.sh" @ONLY NEWLINE_STYLE LF)
 
         # build
@@ -191,10 +191,10 @@ if(NOT TARGET gRPC::grpc++_alts
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
         configure_file(
-          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host/run-build-host.ps1.in"
+          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host/run-build-host.ps1.in"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.ps1" @ONLY NEWLINE_STYLE CRLF)
         configure_file(
-          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host/run-build-host.bat.in"
+          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host/run-build-host.bat.in"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.bat" @ONLY NEWLINE_STYLE CRLF)
 
         # build

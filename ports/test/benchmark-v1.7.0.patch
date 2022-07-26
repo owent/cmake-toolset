@@ -1,0 +1,13 @@
+diff --git a/src/benchmark.cc b/src/benchmark.cc
+index 6035491..7bdc7e3 100644
+--- a/src/benchmark.cc
++++ b/src/benchmark.cc
+@@ -649,7 +649,7 @@ void ParseCommandLineFlags(int* argc, char** argv) {
+   }
+ }
+ 
+-int InitializeStreams() {
++BENCHMARK_EXPORT int InitializeStreams() {
+   static std::ios_base::Init init;
+   return 0;
+ }
