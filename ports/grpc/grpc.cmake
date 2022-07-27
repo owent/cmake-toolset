@@ -136,8 +136,8 @@ if(NOT TARGET gRPC::grpc++_alts
       project_third_party_get_host_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR "grpc"
                                              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION})
       file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS "${CMAKE_COMMAND}"
-                                                                      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS
+          "${CMAKE_COMMAND}" "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host")
       message(STATUS "Dependency(${PROJECT_NAME}): Try to build grpc fo host architecture when crossing compiling")
       project_build_tools_append_cmake_host_options(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS)
       # Vcpkg
