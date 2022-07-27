@@ -54,18 +54,14 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
       endif()
     endif()
 
-    project_third_party_port_declare(benchmark VERSION "v1.7.0" GIT_URL "https://github.com/google/benchmark.git")
+    # Do not use benchmark v1.7.0, which has a lot symbol exporting problems.
+    project_third_party_port_declare(benchmark VERSION "v1.6.2" GIT_URL "https://github.com/google/benchmark.git")
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_PATCH_FILE
         "${CMAKE_CURRENT_LIST_DIR}/benchmark-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_VERSION}.patch")
 
-    # There are alot visibility problems with the benchmark v1.7.0, so we can not built it as dynamic library.
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_VERSION MATCHES "v1.7.0")
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF")
-    else()
-      project_third_party_append_build_shared_lib_var(
-        "benchmark" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS BUILD_SHARED_LIBS)
-    endif()
+    project_third_party_append_build_shared_lib_var(
+      "benchmark" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
     # Using our gtest source
     file(GLOB ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_FIND_GTEST_SRCS

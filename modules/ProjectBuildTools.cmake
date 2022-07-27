@@ -814,7 +814,7 @@ function(project_git_clone_repository)
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
-          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply --inaccurate-eof
                   ${project_git_clone_repository_PATCH_FILES}
           WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -1003,7 +1003,7 @@ function(project_git_clone_repository)
 
     if(project_git_clone_repository_PATCH_FILES)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply --inaccurate-eof
                 ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
