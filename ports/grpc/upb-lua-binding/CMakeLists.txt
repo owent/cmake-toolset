@@ -109,16 +109,16 @@ endif()
 
 add_library(lupb STATIC "def.c" "msg.c" "upb.c")
 
-get_filename_component(UPB_BINDING_LUA_SRC_DIR DIREC "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY)
-get_filename_component(UPB_BINDING_LUA_SRC_DIR DIREC "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
-get_filename_component(UPB_BINDING_LUA_SRC_DIR DIREC "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
+get_filename_component(UPB_BINDING_LUA_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY)
+get_filename_component(UPB_BINDING_LUA_SRC_DIR "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
+get_filename_component(UPB_BINDING_LUA_SRC_DIR "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
 
 target_include_directories(lupb PUBLIC "$<BUILD_INTERFACE:${UPB_BINDING_LUA_SRC_DIR}>"
-                                       "$<INSTALL_INTERFACE:share/upb/${CMAKE_CURRENT_SOURCE_DIR}>")
-target_link_libraries(lupb PUBLIC upb::upb ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
+                                       "$<INSTALL_INTERFACE:share/upb>")
+target_link_libraries(lupb PUBLIC upb::json upb::reflection upb::textformat upb::upb ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
 
 add_library(upb::lupb ALIAS lupb)
 
 if(MSVC)
-  set_property(TARGET upb::lupb lupb PROPERTY FOLDER "upb")
+  set_property(TARGET lupb PROPERTY FOLDER "upb")
 endif(MSVC)
