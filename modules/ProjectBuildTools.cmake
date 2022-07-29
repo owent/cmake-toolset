@@ -354,6 +354,10 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
     list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_HOST_MAKE_PROGRAM}")
   endif()
 
+  if(PROJECT_PREBUILT_HOST_PLATFORM_NAME)
+    list(APPEND ${OUTVAR} "-DPROJECT_PREBUILT_PLATFORM_NAME=${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
+  endif()
+
   set(project_build_tools_append_cmake_host_options_VARS PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_COMMON
                                                          PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON)
   if(PROJECT_BUILD_TOOLS_CMAKE_HOST_PASSTHROUGH)

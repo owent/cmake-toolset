@@ -157,6 +157,8 @@ if(VCPKG_TOOLCHAIN
   message(STATUS "Current protobuf in vcpkg is too old to support MSVC 1929(VS 16.10)")
 else()
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/abseil-cpp.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
 
   if(COMPILER_OPTIONS_TEST_EXCEPTION)
