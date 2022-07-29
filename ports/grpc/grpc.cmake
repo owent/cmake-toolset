@@ -132,10 +132,14 @@ if(NOT TARGET gRPC::grpc++_alts
     endif()
 
     # Build host architecture grpc first
-    if(CMAKE_CROSSCOMPILING)
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING AND CMAKE_CROSSCOMPILING)
       project_third_party_get_host_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR "grpc"
                                              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION})
-      file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}")
+      get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR
+                             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}" DIRECTORY)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}/crosscompiling-grpc-host")
+      file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS
           "${CMAKE_COMMAND}" "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host")
       message(STATUS "Dependency(${PROJECT_NAME}): Try to build grpc fo host architecture when crossing compiling")
@@ -181,28 +185,30 @@ if(NOT TARGET gRPC::grpc++_alts
          OR MSYS)
         configure_file(
           "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host/run-build-host.sh.in"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.sh" @ONLY NEWLINE_STYLE LF)
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}/run-build-host.sh" @ONLY NEWLINE_STYLE LF)
 
         # build
         execute_process(
           COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
-                  "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.sh"
-          WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}
+                  "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}/run-build-host.sh"
+          WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()
         configure_file(
           "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host/run-build-host.ps1.in"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.ps1" @ONLY NEWLINE_STYLE CRLF)
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}/run-build-host.ps1" @ONLY
+          NEWLINE_STYLE CRLF)
         configure_file(
           "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-grpc-host/run-build-host.bat.in"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.bat" @ONLY NEWLINE_STYLE CRLF)
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}/run-build-host.bat" @ONLY
+          NEWLINE_STYLE CRLF)
 
         # build
         execute_process(
           COMMAND
             "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" -NoProfile -InputFormat None -ExecutionPolicy Bypass -NonInteractive
-            -NoLogo -File "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}/run-build-host.ps1"
-          WORKING_DIRECTORY ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_DIR}
+            -NoLogo -File "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}/run-build-host.ps1"
+          WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_TOOL_BUILD_DIR}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
     endif()
