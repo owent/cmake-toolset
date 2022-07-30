@@ -1,5 +1,5 @@
 diff --git a/cmake/make_cmakelists.py b/cmake/make_cmakelists.py
-index d64c14f..85c30b5 100755
+index d64c14f..0a8674f 100755
 --- a/cmake/make_cmakelists.py
 +++ b/cmake/make_cmakelists.py
 @@ -39,8 +39,13 @@ import sys
@@ -57,7 +57,16 @@ index d64c14f..85c30b5 100755
      }
  
    template = textwrap.dedent("""\
-@@ -316,10 +329,180 @@ class Converter(object):
+@@ -283,6 +296,8 @@ class Converter(object):
+           "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+           FORCE)
+     endif()
++    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
++    set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
+ 
+     # When using Ninja, compiler output won't be colorized without this.
+     include(CheckCXXCompilerFlag)
+@@ -316,10 +331,180 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
