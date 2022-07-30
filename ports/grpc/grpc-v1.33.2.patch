@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0f0c47a..9281d17 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -3666,6 +3666,7 @@ add_library(upb
+   third_party/upb/upb/table.c
+   third_party/upb/upb/upb.c
+ )
++set_target_properties(upb PROPERTIES OUTPUT_NAME "grpc_upb")
+ 
+ set_target_properties(upb PROPERTIES
+   VERSION ${gRPC_CORE_VERSION}
