@@ -352,6 +352,15 @@ if(WIN32
     STATUS
       "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}"
   )
+  if(CMAKE_BINARY_DIR MATCHES "^[cC]:" OR CMAKE_BINARY_DIR MATCHES "^/[cC]/")
+    set(project_third_party_get_build_dir_SELECT_BASE "${project_third_party_get_build_dir_USER_BASE}")
+  elseif(CMAKE_BINARY_DIR MATCHES "^([A-Za-z]:)")
+    set(project_third_party_get_build_dir_SELECT_BASE "${CMAKE_MATCH_1}")
+  elseif(CMAKE_BINARY_DIR MATCHES "^(/[A-Za-z])/")
+    set(project_third_party_get_build_dir_SELECT_BASE "${CMAKE_MATCH_1}")
+  else()
+    set(project_third_party_get_build_dir_SELECT_BASE "${project_third_party_get_build_dir_USER_BASE}")
+  endif()
 endif()
 message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH=${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
 
@@ -363,15 +372,20 @@ function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION
     set(project_third_party_get_build_dir_PORT_VERSION "${PORT_VERSION}")
   endif()
 
-  if(WIN32
-     AND NOT MINGW
-     AND NOT CYGWIN)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
+        PARENT_SCOPE)
+  elseif(
+    WIN32
+    AND NOT MINGW
+    AND NOT CYGWIN)
+    set(${OUTPUT_VARNAME}
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
         PARENT_SCOPE)
   else()
     set(${OUTPUT_VARNAME}
-        "${CMAKE_CURRENT_BINARY_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
+        "${CMAKE_BINARY_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILDTREE_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
         PARENT_SCOPE)
   endif()
 endfunction()
@@ -388,12 +402,16 @@ function(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VE
     set(${OUTPUT_VARNAME}
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
         PARENT_SCOPE)
+  elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR)
+    set(${OUTPUT_VARNAME}
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
+        PARENT_SCOPE)
   elseif(
     WIN32
     AND NOT MINGW
     AND NOT CYGWIN)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
         PARENT_SCOPE)
   else()
     get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_BASE_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
@@ -410,7 +428,7 @@ function(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VE
 endfunction()
 
 function(project_third_party_cleanup_old_build_tree BASE_DIR)
-  file(GLOB project_third_party_old_build_dirs "${BASE_DIR}/cmake-toolset/*" "${BASE_DIR}/cmake-toolset-*")
+  file(GLOB project_third_party_old_build_dirs "${BASE_DIR}/cmake-toolset/*")
 
   string(TIMESTAMP current_time "%s" UTC)
 
@@ -432,6 +450,9 @@ function(project_third_party_cleanup_old_build_tree BASE_DIR)
   endforeach()
 endfunction()
 project_third_party_cleanup_old_build_tree("${project_third_party_get_build_dir_USER_BASE}")
+if(NOT project_third_party_get_build_dir_SELECT_BASE STREQUAL project_third_party_get_build_dir_USER_BASE)
+  project_third_party_cleanup_old_build_tree("${project_third_party_get_build_dir_SELECT_BASE}")
+endif()
 
 macro(ATFRAMEWORK_CMAKE_TOOLSET_FIND_BASH_TOOLS)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_BASH bash)
