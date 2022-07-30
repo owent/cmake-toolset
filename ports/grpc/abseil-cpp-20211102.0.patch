@@ -1,0 +1,23 @@
+diff --git a/absl/base/config.h b/absl/base/config.h
+index 585485c..c64f05f 100644
+--- a/absl/base/config.h
++++ b/absl/base/config.h
+@@ -578,7 +578,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
+ 
+ #ifdef __has_include
+ #if __has_include(<variant>) && defined(__cplusplus) && \
+-    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
++    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
++    !defined(_MSC_VER)
+ #define ABSL_HAVE_STD_VARIANT 1
+ #endif
+ #endif
+@@ -609,7 +610,7 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
+      (defined(__cplusplus) && __cplusplus > 201402))
+ // #define ABSL_HAVE_STD_ANY 1
+ #define ABSL_HAVE_STD_OPTIONAL 1
+-#define ABSL_HAVE_STD_VARIANT 1
++// #define ABSL_HAVE_STD_VARIANT 1
+ #define ABSL_HAVE_STD_STRING_VIEW 1
+ #endif
+ 

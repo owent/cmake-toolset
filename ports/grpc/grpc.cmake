@@ -283,6 +283,9 @@ if(NOT TARGET gRPC::grpc++_alts
            # "-DgRPC_ZLIB_PROVIDER=module"
            "-DgRPC_ZLIB_PROVIDER=none")
     endif()
+    if(TARGET upb::upb)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS "-DgRPC_UPB_PROVIDER=package")
+    endif()
     if(OPENSSL_FOUND)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS "-DgRPC_SSL_PROVIDER=package")
     else()
