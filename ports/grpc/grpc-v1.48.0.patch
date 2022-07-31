@@ -1,3 +1,287 @@
+diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
+index 29c73bb..26215ba 100755
+--- a/third_party/upb/cmake/make_cmakelists.py
++++ b/third_party/upb/cmake/make_cmakelists.py
+@@ -39,8 +39,16 @@ import sys
+ import textwrap
+ import os
+ 
++def MappingThirdPartyDep(dep):
++  if dep.startswith("/third_party/"):
++    return dep[13:]
++  return dep
++
+ def StripFirstChar(deps):
+-  return [dep[1:] for dep in deps]
++  ret = [MappingThirdPartyDep(dep[1:]) for dep in deps]
++  if 'utf8_range' in ret:
++    ret.remove('utf8_range')
++  return ret
+ 
+ def IsSourceFile(name):
+   return name.endswith(".c") or name.endswith(".cc")
+@@ -81,10 +89,15 @@ class BuildFileFunctions(object):
+ 
+     if list(filter(IsSourceFile, files)):
+       # Has sources, make this a normal library.
+-      self.converter.toplevel += "add_library(%s\n  %s)\n" % (
+-          kwargs["name"],
+-          "\n  ".join(found_files)
++      output_name = kwargs["name"]
++      if output_name.lower() != "upb":
++        output_name = "upb-" + output_name
++      self.converter.toplevel += "add_library({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
++        kwargs["name"],
++        "\n  ".join(found_files),
++        output_name
+       )
++      self.converter.export_targets.append(kwargs["name"])
+       self._add_deps(kwargs)
+     else:
+       # Header-only library, have to do a couple things differently.
+@@ -93,6 +106,7 @@ class BuildFileFunctions(object):
+       self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
+           kwargs["name"]
+       )
++      self.converter.export_targets.append(kwargs["name"])
+       self._add_deps(kwargs, " INTERFACE")
+ 
+   def cc_binary(self, **kwargs):
+@@ -240,11 +254,13 @@ class Converter(object):
+     self.prelude = ""
+     self.toplevel = ""
+     self.if_lua = ""
++    self.export_targets = []
+ 
+   def convert(self):
+     return self.template % {
+         "prelude": converter.prelude,
+         "toplevel": converter.toplevel,
++        "export_targets": ' '.join(converter.export_targets),
+     }
+ 
+   template = textwrap.dedent("""\
+@@ -275,6 +291,11 @@ class Converter(object):
+           FORCE)
+     endif()
+ 
++    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
++    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
++    set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
++    set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++
+     # When using Ninja, compiler output won't be colorized without this.
+     include(CheckCXXCompilerFlag)
+     CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
+@@ -306,11 +327,159 @@ class Converter(object):
+     elseif(UNIX)
+       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+     endif()
++    if (MSVC)
++      add_compile_options(/wd4146 /wd4703 -D_CRT_SECURE_NO_WARNINGS)
++    endif()
+ 
+     enable_testing()
+ 
++    if (UPB_BUILD_CODEGEN)
++      find_package(absl CONFIG REQUIRED)
++      find_package(protobuf CONFIG REQUIRED)
++    endif()
++
++    add_library(descriptor_upb_proto)
++    set_target_properties(descriptor_upb_proto PROPERTIES OUTPUT_NAME "upb-descriptor_upb_proto")
++
+     %(toplevel)s
+ 
++    set(UPB_DESCRIPTOR_PROTO "${UPB_HOST_INCLUDE_DIR}/google/protobuf/descriptor.proto")
++    if (UPB_BUILD_CODEGEN)
++      set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
++
++      add_executable(protoc-gen-upbdefs
++        ../upbc/common.h
++        ../upbc/common.cc
++        ../upbc/protoc-gen-upbdefs.cc
++      )
++      target_link_libraries(protoc-gen-upbdefs PRIVATE
++        absl::flat_hash_map
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++
++      add_executable(protoc-gen-upb
++        ../upbc/common.h
++        ../upbc/common.cc
++        ../upbc/protoc-gen-upb.cc
++      )
++      target_link_libraries(protoc-gen-upb PRIVATE
++        mini_table
++        port
++        upb
++        absl::flat_hash_map
++        absl::flat_hash_set
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++
++      add_executable(protoc-gen-lua
++        ../upb/bindings/lua/upbc.cc
++      )
++      target_link_libraries(protoc-gen-lua PRIVATE
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++
++      set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
++      set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
++      set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
++      set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
++    else()
++      find_program(PROTOC_PROGRAM protoc)
++      find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
++      find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
++      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
++    endif()
++
++    set(UPB_DESCRIPTOR_SOURCES 
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h" 
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.c"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.c"
++    )
++
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES)
++    set(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES any api duration empty
++        field_mask source_context struct timestamp type wrappers)
++    foreach(PROTO_NAME IN LISTS UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES)
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES
++            "${UPB_HOST_INCLUDE_DIR}/google/protobuf/${PROTO_NAME}.proto")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}_pb.lua")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.h"
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.h")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.c"
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.c")
++    endforeach()
++
++    add_custom_command(
++      OUTPUT ${UPB_DESCRIPTOR_SOURCES}
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor_pb.lua"
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES}
++      DEPENDS "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++      COMMAND
++        "${PROTOC_PROGRAM}"
++        "-I${UPB_HOST_INCLUDE_DIR}"
++        "--plugin=protoc-gen-upb=${PROTOC_GEN_UPB_PROGRAM}"
++        "--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}"
++        "--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}"
++        "--upb_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "--lua_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++    )
++
++    target_sources(descriptor_upb_proto PRIVATE ${UPB_DESCRIPTOR_SOURCES})
++    target_link_libraries(descriptor_upb_proto PRIVATE upb)
++
++    add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++      ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
++    set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
++    target_link_libraries(well_known_types PRIVATE upb)
++
++    include(GNUInstallDirs)
++    install(
++      DIRECTORY ../upb
++      DESTINATION include
++      FILES_MATCHING
++      PATTERN "*.h"
++      PATTERN "*.hpp"
++      PATTERN "*.inc"
++      PATTERN "*.int.h"
++    )
++    install(
++      FILES
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h"
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor_pb.lua"
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++      DESTINATION include/google/protobuf
++    )
++    install(
++      DIRECTORY ../upb/bindings/lua/
++      DESTINATION share/upb/upb/bindings/lua
++    )
++    target_include_directories(upb PUBLIC $<INSTALL_INTERFACE:include>)
++    install(TARGETS
++      descriptor_upb_proto
++      well_known_types
++      %(export_targets)s
++      ${UPB_CODEGEN_TARGETS}
++      EXPORT upb-config
++    )
++    install(EXPORT upb-config NAMESPACE upb:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
+   """)
+ 
+ data = {}
+diff --git a/third_party/upb/upb/bindings/lua/def.c b/third_party/upb/upb/bindings/lua/def.c
+index 1321167..fde490e 100644
+--- a/third_party/upb/upb/bindings/lua/def.c
++++ b/third_party/upb/upb/bindings/lua/def.c
+@@ -617,7 +617,7 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
+ 
+ static int lupb_FileDef_Dependency(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_FileDef* dep = upb_FileDef_Dependency(f, index);
+   lupb_wrapper_pushwrapper(L, 1, dep, LUPB_FILEDEF);
+   return 1;
+@@ -631,7 +631,7 @@ static int lupb_FileDef_DependencyCount(lua_State* L) {
+ 
+ static int lupb_FileDef_enum(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_EnumDef* e = upb_FileDef_TopLevelEnum(f, index);
+   lupb_wrapper_pushwrapper(L, 1, e, LUPB_ENUMDEF);
+   return 1;
+@@ -645,7 +645,7 @@ static int lupb_FileDef_enumcount(lua_State* L) {
+ 
+ static int lupb_FileDef_msg(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_MessageDef* m = upb_FileDef_TopLevelMessage(f, index);
+   lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
+   return 1;
+diff --git a/third_party/upb/upb/bindings/lua/upb.c b/third_party/upb/upb/bindings/lua/upb.c
+index 3d59cdd..8e7333e 100644
+--- a/third_party/upb/upb/bindings/lua/upb.c
++++ b/third_party/upb/upb/bindings/lua/upb.c
+@@ -61,11 +61,13 @@
+ /* Lua compatibility code *****************************************************/
+ 
+ /* Shims for upcoming Lua 5.3 functionality. */
++#if LUA_VERSION_NUM < 503
+ static bool lua_isinteger(lua_State* L, int argn) {
+   LUPB_UNUSED(L);
+   LUPB_UNUSED(argn);
+   return false;
+ }
++#endif
+ 
+ /* Utility functions **********************************************************/
+ 
 diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
 index 9612375..76b0bfb 100644
 --- a/third_party/upb/upb/text_encode.c

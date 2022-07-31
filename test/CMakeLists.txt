@@ -158,8 +158,8 @@ if(VCPKG_TOOLCHAIN
 else()
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/abseil-cpp.cmake")
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
 
   if(COMPILER_OPTIONS_TEST_EXCEPTION)
     include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/prometheus-cpp.cmake")
@@ -261,7 +261,7 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
            "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c"
-           "${CMAKE_CURRENT_BINARY_DIR}/test_pb.lua"
+           "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
     COMMAND
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}"
       "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
@@ -273,7 +273,7 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
             "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua/upb.lua" "${CMAKE_CURRENT_BINARY_DIR}"
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
     COMMENT
-      "Generate test_pb.lua,test_pb.upb.h,test_pb.upb.c,test_pb.upbdefs.h,test_pb.upbdefs.c into ${CMAKE_CURRENT_BINARY_DIR}"
+      "Generate test_pb_pb.lua,test_pb.upb.h,test_pb.upb.c,test_pb.upbdefs.h,test_pb.upbdefs.c into ${CMAKE_CURRENT_BINARY_DIR}"
   )
 
   add_executable(

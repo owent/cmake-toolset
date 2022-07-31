@@ -90,6 +90,10 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
   endif()
 endmacro()
 
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME)
+  message(FATAL_ERROR "upb should be included after grpc")
+endif()
+
 if(NOT TARGET gRPC::grpc++_alts
    AND NOT TARGET gRPC::grpc++
    AND NOT TARGET gRPC::grpc)
