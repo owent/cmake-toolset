@@ -1,5 +1,5 @@
 diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
-index 4dd6454..a3054e8 100644
+index 4dd6454..5805bc9 100644
 --- a/third_party/upb/CMakeLists.txt
 +++ b/third_party/upb/CMakeLists.txt
 @@ -26,6 +26,11 @@ if(NOT CMAKE_BUILD_TYPE)
@@ -95,7 +95,7 @@ index 4dd6454..a3054e8 100644
  add_library(upb_test
    tests/testmain.cc
    tests/test_util.h
-@@ -162,5 +188,146 @@ target_link_libraries(upb_test
+@@ -162,5 +188,145 @@ target_link_libraries(upb_test
    handlers
    port
    upb)
@@ -126,7 +126,6 @@ index 4dd6454..a3054e8 100644
 +    upbc/main.cc
 +  )
 +  target_link_libraries(protoc-gen-upb PRIVATE
-+    mini_table
 +    port
 +    upb
 +    absl::flat_hash_map

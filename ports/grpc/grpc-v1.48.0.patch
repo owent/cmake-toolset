@@ -34,7 +34,7 @@ index 25990a5..c250b8d 100644
  
  
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 29c73bb..2a7247e 100755
+index 29c73bb..f91a11e 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,8 +39,13 @@ import sys
@@ -52,7 +52,7 @@ index 29c73bb..2a7247e 100755
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -81,10 +86,15 @@ class BuildFileFunctions(object):
+@@ -81,11 +86,16 @@ class BuildFileFunctions(object):
  
      if list(filter(IsSourceFile, files)):
        # Has sources, make this a normal library.
@@ -67,10 +67,12 @@ index 29c73bb..2a7247e 100755
 +        "\n  ".join(found_files),
 +        output_name
        )
+-      self._add_deps(kwargs)
 +      self.converter.export_targets.append(kwargs["name"])
-       self._add_deps(kwargs)
++      self._add_deps(kwargs, " PUBLIC")
      else:
        # Header-only library, have to do a couple things differently.
+       # For some info, see:
 @@ -93,6 +103,7 @@ class BuildFileFunctions(object):
        self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
            kwargs["name"]
@@ -105,7 +107,7 @@ index 29c73bb..2a7247e 100755
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
      CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
-@@ -306,11 +324,179 @@ class Converter(object):
+@@ -306,11 +324,180 @@ class Converter(object):
      elseif(UNIX)
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
@@ -160,6 +162,7 @@ index 29c73bb..2a7247e 100755
 +        ../upbc/common.cc
 +        ../upbc/protoc-gen-upb.cc
 +      )
++      add_dependencies(protoc-gen-upb mini_table upb)
 +      target_link_libraries(protoc-gen-upb PRIVATE
 +        mini_table
 +        port
@@ -237,12 +240,12 @@ index 29c73bb..2a7247e 100755
 +    )
 +
 +    target_sources(descriptor_upb_proto PRIVATE ${UPB_DESCRIPTOR_SOURCES})
-+    target_link_libraries(descriptor_upb_proto PRIVATE upb)
++    target_link_libraries(descriptor_upb_proto PUBLIC upb)
 +
 +    add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
 +      ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
 +    set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
-+    target_link_libraries(well_known_types PRIVATE upb)
++    target_link_libraries(well_known_types PUBLIC upb)
 +
 +    include(GNUInstallDirs)
 +    install(
