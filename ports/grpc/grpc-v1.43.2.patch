@@ -1,15 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 303738d..007cf0c 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -3938,6 +3938,7 @@ add_library(upb
-   src/core/ext/upb-generated/google/protobuf/descriptor.upb.c
-   src/core/ext/upbdefs-generated/google/protobuf/descriptor.upbdefs.c
- )
-+set_target_properties(upb PROPERTIES OUTPUT_NAME "grpc_upb")
- 
- set_target_properties(upb PROPERTIES
-   VERSION ${gRPC_CORE_VERSION}
 diff --git a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc b/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
 index 4aa11fd..cefb69a 100644
 --- a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
