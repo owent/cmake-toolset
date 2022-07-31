@@ -18,6 +18,6 @@ endif()
 set(gRPC_MSVC_CONFIGURE ${CMAKE_BUILD_TYPE})
 
 include("${CMAKE_CURRENT_LIST_DIR}/abseil-cpp.cmake")
-# include ("${CMAKE_CURRENT_LIST_DIR}/upb.cmake")
-
 include("${CMAKE_CURRENT_LIST_DIR}/grpc.cmake")
+
+# upb plugin is optional  and can only be imported after grpc

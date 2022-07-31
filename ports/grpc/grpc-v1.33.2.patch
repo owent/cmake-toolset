@@ -1,0 +1,242 @@
+diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
+index 4dd6454..5d781de 100644
+--- a/third_party/upb/CMakeLists.txt
++++ b/third_party/upb/CMakeLists.txt
+@@ -26,6 +26,11 @@ if(NOT CMAKE_BUILD_TYPE)
+       FORCE)
+ endif()
+ 
++set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
++set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
++set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
++set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++
+ # When using Ninja, compiler output won't be colorized without this.
+ include(CheckCXXCompilerFlag)
+ CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
+@@ -58,10 +63,23 @@ elseif(UNIX)
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+ endif()
+ 
++if (MSVC)
++  add_compile_options(/wd4146 /wd4703 -D_CRT_SECURE_NO_WARNINGS)
++endif()
++
++if (UPB_BUILD_CODEGEN)
++  find_package(absl CONFIG REQUIRED)
++  find_package(protobuf CONFIG REQUIRED)
++endif()
++add_library(descriptor_upb_proto)
++set_target_properties(descriptor_upb_proto PROPERTIES OUTPUT_NAME "upb-descriptor_upb_proto")
++
+ enable_testing()
+ 
+ add_library(port
+   upb/port.c)
++set_target_properties(port PROPERTIES OUTPUT_NAME "upb-port")
++
+ add_library(upb
+   upb/decode.c
+   upb/encode.c
+@@ -87,6 +105,7 @@ add_library(reflection
+   upb/def.h
+   upb/def.hpp
+   upb/reflection.h)
++set_target_properties(reflection PROPERTIES OUTPUT_NAME "upb-reflection")
+ target_link_libraries(reflection
+   descriptor_upb_proto
+   port
+@@ -95,6 +114,7 @@ target_link_libraries(reflection
+ add_library(textformat
+   upb/text_encode.c
+   upb/text_encode.h)
++set_target_properties(textformat PROPERTIES OUTPUT_NAME "upb-textformat")
+ target_link_libraries(textformat
+   port
+   reflection)
+@@ -103,6 +123,7 @@ add_library(json
+   upb/json_encode.c
+   upb/json_decode.h
+   upb/json_encode.h)
++set_target_properties(json PROPERTIES OUTPUT_NAME "upb-json")
+ target_link_libraries(json
+   port
+   reflection
+@@ -117,6 +138,7 @@ add_library(handlers
+   upb/sink.c
+   upb/handlers.h
+   upb/sink.h)
++set_target_properties(handlers PROPERTIES OUTPUT_NAME "upb-handlers")
+ target_link_libraries(handlers
+   port
+   reflection
+@@ -133,6 +155,7 @@ add_library(upb_pb
+   upb/pb/decoder.h
+   upb/pb/encoder.h
+   upb/pb/textprinter.h)
++set_target_properties(upb_pb PROPERTIES OUTPUT_NAME "upb-upb_pb")
+ target_link_libraries(upb_pb
+   descriptor_upb_proto
+   handlers
+@@ -145,6 +168,7 @@ add_library(upb_json
+   upb/json/printer.c
+   upb/json/parser.h
+   upb/json/printer.h)
++set_target_properties(upb_json PROPERTIES OUTPUT_NAME "upb-upb_json")
+ target_link_libraries(upb_json
+   upb
+   upb_pb)
+@@ -154,6 +178,8 @@ target_link_libraries(upb_cc_bindings INTERFACE
+   handlers
+   port
+   upb)
++
++if(BUILD_TESTING)
+ add_library(upb_test
+   tests/testmain.cc
+   tests/test_util.h
+@@ -162,5 +188,142 @@ target_link_libraries(upb_test
+   handlers
+   port
+   upb)
++endif()
+ 
+-
++set(UPB_DESCRIPTOR_PROTO "${UPB_HOST_INCLUDE_DIR}/google/protobuf/descriptor.proto")
++if (UPB_BUILD_CODEGEN)
++  set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
++  add_executable(protoc-gen-upbdefs
++    ../upbc/common.h
++    ../upbc/common.cc
++    ../upbc/protoc-gen-upbdefs.cc
++  )
++  target_link_libraries(protoc-gen-upbdefs PRIVATE
++    absl::flat_hash_map
++    absl::strings
++    protobuf::libprotobuf
++    protobuf::libprotoc
++  )
++  add_executable(protoc-gen-upb
++    ../upbc/common.h
++    ../upbc/common.cc
++    ../upbc/protoc-gen-upb.cc
++  )
++  target_link_libraries(protoc-gen-upb PRIVATE
++    mini_table
++    port
++    upb
++    absl::flat_hash_map
++    absl::flat_hash_set
++    absl::strings
++    protobuf::libprotobuf
++    protobuf::libprotoc
++  )
++  add_executable(protoc-gen-lua
++    ../upb/bindings/lua/upbc.cc
++  )
++  target_link_libraries(protoc-gen-lua PRIVATE
++    absl::strings
++    protobuf::libprotobuf
++    protobuf::libprotoc
++  )
++  set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
++  set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
++  set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
++  set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
++else()
++  find_program(PROTOC_PROGRAM protoc)
++  find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
++  find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
++  find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
++endif()
++set(UPB_DESCRIPTOR_SOURCES 
++  "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h" 
++  "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.c"
++  "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
++  "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.c"
++)
++unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS)
++unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS)
++unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES)
++unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES)
++set(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES any api duration empty
++    field_mask source_context struct timestamp type wrappers)
++foreach(PROTO_NAME IN LISTS UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES)
++  list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES
++        "${UPB_HOST_INCLUDE_DIR}/google/protobuf/${PROTO_NAME}.proto")
++  list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}_pb.lua")
++  list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.h"
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.h")
++  list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.c"
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.c")
++endforeach()
++add_custom_command(
++  OUTPUT ${UPB_DESCRIPTOR_SOURCES}
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor_pb.lua"
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES}
++  DEPENDS "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++  COMMAND
++    "${PROTOC_PROGRAM}"
++    "-I${UPB_HOST_INCLUDE_DIR}"
++    "--plugin=protoc-gen-upb=${PROTOC_GEN_UPB_PROGRAM}"
++    "--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}"
++    "--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}"
++    "--upb_out=${CMAKE_CURRENT_BINARY_DIR}"
++    "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}"
++    "--lua_out=${CMAKE_CURRENT_BINARY_DIR}"
++    "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++)
++target_sources(descriptor_upb_proto PRIVATE ${UPB_DESCRIPTOR_SOURCES})
++target_link_libraries(descriptor_upb_proto PRIVATE upb)
++add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++  ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
++set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
++target_link_libraries(well_known_types PRIVATE upb)
++include(GNUInstallDirs)
++install(
++  DIRECTORY ../upb
++  DESTINATION include
++  FILES_MATCHING
++  PATTERN "*.h"
++  PATTERN "*.hpp"
++  PATTERN "*.inc"
++  PATTERN "*.int.h"
++)
++install(
++  FILES
++    "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
++    "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor_pb.lua"
++    ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++    ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++  DESTINATION include/google/protobuf
++)
++install(
++  DIRECTORY ../upb/bindings/lua/
++  DESTINATION share/upb/upb/bindings/lua
++)
++target_include_directories(upb PUBLIC $<INSTALL_INTERFACE:include>)
++install(TARGETS
++  descriptor_upb_proto
++  well_known_types
++  port
++  upb
++  generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me
++  reflection
++  textformat
++  json
++  table
++  handlers
++  upb_pb
++  upb_json
++  upb_cc_bindings
++  ${UPB_CODEGEN_TARGETS}
++  EXPORT upb-config
++)
++install(EXPORT upb-config NAMESPACE upb:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
+\ No newline at end of file
