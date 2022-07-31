@@ -90,10 +90,6 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
   endif()
 endmacro()
 
-if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME)
-  message(FATAL_ERROR "upb should be included after grpc")
-endif()
-
 if(NOT TARGET gRPC::grpc++_alts
    AND NOT TARGET gRPC::grpc++
    AND NOT TARGET gRPC::grpc)
@@ -107,12 +103,15 @@ if(NOT TARGET gRPC::grpc++_alts
      AND NOT TARGET gRPC::grpc++
      AND NOT TARGET gRPC::grpc)
 
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME)
+      message(FATAL_ERROR "upb should be included after grpc")
+    endif()
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
       # This is related to abseil-cpp
       if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.33.2")
-        else(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
+        elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.43.2")
         endif()
       endif()

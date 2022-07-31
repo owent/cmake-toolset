@@ -12,7 +12,7 @@ index 4aa11fd..cefb69a 100644
            parent_->config_->discovery_mechanisms()[index_].cluster_name,
            parent_->config_->discovery_mechanisms()[index_].eds_service_name};
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index dea4397..733b50d 100755
+index dea4397..35997d1 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -38,8 +38,13 @@ import sys
@@ -82,7 +82,7 @@ index dea4397..733b50d 100755
  
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
-@@ -295,11 +312,159 @@ class Converter(object):
+@@ -295,11 +312,158 @@ class Converter(object):
      elseif(UNIX)
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
@@ -124,7 +124,6 @@ index dea4397..733b50d 100755
 +        ../upbc/protoc-gen-upb.cc
 +      )
 +      target_link_libraries(protoc-gen-upb PRIVATE
-+        mini_table
 +        port
 +        upb
 +        absl::flat_hash_map
