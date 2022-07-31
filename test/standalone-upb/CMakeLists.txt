@@ -112,7 +112,7 @@ add_executable(
   cmake-toolset-upb-and-lua-binding-test
   "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
   "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c"
-  upb-and-lua-binding.cpp)
+  ../upb-and-lua-binding.cpp)
 
 target_include_directories("cmake-toolset-upb-and-lua-binding-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
