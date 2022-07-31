@@ -1,5 +1,5 @@
 diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
-index 4dd6454..5d781de 100644
+index 4dd6454..fb1e8c2 100644
 --- a/third_party/upb/CMakeLists.txt
 +++ b/third_party/upb/CMakeLists.txt
 @@ -26,6 +26,11 @@ if(NOT CMAKE_BUILD_TYPE)
@@ -95,7 +95,7 @@ index 4dd6454..5d781de 100644
  add_library(upb_test
    tests/testmain.cc
    tests/test_util.h
-@@ -162,5 +188,142 @@ target_link_libraries(upb_test
+@@ -162,5 +188,146 @@ target_link_libraries(upb_test
    handlers
    port
    upb)
@@ -106,9 +106,11 @@ index 4dd6454..5d781de 100644
 +if (UPB_BUILD_CODEGEN)
 +  set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
 +  add_executable(protoc-gen-upbdefs
-+    ../upbc/common.h
-+    ../upbc/common.cc
-+    ../upbc/protoc-gen-upbdefs.cc
++    ../upbc/message_layout.h
++    ../upbc/message_layout.cc
++    ../upbc/generator.cc
++    ../upbc/generator.h
++    ../upbc/main.cc
 +  )
 +  target_link_libraries(protoc-gen-upbdefs PRIVATE
 +    absl::flat_hash_map
@@ -117,9 +119,11 @@ index 4dd6454..5d781de 100644
 +    protobuf::libprotoc
 +  )
 +  add_executable(protoc-gen-upb
-+    ../upbc/common.h
-+    ../upbc/common.cc
-+    ../upbc/protoc-gen-upb.cc
++    ../upbc/message_layout.h
++    ../upbc/message_layout.cc
++    ../upbc/generator.cc
++    ../upbc/generator.h
++    ../upbc/main.cc
 +  )
 +  target_link_libraries(protoc-gen-upb PRIVATE
 +    mini_table
