@@ -1,5 +1,5 @@
 diff --git a/cmake/make_cmakelists.py b/cmake/make_cmakelists.py
-index d64c14f..da1cf9b 100755
+index d64c14f..087862d 100755
 --- a/cmake/make_cmakelists.py
 +++ b/cmake/make_cmakelists.py
 @@ -39,8 +39,13 @@ import sys
@@ -17,7 +17,7 @@ index d64c14f..da1cf9b 100755
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -81,10 +86,15 @@ class BuildFileFunctions(object):
+@@ -81,11 +86,16 @@ class BuildFileFunctions(object):
  
      if list(filter(IsSourceFile, files)):
        # Has sources, make this a normal library.
@@ -31,10 +31,12 @@ index d64c14f..da1cf9b 100755
 +          "\n  ".join(found_files),
 +          output_name
        )
+-      self._add_deps(kwargs)
 +      self.converter.export_targets.append(kwargs["name"])
-       self._add_deps(kwargs)
++      self._add_deps(kwargs, " PUBLIC")
      else:
        # Header-only library, have to do a couple things differently.
+       # For some info, see:
 @@ -93,6 +103,7 @@ class BuildFileFunctions(object):
        self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
            kwargs["name"]
@@ -68,7 +70,7 @@ index d64c14f..da1cf9b 100755
  
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
-@@ -316,10 +333,180 @@ class Converter(object):
+@@ -316,10 +333,181 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -123,6 +125,7 @@ index d64c14f..da1cf9b 100755
 +        ../upbc/common.cc
 +        ../upbc/protoc-gen-upb.cc
 +      )
++      add_dependencies(protoc-gen-upb mini_table upb)
 +      target_link_libraries(protoc-gen-upb PRIVATE
 +        mini_table
 +        port
@@ -200,12 +203,12 @@ index d64c14f..da1cf9b 100755
 +    )
 +
 +    target_sources(descriptor_upb_proto PRIVATE ${UPB_DESCRIPTOR_SOURCES})
-+    target_link_libraries(descriptor_upb_proto PRIVATE upb)
++    target_link_libraries(descriptor_upb_proto PUBLIC upb)
 +
 +    add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
 +      ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
 +    set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
-+    target_link_libraries(well_known_types PRIVATE upb)
++    target_link_libraries(well_known_types PUBLIC upb)
 +
 +    include(GNUInstallDirs)
 +    install(
@@ -281,7 +284,7 @@ index 602dbaf..699c3c2 100644
    lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
    return 1;
 diff --git a/upb/bindings/lua/upb.c b/upb/bindings/lua/upb.c
-index 3d59cdd..e36e36b 100644
+index 3d59cdd..8e7333e 100644
 --- a/upb/bindings/lua/upb.c
 +++ b/upb/bindings/lua/upb.c
 @@ -61,11 +61,13 @@

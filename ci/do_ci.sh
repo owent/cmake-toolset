@@ -91,6 +91,13 @@ elif [[ "$1" == "gcc.4.8.test" ]]; then
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
+elif [[ "$1" == "gcc.standalone-upb.test" ]]; then
+  echo "$1"
+  mkdir -p test/build_jobs_dir
+  cd test/build_jobs_dir
+  cmake ../standalone-upb -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
+  cmake --build . -j || cmake --build .
+  THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
 elif [[ "$1" == "clang.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
