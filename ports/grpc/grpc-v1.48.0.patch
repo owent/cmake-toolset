@@ -1,8 +1,8 @@
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 29c73bb..13228f0 100755
+index 29c73bb..2a7247e 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
-@@ -39,8 +39,16 @@ import sys
+@@ -39,8 +39,13 @@ import sys
  import textwrap
  import os
  
@@ -13,14 +13,11 @@ index 29c73bb..13228f0 100755
 +
  def StripFirstChar(deps):
 -  return [dep[1:] for dep in deps]
-+  ret = [MappingThirdPartyDep(dep[1:]) for dep in deps]
-+  if 'utf8_range' in ret:
-+    ret.remove('utf8_range')
-+  return ret
++  return [MappingThirdPartyDep(dep[1:]) for dep in deps]
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -81,10 +89,15 @@ class BuildFileFunctions(object):
+@@ -81,10 +86,15 @@ class BuildFileFunctions(object):
  
      if list(filter(IsSourceFile, files)):
        # Has sources, make this a normal library.
@@ -39,7 +36,7 @@ index 29c73bb..13228f0 100755
        self._add_deps(kwargs)
      else:
        # Header-only library, have to do a couple things differently.
-@@ -93,6 +106,7 @@ class BuildFileFunctions(object):
+@@ -93,6 +103,7 @@ class BuildFileFunctions(object):
        self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
            kwargs["name"]
        )
@@ -47,7 +44,7 @@ index 29c73bb..13228f0 100755
        self._add_deps(kwargs, " INTERFACE")
  
    def cc_binary(self, **kwargs):
-@@ -240,11 +254,13 @@ class Converter(object):
+@@ -240,11 +251,13 @@ class Converter(object):
      self.prelude = ""
      self.toplevel = ""
      self.if_lua = ""
@@ -61,7 +58,7 @@ index 29c73bb..13228f0 100755
      }
  
    template = textwrap.dedent("""\
-@@ -275,6 +291,11 @@ class Converter(object):
+@@ -275,6 +288,11 @@ class Converter(object):
            FORCE)
      endif()
  
@@ -73,7 +70,7 @@ index 29c73bb..13228f0 100755
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
      CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
-@@ -306,11 +327,179 @@ class Converter(object):
+@@ -306,11 +324,179 @@ class Converter(object):
      elseif(UNIX)
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
@@ -302,6 +299,19 @@ index 3d59cdd..8e7333e 100644
  
  /* Utility functions **********************************************************/
  
+diff --git a/third_party/upb/upb/decode_internal.h b/third_party/upb/upb/decode_internal.h
+index 11bb9aa..8b594d5 100644
+--- a/third_party/upb/upb/decode_internal.h
++++ b/third_party/upb/upb/decode_internal.h
+@@ -35,7 +35,7 @@
+ 
+ #include <setjmp.h>
+ 
+-#include "third_party/utf8_range/utf8_range.h"
++#include "upb/third_party/utf8_range/utf8_range.h"
+ #include "upb/decode.h"
+ #include "upb/msg_internal.h"
+ #include "upb/upb_internal.h"
 diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
 index 9612375..76b0bfb 100644
 --- a/third_party/upb/upb/text_encode.c
