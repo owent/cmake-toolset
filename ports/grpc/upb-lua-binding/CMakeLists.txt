@@ -30,7 +30,49 @@ endif()
 find_package(upb REQUIRED CONFIG)
 find_package(absl REQUIRED CONFIG)
 find_package(protobuf REQUIRED CONFIG)
-find_package(lua REQUIRED)
+
+# Try to use unofficial-lua-config.cmake in vcpkg
+if(VCPKG_TOOLCHAIN
+   AND NOT TARGET lua::liblua-static
+   AND NOT TARGET lua::liblua-dynamic
+   AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
+   AND NOT LUA_FOUND)
+  find_package(unofficial-lua QUIET CONFIG)
+endif()
+
+# Try to use lua-config.cmake
+if(NOT TARGET lua::liblua-static
+   AND NOT TARGET lua::liblua-dynamic
+   AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
+   AND NOT LUA_FOUND)
+  find_package(lua QUIET CONFIG)
+endif()
+
+# Try to use FindLua.cmake
+if(NOT TARGET lua::liblua-static
+   AND NOT TARGET lua::liblua-dynamic
+   AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
+   AND NOT LUA_FOUND)
+  find_package(Lua QUIET MODULE)
+endif()
+
+if(NOT TARGET lua::liblua-static
+   AND NOT TARGET lua::liblua-dynamic
+   AND NOT TARGET lua::liblua
+   AND NOT TARGET unofficial-lua::lua
+   AND NOT TARGET lua
+   AND NOT LUA_FOUND)
+  message(
+    FATAL_ERROR
+      "lua::liblua-static,lua::liblua-dynamic,lua::liblua,unofficial-lua::lua,lua or Lua isrequired to build this module"
+  )
+endif()
 
 include(CheckCXXSourceCompiles)
 if(TARGET lua::liblua-dynamic)
@@ -67,7 +109,9 @@ elseif(TARGET lua)
 elseif(LUA_FOUND)
   add_library(lua::liblua UNKNOWN IMPORTED)
   set_target_properties(lua::liblua PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}")
-  set_target_properties(lua::liblua PROPERTIES IMPORTED_LOCATION "${LUA_LIBRARIES}")
+  set(UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS ${LUA_LIBRARIES})
+  list(POP_FRONT UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS UPB_BINDING_LUA_THIRD_PARTY_LUA_IMPORTED_LOCATION)
+  set_target_properties(lua::liblua PROPERTIES IMPORTED_LOCATION "${UPB_BINDING_LUA_THIRD_PARTY_LUA_IMPORTED_LOCATION}")
 
   if(ANDROID)
     list(APPEND UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "log" "m" "c")

@@ -1,5 +1,5 @@
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 29c73bb..26215ba 100755
+index 29c73bb..13228f0 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,8 +39,16 @@ import sys
@@ -73,7 +73,7 @@ index 29c73bb..26215ba 100755
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
      CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
-@@ -306,11 +327,159 @@ class Converter(object):
+@@ -306,11 +327,179 @@ class Converter(object):
      elseif(UNIX)
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
@@ -90,6 +90,20 @@ index 29c73bb..26215ba 100755
 +
 +    add_library(descriptor_upb_proto)
 +    set_target_properties(descriptor_upb_proto PROPERTIES OUTPUT_NAME "upb-descriptor_upb_proto")
++
++    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range")
++    file(COPY ../third_party/utf8_range/utf8_range.h
++          DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range" USE_SOURCE_PERMISSIONS)
++    add_library(utf8_range
++      ../third_party/utf8_range/naive.c
++      ../third_party/utf8_range/range2-neon.c
++      ../third_party/utf8_range/range2-sse.c
++      "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range/utf8_range.h"
++    )
++    set_target_properties(utf8_range PROPERTIES OUTPUT_NAME "upb-utf8_range")
++    target_include_directories(utf8_range PUBLIC
++      "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/_deps/include>"
++      "$<INSTALL_INTERFACE:include>")
 +
      %(toplevel)s
  
@@ -218,6 +232,11 @@ index 29c73bb..26215ba 100755
 +      DESTINATION include/google/protobuf
 +    )
 +    install(
++      FILES
++        "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range/utf8_range.h"
++      DESTINATION include/upb/third_party/utf8_range
++    )
++    install(
 +      DIRECTORY ../upb/bindings/lua/
 +      DESTINATION share/upb/upb/bindings/lua
 +    )
@@ -225,6 +244,7 @@ index 29c73bb..26215ba 100755
 +    install(TARGETS
 +      descriptor_upb_proto
 +      well_known_types
++      utf8_range
 +      %(export_targets)s
 +      ${UPB_CODEGEN_TARGETS}
 +      EXPORT upb-config
