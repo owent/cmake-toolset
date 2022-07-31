@@ -1,3 +1,38 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 25990a5..c250b8d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4181,6 +4181,10 @@ endif()
+ 
+ endif()
+ 
++file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range")
++file(COPY third_party/upb/third_party/utf8_range/utf8_range.h
++      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range" USE_SOURCE_PERMISSIONS)
++
+ add_library(upb
+   third_party/upb/third_party/utf8_range/naive.c
+   third_party/upb/third_party/utf8_range/range2-neon.c
+@@ -4217,6 +4221,7 @@ endif()
+ 
+ target_include_directories(upb
+   PUBLIC $<INSTALL_INTERFACE:${gRPC_INSTALL_INCLUDEDIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/_deps/include>"
+   PRIVATE
+     ${CMAKE_CURRENT_SOURCE_DIR}
+     ${_gRPC_ADDRESS_SORTING_INCLUDE_DIR}
+@@ -4241,6 +4246,11 @@ if(gRPC_INSTALL)
+     LIBRARY DESTINATION ${gRPC_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
+   )
++  install(
++    FILES
++      "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range/utf8_range.h"
++    DESTINATION include/upb/third_party/utf8_range
++  )
+ endif()
+ 
+ 
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
 index 29c73bb..2a7247e 100755
 --- a/third_party/upb/cmake/make_cmakelists.py

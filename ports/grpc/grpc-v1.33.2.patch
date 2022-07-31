@@ -1,5 +1,5 @@
 diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
-index 4dd6454..fb1e8c2 100644
+index 4dd6454..a3054e8 100644
 --- a/third_party/upb/CMakeLists.txt
 +++ b/third_party/upb/CMakeLists.txt
 @@ -26,6 +26,11 @@ if(NOT CMAKE_BUILD_TYPE)
@@ -106,11 +106,11 @@ index 4dd6454..fb1e8c2 100644
 +if (UPB_BUILD_CODEGEN)
 +  set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
 +  add_executable(protoc-gen-upbdefs
-+    ../upbc/message_layout.h
-+    ../upbc/message_layout.cc
-+    ../upbc/generator.cc
-+    ../upbc/generator.h
-+    ../upbc/main.cc
++    upbc/message_layout.h
++    upbc/message_layout.cc
++    upbc/generator.cc
++    upbc/generator.h
++    upbc/main.cc
 +  )
 +  target_link_libraries(protoc-gen-upbdefs PRIVATE
 +    absl::flat_hash_map
@@ -119,11 +119,11 @@ index 4dd6454..fb1e8c2 100644
 +    protobuf::libprotoc
 +  )
 +  add_executable(protoc-gen-upb
-+    ../upbc/message_layout.h
-+    ../upbc/message_layout.cc
-+    ../upbc/generator.cc
-+    ../upbc/generator.h
-+    ../upbc/main.cc
++    upbc/message_layout.h
++    upbc/message_layout.cc
++    upbc/generator.cc
++    upbc/generator.h
++    upbc/main.cc
 +  )
 +  target_link_libraries(protoc-gen-upb PRIVATE
 +    mini_table
@@ -136,7 +136,7 @@ index 4dd6454..fb1e8c2 100644
 +    protobuf::libprotoc
 +  )
 +  add_executable(protoc-gen-lua
-+    ../upb/bindings/lua/upbc.cc
++    upb/bindings/lua/upbc.cc
 +  )
 +  target_link_libraries(protoc-gen-lua PRIVATE
 +    absl::strings
@@ -203,7 +203,7 @@ index 4dd6454..fb1e8c2 100644
 +target_link_libraries(well_known_types PRIVATE upb)
 +include(GNUInstallDirs)
 +install(
-+  DIRECTORY ../upb
++  DIRECTORY upb
 +  DESTINATION include
 +  FILES_MATCHING
 +  PATTERN "*.h"
@@ -221,7 +221,7 @@ index 4dd6454..fb1e8c2 100644
 +  DESTINATION include/google/protobuf
 +)
 +install(
-+  DIRECTORY ../upb/bindings/lua/
++  DIRECTORY upb/bindings/lua/
 +  DESTINATION share/upb/upb/bindings/lua
 +)
 +target_include_directories(upb PUBLIC $<INSTALL_INTERFACE:include>)
