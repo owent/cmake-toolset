@@ -33,6 +33,83 @@ index 25990a5..c250b8d 100644
  endif()
  
  
+diff --git a/src/core/lib/promise/detail/basic_seq.h b/src/core/lib/promise/detail/basic_seq.h
+index 93c9fac..343672e 100644
+--- a/src/core/lib/promise/detail/basic_seq.h
++++ b/src/core/lib/promise/detail/basic_seq.h
+@@ -401,11 +401,20 @@ class BasicSeq {
+   }
+ };
+ 
++template <typename F, typename Arg, typename Iter>
++struct BasicSeqIterWrappedTraits {
++  using IterValue = decltype(*std::declval<Iter>());
++  using StateCreated = decltype(std::declval<F>()(std::declval<IterValue>(),
++                                                  std::declval<Arg>()));
++  using State = PromiseLike<StateCreated>;
++  using Wrapped = typename State::Result;
++};
++
+ // As above, but models a sequence of unknown size
+ // At each element, the accumulator A and the current value V is passed to some
+ // function of type F as f(V, A); f is expected to return a promise that
+ // resolves to Traits::WrappedType.
+-template <template <typename Wrapped> class Traits, typename F, typename Arg,
++template <class Traits, typename F, typename Arg,
+           typename Iter>
+ class BasicSeqIter {
+  private:
+@@ -466,7 +475,7 @@ class BasicSeqIter {
+   Poll<Wrapped> PollNonEmpty() {
+     Poll<Wrapped> r = state_();
+     if (absl::holds_alternative<Pending>(r)) return r;
+-    return Traits<Wrapped>::template CheckResultAndRunNext<Wrapped>(
++    return Traits::template CheckResultAndRunNext<Wrapped>(
+         std::move(absl::get<Wrapped>(r)), [this](Wrapped arg) -> Poll<Wrapped> {
+           auto next = cur_;
+           ++next;
+@@ -476,7 +485,7 @@ class BasicSeqIter {
+           cur_ = next;
+           state_.~State();
+           Construct(&state_,
+-                    Traits<Wrapped>::CallSeqFactory(f_, *cur_, std::move(arg)));
++                    Traits::template CallSeqFactory(f_, *cur_, std::move(arg)));
+           return PollNonEmpty();
+         });
+   }
+diff --git a/src/core/lib/promise/seq.h b/src/core/lib/promise/seq.h
+index 651a7af..de12889 100644
+--- a/src/core/lib/promise/seq.h
++++ b/src/core/lib/promise/seq.h
+@@ -75,9 +75,9 @@ F Seq(F functor) {
+ //   }
+ //   return argument;
+ template <typename Iter, typename Factory, typename Argument>
+-promise_detail::BasicSeqIter<promise_detail::SeqTraits, Factory, Argument, Iter>
++promise_detail::BasicSeqIter<promise_detail::SeqTraits<typename promise_detail::BasicSeqIterWrappedTraits<Factory, Argument, Iter>::Wrapped>, Factory, Argument, Iter>
+ SeqIter(Iter begin, Iter end, Argument argument, Factory factory) {
+-  return promise_detail::BasicSeqIter<promise_detail::SeqTraits, Factory,
++  return promise_detail::BasicSeqIter<promise_detail::SeqTraits<typename promise_detail::BasicSeqIterWrappedTraits<Factory, Argument, Iter>::Wrapped>, Factory,
+                                       Argument, Iter>(
+       begin, end, std::move(factory), std::move(argument));
+ }
+diff --git a/src/core/lib/promise/try_seq.h b/src/core/lib/promise/try_seq.h
+index fcaca8f..a5bef80 100644
+--- a/src/core/lib/promise/try_seq.h
++++ b/src/core/lib/promise/try_seq.h
+@@ -144,10 +144,10 @@ promise_detail::TrySeq<Functors...> TrySeq(Functors... functors) {
+ //   }
+ //   return argument;
+ template <typename Iter, typename Factory, typename Argument>
+-promise_detail::BasicSeqIter<promise_detail::TrySeqTraits, Factory, Argument,
++promise_detail::BasicSeqIter<promise_detail::TrySeqTraits<typename promise_detail::BasicSeqIterWrappedTraits<Factory, Argument, Iter>::Wrapped>, Factory, Argument,
+                              Iter>
+ TrySeqIter(Iter begin, Iter end, Argument argument, Factory factory) {
+-  return promise_detail::BasicSeqIter<promise_detail::TrySeqTraits, Factory,
++  return promise_detail::BasicSeqIter<promise_detail::TrySeqTraits<typename promise_detail::BasicSeqIterWrappedTraits<Factory, Argument, Iter>::Wrapped>, Factory,
+                                       Argument, Iter>(
+       begin, end, std::move(factory), std::move(argument));
+ }
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
 index 29c73bb..efe81a1 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
