@@ -87,6 +87,9 @@ if [ ! -e "$SOURCE_DIR/CMakeLists.txt" ]; then
   exit -2
 fi
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
 SOURCE_DIR="$(cd $SOURCE_DIR && pwd)"
 mkdir -p "$WORKING_DIR/lib"
 HOST_PYTHON3_EXECUTABLE="$(which python3)"

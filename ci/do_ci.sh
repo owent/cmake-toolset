@@ -97,7 +97,7 @@ elif [[ "$1" == "gcc.standalone-upb.test" ]]; then
   cd test/build_jobs_dir
   cmake ../standalone-upb -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
   cmake --build . -j || cmake --build .
-  THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
+  THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/third_party/install/*)
 elif [[ "$1" == "clang.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir

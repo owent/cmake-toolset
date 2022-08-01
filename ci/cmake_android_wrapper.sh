@@ -112,6 +112,9 @@ if [[ "${ANDROID_TOOLCHAIN:0:5}" != "clang" ]]; then
   ANDROID_TOOLCHAIN="gcc"
 fi
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
 for ARCH in ${ARCHS}; do
   echo "================== Compling $ARCH =================="
   echo "Building libmt_core for android-$CONF_ANDROID_NATIVE_API_LEVEL ${ARCH}"
@@ -128,6 +131,12 @@ for ARCH in ${ARCHS}; do
   EXT_OPTIONS=""
   if [[ "${ANDROID_TOOLCHAIN:0:5}" == "clang" ]]; then
     EXT_OPTIONS="$EXT_OPTIONS -DANDROID_LD=lld"
+  fi
+  if [[ -e "$ANDROID_NDK_ROOT/build/core/version.mk" ]]; then
+    ANDROID_NDK_MAJOR_VERSION=$(cat "$ANDROID_NDK_ROOT/build/core/version.mk" | awk '$0 ~ /NDK_MAJOR/ { print $NF }')
+    if [[ ! -z "$ANDROID_NDK_MAJOR_VERSION" ]] && [[ $ANDROID_NDK_MAJOR_VERSION -ge 25 ]]; then
+      EXT_OPTIONS="$EXT_OPTIONS -DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF"
+    fi
   fi
 
   # 64 bits must at least using android-21
