@@ -34,7 +34,7 @@ index 25990a5..c250b8d 100644
  
  
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 29c73bb..f91a11e 100755
+index 29c73bb..efe81a1 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,8 +39,13 @@ import sys
@@ -95,19 +95,24 @@ index 29c73bb..f91a11e 100755
      }
  
    template = textwrap.dedent("""\
-@@ -275,6 +288,11 @@ class Converter(object):
+@@ -275,6 +288,16 @@ class Converter(object):
            FORCE)
      endif()
  
 +    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
-+    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
 +    set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
-+    set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++    if (UNIX AND NOT APPLE)
++      set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
++      set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++    elseif (APPLE)
++      set(CMAKE_INSTALL_RPATH "@loader_path/../lib64" "@loader_path/../lib")
++      set(CMAKE_BUILD_RPATH  "@loader_path/../lib64" "@loader_path/../lib")
++    endif()
 +
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
      CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
-@@ -306,11 +324,180 @@ class Converter(object):
+@@ -306,11 +329,180 @@ class Converter(object):
      elseif(UNIX)
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()

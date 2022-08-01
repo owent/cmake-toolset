@@ -1,20 +1,25 @@
 diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
-index 4dd6454..7b62ca7 100644
+index 4dd6454..3e28d48 100644
 --- a/third_party/upb/CMakeLists.txt
 +++ b/third_party/upb/CMakeLists.txt
-@@ -26,6 +26,11 @@ if(NOT CMAKE_BUILD_TYPE)
+@@ -26,6 +26,16 @@ if(NOT CMAKE_BUILD_TYPE)
        FORCE)
  endif()
  
 +set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
-+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
 +set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
-+set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++if (UNIX AND NOT APPLE)
++  set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
++  set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++elseif (APPLE)
++  set(CMAKE_INSTALL_RPATH "@loader_path/../lib64" "@loader_path/../lib")
++  set(CMAKE_BUILD_RPATH  "@loader_path/../lib64" "@loader_path/../lib")
++endif()
 +
  # When using Ninja, compiler output won't be colorized without this.
  include(CheckCXXCompilerFlag)
  CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
-@@ -58,10 +63,23 @@ elseif(UNIX)
+@@ -58,10 +68,23 @@ elseif(UNIX)
    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
  endif()
  
@@ -38,7 +43,7 @@ index 4dd6454..7b62ca7 100644
  add_library(upb
    upb/decode.c
    upb/encode.c
-@@ -87,6 +105,7 @@ add_library(reflection
+@@ -87,6 +110,7 @@ add_library(reflection
    upb/def.h
    upb/def.hpp
    upb/reflection.h)
@@ -46,7 +51,7 @@ index 4dd6454..7b62ca7 100644
  target_link_libraries(reflection
    descriptor_upb_proto
    port
-@@ -95,6 +114,7 @@ target_link_libraries(reflection
+@@ -95,6 +119,7 @@ target_link_libraries(reflection
  add_library(textformat
    upb/text_encode.c
    upb/text_encode.h)
@@ -54,7 +59,7 @@ index 4dd6454..7b62ca7 100644
  target_link_libraries(textformat
    port
    reflection)
-@@ -103,6 +123,7 @@ add_library(json
+@@ -103,6 +128,7 @@ add_library(json
    upb/json_encode.c
    upb/json_decode.h
    upb/json_encode.h)
@@ -62,7 +67,7 @@ index 4dd6454..7b62ca7 100644
  target_link_libraries(json
    port
    reflection
-@@ -117,6 +138,7 @@ add_library(handlers
+@@ -117,6 +143,7 @@ add_library(handlers
    upb/sink.c
    upb/handlers.h
    upb/sink.h)
@@ -70,7 +75,7 @@ index 4dd6454..7b62ca7 100644
  target_link_libraries(handlers
    port
    reflection
-@@ -133,6 +155,7 @@ add_library(upb_pb
+@@ -133,6 +160,7 @@ add_library(upb_pb
    upb/pb/decoder.h
    upb/pb/encoder.h
    upb/pb/textprinter.h)
@@ -78,7 +83,7 @@ index 4dd6454..7b62ca7 100644
  target_link_libraries(upb_pb
    descriptor_upb_proto
    handlers
-@@ -145,6 +168,7 @@ add_library(upb_json
+@@ -145,6 +173,7 @@ add_library(upb_json
    upb/json/printer.c
    upb/json/parser.h
    upb/json/printer.h)
@@ -86,7 +91,7 @@ index 4dd6454..7b62ca7 100644
  target_link_libraries(upb_json
    upb
    upb_pb)
-@@ -154,6 +178,8 @@ target_link_libraries(upb_cc_bindings INTERFACE
+@@ -154,6 +183,8 @@ target_link_libraries(upb_cc_bindings INTERFACE
    handlers
    port
    upb)
@@ -95,7 +100,7 @@ index 4dd6454..7b62ca7 100644
  add_library(upb_test
    tests/testmain.cc
    tests/test_util.h
-@@ -162,5 +188,128 @@ target_link_libraries(upb_test
+@@ -162,5 +193,128 @@ target_link_libraries(upb_test
    handlers
    port
    upb)
@@ -226,3 +231,53 @@ index 4dd6454..7b62ca7 100644
 +)
 +install(EXPORT upb-config NAMESPACE upb:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
 \ No newline at end of file
+diff --git a/third_party/upb/upb/bindings/lua/def.c b/third_party/upb/upb/bindings/lua/def.c
+index 6dc6b1a..9261607 100644
+--- a/third_party/upb/upb/bindings/lua/def.c
++++ b/third_party/upb/upb/bindings/lua/def.c
+@@ -567,7 +567,7 @@ const upb_filedef *lupb_filedef_check(lua_State *L, int narg) {
+ 
+ static int lupb_filedef_dep(lua_State *L) {
+   const upb_filedef *f = lupb_filedef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_filedef *dep = upb_filedef_dep(f, index);
+   lupb_wrapper_pushwrapper(L, 1, dep, LUPB_FILEDEF);
+   return 1;
+@@ -581,7 +581,7 @@ static int lupb_filedef_depcount(lua_State *L) {
+ 
+ static int lupb_filedef_enum(lua_State *L) {
+   const upb_filedef *f = lupb_filedef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_enumdef *e = upb_filedef_enum(f, index);
+   lupb_wrapper_pushwrapper(L, 1, e, LUPB_ENUMDEF);
+   return 1;
+@@ -595,7 +595,7 @@ static int lupb_filedef_enumcount(lua_State *L) {
+ 
+ static int lupb_filedef_msg(lua_State *L) {
+   const upb_filedef *f = lupb_filedef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_msgdef *m = upb_filedef_msg(f, index);
+   lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
+   return 1;
+diff --git a/third_party/upb/upb/bindings/lua/upb.c b/third_party/upb/upb/bindings/lua/upb.c
+index 3630ae2..22f4a20 100644
+--- a/third_party/upb/upb/bindings/lua/upb.c
++++ b/third_party/upb/upb/bindings/lua/upb.c
+@@ -33,12 +33,13 @@
+ /* Lua compatibility code *****************************************************/
+ 
+ /* Shims for upcoming Lua 5.3 functionality. */
++#if LUA_VERSION_NUM < 503
+ static bool lua_isinteger(lua_State *L, int argn) {
+   LUPB_UNUSED(L);
+   LUPB_UNUSED(argn);
+   return false;
+ }
+-
++#endif
+ 
+ /* Utility functions **********************************************************/
+ 
