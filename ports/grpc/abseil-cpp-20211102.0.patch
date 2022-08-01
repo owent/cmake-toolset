@@ -1,5 +1,5 @@
 diff --git a/absl/base/config.h b/absl/base/config.h
-index 585485c..be69e70 100644
+index 585485c..dabf6ef 100644
 --- a/absl/base/config.h
 +++ b/absl/base/config.h
 @@ -550,7 +550,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
@@ -8,7 +8,7 @@ index 585485c..be69e70 100644
  #if __has_include(<any>) && defined(__cplusplus) && __cplusplus >= 201703L && \
 -    !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
 +    !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
-+    !defined(_MSC_VER)
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
  #define ABSL_HAVE_STD_ANY 1
  #endif
  #endif
@@ -18,7 +18,7 @@ index 585485c..be69e70 100644
  #if __has_include(<optional>) && defined(__cplusplus) && \
 -    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
 +    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
-+    !defined(_MSC_VER)
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
  #define ABSL_HAVE_STD_OPTIONAL 1
  #endif
  #endif
@@ -28,7 +28,7 @@ index 585485c..be69e70 100644
  #if __has_include(<variant>) && defined(__cplusplus) && \
 -    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
 +    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
-+    !defined(_MSC_VER)
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
  #define ABSL_HAVE_STD_VARIANT 1
  #endif
  #endif
@@ -38,7 +38,7 @@ index 585485c..be69e70 100644
  #if __has_include(<string_view>) && defined(__cplusplus) && \
 -    __cplusplus >= 201703L
 +    __cplusplus >= 201703L && \
-+    !defined(_MSC_VER)
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
  #define ABSL_HAVE_STD_STRING_VIEW 1
  #endif
  #endif

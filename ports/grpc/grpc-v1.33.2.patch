@@ -1,5 +1,5 @@
 diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
-index 4dd6454..5805bc9 100644
+index 4dd6454..7b62ca7 100644
 --- a/third_party/upb/CMakeLists.txt
 +++ b/third_party/upb/CMakeLists.txt
 @@ -26,6 +26,11 @@ if(NOT CMAKE_BUILD_TYPE)
@@ -95,7 +95,7 @@ index 4dd6454..5805bc9 100644
  add_library(upb_test
    tests/testmain.cc
    tests/test_util.h
-@@ -162,5 +188,145 @@ target_link_libraries(upb_test
+@@ -162,5 +188,128 @@ target_link_libraries(upb_test
    handlers
    port
    upb)
@@ -104,20 +104,7 @@ index 4dd6454..5805bc9 100644
 -
 +set(UPB_DESCRIPTOR_PROTO "${UPB_HOST_INCLUDE_DIR}/google/protobuf/descriptor.proto")
 +if (UPB_BUILD_CODEGEN)
-+  set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
-+  add_executable(protoc-gen-upbdefs
-+    upbc/message_layout.h
-+    upbc/message_layout.cc
-+    upbc/generator.cc
-+    upbc/generator.h
-+    upbc/main.cc
-+  )
-+  target_link_libraries(protoc-gen-upbdefs PRIVATE
-+    absl::flat_hash_map
-+    absl::strings
-+    protobuf::libprotobuf
-+    protobuf::libprotoc
-+  )
++  set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-lua)
 +  add_executable(protoc-gen-upb
 +    upbc/message_layout.h
 +    upbc/message_layout.cc
@@ -144,12 +131,10 @@ index 4dd6454..5805bc9 100644
 +  )
 +  set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
 +  set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
-+  set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
 +  set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
 +else()
 +  find_program(PROTOC_PROGRAM protoc)
 +  find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
-+  find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
 +  find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
 +endif()
 +set(UPB_DESCRIPTOR_SOURCES 
@@ -187,10 +172,8 @@ index 4dd6454..5805bc9 100644
 +    "${PROTOC_PROGRAM}"
 +    "-I${UPB_HOST_INCLUDE_DIR}"
 +    "--plugin=protoc-gen-upb=${PROTOC_GEN_UPB_PROGRAM}"
-+    "--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}"
 +    "--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}"
 +    "--upb_out=${CMAKE_CURRENT_BINARY_DIR}"
-+    "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}"
 +    "--lua_out=${CMAKE_CURRENT_BINARY_DIR}"
 +    "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
 +)
