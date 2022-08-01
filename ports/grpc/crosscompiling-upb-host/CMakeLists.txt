@@ -33,9 +33,32 @@ set(ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING TRUE)
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
 # Ports
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/abseil-cpp.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_STANDALONE)
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/abseil-cpp.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
+else()
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
+
+  if(NOT ANDROID AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
+    if(NOT WIN32 AND NOT MINGW)
+      include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+    endif()
+  endif()
+
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
+
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/gtest.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/benchmark.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
+endif()
 
 message(
   STATUS
