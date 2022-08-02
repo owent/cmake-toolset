@@ -296,11 +296,8 @@ if(NOT TARGET gRPC::grpc++_alts
            # "-DgRPC_SSL_PROVIDER=module"
            "-DgRPC_SSL_PROVIDER=none")
     endif()
-    if(WIN32
-       OR MINGW
-       OR CYGWIN)
-      list(APPEND "-DCMAKE_DEBUG_POSTFIX=-dbg" "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
-    endif()
+
+    project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS)
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
       list(

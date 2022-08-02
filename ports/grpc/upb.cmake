@@ -123,12 +123,8 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       project_third_party_append_build_shared_lib_var("upb" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS
                                                       BUILD_SHARED_LIBS)
     endif()
-    if(WIN32
-       OR MINGW
-       OR CYGWIN)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=-dbg"
-           "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
-    endif()
+
+    project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS)
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH AND (CMAKE_HOST_WIN32 OR CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows"))
       file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.ps1"
