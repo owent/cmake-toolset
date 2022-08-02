@@ -11,6 +11,10 @@ if [[ "x$CI_BUILD_CONFIGURE_TYPE" == "x" ]]; then
   export CI_BUILD_CONFIGURE_TYPE="Release"
 fi
 
+if [[ ! -z "$CI" ]] || [[ ! -z "$CI_NAME" ]]; then
+  export ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE="true"
+fi
+
 if [[ "$1" == "format" ]]; then
   python3 -m pip install --user -r ./ci/requirements.txt
   bash ./ci/format.sh

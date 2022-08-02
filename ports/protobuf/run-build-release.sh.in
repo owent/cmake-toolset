@@ -14,6 +14,12 @@ else
     ALLOW_PARALLEL_BUILD_FLAGS=1 ;
 fi
 
+if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]]; then
+    FINAL_BUILD_TYPE="@CMAKE_BUILD_TYPE@"
+else
+    FINAL_BUILD_TYPE="Release"
+fi
+
 set -x ;
 
 # build host protoc first
@@ -37,19 +43,25 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
         if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
             if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-                "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+                    "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+                fi
+                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+                    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                fi
             else
-                "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-                "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+                    "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+                fi
+                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+                    "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                fi
             fi
 
-            if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
-                if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                    "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
-                else
-                    "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
-                fi
+            if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+                "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
+            else
+                "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
             fi
 
         else
@@ -94,19 +106,25 @@ fi
 if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
     if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+            "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+        fi
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        fi
     else
-        "@CMAKE_COMMAND@" --build . --target install --config Debug ;
-        "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+            "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+        fi
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+            "@CMAKE_COMMAND@" --build . --target install --config Release ;
+        fi
     fi
 
-    if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]] && [[ "x@CMAKE_BUILD_TYPE@" != "xRelease" ]]; then
-        if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-            "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
-        else
-            "@CMAKE_COMMAND@" --build . --target install --config "@CMAKE_BUILD_TYPE@" ;
-        fi
+    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+        "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
+    else
+        "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
     fi
 
 else

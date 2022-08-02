@@ -210,6 +210,7 @@ For example, if we want to use the same python3 executable on target and host bu
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR` : Where to build packages of host system.
 + Option(Optional): `PROJECT_PREBUILT_PLATFORM_NAME` : Platform name
 + Option(Optional): `PROJECT_PREBUILT_HOST_PLATFORM_NAME` : Host platform name
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE` : Where to build packages in CI mode(Only one triplet for MSVC).
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")
