@@ -5,6 +5,10 @@ $OutputEncoding = [System.Text.UTF8Encoding]::new()
 $ENV:LC_ALL = "en_US.UTF-8"
 $ENV:LANG = "en_US.UTF-8"
 
+if ( (Test-Path ENV:CI) -or (Test-Path ENV:CI_NAME) ) {
+  $ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE = "true"
+}
+
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $WORK_DIR = Get-Location
 
