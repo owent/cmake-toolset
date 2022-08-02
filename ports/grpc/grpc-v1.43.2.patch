@@ -297,51 +297,18 @@ index c9d98bb..b1f9b86 100644
  /* Utility functions **********************************************************/
  
 diff --git a/third_party/upb/upb/bindings/lua/upbc.cc b/third_party/upb/upb/bindings/lua/upbc.cc
-index e2bb0dd..b791230 100644
+index e2bb0dd..527863a 100644
 --- a/third_party/upb/upb/bindings/lua/upbc.cc
 +++ b/third_party/upb/upb/bindings/lua/upbc.cc
-@@ -69,11 +69,11 @@ static void PrintHexDigit(char digit, protobuf::io::Printer* printer) {
-   printer->WriteRaw(&text, 1);
- }
- 
--static void PrintString(int max_cols, absl::string_view* str,
-+static const char* PrintString(int max_cols, const char* data_begin, const char* data_end,
-                         protobuf::io::Printer* printer) {
-   printer->Print("\'");
--  while (max_cols > 0 && !str->empty()) {
--    char ch = (*str)[0];
-+  while (max_cols > 0 && data_begin < data_end) {
-+    char ch = *data_begin;
-     if (ch == '\\') {
-       printer->PrintRaw("\\\\");
+@@ -80,7 +80,7 @@ static void PrintString(int max_cols, absl::string_view* str,
+     } else if (ch == '\'') {
+       printer->PrintRaw("\\'");
        max_cols--;
-@@ -90,9 +90,10 @@ static void PrintString(int max_cols, absl::string_view* str,
-       PrintHexDigit(byte & 15, printer);
-       max_cols -= 4;
-     }
--    str->remove_prefix(1);
-+    ++ data_begin;
-   }
-   printer->Print("\'");
-+  return data_begin;
- }
- 
- bool LuaGenerator::Generate(
-@@ -117,10 +118,11 @@ bool LuaGenerator::Generate(
-   file_proto.SerializeToString(&file_data);
- 
-   printer.Print("local descriptor = table.concat({\n");
--  absl::string_view data(file_data);
--  while (!data.empty()) {
-+  const char* data_begin = file_data.c_str();
-+  const char* data_end = data_begin + file_data.size();
-+  while (data_begin < data_end) {
-     printer.Print("  ");
--    PrintString(72, &data, &printer);
-+    data_begin = PrintString(72, data_begin, data_end, &printer);
-     printer.Print(",\n");
-   }
-   printer.Print("})\n");
+-    } else if (isprint(ch)) {
++    } else if (isprint(static_cast<int>(static_cast<unsigned char>(ch)))) {
+       printer->WriteRaw(&ch, 1);
+       max_cols--;
+     } else {
 diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
 index 12840c0..39ce223 100644
 --- a/third_party/upb/upb/text_encode.c
