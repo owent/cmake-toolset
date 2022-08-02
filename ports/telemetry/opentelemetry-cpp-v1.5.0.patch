@@ -107,7 +107,7 @@ index dfda869..486d61d 100644
  }  // namespace exporter
  OPENTELEMETRY_END_NAMESPACE
 diff --git a/exporters/prometheus/src/collector.cc b/exporters/prometheus/src/collector.cc
-index 03793a8..19d27e5 100644
+index 03793a8..c0db4d7 100644
 --- a/exporters/prometheus/src/collector.cc
 +++ b/exporters/prometheus/src/collector.cc
 @@ -58,7 +58,7 @@ void PrometheusCollector::AddMetricData(const sdk::metrics::ResourceMetrics &dat
@@ -115,7 +115,7 @@ index 03793a8..19d27e5 100644
    if (metrics_to_collect_.size() + 1 <= max_collection_size_)
    {
 -    metrics_to_collect_.emplace_back(new sdk::metrics::ResourceMetrics{data});
-+    metrics_to_collect_.emplace_back(std::unique_ptr<sdk::metrics::ResourceMetrics>(new sdk::metrics::ResourceMetrics{data}));
++    metrics_to_collect_.emplace_back(new sdk::metrics::ResourceMetrics(data));
    }
    collection_lock_.unlock();
  }
