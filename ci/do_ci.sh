@@ -4,6 +4,9 @@ cd "$(cd "$(dirname $0)" && pwd)/.."
 
 set -ex
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
 if [[ "x$CI_BUILD_CONFIGURE_TYPE" == "x" ]]; then
   export CI_BUILD_CONFIGURE_TYPE="Release"
 fi

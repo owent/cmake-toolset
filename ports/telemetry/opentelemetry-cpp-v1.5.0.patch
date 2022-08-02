@@ -1,0 +1,13 @@
+diff --git a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h
+index 70aa5dd..e5102c6 100644
+--- a/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h
++++ b/exporters/otlp/include/opentelemetry/exporters/otlp/otlp_http_client.h
+@@ -186,7 +186,7 @@ class OtlpHttpClient
+       event_handle.swap(input_handle);
+     }
+ 
+-    inline explicit HttpSessionData(HttpSessionData &&other)
++    inline HttpSessionData(HttpSessionData &&other)
+     {
+       session.swap(other.session);
+       event_handle.swap(other.event_handle);
