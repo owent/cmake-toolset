@@ -33,6 +33,19 @@ index 25990a5..c250b8d 100644
  endif()
  
  
+diff --git a/src/core/lib/iomgr/resolve_address_windows.cc b/src/core/lib/iomgr/resolve_address_windows.cc
+index 0051b74..5fceaaf 100644
+--- a/src/core/lib/iomgr/resolve_address_windows.cc
++++ b/src/core/lib/iomgr/resolve_address_windows.cc
+@@ -115,7 +115,7 @@ NativeDNSResolver::ResolveNameBlocking(absl::string_view name,
+     goto done;
+   }
+   if (port.empty()) {
+-    if (default_port == NULL) {
++    if (default_port.empty()) {
+       error = GRPC_ERROR_CREATE_FROM_CPP_STRING(
+           absl::StrFormat("no port in name '%s'", name));
+       goto done;
 diff --git a/src/core/lib/promise/detail/basic_seq.h b/src/core/lib/promise/detail/basic_seq.h
 index 93c9fac..343672e 100644
 --- a/src/core/lib/promise/detail/basic_seq.h
