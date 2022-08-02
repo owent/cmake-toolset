@@ -25,7 +25,8 @@ extern "C" {
 int main() {
   upb::Arena arena;
   cmake_toolset_test_message* test_msg = cmake_toolset_test_message_new(arena.ptr());
-  cmake_toolset_test_message_set_str(test_msg, upb_StringView_FromString("hello world!"));
+  // cmake_toolset_test_message_set_str(test_msg, upb_StringView_FromString("hello world!")); // New implementation
+  // cmake_toolset_test_message_set_str(test_msg, upb_strview_makez("hello world!")); // Old implementation
   cmake_toolset_test_message_set_i64(test_msg, 123321);
   size_t size;
   cmake_toolset_test_message_serialize(test_msg, arena.ptr(), &size);

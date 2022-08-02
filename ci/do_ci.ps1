@@ -2,6 +2,9 @@ $PSDefaultParameterValues['*:Encoding'] = 'UTF-8'
 
 $OutputEncoding = [System.Text.UTF8Encoding]::new()
 
+$ENV:LC_ALL = "en_US.UTF-8"
+$ENV:LANG = "en_US.UTF-8"
+
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $WORK_DIR = Get-Location
 

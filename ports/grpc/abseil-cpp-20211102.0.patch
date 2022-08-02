@@ -1,5 +1,5 @@
 diff --git a/absl/base/config.h b/absl/base/config.h
-index 585485c..dabf6ef 100644
+index 585485c..707f04b 100644
 --- a/absl/base/config.h
 +++ b/absl/base/config.h
 @@ -550,7 +550,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
@@ -42,16 +42,3 @@ index 585485c..dabf6ef 100644
  #define ABSL_HAVE_STD_STRING_VIEW 1
  #endif
  #endif
-@@ -608,9 +612,9 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
-     ((defined(_MSVC_LANG) && _MSVC_LANG > 201402) || \
-      (defined(__cplusplus) && __cplusplus > 201402))
- // #define ABSL_HAVE_STD_ANY 1
--#define ABSL_HAVE_STD_OPTIONAL 1
--#define ABSL_HAVE_STD_VARIANT 1
--#define ABSL_HAVE_STD_STRING_VIEW 1
-+// #define ABSL_HAVE_STD_OPTIONAL 1
-+// #define ABSL_HAVE_STD_VARIANT 1
-+// #define ABSL_HAVE_STD_STRING_VIEW 1
- #endif
- 
- // ABSL_USES_STD_ANY
