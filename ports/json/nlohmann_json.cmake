@@ -29,12 +29,7 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
       "-DJSON_Install=ON"
       "-DJSON_BuildTests=OFF")
 
-    if(WIN32
-       OR MINGW
-       OR CYGWIN)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=-dbg"
-           "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
-    endif()
+    project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS)
     project_third_party_append_build_shared_lib_var(
       "nlohmann_json" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS BUILD_SHARED_LIBS)
 

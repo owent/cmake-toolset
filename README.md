@@ -121,16 +121,23 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 17. Macro: `add_linker_flags_for_all([LDFLAGS...])`
 18. Macro: `add_linker_flags_for_all_unique([LDFLAGS...])`
 19. Macro: `try_set_linker([LINKER <linker name or path...>] [LEGACY_LINKER_DIRECTORY <linker directory that contains ld>])`
-20. Function: `add_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
-21. Function: `remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
-22. Function: `add_target_link_flags(<TARGET> [LDFLAGS...])`
-23. Variable `COMPILER_OPTIONS_TEST_STD_COROUTINE` : `TRUE` when toolchain support C++20 Coroutine.
-24. Variable `COMPILER_OPTIONS_TEST_STD_COROUTINE_TS` : `TRUE` when toolchain experimental support C++20 Coroutine.
-25. Variable `COMPILER_OPTIONS_TEST_EXCEPTION` : `TRUE` when toolchain enable exception support.
-26. Variable `COMPILER_OPTIONS_TEST_STD_EXCEPTION_PTR` : `TRUE` when toolchain support C++11 `std::exception_ptr` .
-27. Variable `COMPILER_OPTIONS_TEST_RTTI` : `TRUE` when toolchain enable runtime type information.
-28. Variable `COMPILER_STRICT_CFLAGS` : flags of all but compatible warnings and turn warning to error.
-29. Variable `COMPILER_STRICT_EXTRA_CFLAGS` : flags of all extra warnings.
+20. Macro: `project_build_tools_auto_append_postfix(<VARNAME>)` : Auto add postfix cmake options to variable
+21. Function: `add_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
+22. Function: `remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
+23. Function: `add_target_link_flags(<TARGET> [LDFLAGS...])`
+24. Function: `project_build_tools_auto_set_target_postfix(<TARGET> [TARGET...])` : Auto set postfix to targets
+25. Function: `project_build_tools_set_import_declaration(<VARNAME>)` : Set import delaration of current toolchain to variable
+26. Function: `project_build_tools_set_export_declaration(<VARNAME>)` : Set export delaration of current toolchain to variable
+27. Function: `project_build_tools_get_origin_rpath(<VARNAME> [path...])` : Get relative `RPATH/RUNPATH` paths
+28. Function: `project_build_tools_set_global_install_rpath_origin([path...])` : Set global `RPATH/RUNPATH` to relative paths for installed targets
+29. Function: `project_build_tools_set_global_build_rpath_origin([path...])` : Set global `RPATH/RUNPATH` to relative paths when building
+30. Variable `COMPILER_OPTIONS_TEST_STD_COROUTINE` : `TRUE` when toolchain support C++20 Coroutine.
+31. Variable `COMPILER_OPTIONS_TEST_STD_COROUTINE_TS` : `TRUE` when toolchain experimental support C++20 Coroutine.
+32. Variable `COMPILER_OPTIONS_TEST_EXCEPTION` : `TRUE` when toolchain enable exception support.
+33. Variable `COMPILER_OPTIONS_TEST_STD_EXCEPTION_PTR` : `TRUE` when toolchain support C++11 `std::exception_ptr` .
+34. Variable `COMPILER_OPTIONS_TEST_RTTI` : `TRUE` when toolchain enable runtime type information.
+35. Variable `COMPILER_STRICT_CFLAGS` : flags of all but compatible warnings and turn warning to error.
+36. Variable `COMPILER_STRICT_EXTRA_CFLAGS` : flags of all extra warnings.
 
 ### `TargetOption.cmake`
 

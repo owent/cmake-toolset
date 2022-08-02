@@ -84,12 +84,7 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
       endif()
     endforeach()
 
-    if(WIN32
-       OR MINGW
-       OR CYGWIN)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS "-DCMAKE_DEBUG_POSTFIX=-dbg"
-           "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg")
-    endif()
+    project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS)
 
     # CMake options end, maybe need patch files
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_PATCH_FILE
