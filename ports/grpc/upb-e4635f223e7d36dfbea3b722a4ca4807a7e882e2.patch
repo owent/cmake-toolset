@@ -306,6 +306,52 @@ index 3d59cdd..8e7333e 100644
  
  /* Utility functions **********************************************************/
  
+diff --git a/upb/bindings/lua/upbc.cc b/upb/bindings/lua/upbc.cc
+index 78e1473..5119f5a 100644
+--- a/upb/bindings/lua/upbc.cc
++++ b/upb/bindings/lua/upbc.cc
+@@ -68,11 +68,11 @@ static void PrintHexDigit(char digit, protobuf::io::Printer* printer) {
+   printer->WriteRaw(&text, 1);
+ }
+ 
+-static void PrintString(int max_cols, absl::string_view* str,
++static const char* PrintString(int max_cols, const char* data_begin, const char* data_end,
+                         protobuf::io::Printer* printer) {
+   printer->Print("\'");
+-  while (max_cols > 0 && !str->empty()) {
+-    char ch = (*str)[0];
++  while (max_cols > 0 && data_begin < data_end) {
++    char ch = *data_begin;
+     if (ch == '\\') {
+       printer->PrintRaw("\\\\");
+       max_cols--;
+@@ -89,9 +89,10 @@ static void PrintString(int max_cols, absl::string_view* str,
+       PrintHexDigit(byte & 15, printer);
+       max_cols -= 4;
+     }
+-    str->remove_prefix(1);
++    ++ data_begin;
+   }
+   printer->Print("\'");
++  return data_begin;
+ }
+ 
+ bool LuaGenerator::Generate(const protobuf::FileDescriptor* file,
+@@ -115,10 +116,11 @@ bool LuaGenerator::Generate(const protobuf::FileDescriptor* file,
+   file_proto.SerializeToString(&file_data);
+ 
+   printer.Print("local descriptor = table.concat({\n");
+-  absl::string_view data(file_data);
+-  while (!data.empty()) {
++  const char* data_begin = file_data.c_str();
++  const char* data_end = data_begin + file_data.size();
++  while (data_begin < data_end) {
+     printer.Print("  ");
+-    PrintString(72, &data, &printer);
++    data_begin = PrintString(72, data_begin, data_end, &printer);
+     printer.Print(",\n");
+   }
+   printer.Print("})\n");
 diff --git a/upb/internal/decode.h b/upb/internal/decode.h
 index 708874c..604df7e 100644
 --- a/upb/internal/decode.h
