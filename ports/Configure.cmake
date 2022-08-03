@@ -337,12 +337,19 @@ project_git_get_ambiguous_name(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH "${ATFR
 
 if(NOT project_third_party_get_build_dir_HASH)
   if(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
-    set(project_third_party_get_build_dir_HASH "${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
+    set(project_third_party_get_build_dir_HASH_TOOLSET "${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
   else()
-    file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH)
+    file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH_TOOLSET)
   endif()
+  string(SHA256 project_third_party_get_build_dir_HASH_PROJECT "${PROJECT_SOURCE_DIR}")
+
+  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 8
+                   project_third_party_get_build_dir_HASH_TOOLSET)
+  string(SUBSTRING "${project_third_party_get_build_dir_HASH_PROJECT}" 0 5
+                   project_third_party_get_build_dir_HASH_PROJECT)
+  set(project_third_party_get_build_dir_HASH
+      "${project_third_party_get_build_dir_HASH_TOOLSET}-${project_third_party_get_build_dir_HASH_PROJECT}")
 endif()
-string(SUBSTRING "${project_third_party_get_build_dir_HASH}" 0 8 project_third_party_get_build_dir_HASH)
 if(DEFINED ENV{HOME})
   set(project_third_party_get_build_dir_USER_BASE "$ENV{HOME}")
 elseif(DEFINED ENV{USERPROFILE})
