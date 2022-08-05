@@ -270,11 +270,13 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
            "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c"
-           "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
+           "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua" "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua"
     COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}"
             ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
             "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua/upb.lua" "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/test_upb-and-lua-binding.lua"
+            "${CMAKE_CURRENT_BINARY_DIR}"
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
     COMMENT
       "Generate test_pb_pb.lua,test_pb.upb.h,test_pb.upb.c,test_pb.upbdefs.h,test_pb.upbdefs.c into ${CMAKE_CURRENT_BINARY_DIR}"
@@ -293,4 +295,9 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
 
   target_compile_options("cmake-toolset-upb-and-lua-binding-test"
                          PRIVATE "${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS}")
+
+  add_test(
+    NAME cmake-toolset.upb-and-lua-binding-test
+    COMMAND cmake-toolset-upb-and-lua-binding-test "./test_upb-and-lua-binding.lua"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 endif()
