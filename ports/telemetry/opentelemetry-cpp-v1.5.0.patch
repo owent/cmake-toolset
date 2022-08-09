@@ -106,6 +106,40 @@ index dfda869..486d61d 100644
  }  // namespace otlp
  }  // namespace exporter
  OPENTELEMETRY_END_NAMESPACE
+diff --git a/exporters/otlp/src/otlp_http_client.cc b/exporters/otlp/src/otlp_http_client.cc
+index 40234be..58c5d78 100644
+--- a/exporters/otlp/src/otlp_http_client.cc
++++ b/exporters/otlp/src/otlp_http_client.cc
+@@ -668,8 +668,12 @@ OtlpHttpClient::~OtlpHttpClient()
+       }
+     }
+     // When changes of running_sessions_ and notify_one/notify_all happen between predicate
+-    // checking and waiting, we should not wait forever.
+-    session_waker_.wait_for(lock, options_.timeout);
++    // checking and waiting, we should not wait forever. We should cleanup gc sessions here as soon
++    // as possible to call FinishSession() and cleanup resources.
++    if (std::cv_status::timeout == session_waker_.wait_for(lock, options_.timeout))
++    {
++      cleanupGCSessions();
++    }
+   }
+ 
+   // And then remove all session datas
+@@ -781,8 +785,12 @@ bool OtlpHttpClient::ForceFlush(std::chrono::microseconds timeout) noexcept
+         }
+       }
+       // When changes of running_sessions_ and notify_one/notify_all happen between predicate
+-      // checking and waiting, we should not wait forever.
+-      session_waker_.wait_for(lock, options_.timeout);
++      // checking and waiting, we should not wait forever.We should cleanup gc sessions here as soon
++      // as possible to call FinishSession() and cleanup resources.
++      if (std::cv_status::timeout == session_waker_.wait_for(lock, options_.timeout))
++      {
++        cleanupGCSessions();
++      }
+     }
+     return true;
+   }
 diff --git a/exporters/prometheus/src/collector.cc b/exporters/prometheus/src/collector.cc
 index 03793a8..c0db4d7 100644
 --- a/exporters/prometheus/src/collector.cc
@@ -119,3 +153,57 @@ index 03793a8..c0db4d7 100644
    }
    collection_lock_.unlock();
  }
+diff --git a/ext/src/http/client/curl/http_client_curl.cc b/ext/src/http/client/curl/http_client_curl.cc
+index 4dcdb4b..3ba0133 100644
+--- a/ext/src/http/client/curl/http_client_curl.cc
++++ b/ext/src/http/client/curl/http_client_curl.cc
+@@ -77,9 +77,12 @@ void Session::SendRequest(
+     // reuse it instead of creating a new one.
+     http_client_.MaybeSpawnBackgroundThread();
+   }
+-  else if (callback)
++  else
+   {
+-    callback->OnEvent(opentelemetry::ext::http::client::SessionState::CreateFailed, "");
++    if (callback)
++    {
++      callback->OnEvent(opentelemetry::ext::http::client::SessionState::CreateFailed, "");
++    }
+     is_session_active_.store(false, std::memory_order_release);
+   }
+ }
+@@ -176,8 +179,9 @@ bool HttpClient::CancelAllSessions() noexcept
+   {
+     std::unordered_map<uint64_t, std::shared_ptr<Session>> sessions;
+     {
++      // We can only cleanup session and curl handles in the IO thread.
+       std::lock_guard<std::mutex> lock_guard{sessions_m_};
+-      sessions.swap(sessions_);
++      sessions = sessions_;
+     }
+ 
+     if (sessions.empty())
+@@ -200,8 +204,9 @@ bool HttpClient::FinishAllSessions() noexcept
+   {
+     std::unordered_map<uint64_t, std::shared_ptr<Session>> sessions;
+     {
++      // We can only cleanup session and curl handles in the IO thread.
+       std::lock_guard<std::mutex> lock_guard{sessions_m_};
+-      sessions.swap(sessions_);
++      sessions = sessions_;
+     }
+ 
+     if (sessions.empty())
+diff --git a/ext/src/http/client/curl/http_operation_curl.cc b/ext/src/http/client/curl/http_operation_curl.cc
+index a87cf50..b46b73f 100644
+--- a/ext/src/http/client/curl/http_operation_curl.cc
++++ b/ext/src/http/client/curl/http_operation_curl.cc
+@@ -1,6 +1,8 @@
+ // Copyright The OpenTelemetry Authors
+ // SPDX-License-Identifier: Apache-2.0
+ 
++#include <cstring>
++
+ #include "opentelemetry/ext/http/client/curl/http_operation_curl.h"
+ 
+ #include "opentelemetry/ext/http/client/curl/http_client_curl.h"
