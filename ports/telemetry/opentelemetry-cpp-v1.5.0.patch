@@ -194,3 +194,16 @@ index 4dcdb4b..3ba0133 100644
      }
  
      if (sessions.empty())
+diff --git a/ext/src/http/client/curl/http_operation_curl.cc b/ext/src/http/client/curl/http_operation_curl.cc
+index a87cf50..b46b73f 100644
+--- a/ext/src/http/client/curl/http_operation_curl.cc
++++ b/ext/src/http/client/curl/http_operation_curl.cc
+@@ -1,6 +1,8 @@
+ // Copyright The OpenTelemetry Authors
+ // SPDX-License-Identifier: Apache-2.0
+ 
++#include <cstring>
++
+ #include "opentelemetry/ext/http/client/curl/http_operation_curl.h"
+ 
+ #include "opentelemetry/ext/http/client/curl/http_client_curl.h"
