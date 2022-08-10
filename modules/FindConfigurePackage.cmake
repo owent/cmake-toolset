@@ -596,7 +596,7 @@ macro(FindConfigurePackage)
         else()
           set(FindConfigurePackageCMakeBuildParallelFlags "-j")
         endif()
-        if(NOT FindConfigurePackage_INSTALL_TARGET)
+        if(FindConfigurePackage_INSTALL_TARGET)
           set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --build . --target ${FindConfigurePackage_INSTALL_TARGET})
         else()
           set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --install . --prefix
