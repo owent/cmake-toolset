@@ -716,7 +716,7 @@ if(NOT TARGET <target to link>)
       # CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS  # For C only project
       # CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
       # CMAKE_INHERIT_FIND_ROOT_PATH              # Need to find dependency from install path
-      # CMAKE_INHERIT_SYSTEM_LINKS                # Nedd to link system libraries
+      # CMAKE_INHERIT_SYSTEM_LINKS                # Need to link system libraries
       CMAKE_FLAGS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_BUILD_OPTIONS}
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_<PACKAGE NAME:UPPERCASE>_PATCH_OPTIONS}
