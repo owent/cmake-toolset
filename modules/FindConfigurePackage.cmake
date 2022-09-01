@@ -413,6 +413,15 @@ macro(FindConfigurePackage)
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       endif()
 
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_DEFAULT_VISIBILITY_HIDDEN)
+        if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN
+           AND NOT DEFINED
+               CACHE{ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN})
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN
+              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_DEFAULT_VISIBILITY_HIDDEN})
+        endif()
+      endif()
+
       # build using configure and make
       if(FindConfigurePackage_BUILD_WITH_CONFIGURE)
         if(FindConfigurePackage_PROJECT_DIRECTORY)
