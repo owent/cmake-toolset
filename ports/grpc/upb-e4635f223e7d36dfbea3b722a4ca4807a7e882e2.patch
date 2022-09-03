@@ -66,11 +66,11 @@ index d64c14f..27813c3 100755
 +    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
 +    set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
 +    if (UNIX AND NOT APPLE)
-+      set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib64" "$ORIGIN/../lib")
-+      set(CMAKE_BUILD_RPATH  "$ORIGIN/../lib64" "$ORIGIN/../lib")
++      set(CMAKE_INSTALL_RPATH "$ORIGIN" "$ORIGIN/../lib64" "$ORIGIN/../lib")
++      set(CMAKE_BUILD_RPATH  "$ORIGIN" "$ORIGIN/../lib64" "$ORIGIN/../lib")
 +    elseif (APPLE)
-+      set(CMAKE_INSTALL_RPATH "@loader_path/../lib64" "@loader_path/../lib")
-+      set(CMAKE_BUILD_RPATH  "@loader_path/../lib64" "@loader_path/../lib")
++      set(CMAKE_INSTALL_RPATH "@loader_path" "@loader_path/../lib64" "@loader_path/../lib")
++      set(CMAKE_BUILD_RPATH  "@loader_path" "@loader_path/../lib64" "@loader_path/../lib")
 +    endif()
  
      # When using Ninja, compiler output won't be colorized without this.
