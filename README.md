@@ -235,7 +235,17 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/<package dir>[/package sub dir]/
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_MODE "release")  # debug/release
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_VERSION "5.2.1")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_GIT_URL "https://github.com/jemalloc/jemalloc.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/jemalloc.cmake")
+```
+
+### Package - mimalloc
+
+```cmake
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_MODE "release")  # debug/release
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_SECURE OFF)      # Use full security mitigations (like guard pages, allocation randomization, double-free mitigation, and free-list corruption detection)
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_VERSION "v2.0.6")
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_GIT_URL "https://github.com/microsoft/mimalloc.git")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
 ```
 
 ### Package - algorithm - xxhash
