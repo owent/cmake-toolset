@@ -99,6 +99,7 @@ if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
     endif()
   endif()
 endif()
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
