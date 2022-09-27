@@ -1,0 +1,383 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4d9a95c..dd20d57 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4177,6 +4177,11 @@ if(gRPC_INSTALL)
+     LIBRARY DESTINATION ${gRPC_INSTALL_LIBDIR}
+     ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
+   )
++  install(
++    FILES
++      "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range/utf8_range.h"
++    DESTINATION include/upb/third_party/utf8_range
++  )
+ endif()
+ 
+ 
+@@ -4254,6 +4259,10 @@ endif()
+ 
+ endif()
+ 
++file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range")
++file(COPY third_party/upb/third_party/utf8_range/utf8_range.h
++      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range" USE_SOURCE_PERMISSIONS)
++
+ add_library(upb
+   third_party/upb/third_party/utf8_range/naive.c
+   third_party/upb/third_party/utf8_range/range2-neon.c
+@@ -4297,6 +4306,7 @@ endif()
+ 
+ target_include_directories(upb
+   PUBLIC $<INSTALL_INTERFACE:${gRPC_INSTALL_INCLUDEDIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/_deps/include>"
+   PRIVATE
+     ${CMAKE_CURRENT_SOURCE_DIR}
+     ${_gRPC_ADDRESS_SORTING_INCLUDE_DIR}
+diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
+index d64c14f..89612c3 100755
+--- a/third_party/upb/cmake/make_cmakelists.py
++++ b/third_party/upb/cmake/make_cmakelists.py
+@@ -39,8 +39,13 @@ import sys
+ import textwrap
+ import os
+ 
++def MappingThirdPartyDep(dep):
++  if dep.startswith("/third_party/"):
++    return dep[13:]
++  return dep
++
+ def StripFirstChar(deps):
+-  return [dep[1:] for dep in deps]
++  return [MappingThirdPartyDep(dep[1:]) for dep in deps]
+ 
+ def IsSourceFile(name):
+   return name.endswith(".c") or name.endswith(".cc")
+@@ -81,11 +86,16 @@ class BuildFileFunctions(object):
+ 
+     if list(filter(IsSourceFile, files)):
+       # Has sources, make this a normal library.
+-      self.converter.toplevel += "add_library(%s\n  %s)\n" % (
+-          kwargs["name"],
+-          "\n  ".join(found_files)
++      output_name = kwargs["name"]
++      if output_name.lower() != "upb":
++        output_name = "upb-" + output_name
++      self.converter.toplevel += "add_library({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
++        kwargs["name"],
++        "\n  ".join(found_files),
++        output_name
+       )
+-      self._add_deps(kwargs)
++      self.converter.export_targets.append(kwargs["name"])
++      self._add_deps(kwargs, " PUBLIC")
+     else:
+       # Header-only library, have to do a couple things differently.
+       # For some info, see:
+@@ -93,6 +103,7 @@ class BuildFileFunctions(object):
+       self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
+           kwargs["name"]
+       )
++      self.converter.export_targets.append(kwargs["name"])
+       self._add_deps(kwargs, " INTERFACE")
+ 
+   def cc_binary(self, **kwargs):
+@@ -249,11 +260,13 @@ class Converter(object):
+     self.prelude = ""
+     self.toplevel = ""
+     self.if_lua = ""
++    self.export_targets = []
+ 
+   def convert(self):
+     return self.template % {
+         "prelude": converter.prelude,
+         "toplevel": converter.toplevel,
++        "export_targets": ' '.join(converter.export_targets),
+     }
+ 
+   template = textwrap.dedent("""\
+@@ -284,6 +297,16 @@ class Converter(object):
+           FORCE)
+     endif()
+ 
++    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
++    set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
++    if (UNIX AND NOT APPLE)
++      set(CMAKE_INSTALL_RPATH "$ORIGIN" "$ORIGIN/../lib64" "$ORIGIN/../lib")
++      set(CMAKE_BUILD_RPATH  "$ORIGIN" "$ORIGIN/../lib64" "$ORIGIN/../lib")
++    elseif (APPLE)
++      set(CMAKE_INSTALL_RPATH "@loader_path" "@loader_path/../lib64" "@loader_path/../lib")
++      set(CMAKE_BUILD_RPATH  "@loader_path" "@loader_path/../lib64" "@loader_path/../lib")
++    endif()
++
+     # When using Ninja, compiler output won't be colorized without this.
+     include(CheckCXXCompilerFlag)
+     CHECK_CXX_COMPILER_FLAG(-fdiagnostics-color=always SUPPORTS_COLOR_ALWAYS)
+@@ -315,11 +338,180 @@ class Converter(object):
+     elseif(UNIX)
+       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+     endif()
++    if (MSVC)
++      add_compile_options(/wd4146 /wd4703 -D_CRT_SECURE_NO_WARNINGS)
++    endif()
+ 
+     enable_testing()
+ 
++    if (UPB_BUILD_CODEGEN)
++      find_package(absl CONFIG REQUIRED)
++      find_package(protobuf CONFIG REQUIRED)
++    endif()
++
++    add_library(descriptor_upb_proto)
++    set_target_properties(descriptor_upb_proto PROPERTIES OUTPUT_NAME "upb-descriptor_upb_proto")
++
++    file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range")
++    file(COPY ../third_party/utf8_range/utf8_range.h
++          DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range" USE_SOURCE_PERMISSIONS)
++    add_library(utf8_range
++      ../third_party/utf8_range/naive.c
++      ../third_party/utf8_range/range2-neon.c
++      ../third_party/utf8_range/range2-sse.c
++      "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range/utf8_range.h"
++    )
++    set_target_properties(utf8_range PROPERTIES OUTPUT_NAME "upb-utf8_range")
++    target_include_directories(utf8_range PUBLIC
++      "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/_deps/include>"
++      "$<INSTALL_INTERFACE:include>")
++
+     %(toplevel)s
+ 
++    set(UPB_DESCRIPTOR_PROTO "${UPB_HOST_INCLUDE_DIR}/google/protobuf/descriptor.proto")
++    if (UPB_BUILD_CODEGEN)
++      set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
++
++      add_executable(protoc-gen-upbdefs
++        ../upbc/common.h
++        ../upbc/common.cc
++        ../upbc/protoc-gen-upbdefs.cc
++      )
++      target_link_libraries(protoc-gen-upbdefs PRIVATE
++        absl::flat_hash_map
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++
++      add_executable(protoc-gen-upb
++        ../upbc/common.h
++        ../upbc/common.cc
++        ../upbc/protoc-gen-upb.cc
++      )
++      add_dependencies(protoc-gen-upb mini_table upb)
++      target_link_libraries(protoc-gen-upb PRIVATE
++        mini_table
++        port
++        upb
++        absl::flat_hash_map
++        absl::flat_hash_set
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++
++      add_executable(protoc-gen-lua
++        ../upb/bindings/lua/upbc.cc
++      )
++      target_link_libraries(protoc-gen-lua PRIVATE
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++
++      set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
++      set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
++      set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
++      set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
++    else()
++      find_program(PROTOC_PROGRAM protoc)
++      find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
++      find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
++      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
++    endif()
++
++    set(UPB_DESCRIPTOR_SOURCES 
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h" 
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.c"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.c"
++    )
++
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES)
++    set(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES any api duration empty
++        field_mask source_context struct timestamp type wrappers)
++    foreach(PROTO_NAME IN LISTS UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES)
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES
++            "${UPB_HOST_INCLUDE_DIR}/google/protobuf/${PROTO_NAME}.proto")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}_pb.lua")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.h"
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.h")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.c"
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.c")
++    endforeach()
++
++    add_custom_command(
++      OUTPUT ${UPB_DESCRIPTOR_SOURCES}
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor_pb.lua"
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES}
++      DEPENDS "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++      COMMAND
++        "${PROTOC_PROGRAM}"
++        "-I${UPB_HOST_INCLUDE_DIR}"
++        "--plugin=protoc-gen-upb=${PROTOC_GEN_UPB_PROGRAM}"
++        "--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}"
++        "--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}"
++        "--upb_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "--lua_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "${UPB_DESCRIPTOR_PROTO}" ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++    )
++
++    target_sources(descriptor_upb_proto PRIVATE ${UPB_DESCRIPTOR_SOURCES})
++    target_link_libraries(descriptor_upb_proto PUBLIC upb)
++
++    add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++      ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
++    set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
++    target_link_libraries(well_known_types PUBLIC upb)
++
++    include(GNUInstallDirs)
++    install(
++      DIRECTORY ../upb
++      DESTINATION include
++      FILES_MATCHING
++      PATTERN "*.h"
++      PATTERN "*.hpp"
++      PATTERN "*.inc"
++      PATTERN "*.int.h"
++    )
++    install(
++      FILES
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h"
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
++        "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor_pb.lua"
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++      DESTINATION include/google/protobuf
++    )
++    install(
++      FILES
++        "${CMAKE_CURRENT_BINARY_DIR}/_deps/include/upb/third_party/utf8_range/utf8_range.h"
++      DESTINATION include/upb/third_party/utf8_range
++    )
++    install(
++      DIRECTORY ../upb/bindings/lua/
++      DESTINATION share/upb/upb/bindings/lua
++    )
++    target_include_directories(upb PUBLIC $<INSTALL_INTERFACE:include>)
++    install(TARGETS
++      descriptor_upb_proto
++      well_known_types
++      utf8_range
++      %(export_targets)s
++      ${UPB_CODEGEN_TARGETS}
++      EXPORT upb-config
++    )
++    install(EXPORT upb-config NAMESPACE upb:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
+   """)
+ 
+ data = {}
+diff --git a/third_party/upb/upb/bindings/lua/def.c b/third_party/upb/upb/bindings/lua/def.c
+index 602dbaf..699c3c2 100644
+--- a/third_party/upb/upb/bindings/lua/def.c
++++ b/third_party/upb/upb/bindings/lua/def.c
+@@ -617,7 +617,7 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
+ 
+ static int lupb_FileDef_Dependency(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_FileDef* dep = upb_FileDef_Dependency(f, index);
+   lupb_wrapper_pushwrapper(L, 1, dep, LUPB_FILEDEF);
+   return 1;
+@@ -631,7 +631,7 @@ static int lupb_FileDef_DependencyCount(lua_State* L) {
+ 
+ static int lupb_FileDef_enum(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_EnumDef* e = upb_FileDef_TopLevelEnum(f, index);
+   lupb_wrapper_pushwrapper(L, 1, e, LUPB_ENUMDEF);
+   return 1;
+@@ -645,7 +645,7 @@ static int lupb_FileDef_enumcount(lua_State* L) {
+ 
+ static int lupb_FileDef_msg(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_MessageDef* m = upb_FileDef_TopLevelMessage(f, index);
+   lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
+   return 1;
+diff --git a/third_party/upb/upb/bindings/lua/upb.c b/third_party/upb/upb/bindings/lua/upb.c
+index 3d59cdd..8e7333e 100644
+--- a/third_party/upb/upb/bindings/lua/upb.c
++++ b/third_party/upb/upb/bindings/lua/upb.c
+@@ -61,11 +61,13 @@
+ /* Lua compatibility code *****************************************************/
+ 
+ /* Shims for upcoming Lua 5.3 functionality. */
++#if LUA_VERSION_NUM < 503
+ static bool lua_isinteger(lua_State* L, int argn) {
+   LUPB_UNUSED(L);
+   LUPB_UNUSED(argn);
+   return false;
+ }
++#endif
+ 
+ /* Utility functions **********************************************************/
+ 
+diff --git a/third_party/upb/upb/bindings/lua/upbc.cc b/third_party/upb/upb/bindings/lua/upbc.cc
+index 78e1473..2d353b0 100644
+--- a/third_party/upb/upb/bindings/lua/upbc.cc
++++ b/third_party/upb/upb/bindings/lua/upbc.cc
+@@ -79,7 +79,7 @@ static void PrintString(int max_cols, absl::string_view* str,
+     } else if (ch == '\'') {
+       printer->PrintRaw("\\'");
+       max_cols--;
+-    } else if (isprint(ch)) {
++    } else if (isprint(static_cast<int>(static_cast<unsigned char>(ch)))) {
+       printer->WriteRaw(&ch, 1);
+       max_cols--;
+     } else {
+diff --git a/third_party/upb/upb/internal/decode.h b/third_party/upb/upb/internal/decode.h
+index 708874c..604df7e 100644
+--- a/third_party/upb/upb/internal/decode.h
++++ b/third_party/upb/upb/internal/decode.h
+@@ -38,7 +38,7 @@
+ #include "upb/decode.h"
+ #include "upb/internal/upb.h"
+ #include "upb/msg_internal.h"
+-#include "third_party/utf8_range/utf8_range.h"
++#include "upb/third_party/utf8_range/utf8_range.h"
+ 
+ /* Must be last. */
+ #include "upb/port_def.inc"
+diff --git a/third_party/upb/upb/text_encode.c b/third_party/upb/upb/text_encode.c
+index dfb213f..a6566cc 100644
+--- a/third_party/upb/upb/text_encode.c
++++ b/third_party/upb/upb/text_encode.c
+@@ -295,7 +295,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+ #define CHK(x)      \
+   do {              \
+     if (!(x)) {     \
+-      return false; \
++      return NULL;  \
+     }               \
+   } while (0)
+ 
