@@ -6,4 +6,10 @@ message test_message {
   int32 i32 = 1;
   int64 i64 = 2;
   string str = 3;
+
+  oneof test_oneof {
+    int32 oi32 = 11;
+    int64 oi64 = 12;
+    string ostr = 13;
+  }
 }

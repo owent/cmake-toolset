@@ -18,3 +18,5 @@ _deps
 build_jobs_*
 /test/third_party/install
 /test/third_party/packages
+/test/standalone-upb/third_party/install
+/test/standalone-upb/third_party/packages
