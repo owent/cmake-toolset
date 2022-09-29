@@ -45,7 +45,7 @@ index 1e360cc..d3f684d 100644
  #error PROTOBUF_CONSTINIT was previously defined
  #endif
  #if defined(__cpp_constinit)
-+#if defined(_MSC_VER) && _MSC_VER <= 1932
++#if defined(_MSC_VER)
 +#define PROTOBUF_CONSTINIT
 +#define PROTOBUF_CONSTEXPR constexpr
 +#else
