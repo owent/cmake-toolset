@@ -432,8 +432,10 @@ macro(FindConfigurePackage)
           project_build_tools_generate_load_env_bash("${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
           if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
             if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
-              file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-                   "export CFLAGS=\"\$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+                "export CFLAGS=\"\$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
             endif()
           endif()
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
@@ -452,8 +454,10 @@ macro(FindConfigurePackage)
           project_build_tools_generate_load_env_bash("${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}")
           if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
             if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
-              file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-                   "export CFLAGS=\"\$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+                "export CFLAGS=\"\$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
             endif()
           endif()
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
