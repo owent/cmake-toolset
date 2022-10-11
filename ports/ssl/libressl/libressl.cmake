@@ -192,9 +192,10 @@ if(NOT TARGET LibreSSL::Crypto)
       project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-cmake.sh")
       project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-build-release.sh")
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-cmake.sh"
+        BASH "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-cmake.sh"
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_OPTIONS}")
       project_expand_list_for_command_line_to_file(
+        BASH
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-build-release.sh"
         ${CMAKE_COMMAND}
         --build
@@ -236,9 +237,10 @@ if(NOT TARGET LibreSSL::Crypto)
       project_make_executable(
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-build-release.bat")
       project_expand_list_for_command_line_to_file(
-        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-cmake.bat"
+        BAT "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-cmake.bat"
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_OPTIONS}")
       project_expand_list_for_command_line_to_file(
+        BAT
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_LIBRESSL_BUILD_DIR}/run-build-release.bat"
         ${CMAKE_COMMAND}
         --build
