@@ -886,7 +886,6 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         endif()
       else()
         # Try add coroutine
-        set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} /await")
         check_cxx_source_compiles(
           "#include <coroutine>
             int main() {
@@ -894,15 +893,29 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
             }"
           COMPILER_OPTIONS_TEST_STD_COROUTINE)
         if(NOT COMPILER_OPTIONS_TEST_STD_COROUTINE)
+          set(CMAKE_REQUIRED_FLAGS "${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS} /await")
           check_cxx_source_compiles(
-            "#include <experimental/coroutine>
+            "#include <coroutine>
+              int main() {
+                  return std::suspend_always().await_ready()? 0: 1;
+              }"
+            COMPILER_OPTIONS_TEST_STD_COROUTINE_WITH_AWAIT)
+
+          if(COMPILER_OPTIONS_TEST_STD_COROUTINE_WITH_AWAIT)
+            set(COMPILER_OPTIONS_TEST_STD_COROUTINE
+                ${COMPILER_OPTIONS_TEST_STD_COROUTINE_WITH_AWAIT}
+                CACHE BOOL "#include <coroutine> with /await" FORCE)
+          else()
+            check_cxx_source_compiles(
+              "#include <experimental/coroutine>
            int main() {
              return std::experimental::suspend_always().await_ready()? 0: 1;
            }"
-            COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
-        endif()
-        if(COMPILER_OPTIONS_TEST_STD_COROUTINE OR COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
-          set(COMPILER_OPTIONS_STD_COROUTINE_FLAGS "/await")
+              COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+          endif()
+          if(COMPILER_OPTIONS_TEST_STD_COROUTINE_WITH_AWAIT OR COMPILER_OPTIONS_TEST_STD_COROUTINE_TS)
+            set(COMPILER_OPTIONS_STD_COROUTINE_FLAGS "/await")
+          endif()
         endif()
       endif()
       set(CMAKE_REQUIRED_FLAGS ${COMPILER_OPTIONS_BAKCUP_CMAKE_REQUIRED_FLAGS})
