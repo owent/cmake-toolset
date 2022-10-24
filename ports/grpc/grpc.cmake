@@ -114,10 +114,10 @@ if(NOT TARGET gRPC::grpc++_alts
         elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.43.2")
         endif()
-      elseif(MSVC)
-        # gRPC 1.50.0 has some compatibility problems here.
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.49.1")
       endif()
+
+      # TODO MSVC can only use C++17 in find_configure_package() below, we should remove the CMAKE_CXX_STANDARD patch
+      # after gRPC support MSVC with higher standard.
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.50.0")
       endif()
@@ -322,6 +322,14 @@ if(NOT TARGET gRPC::grpc++_alts
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_PATCH_FILE}")
     endif()
 
+    # Patch CMAKE_CXX_STANDARD
+    if(CMAKE_CXX_STANDARD)
+      if(MSVC AND CMAKE_CXX_STANDARD GREATER 17)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+        set(CMAKE_CXX_STANDARD 17)
+      endif()
+    endif()
+
     find_configure_package(
       PACKAGE
       gRPC
@@ -345,6 +353,11 @@ if(NOT TARGET gRPC::grpc++_alts
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}"
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_GIT_URL}")
+    # Restore C++ standard options
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD)
+      set(CMAKE_CXX_STANDARD ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD})
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD)
+    endif()
 
     if(TARGET gRPC::grpc++_alts
        OR TARGET gRPC::grpc++
