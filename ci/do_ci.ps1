@@ -174,11 +174,11 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
 elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
   Write-Output $args
-  vcpkg install --triplet=x64-windows fmt zlib lz4 zstd libuv lua openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp mimalloc
+  vcpkg install --triplet=x64-windows-static fmt zlib lz4 zstd libuv lua openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp mimalloc
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location -Verbose "test/build_jobs_dir"
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
-    -DVCPKG_TARGET_TRIPLET=x64-windows "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
+    -DVCPKG_TARGET_TRIPLET=x64-windows-static "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
