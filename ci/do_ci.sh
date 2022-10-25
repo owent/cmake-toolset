@@ -214,13 +214,13 @@ elif [[ "$1" == "msvc.shared.test" ]]; then
 elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   echo "$1"
   [ ! -z "$VCPKG_INSTALLATION_ROOT" ]
-  vcpkg install --triplet=x64-windows-static fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp mimalloc
+  vcpkg install --triplet=x64-windows-static-md fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp mimalloc
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"
   fi
-  cmake .. -G "$CMAKE_GENERATOR" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static \
+  cmake .. -G "$CMAKE_GENERATOR" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static-md \
     -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
   cmake --build . -j --config $CI_BUILD_CONFIGURE_TYPE || cmake --build . --config $CI_BUILD_CONFIGURE_TYPE
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
