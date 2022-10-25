@@ -1,20 +1,36 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4d9a95c..9e9fb51 100644
+index 4d9a95c..221db10 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -276,10 +276,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_gRPC_C_CXX_FLAGS}")
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_gRPC_C_CXX_FLAGS}")
- 
- if(gRPC_USE_PROTO_LITE)
--  set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf-lite")
-+  set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf-lite")
-   add_definitions("-DGRPC_USE_PROTO_LITE")
- else()
--  set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf")
-+  set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf")
+@@ -366,22 +366,22 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)
+   )
  endif()
- 
- if(gRPC_BACKWARDS_COMPATIBILITY_MODE)
+ # Setup external proto library at third_party/opencensus-proto/src with 2 download URLs
+-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src)
++if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto)
+   # Download the archive via HTTP, validate the checksum, and extract to third_party/opencensus-proto/src.
+   download_archive(
+-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src
++    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto
+     https://storage.googleapis.com/grpc-bazel-mirror/github.com/census-instrumentation/opencensus-proto/archive/v0.3.0.tar.gz
+     b7e13f0b4259e80c3070b583c2f39e53153085a6918718b1c710caf7037572b0
+-    opencensus-proto-0.3.0/src
++    opencensus-proto-0.3.0
+   )
+ endif()
+-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src)
++if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto)
+   # Download the archive via HTTP, validate the checksum, and extract to third_party/opencensus-proto/src.
+   download_archive(
+-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src
++    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto
+     https://github.com/census-instrumentation/opencensus-proto/archive/v0.3.0.tar.gz
+     b7e13f0b4259e80c3070b583c2f39e53153085a6918718b1c710caf7037572b0
+-    opencensus-proto-0.3.0/src
++    opencensus-proto-0.3.0
+   )
+ endif()
+ # Setup external proto library at third_party/xds with 2 download URLs
 @@ -4177,6 +4177,11 @@ if(gRPC_INSTALL)
      LIBRARY DESTINATION ${gRPC_INSTALL_LIBDIR}
      ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
@@ -46,23 +62,6 @@ index 4d9a95c..9e9fb51 100644
    PRIVATE
      ${CMAKE_CURRENT_SOURCE_DIR}
      ${_gRPC_ADDRESS_SORTING_INCLUDE_DIR}
-diff --git a/templates/CMakeLists.txt.template b/templates/CMakeLists.txt.template
-index 161cf46..f62f6ee 100644
---- a/templates/CMakeLists.txt.template
-+++ b/templates/CMakeLists.txt.template
-@@ -318,10 +318,10 @@
-   set(CMAKE_CXX_FLAGS "<%text>${CMAKE_CXX_FLAGS} ${_gRPC_C_CXX_FLAGS}</%text>")
- 
-   if(gRPC_USE_PROTO_LITE)
--    set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf-lite")
-+    set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf-lite")
-     add_definitions("-DGRPC_USE_PROTO_LITE")
-   else()
--    set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf")
-+    set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf")
-   endif()
- 
-   if(gRPC_BACKWARDS_COMPATIBILITY_MODE)
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
 index d64c14f..89612c3 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
@@ -229,8 +228,8 @@ index d64c14f..89612c3 100755
 +      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
 +    endif()
 +
-+    set(UPB_DESCRIPTOR_SOURCES 
-+      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h" 
++    set(UPB_DESCRIPTOR_SOURCES
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h"
 +      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.c"
 +      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
 +      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.c"

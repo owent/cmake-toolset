@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7052846..95dd18d 100644
+index 7052846..fd0d207 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -276,10 +276,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_gRPC_C_CXX_FLAGS}")
@@ -15,6 +15,35 @@ index 7052846..95dd18d 100644
  endif()
  
  if(gRPC_BACKWARDS_COMPATIBILITY_MODE)
+@@ -366,22 +366,22 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)
+   )
+ endif()
+ # Setup external proto library at third_party/opencensus-proto/src with 2 download URLs
+-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src)
++if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto)
+   # Download the archive via HTTP, validate the checksum, and extract to third_party/opencensus-proto/src.
+   download_archive(
+-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src
++    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto
+     https://storage.googleapis.com/grpc-bazel-mirror/github.com/census-instrumentation/opencensus-proto/archive/v0.3.0.tar.gz
+     b7e13f0b4259e80c3070b583c2f39e53153085a6918718b1c710caf7037572b0
+-    opencensus-proto-0.3.0/src
++    opencensus-proto-0.3.0
+   )
+ endif()
+-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src)
++if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto)
+   # Download the archive via HTTP, validate the checksum, and extract to third_party/opencensus-proto/src.
+   download_archive(
+-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto/src
++    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencensus-proto
+     https://github.com/census-instrumentation/opencensus-proto/archive/v0.3.0.tar.gz
+     b7e13f0b4259e80c3070b583c2f39e53153085a6918718b1c710caf7037572b0
+-    opencensus-proto-0.3.0/src
++    opencensus-proto-0.3.0
+   )
+ endif()
+ # Setup external proto library at third_party/xds with 2 download URLs
 @@ -4157,6 +4157,11 @@ if(gRPC_INSTALL)
      LIBRARY DESTINATION ${gRPC_INSTALL_LIBDIR}
      ARCHIVE DESTINATION ${gRPC_INSTALL_LIBDIR}
@@ -64,7 +93,7 @@ index 82fe421..b3806ce 100644
  
    if(gRPC_BACKWARDS_COMPATIBILITY_MODE)
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index d64c14f..89612c3 100755
+index d64c14f..bf694b0 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,8 +39,13 @@ import sys
