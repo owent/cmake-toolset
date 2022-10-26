@@ -1,20 +1,7 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7052846..fd0d207 100644
+index 7052846..39f3e95 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -276,10 +276,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_gRPC_C_CXX_FLAGS}")
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_gRPC_C_CXX_FLAGS}")
- 
- if(gRPC_USE_PROTO_LITE)
--  set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf-lite")
-+  set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf-lite")
-   add_definitions("-DGRPC_USE_PROTO_LITE")
- else()
--  set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf")
-+  set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf")
- endif()
- 
- if(gRPC_BACKWARDS_COMPATIBILITY_MODE)
 @@ -366,22 +366,22 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)
    )
  endif()
@@ -75,23 +62,6 @@ index 7052846..fd0d207 100644
    PRIVATE
      ${CMAKE_CURRENT_SOURCE_DIR}
      ${_gRPC_ADDRESS_SORTING_INCLUDE_DIR}
-diff --git a/templates/CMakeLists.txt.template b/templates/CMakeLists.txt.template
-index 82fe421..b3806ce 100644
---- a/templates/CMakeLists.txt.template
-+++ b/templates/CMakeLists.txt.template
-@@ -318,10 +318,10 @@
-   set(CMAKE_CXX_FLAGS "<%text>${CMAKE_CXX_FLAGS} ${_gRPC_C_CXX_FLAGS}</%text>")
- 
-   if(gRPC_USE_PROTO_LITE)
--    set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf-lite")
-+    set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf-lite")
-     add_definitions("-DGRPC_USE_PROTO_LITE")
-   else()
--    set(_gRPC_PROTOBUF_LIBRARY_NAME "libprotobuf")
-+    set(_gRPC_PROTOBUF_LIBRARY_NAME "protobuf::libprotobuf")
-   endif()
- 
-   if(gRPC_BACKWARDS_COMPATIBILITY_MODE)
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
 index d64c14f..bf694b0 100755
 --- a/third_party/upb/cmake/make_cmakelists.py

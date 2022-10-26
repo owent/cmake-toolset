@@ -174,7 +174,8 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
 elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
   Write-Output $args
-  vcpkg install --triplet=x64-windows-static-md fmt zlib lz4 zstd libuv lua openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp mimalloc
+  # benchmark 1.7.0 has linking problems
+  vcpkg install --triplet=x64-windows-static-md fmt zlib lz4 zstd libuv lua openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest civetweb prometheus-cpp mimalloc
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location -Verbose "test/build_jobs_dir"
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
