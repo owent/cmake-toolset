@@ -27,7 +27,7 @@ if(NOT TARGET TBB::tbb)
       "-DTBB_STRICT=OFF"
       "-DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}")
     project_third_party_try_patch_file(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}"
-                                       "tbb" "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}")
+                                       "tbb" "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_VERSION}")
 
     project_third_party_append_build_shared_lib_var("TBB" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
