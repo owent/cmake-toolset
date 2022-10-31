@@ -666,3 +666,62 @@ function(project_third_party_port_declare PORT_NAME)
 
   unset(FULL_PORT_NAME)
 endfunction()
+
+function(project_third_party_try_patch_file_internal OUTPUT_VAR BASE_DIRECTORY PORT_PREFIX VERSION SUFFIX)
+  string(REPLACE "." "\\." SUFFIX_REGEX "${SUFFIX}")
+  if(EXISTS "${BASE_DIRECTORY}/${PORT_PREFIX}-${VERSION}${SUFFIX}")
+    set(${OUTPUT_VAR}
+        "${BASE_DIRECTORY}/${PORT_PREFIX}-${VERSION}${SUFFIX}"
+        PARENT_SCOPE)
+  elseif(VERSION MATCHES "(.*)\\.[^\\.]*$")
+    unset(SELECT_PATCH_FILE)
+    unset(SELECT_PATCH_VERSION)
+    set(MINOR_VERSION "${CMAKE_MATCH_1}")
+    if(VERSION MATCHES "^v(.*)")
+      set(STANDARD_VERSION "${CMAKE_MATCH_1}")
+    else()
+      set(STANDARD_VERSION "${VERSION}")
+    endif()
+    file(GLOB TRY_PATCH_FILES "${BASE_DIRECTORY}/${PORT_PREFIX}-${MINOR_VERSION}*${SUFFIX}")
+    foreach(PATCH_FILE IN LISTS TRY_PATCH_FILES)
+      get_filename_component(PATCH_FILE_BASE_NAME "${PATCH_FILE}" NAME)
+      if(PATCH_FILE_BASE_NAME MATCHES "^${PORT_PREFIX}-(v)?([0-9]+\\..*)${SUFFIX_REGEX}")
+        set(TRY_SELECT_PATCH_VERSION "${CMAKE_MATCH_2}")
+        if("${TRY_SELECT_PATCH_VERSION}" VERSION_LESS_EQUAL "${STANDARD_VERSION}")
+          if(NOT SELECT_PATCH_VERSION)
+            set(SELECT_PATCH_FILE "${PATCH_FILE}")
+            set(SELECT_PATCH_VERSION "${TRY_SELECT_PATCH_VERSION}")
+          elseif(TRY_SELECT_PATCH_VERSION VERSION_GREATER SELECT_PATCH_VERSION)
+            set(SELECT_PATCH_FILE "${PATCH_FILE}")
+            set(SELECT_PATCH_VERSION "${TRY_SELECT_PATCH_VERSION}")
+          endif()
+        endif()
+      endif()
+    endforeach()
+    if(SELECT_PATCH_FILE)
+      set(${OUTPUT_VAR}
+          "${SELECT_PATCH_FILE}"
+          PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
+function(project_third_party_try_patch_file OUTPUT_VAR BASE_DIRECTORY PORT_PREFIX VERSION)
+  if(CMAKE_CROSSCOMPILING)
+    project_third_party_try_patch_file_internal(${OUTPUT_VAR} "${BASE_DIRECTORY}" "${PORT_PREFIX}" "${VERSION}"
+                                                ".cross.patch")
+    if(${OUTPUT_VAR})
+      set(${OUTPUT_VAR}
+          "${${OUTPUT_VAR}}"
+          PARENT_SCOPE)
+      return()
+    endif()
+  endif()
+  project_third_party_try_patch_file_internal(${OUTPUT_VAR} "${BASE_DIRECTORY}" "${PORT_PREFIX}" "${VERSION}" ".patch")
+  if(${OUTPUT_VAR})
+    set(${OUTPUT_VAR}
+        "${${OUTPUT_VAR}}"
+        PARENT_SCOPE)
+    return()
+  endif()
+endfunction()

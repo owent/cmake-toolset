@@ -119,7 +119,7 @@ if(NOT TARGET gRPC::grpc++_alts
       # TODO MSVC can only use C++17 in find_configure_package() below, we should remove the CMAKE_CXX_STANDARD patch
       # after gRPC support MSVC with higher standard.
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.50.0")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.50.1")
       endif()
     endif()
 
@@ -222,8 +222,9 @@ if(NOT TARGET gRPC::grpc++_alts
              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_APPEND_DEFAULT_BUILD_OPTIONS})
       endif()
     endif()
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_PATCH_FILE
-        "${CMAKE_CURRENT_LIST_DIR}/grpc-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}.patch")
+    project_third_party_try_patch_file(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "grpc"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}")
 
     # Some versions has problem when linking with MSVC
     if(MSVC)
