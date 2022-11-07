@@ -1,0 +1,24 @@
+namespace helloworld;
+
+// The request message containing the user's name.
+table HelloRequest { name : string; }
+
+// The response message containing the greetings
+table HelloReply { message : string; }
+
+union MessageBody {
+  hello_request: HelloRequest,
+  hello_response: HelloReply
+}
+
+struct MessageHead {
+  timestamp: int64;
+  sequence: int64;
+}
+
+table Message {
+  head: MessageHead (id: 0);
+  body: MessageBody (id: 2);
+}
+
+root_type Message;
