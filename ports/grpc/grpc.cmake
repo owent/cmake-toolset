@@ -56,33 +56,38 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
       endif()
       if(TARGET gRPC::grpc_csharp_plugin)
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE gRPC::grpc_csharp_plugin)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE
+                                                  gRPC::grpc_csharp_plugin)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE grpc_csharp_plugin)
       endif()
       if(TARGET gRPC::grpc_node_plugin)
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE gRPC::grpc_node_plugin)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE
+                                                  gRPC::grpc_node_plugin)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE grpc_node_plugin)
       endif()
       if(TARGET gRPC::grpc_objective_c_plugin)
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE
-                     gRPC::grpc_objective_c_plugin)
+        project_build_tools_get_imported_location(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE gRPC::grpc_objective_c_plugin)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE grpc_objective_c_plugin)
       endif()
       if(TARGET gRPC::grpc_php_plugin)
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE gRPC::grpc_php_plugin)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE
+                                                  gRPC::grpc_php_plugin)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE grpc_php_plugin)
       endif()
       if(TARGET gRPC::grpc_python_plugin)
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE gRPC::grpc_python_plugin)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE
+                                                  gRPC::grpc_python_plugin)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE grpc_python_plugin)
       endif()
       if(TARGET gRPC::grpc_ruby_plugin)
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE gRPC::grpc_ruby_plugin)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE
+                                                  gRPC::grpc_ruby_plugin)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE grpc_ruby_plugin)
       endif()
@@ -234,10 +239,22 @@ if(NOT TARGET gRPC::grpc++_alts
         "grpc" "GRPC" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS BUILD_SHARED_LIBS)
     endif()
 
+    if(NOT gRPC_MSVC_CONFIGURE)
+      if(ABSEIL_CPP_MSVC_CONFIGURE)
+        set(gRPC_MSVC_CONFIGURE ${ABSEIL_CPP_MSVC_CONFIGURE})
+      else()
+        set(gRPC_MSVC_CONFIGURE "${CMAKE_BUILD_TYPE}")
+      endif()
+    endif()
+    if(CMAKE_CROSSCOMPILING)
+      set(gRPC_BUILD_CODEGEN OFF)
+    else()
+      set(gRPC_BUILD_CODEGEN ON)
+    endif()
+
     list(
       APPEND
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
-      "-DCMAKE_BUILD_TYPE=${gRPC_MSVC_CONFIGURE}"
       "-DgRPC_INSTALL_CSHARP_EXT=OFF"
       "-DgRPC_GFLAGS_PROVIDER=none"
       "-DgRPC_BENCHMARK_PROVIDER=none"
