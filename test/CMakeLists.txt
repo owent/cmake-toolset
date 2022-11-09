@@ -178,6 +178,7 @@ endif()
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
 
 # Test protobuf generator
+set(MAIN_TEST_SRC_FILES main.cpp)
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
@@ -189,12 +190,30 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
     COMMENT "Generate test_pb.pb,test_pb.pb.h,test_pb.pb.cc into ${CMAKE_CURRENT_BINARY_DIR}")
 
-  add_executable(cmake-toolset-test "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
-                                    "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h" main.cpp)
+  list(APPEND MAIN_TEST_SRC_FILES "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.cc"
+       "${CMAKE_CURRENT_BINARY_DIR}/test_pb.pb.h")
+endif()
+
+# Test flatbuffer
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE)
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h"
+    COMMAND
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE}" -I
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host" --cpp --allow-non-utf8
+      --natural-utf8 --gen-mutable --gen-object-api --reflect-types --reflect-names -o "${CMAKE_CURRENT_BINARY_DIR}"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host/helloworld.fbs"
+    DEPENDS "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host/helloworld.fbs"
+    COMMENT "Generate helloworld_generated.h into ${CMAKE_CURRENT_BINARY_DIR}")
+
+  list(APPEND MAIN_TEST_SRC_FILES "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h")
+endif()
+
+add_executable(cmake-toolset-test ${MAIN_TEST_SRC_FILES})
+
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
   target_include_directories(cmake-toolset-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
   target_compile_definitions(cmake-toolset-test PRIVATE "HAVE_PROTOBUF=1")
-else()
-  add_executable(cmake-toolset-test main.cpp)
 endif()
 
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES)
