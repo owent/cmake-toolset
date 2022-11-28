@@ -6,20 +6,35 @@ macro(PROJECT_THIRD_PARTY_LZ4_IMPORT)
   if(TARGET lz4::lz4_static)
     message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4_static")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME lz4::lz4_static)
+  elseif(TARGET LZ4::lz4_static)
+    message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target LZ4::lz4_static")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME LZ4::lz4_static)
   elseif(TARGET lz4::lz4_shared)
     message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4_shared")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME lz4::lz4_shared)
+  elseif(TARGET LZ4::lz4_shared)
+    message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target LZ4::lz4_shared")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME LZ4::lz4_shared)
   elseif(TARGET lz4::lz4)
     message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target lz4::lz4")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME lz4::lz4)
+  elseif(TARGET LZ4::lz4)
+    message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target LZ4::lz4")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME LZ4::lz4)
   endif()
 
   if(TARGET lz4::lz4cli)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN lz4::lz4cli)
     message(STATUS "Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN}")
+  elseif(TARGET LZ4::lz4cli)
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN LZ4::lz4cli)
+    message(STATUS "Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN}")
   endif()
   if(TARGET lz4::lz4c)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN lz4::lz4c)
+    message(STATUS "Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN}")
+  elseif(TARGET LZ4::lz4c)
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN LZ4::lz4c)
     message(STATUS "Dependency(${PROJECT_NAME}): lz4 found exec: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4C_BIN}")
   endif()
 endmacro()
@@ -28,7 +43,12 @@ if(NOT TARGET lz4::lz4_static
    AND NOT TARGET lz4::lz4_shared
    AND NOT TARGET lz4::lz4
    AND NOT TARGET lz4::lz4cli
-   AND NOT TARGET lz4::lz4c)
+   AND NOT TARGET lz4::lz4c
+   AND NOT TARGET LZ4::lz4_static
+   AND NOT TARGET LZ4::lz4_shared
+   AND NOT TARGET LZ4::lz4
+   AND NOT TARGET LZ4::lz4cli
+   AND NOT TARGET LZ4::lz4c)
   if(VCPKG_TOOLCHAIN)
     find_package(lz4 QUIET)
     project_third_party_lz4_import()
@@ -38,7 +58,12 @@ if(NOT TARGET lz4::lz4_static
      AND NOT TARGET lz4::lz4_shared
      AND NOT TARGET lz4::lz4
      AND NOT TARGET lz4::lz4cli
-     AND NOT TARGET lz4::lz4c)
+     AND NOT TARGET lz4::lz4c
+     AND NOT TARGET LZ4::lz4_static
+     AND NOT TARGET LZ4::lz4_shared
+     AND NOT TARGET LZ4::lz4
+     AND NOT TARGET LZ4::lz4cli
+     AND NOT TARGET LZ4::lz4c)
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_LZ4_BUILD_OPTIONS "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
@@ -65,7 +90,7 @@ if(NOT TARGET lz4::lz4_static
       PORT_PREFIX
       "COMPRESSION"
       VERSION
-      "v1.9.3"
+      "v1.9.4"
       GIT_URL
       "https://github.com/lz4/lz4.git")
 
@@ -110,7 +135,12 @@ if(NOT TARGET lz4::lz4_static
        AND NOT TARGET lz4::lz4_shared
        AND NOT TARGET lz4::lz4
        AND NOT TARGET lz4::lz4cli
-       AND NOT TARGET lz4::lz4c)
+       AND NOT TARGET lz4::lz4c
+       AND NOT TARGET LZ4::lz4_static
+       AND NOT TARGET LZ4::lz4_shared
+       AND NOT TARGET LZ4::lz4
+       AND NOT TARGET LZ4::lz4cli
+       AND NOT TARGET LZ4::lz4c)
       echowithcolor(COLOR YELLOW "-- Dependency(${PROJECT_NAME}): lz4 not found")
     endif()
     project_third_party_lz4_import()
@@ -122,6 +152,9 @@ endif()
 # lz4 can not be built on some version of MSVC 2019 and Windows SDK, Just skip it
 if(NOT TARGET lz4::lz4_static
    AND NOT TARGET lz4::lz4_shared
-   AND NOT TARGET lz4::lz4)
+   AND NOT TARGET lz4::lz4
+   AND NOT TARGET LZ4::lz4_static
+   AND NOT TARGET LZ4::lz4_shared
+   AND NOT TARGET LZ4::lz4)
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build lz4.")
 endif()

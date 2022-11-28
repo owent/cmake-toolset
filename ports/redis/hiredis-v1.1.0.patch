@@ -1,0 +1,36 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3d52d0c..8a3c134 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,7 +54,7 @@ IF(NOT MSVC)
+         PROPERTIES OUTPUT_NAME hiredis)
+ ENDIF()
+ 
+-SET_TARGET_PROPERTIES(hiredis
++SET_TARGET_PROPERTIES(hiredis hiredis_static
+     PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+     VERSION "${HIREDIS_SONAME}")
+ IF(MSVC)
+@@ -172,9 +172,10 @@ IF(ENABLE_SSL)
+ 
+     IF (APPLE)
+         SET_PROPERTY(TARGET hiredis_ssl PROPERTY LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup")
++        SET_PROPERTY(TARGET hiredis_ssl_static PROPERTY LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup")
+     ENDIF()
+ 
+-    SET_TARGET_PROPERTIES(hiredis_ssl
++    SET_TARGET_PROPERTIES(hiredis_ssl hiredis_ssl_static
+         PROPERTIES
+         WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+         VERSION "${HIREDIS_SONAME}")
+@@ -187,8 +188,9 @@ IF(ENABLE_SSL)
+     TARGET_INCLUDE_DIRECTORIES(hiredis_ssl_static PRIVATE "${OPENSSL_INCLUDE_DIR}")
+ 
+     TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE ${OPENSSL_LIBRARIES})
++    TARGET_LINK_LIBRARIES(hiredis_ssl_static PRIVATE ${OPENSSL_LIBRARIES})
+     IF (WIN32 OR MINGW)
+-        TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl PUBLIC hiredis)
+         TARGET_LINK_LIBRARIES(hiredis_ssl_static PUBLIC hiredis_static)
+     ENDIF()
+     CONFIGURE_FILE(hiredis_ssl.pc.in hiredis_ssl.pc @ONLY)
