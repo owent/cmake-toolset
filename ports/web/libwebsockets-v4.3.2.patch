@@ -11,6 +11,20 @@ index 166d48a..bbf4bba 100644
  	# Unbreak MSVC broken preprocessor __VA_ARGS__ behaviour
  	if (MSVC_VERSION GREATER 1925)
  		add_compile_options(/Zc:preprocessor /wd5105)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 19dc0cf..199adf9 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -265,7 +265,8 @@ endif()
+ 
+ # Setup the linking for all libs.
+ foreach (lib ${LWS_LIBRARIES})
+-	target_link_libraries(${lib} ${LIB_LIST})
++	target_link_libraries(${lib} PUBLIC ${LIB_LIST})
++	message(STATUS "${lib} links: ${LIB_LIST}")
+ endforeach()
+ 
+ #
 diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
 index fb810a8..2cde19b 100644
 --- a/lib/event-libs/libuv/CMakeLists.txt
