@@ -12,15 +12,31 @@ index 166d48a..bbf4bba 100644
  	if (MSVC_VERSION GREATER 1925)
  		add_compile_options(/Zc:preprocessor /wd5105)
 diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
-index 19dc0cf..199adf9 100644
+index 19dc0cf..9048333 100644
 --- a/lib/CMakeLists.txt
 +++ b/lib/CMakeLists.txt
-@@ -265,7 +265,8 @@ endif()
+@@ -176,7 +176,7 @@ if (LWS_WITH_STATIC)
+ 	)
+ 	target_include_directories(websockets PRIVATE ${LWS_LIB_BUILD_INC_PATHS})
+ 	target_compile_definitions(websockets PRIVATE LWS_BUILDING_STATIC)
+-	target_include_directories(websockets PUBLIC ${LWS_PUBLIC_INCLUDES})
++	target_include_directories(websockets BEFORE PUBLIC ${LWS_PUBLIC_INCLUDES})
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
  
+ 	if (WIN32)
+@@ -204,7 +204,7 @@ if (LWS_WITH_SHARED)
+ 	)
+ 	target_include_directories(websockets_shared PRIVATE ${LWS_LIB_BUILD_INC_PATHS})
+ 	target_compile_definitions(websockets_shared PRIVATE LWS_BUILDING_SHARED)
+-	target_include_directories(websockets_shared PUBLIC ${LWS_PUBLIC_INCLUDES})
++	target_include_directories(websockets_shared BEFORE PUBLIC ${LWS_PUBLIC_INCLUDES})
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+ 	# We want the shared lib to be named "libwebsockets"
+@@ -266,6 +266,7 @@ endif()
  # Setup the linking for all libs.
  foreach (lib ${LWS_LIBRARIES})
--	target_link_libraries(${lib} ${LIB_LIST})
-+	target_link_libraries(${lib} PUBLIC ${LIB_LIST})
+ 	target_link_libraries(${lib} ${LIB_LIST})
 +	message(STATUS "${lib} links: ${LIB_LIST}")
  endforeach()
  
