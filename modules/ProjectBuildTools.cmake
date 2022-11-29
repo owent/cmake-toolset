@@ -943,6 +943,8 @@ function(project_git_clone_repository)
               "Retry to fetch ${project_git_clone_repository_COMMIT} from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
           )
         endif()
+        math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
+             OUTPUT_FORMAT DECIMAL)
         if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
           execute_process(
             COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "--deepen=${project_git_clone_repository_DEPTH}"
@@ -951,6 +953,10 @@ function(project_git_clone_repository)
             WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                               ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
         else()
+          set(project_git_clone_repository_GIT_FETCH_RESULT 1)
+        endif()
+        # Some server do not support --deepen=N , we fallback to full fetch
+        if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
           message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
           execute_process(
             COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "-n" origin ${project_git_clone_repository_COMMIT}
