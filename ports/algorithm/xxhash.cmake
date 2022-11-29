@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_XXHASH_IMPORT)
   if(TARGET xxHash::xxhash)

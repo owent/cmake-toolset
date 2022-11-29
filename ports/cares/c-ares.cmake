@@ -3,7 +3,7 @@
 # git@github.com:c-ares/c-ares.git
 # https://c-ares.haxx.se/
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party c-ares ==================
 macro(PROJECT_THIRD_PARTY_CARES_IMPORT)

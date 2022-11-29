@@ -1,5 +1,5 @@
 # =========== third party libressl ==================
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_LIBRESSL_IMPORT)
   if(TARGET LibreSSL::Crypto)

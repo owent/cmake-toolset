@@ -5,7 +5,7 @@
 # SSL
 # ZLIB
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 include("${CMAKE_CURRENT_LIST_DIR}/abseil-cpp.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/grpc.cmake")

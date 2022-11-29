@@ -1,7 +1,7 @@
 # The C++ OpenTelemetry client.
 # https://github.com/open-telemetry/opentelemetry-cpp
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party opentelemetry-cpp ==================
 macro(PROJECT_THIRD_PARTY_OPENTELEMETRY_CPP_IMPORT)

@@ -2,7 +2,7 @@
 # https://github.com/google/re2.git
 # git@github.com:google/re2.git
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party re2 ==================
 macro(PROJECT_THIRD_PARTY_RE2_IMPORT)

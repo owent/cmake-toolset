@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 include("${CMAKE_CURRENT_LIST_DIR}/zlib.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/lz4.cmake")

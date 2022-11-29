@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 # =========== third party libcurl ==================
 macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
   if(CURL_FOUND)

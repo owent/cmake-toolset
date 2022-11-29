@@ -1,5 +1,5 @@
 # =========== third party Microsoft.GSL ==================
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party Microsoft.GSL ==================
 macro(PROJECT_THIRD_PARTY_MICROSOFT_GSL_IMPORT)

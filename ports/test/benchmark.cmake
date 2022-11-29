@@ -2,7 +2,7 @@
 # https://github.com/google/benchmark
 # git@github.com:google/benchmark.git
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party benchmark ==================
 macro(PROJECT_THIRD_PARTY_BENCHMARK_IMPORT)

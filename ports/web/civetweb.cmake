@@ -1,7 +1,7 @@
 # Project mission is to provide easy to use, powerful, C (C/C++) embeddable web server with optional CGI, SSL and Lua support.
 # https://github.com/civetweb/civetweb/
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party civetweb ==================
 function(PROJECT_THIRD_PARTY_CIVETWEB_PATCH_IMPORTED_TARGET TARGET_NAME)

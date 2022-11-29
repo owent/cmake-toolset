@@ -2,7 +2,7 @@
 # https://github.com/protocolbuffers/upb.git
 # git@github.com:protocolbuffers/upb.git
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # It's already included in grpc/third_party/upb , there is no need to import it again.
 

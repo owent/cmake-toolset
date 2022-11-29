@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
   if(TARGET protobuf::protoc

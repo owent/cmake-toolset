@@ -1,5 +1,5 @@
 # =========== third party flatbuffers ==================
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party flatbuffers ==================
 macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)

@@ -3,7 +3,7 @@
 # git@github.com:grpc/grpc.git
 # https://grpc.io/
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party grpc ==================
 macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)

@@ -1,6 +1,6 @@
 # BoringSSL requires go and perl, we don't support it now.
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_BORINGSSL_IMPORT)
   if(OPENSSL_FOUND OR OpenSSL_FOUND)

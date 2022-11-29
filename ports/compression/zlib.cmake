@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party zlib ==================
 # force to use prebuilt when using mingw
