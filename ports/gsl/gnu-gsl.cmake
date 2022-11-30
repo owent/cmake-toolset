@@ -1,4 +1,4 @@
 # =========== third party GNU GSL ==================
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # TODO

@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 # =========== third_party redis ==================
 
 macro(PROJECT_THIRD_PARTY_REDIS_HIREDIS_IMPORT)

@@ -1,7 +1,7 @@
 # Prometheus Data Model implement for C++
 # https://github.com/jupp0r/prometheus-cpp
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party prometheus-cpp ==================
 macro(PROJECT_THIRD_PARTY_PROMETHEUS_CPP_IMPORT)

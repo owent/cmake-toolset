@@ -1,5 +1,5 @@
 # =========== third party gsl-lite ==================
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party gsl-lite ==================
 macro(PROJECT_THIRD_PARTY_GSL_LITE_IMPORT)

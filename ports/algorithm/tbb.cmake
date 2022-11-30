@@ -1,4 +1,11 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
+
+macro(PROJECT_THIRD_PARTY_TBB_IMPORT)
+  if(TARGET TBB::tbb)
+    message(STATUS "Dependency(${PROJECT_NAME}): tbb using target TBB::tbb")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_LINK_NAME TBB::tbb)
+  endif()
+endmacro()
 
 macro(PROJECT_THIRD_PARTY_TBB_IMPORT)
   if(TARGET TBB::tbb)

@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party yaml-cpp ==================
 macro(PROJECT_THIRD_PARTY_YAML_CPP_IMPORT)

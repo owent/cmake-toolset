@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_FMTLIB_IMPORT)
   if(TARGET fmt::fmt-header-only)

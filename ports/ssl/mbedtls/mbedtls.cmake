@@ -1,5 +1,5 @@
 # =========== third party mbedtls ==================
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_MBEDTLS_IMPORT)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)

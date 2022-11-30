@@ -2,7 +2,7 @@
 # https://github.com/abseil/abseil-cpp.git
 # git@github.com:abseil/abseil-cpp.git
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party abseil-cpp ==================
 macro(PROJECT_THIRD_PARTY_ABSEIL_IMPORT)

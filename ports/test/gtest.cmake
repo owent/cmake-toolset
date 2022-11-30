@@ -2,7 +2,7 @@
 # https://github.com/google/googletest/
 # git@github.com:google/googletest.git
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party GTest ==================
 macro(PROJECT_THIRD_PARTY_GTEST_IMPORT)

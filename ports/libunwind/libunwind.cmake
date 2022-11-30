@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_LIBUNWIND_IMPORT)
   if(TARGET Libunwind::libunwind)

@@ -2,7 +2,7 @@
 # https://github.com/nlohmann/json
 # https://json.nlohmann.me/
 
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party nlohmann_json ==================
 macro(PROJECT_THIRD_PARTY_NLOHMANN_JSON_IMPORT)

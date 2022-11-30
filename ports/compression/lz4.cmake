@@ -1,4 +1,4 @@
-include_guard(GLOBAL)
+include_guard(DIRECTORY)
 
 # =========== third party lz4 ==================
 # force to use prebuilt when using mingw
