@@ -283,7 +283,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
               ))
           set(try_set_linker_LINK_OPTION "--ld-path=${try_set_linker_TRY_LINKER}")
         else()
-          set(try_set_linker_LINK_OPTION "-fuse-ld=${try_set_linker_TRY_LINKER}")
+          get_filename_component(try_set_linker_TRY_LINKER_BASENAME "${try_set_linker_TRY_LINKER}" NAME)
+          string(REGEX REPLACE "\\.[Ee][Ex][Ee]$" "" try_set_linker_TRY_LINKER_BASENAME
+                               "${try_set_linker_TRY_LINKER_BASENAME}")
+          set(try_set_linker_LINK_OPTION "-fuse-ld=${try_set_linker_TRY_LINKER_BASENAME}")
         endif()
         set(CMAKE_REQUIRED_LINK_OPTIONS ${try_set_linker_BACKUP_CMAKE_REQUIRED_LINK_OPTIONS}
                                         "${try_set_linker_LINK_OPTION}")
