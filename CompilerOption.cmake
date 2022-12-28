@@ -7,6 +7,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
 
   include(CheckCCompilerFlag)
   include(CheckCXXSourceCompiles)
+  include(CMakePushCheckState)
   set(__COMPILER_OPTION_LOADED 1)
   cmake_policy(PUSH)
   cmake_policy(SET CMP0067 NEW)
