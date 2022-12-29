@@ -92,7 +92,9 @@ if(NOT Libnghttp3_FOUND)
   find_package_handle_standard_args(Libnghttp3 REQUIRED_VARS Libnghttp3_INCLUDE_DIRS Libnghttp3_LIBRARIES)
 endif()
 
-if(NOT Libnghttp3_VERSION AND Libnghttp3_INCLUDE_DIRS AND EXISTS "${Libnghttp3_INCLUDE_DIRS}/nghttp3/version.h")
+if(NOT Libnghttp3_VERSION
+   AND Libnghttp3_INCLUDE_DIRS
+   AND EXISTS "${Libnghttp3_INCLUDE_DIRS}/nghttp3/version.h")
   file(STRINGS "${Libnghttp3_INCLUDE_DIRS}/nghttp3/version.h" Libnghttp3_HEADER_CONTENTS
        REGEX "#define NGHTTP3_VERSION[ \t]*\"[0-9\\.]*\"")
 
