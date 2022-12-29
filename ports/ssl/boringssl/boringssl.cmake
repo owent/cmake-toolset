@@ -90,6 +90,7 @@ ${OPENSSL_VERSION_STR}
       endif()
     endif()
     message(STATUS "Dependency(${PROJECT_NAME}): boringssl found.(openssl: ${OPENSSL_VERSION})")
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME)
 
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
       if(TARGET OpenSSL::Crypto)
@@ -98,15 +99,19 @@ ${OPENSSL_VERSION_STR}
         if(TARGET Libunwind::libunwind)
           project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES
                                                                       Libunwind::libunwind)
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME Libunwind::libunwind)
         endif()
         if(TARGET ZLIB::ZLIB)
           project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES ZLIB::ZLIB)
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME ZLIB::ZLIB)
         endif()
         if(TARGET Threads::Threads)
           project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES Threads::Threads
                                                                       ${CMAKE_DL_LIBS})
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME Threads::Threads ${CMAKE_DL_LIBS})
         elseif(CMAKE_DL_LIBS)
           project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES ${CMAKE_DL_LIBS})
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME ${CMAKE_DL_LIBS})
         endif()
       endif()
       if(TARGET OpenSSL::SSL)
@@ -183,7 +188,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     PORT_PREFIX
     "CRYPTO"
     VERSION
-    "4fb158925f7753d80fb858cb0239dff893ef9f15"
+    "b9232f9e27e5668bc0414879dcdedb2a59ea75f2"
     GIT_URL
     "https://github.com/google/boringssl.git"
     BUILD_OPTIONS
