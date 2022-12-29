@@ -5,11 +5,20 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
     message(STATUS "Dependency(${PROJECT_NAME}): ngtcp2 using target Libngtcp2::libngtcp2")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_LINK_NAME Libngtcp2::libngtcp2)
 
+    if(TARGET Libnghttp3::libnghttp3)
+      project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2 ADD_LIBRARIES
+                                                                  Libnghttp3::libnghttp3)
+    endif()
+
     find_package(Libngtcp2_crypto_openssl QUIET)
     if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
       message(
         STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_openssl using target Libngtcp2::libngtcp2_crypto_openssl")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_OPENSSL_LINK_NAME Libngtcp2::libngtcp2_crypto_openssl)
+      if(TARGET Libnghttp3::libnghttp3)
+        project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_openssl ADD_LIBRARIES
+                                                                    Libnghttp3::libnghttp3)
+      endif()
     endif()
   endif()
 endmacro()

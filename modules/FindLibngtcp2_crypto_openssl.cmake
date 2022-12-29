@@ -38,78 +38,18 @@ if(LIBNGTCP2_CRYPTO_OPENSSL_ROOT)
                                            ${LIBNGTCP2_CRYPTO_OPENSSL_ROOT}/lib NO_DEFAULT_PATH)
 endif()
 
-find_package(PkgConfig)
-if(PKG_CONFIG_FOUND)
-  if(_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB AND EXISTS "${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB}/pkgconfig")
-    if("${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB}/pkgconfig/libngtcp2_crypto_openssl.pc")
-      pkg_check_modules(Libngtcp2_crypto_openssl IMPORTED_TARGET GLOBAL
-                        "${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB}/pkgconfig/libngtcp2_crypto_openssl.pc")
-    endif()
-  else()
-    pkg_check_modules(Libngtcp2_crypto_openssl IMPORTED_TARGET GLOBAL libngtcp2_crypto_openssl)
-  endif()
-  if(NOT Libngtcp2_crypto_openssl_FOUND AND Libngtcp2_crypto_openssl_STATIC_FOUND)
-    set(Libngtcp2_crypto_openssl_FOUND ${Libngtcp2_crypto_openssl_STATIC_FOUND})
-    set(Libngtcp2_crypto_openssl_INCLUDE_DIRS ${Libngtcp2_crypto_openssl_STATIC_INCLUDE_DIRS})
-    set(Libngtcp2_crypto_openssl_LIBRARIES ${Libngtcp2_crypto_openssl_STATIC_LIBRARIES})
-    set(Libngtcp2_crypto_openssl_LIBRARY_DIRS ${Libngtcp2_crypto_openssl_STATIC_LIBRARY_DIRS})
-    set(Libngtcp2_crypto_openssl_LDFLAGS ${Libngtcp2_crypto_openssl_STATIC_LDFLAGS})
-    set(Libngtcp2_crypto_openssl_CFLAGS ${Libngtcp2_crypto_openssl_STATIC_CFLAGS})
-  endif()
-  if(Libngtcp2_crypto_openssl_FOUND AND Libngtcp2_crypto_openssl_LIBRARY_DIRS)
-    # Patch for libngtcp2_crypto_openssl.pc and FindLibngtcp2_crypto_openssl.cmake in other repositories(nghttp2 and
-    # etc.).
-    if(EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl_static.a"
-       AND NOT EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl.a")
-      file(CREATE_LINK "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl_static.a"
-           "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl.a" COPY_ON_ERROR)
-    endif()
-    if(EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl_static.lib"
-       AND NOT EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl.lib")
-      file(CREATE_LINK "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl_static.lib"
-           "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl.lib" COPY_ON_ERROR)
-    endif()
-
-    unset(_Libngtcp2_crypto_openssl_LIBRARYS_PKGCONFIG)
-    foreach(_Libngtcp2_crypto_openssl_LIBRARY_PKGCONFIG ${Libngtcp2_crypto_openssl_LIBRARIES})
-      if(IS_ABSOLUTE "${_Libngtcp2_crypto_openssl_LIBRARY_PKGCONFIG}")
-        list(APPEND _Libngtcp2_crypto_openssl_LIBRARYS_PKGCONFIG "${_Libngtcp2_crypto_openssl_LIBRARY_PKGCONFIG}")
-      else()
-        unset(_Libngtcp2_crypto_openssl_LIBRARY_ABSOLUTE_PKGCONFIG)
-        unset(_Libngtcp2_crypto_openssl_LIBRARY_ABSOLUTE_PKGCONFIG CACHE)
-        find_library(
-          _Libngtcp2_crypto_openssl_LIBRARY_ABSOLUTE_PKGCONFIG
-          NAMES "${_Libngtcp2_crypto_openssl_LIBRARY_PKGCONFIG}"
-          PATHS ${Libngtcp2_crypto_openssl_LIBRARY_DIRS}
-          NO_DEFAULT_PATH)
-        if(_Libngtcp2_crypto_openssl_LIBRARY_ABSOLUTE_PKGCONFIG)
-          list(APPEND _Libngtcp2_crypto_openssl_LIBRARYS_PKGCONFIG
-               "${_Libngtcp2_crypto_openssl_LIBRARY_ABSOLUTE_PKGCONFIG}")
-        endif()
-      endif()
-    endforeach()
-    set(Libngtcp2_crypto_openssl_LIBRARIES ${_Libngtcp2_crypto_openssl_LIBRARYS_PKGCONFIG})
-    set(Libngtcp2_crypto_openssl_LIBRARIES
-        ${_Libngtcp2_crypto_openssl_LIBRARYS_PKGCONFIG}
-        CACHE INTERNAL "libngtcp2_crypto_openssl" FORCE)
-    unset(_Libngtcp2_crypto_openssl_LIBRARYS_PKGCONFIG)
-  endif()
-endif()
-
-if(NOT Libngtcp2_crypto_openssl_FOUND)
-  find_path(Libngtcp2_crypto_openssl_INCLUDE_DIRS NAMES "ngtcp2/ngtcp2_crypto.h"
-                                                        ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_INCLUDE})
-  find_library(Libngtcp2_crypto_openssl_LIBRARY NAMES ngtcp2_crypto_openssl ngtcp2_crypto_openssl_static
-                                                      ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB})
-  unset(_Libngtcp2_crypto_openssl_LIBRARIES)
-  set(Libngtcp2_crypto_openssl_LIBRARIES
-      ${Libngtcp2_crypto_openssl_LIBRARY}
-      CACHE FILEPATH "Path of libngtcp2_crypto_openssl libraries." FORCE)
-  get_filename_component(Libngtcp2_crypto_openssl_LIBRARY_DIRS ${Libngtcp2_crypto_openssl_LIBRARY} DIRECTORY CACHE)
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Libngtcp2_crypto_openssl REQUIRED_VARS Libngtcp2_crypto_openssl_INCLUDE_DIRS
-                                                                           Libngtcp2_crypto_openssl_LIBRARIES)
-endif()
+find_path(Libngtcp2_crypto_openssl_INCLUDE_DIRS NAMES "ngtcp2/ngtcp2_crypto.h"
+                                                      ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_INCLUDE})
+find_library(Libngtcp2_crypto_openssl_LIBRARY NAMES ngtcp2_crypto_openssl ngtcp2_crypto_openssl_static
+                                                    ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB})
+unset(_Libngtcp2_crypto_openssl_LIBRARIES)
+set(Libngtcp2_crypto_openssl_LIBRARIES
+    ${Libngtcp2_crypto_openssl_LIBRARY}
+    CACHE FILEPATH "Path of libngtcp2_crypto_openssl libraries." FORCE)
+get_filename_component(Libngtcp2_crypto_openssl_LIBRARY_DIRS ${Libngtcp2_crypto_openssl_LIBRARY} DIRECTORY CACHE)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Libngtcp2_crypto_openssl REQUIRED_VARS Libngtcp2_crypto_openssl_INCLUDE_DIRS
+                                                                         Libngtcp2_crypto_openssl_LIBRARIES)
 
 if(NOT Libngtcp2_crypto_openssl_VERSION
    AND Libngtcp2_crypto_openssl_INCLUDE_DIRS
@@ -124,6 +64,19 @@ if(NOT Libngtcp2_crypto_openssl_VERSION
 endif()
 
 if(Libngtcp2_crypto_openssl_FOUND)
+  # Patch for libngtcp2_crypto_openssl.pc and FindLibngtcp2_crypto_openssl.cmake in other repositories(nghttp2 and
+  # etc.).
+  if(EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl_static.a"
+     AND NOT EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl.a")
+    file(CREATE_LINK "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl_static.a"
+         "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/libngtcp2_crypto_openssl.a" COPY_ON_ERROR)
+  endif()
+  if(EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl_static.lib"
+     AND NOT EXISTS "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl.lib")
+    file(CREATE_LINK "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl_static.lib"
+         "${Libngtcp2_crypto_openssl_LIBRARY_DIRS}/ngtcp2_crypto_openssl.lib" COPY_ON_ERROR)
+  endif()
+
   if(NOT LIBNGTCP2_CRYPTO_OPENSSL_FOUND)
     set(LIBNGTCP2_CRYPTO_OPENSSL_FOUND ${Libngtcp2_crypto_openssl_FOUND})
   endif()

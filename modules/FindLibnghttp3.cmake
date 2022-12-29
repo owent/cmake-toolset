@@ -37,60 +37,15 @@ if(LIBNGHTTP3_ROOT)
   set(_LIBNGHTTP3_SEARCH_LIB PATHS ${LIBNGHTTP3_ROOT}/lib64 ${LIBNGHTTP3_ROOT}/lib NO_DEFAULT_PATH)
 endif()
 
-find_package(PkgConfig)
-if(PKG_CONFIG_FOUND)
-  if(_LIBNGHTTP3_SEARCH_LIB AND EXISTS "${_LIBNGHTTP3_SEARCH_LIB}/pkgconfig")
-    if("${_LIBNGHTTP3_SEARCH_LIB}/pkgconfig/libnghttp3.pc")
-      pkg_check_modules(Libnghttp3 IMPORTED_TARGET GLOBAL "${_LIBNGHTTP3_SEARCH_LIB}/pkgconfig/libnghttp3.pc")
-    endif()
-  else()
-    pkg_check_modules(Libnghttp3 IMPORTED_TARGET GLOBAL libnghttp3)
-  endif()
-  if(NOT Libnghttp3_FOUND AND Libnghttp3_STATIC_FOUND)
-    set(Libnghttp3_FOUND ${Libnghttp3_STATIC_FOUND})
-    set(Libnghttp3_INCLUDE_DIRS ${Libnghttp3_STATIC_INCLUDE_DIRS})
-    set(Libnghttp3_LIBRARIES ${Libnghttp3_STATIC_LIBRARIES})
-    set(Libnghttp3_LIBRARY_DIRS ${Libnghttp3_STATIC_LIBRARY_DIRS})
-    set(Libnghttp3_LDFLAGS ${Libnghttp3_STATIC_LDFLAGS})
-    set(Libnghttp3_CFLAGS ${Libnghttp3_STATIC_CFLAGS})
-  endif()
-  if(Libnghttp3_FOUND AND Libnghttp3_LIBRARY_DIRS)
-    unset(_Libnghttp3_LIBRARYS_PKGCONFIG)
-    foreach(_Libnghttp3_LIBRARY_PKGCONFIG ${Libnghttp3_LIBRARIES})
-      if(IS_ABSOLUTE "${_Libnghttp3_LIBRARY_PKGCONFIG}")
-        list(APPEND _Libnghttp3_LIBRARYS_PKGCONFIG "${_Libnghttp3_LIBRARY_PKGCONFIG}")
-      else()
-        unset(_Libnghttp3_LIBRARY_ABSOLUTE_PKGCONFIG)
-        unset(_Libnghttp3_LIBRARY_ABSOLUTE_PKGCONFIG CACHE)
-        find_library(
-          _Libnghttp3_LIBRARY_ABSOLUTE_PKGCONFIG
-          NAMES "${_Libnghttp3_LIBRARY_PKGCONFIG}"
-          PATHS ${Libnghttp3_LIBRARY_DIRS}
-          NO_DEFAULT_PATH)
-        if(_Libnghttp3_LIBRARY_ABSOLUTE_PKGCONFIG)
-          list(APPEND _Libnghttp3_LIBRARYS_PKGCONFIG "${_Libnghttp3_LIBRARY_ABSOLUTE_PKGCONFIG}")
-        endif()
-      endif()
-    endforeach()
-    set(Libnghttp3_LIBRARIES ${_Libnghttp3_LIBRARYS_PKGCONFIG})
-    set(Libnghttp3_LIBRARIES
-        ${_Libnghttp3_LIBRARYS_PKGCONFIG}
-        CACHE INTERNAL "libnghttp3" FORCE)
-    unset(_Libnghttp3_LIBRARYS_PKGCONFIG)
-  endif()
-endif()
-
-if(NOT Libnghttp3_FOUND)
-  find_path(Libnghttp3_INCLUDE_DIRS NAMES "nghttp3/nghttp3.h" ${_LIBNGHTTP3_SEARCH_INCLUDE})
-  find_library(Libnghttp3_LIBRARY NAMES nghttp3 ${_LIBNGHTTP3_SEARCH_LIB})
-  unset(_Libnghttp3_LIBRARIES)
-  set(Libnghttp3_LIBRARIES
-      ${Libnghttp3_LIBRARY}
-      CACHE FILEPATH "Path of libnghttp3 libraries." FORCE)
-  get_filename_component(Libnghttp3_LIBRARY_DIRS ${Libnghttp3_LIBRARY} DIRECTORY CACHE)
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(Libnghttp3 REQUIRED_VARS Libnghttp3_INCLUDE_DIRS Libnghttp3_LIBRARIES)
-endif()
+find_path(Libnghttp3_INCLUDE_DIRS NAMES "nghttp3/nghttp3.h" ${_LIBNGHTTP3_SEARCH_INCLUDE})
+find_library(Libnghttp3_LIBRARY NAMES nghttp3 ${_LIBNGHTTP3_SEARCH_LIB})
+unset(_Libnghttp3_LIBRARIES)
+set(Libnghttp3_LIBRARIES
+    ${Libnghttp3_LIBRARY}
+    CACHE FILEPATH "Path of libnghttp3 libraries." FORCE)
+get_filename_component(Libnghttp3_LIBRARY_DIRS ${Libnghttp3_LIBRARY} DIRECTORY CACHE)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Libnghttp3 REQUIRED_VARS Libnghttp3_INCLUDE_DIRS Libnghttp3_LIBRARIES)
 
 if(NOT Libnghttp3_VERSION
    AND Libnghttp3_INCLUDE_DIRS
