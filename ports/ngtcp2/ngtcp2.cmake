@@ -66,7 +66,7 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     project_third_party_port_declare(
       Libngtcp2
       VERSION
-      "v0.12.0"
+      "v0.12.1"
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"
       BUILD_OPTIONS
