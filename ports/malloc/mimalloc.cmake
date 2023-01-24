@@ -43,7 +43,7 @@ if(NOT TARGET mimalloc-secure
     project_third_party_port_declare(
       mimalloc
       VERSION
-      "v2.0.7"
+      "v2.0.9"
       GIT_URL
       "https://github.com/microsoft/mimalloc.git"
       BUILD_OPTIONS
