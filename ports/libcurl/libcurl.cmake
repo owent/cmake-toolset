@@ -67,6 +67,13 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BIN_CURL "${CURL_EXECUTABLE}")
         endif()
       endif()
+
+      if(TARGET Libnghttp2::libnghttp2)
+        project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES Libnghttp2::libnghttp2)
+      endif()
+      if(TARGET Libngtcp2::libngtcp2)
+        project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES Libngtcp2::libngtcp2)
+      endif()
     else()
       find_program(
         CURL_EXECUTABLE
@@ -201,6 +208,13 @@ if(NOT CURL_EXECUTABLE)
              "-DZstd_INCLUDE_DIR=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_WITH_ZSTD_INCLUDE_DIRS}"
              "-DZstd_LIBRARY=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_WITH_ZSTD_LIBRARY}")
       endif()
+    endif()
+
+    if(TARGET Libngtcp2::libngtcp2)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DUSE_NGTCP2=ON")
+    endif()
+    if(TARGET Libnghttp2::libnghttp2)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS "-DUSE_NGHTTP2=ON")
     endif()
 
     find_configure_package(
