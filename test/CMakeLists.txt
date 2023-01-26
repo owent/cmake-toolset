@@ -145,11 +145,10 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
-
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ngtcp2/nghttp3.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ngtcp2/ngtcp2.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/nghttp2/nghttp2.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
 
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/civetweb.cmake")

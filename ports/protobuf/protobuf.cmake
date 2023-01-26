@@ -60,7 +60,7 @@ macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
                    IMPORTED_LOCATION_NOCONFIG "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}")
       message(
         STATUS
-          "Dependency(${PROJECT_NAME}): peorobuf executable for crosscompiling(Also reset target protobuf::protoc):
+          "Dependency(${PROJECT_NAME}): protobuf executable for crosscompiling(Also reset target protobuf::protoc):
   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}"
       )
     endif()
