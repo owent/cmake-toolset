@@ -27,6 +27,10 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
                                                                             "libz\\.|zlib")
               list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
                    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME}")
+            elseif(LIBCURL_DEP_LINK_NAME MATCHES "nghttp2|nghttp3|ngtcp2")
+              message(
+                "Libcurl: ignore ${LIBCURL_DEP_LINK_NAME} we will use Libnghttp2::libnghttp2 or Libngtcp2::libngtcp2_crypto_openssl"
+              )
             else()
               list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
                    "${LIBCURL_DEP_LINK_NAME}")
@@ -57,6 +61,14 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl)
     endif()
 
+    if(TARGET Libnghttp2::libnghttp2)
+      project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES Libnghttp2::libnghttp2)
+    endif()
+    if(Libngtcp2::libngtcp2_crypto_openssl)
+      project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES
+                                                                  Libngtcp2::libngtcp2_crypto_openssl)
+    endif()
+
     if(TARGET CURL::curl)
       get_target_property(CURL_EXECUTABLE CURL::curl IMPORTED_LOCATION)
       if(CURL_EXECUTABLE AND EXISTS ${CURL_EXECUTABLE})
@@ -66,14 +78,6 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
         if(CURL_EXECUTABLE AND EXISTS ${CURL_EXECUTABLE})
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BIN_CURL "${CURL_EXECUTABLE}")
         endif()
-      endif()
-
-      if(TARGET Libnghttp2::libnghttp2)
-        project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES Libnghttp2::libnghttp2)
-      endif()
-      if(Libngtcp2::libngtcp2_crypto_openssl)
-        project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES
-                                                                    Libngtcp2::libngtcp2_crypto_openssl)
       endif()
     else()
       find_program(
@@ -200,18 +204,8 @@ if(NOT CURL_EXECUTABLE)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGTCP2=ON")
       endif()
       # The link order of libcurl has some problems and will link error with nghttp2 when building static library.
-      if(MSVC)
-        project_third_party_check_build_shared_lib("libcurl" ""
-                                                   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_USE_SHARED)
-        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_USE_SHARED)
-          if(TARGET Libnghttp2::libnghttp2)
-            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGHTTP2=ON")
-          endif()
-        endif()
-      else()
-        if(TARGET Libnghttp2::libnghttp2)
-          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGHTTP2=ON")
-        endif()
+      if(TARGET Libnghttp2::libnghttp2)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGHTTP2=ON")
       endif()
 
       #[[

@@ -1153,6 +1153,56 @@ function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME
   endif()
 endfunction()
 
+function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
+  set(multiValueArgs ADD_DEFINITIONS REMOVE_DEFINITIONS)
+  cmake_parse_arguments(PATCH_OPTIONS "" "" "${multiValueArgs}" ${ARGN})
+
+  get_target_property(OLD_DEFINITIONS ${TARGET_NAME} INTERFACE_COMPILE_DEFINITIONS)
+  if(NOT OLD_DEFINITIONS)
+    set(OLD_DEFINITIONS "") # Reset NOTFOUND
+  endif()
+  unset(PATCH_INNER_DEFINITIONS)
+  if(OLD_DEFINITIONS AND PATCH_OPTIONS_REMOVE_DEFINITIONS)
+    foreach(DEP_PATH IN LISTS OLD_DEFINITIONS)
+      set(MATCH_ANY_RULES FALSE)
+      foreach(MATCH_RULE IN LISTS PATCH_OPTIONS_REMOVE_DEFINITIONS)
+        if(DEP_PATH MATCHES ${MATCH_RULE})
+          set(MATCH_ANY_RULES TRUE)
+          break()
+        endif()
+      endforeach()
+
+      if(NOT MATCH_ANY_RULES)
+        list(APPEND PATCH_INNER_DEFINITIONS ${DEP_PATH})
+      endif()
+    endforeach()
+    if(PATCH_OPTIONS_ADD_DEFINITIONS)
+      list(APPEND PATCH_INNER_DEFINITIONS ${PATCH_OPTIONS_ADD_DEFINITIONS})
+    endif()
+  elseif(OLD_DEFINITIONS)
+    set(PATCH_INNER_DEFINITIONS ${OLD_DEFINITIONS})
+    if(PATCH_OPTIONS_ADD_DEFINITIONS)
+      list(APPEND PATCH_INNER_DEFINITIONS ${PATCH_OPTIONS_ADD_DEFINITIONS})
+    endif()
+  elseif(PATCH_OPTIONS_ADD_DEFINITIONS)
+    set(PATCH_INNER_DEFINITIONS ${PATCH_OPTIONS_ADD_DEFINITIONS})
+  else()
+    set(PATCH_INNER_DEFINITIONS "")
+  endif()
+
+  if(PATCH_INNER_DEFINITIONS)
+    list(REMOVE_DUPLICATES PATCH_INNER_DEFINITIONS)
+  endif()
+
+  if(NOT OLD_DEFINITIONS STREQUAL PATCH_INNER_DEFINITIONS)
+    set_target_properties(${TARGET_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${PATCH_INNER_DEFINITIONS}")
+    message(
+      STATUS
+        "Patch: INTERFACE_COMPILE_DEFINITIONS of ${TARGET_NAME} from \"${OLD_DEFINITIONS}\" to \"${PATCH_INNER_DEFINITIONS}\""
+    )
+  endif()
+endfunction()
+
 function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
   if(CMAKE_BUILD_TYPE)
     string(TOUPPER "IMPORTED_LOCATION_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_IMPORTED_LOCATION)

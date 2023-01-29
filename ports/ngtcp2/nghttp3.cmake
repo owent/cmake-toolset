@@ -4,6 +4,28 @@ macro(PROJECT_THIRD_PARTY_NGHTTP3_IMPORT)
   if(TARGET Libnghttp3::libnghttp3)
     message(STATUS "Dependency(${PROJECT_NAME}): nghttp3 using target Libnghttp3::libnghttp3")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_LINK_NAME Libnghttp3::libnghttp3)
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
+      include(CMakePushCheckState)
+      include(CheckCXXSymbolExists)
+      cmake_push_check_state()
+      set(CMAKE_REQUIRED_LIBRARIES Libnghttp3::libnghttp3)
+      if(MSVC)
+        set(CMAKE_REQUIRED_FLAGS "/utf-8")
+      endif()
+      check_cxx_symbol_exists(nghttp3_version "nghttp3/nghttp3.h"
+                              ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_DYNAMICLIB)
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_DYNAMICLIB)
+        set(CMAKE_REQUIRED_DEFINITIONS "-DNGHTTP3_STATICLIB=1")
+        check_cxx_symbol_exists(nghttp3_version "nghttp3/nghttp3.h"
+                                ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_STATICLIB)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_STATICLIB)
+          project_build_tools_patch_imported_interface_definitions(Libnghttp3::libnghttp3 ADD_DEFINITIONS
+                                                                   "NGHTTP3_STATICLIB=1")
+        endif()
+      endif()
+      cmake_pop_check_state()
+    endif()
   endif()
 endmacro()
 
