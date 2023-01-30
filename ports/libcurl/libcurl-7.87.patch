@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b435207..3cae9f1 100644
+index b435207..8603535 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -510,19 +510,23 @@ if(CURL_USE_NSS)
@@ -17,10 +17,8 @@ index b435207..3cae9f1 100644
    # Be sure that the OpenSSL library actually supports QUIC.
    if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
      cmake_push_check_state()
--    set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
--    set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
-+    set(CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCLUDE_DIR}")
-+    set(CMAKE_REQUIRED_LIBRARIES "${OPENSSL_LIBRARIES}")
+     set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+     set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
 +    if(CMAKE_DL_LIBS)
 +      list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_DL_LIBS})
 +    endif()
