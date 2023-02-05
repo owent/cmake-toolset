@@ -692,20 +692,29 @@ endfunction()
 
 function(project_third_party_try_patch_file OUTPUT_VAR BASE_DIRECTORY PORT_PREFIX VERSION)
   if(CMAKE_CROSSCOMPILING)
-    project_third_party_try_patch_file_internal(${OUTPUT_VAR} "${BASE_DIRECTORY}" "${PORT_PREFIX}" "${VERSION}"
-                                                ".cross.patch")
-    if(${OUTPUT_VAR})
-      set(${OUTPUT_VAR}
-          "${${OUTPUT_VAR}}"
-          PARENT_SCOPE)
+    project_third_party_try_patch_file_internal(TRY_PATCH_FILE_PATH_CROSS "${BASE_DIRECTORY}" "${PORT_PREFIX}"
+                                                "${VERSION}" ".cross.patch")
+    if(TRY_PATCH_FILE_PATH_CROSS)
+      file(SIZE "${TRY_PATCH_FILE_PATH_CROSS}" TRY_PATCH_FILE_SIZE_CROSS)
+      # Valid patch file should contains "diff --git a/ b/" at least
+      if(${TRY_PATCH_FILE_SIZE_CROSS} GREATER 16)
+        set(${OUTPUT_VAR}
+            "${TRY_PATCH_FILE_PATH_CROSS}"
+            PARENT_SCOPE)
+      endif()
       return()
     endif()
   endif()
-  project_third_party_try_patch_file_internal(${OUTPUT_VAR} "${BASE_DIRECTORY}" "${PORT_PREFIX}" "${VERSION}" ".patch")
-  if(${OUTPUT_VAR})
-    set(${OUTPUT_VAR}
-        "${${OUTPUT_VAR}}"
-        PARENT_SCOPE)
+  project_third_party_try_patch_file_internal(TRY_PATCH_FILE_PATH_HOST "${BASE_DIRECTORY}" "${PORT_PREFIX}"
+                                              "${VERSION}" ".patch")
+  if(TRY_PATCH_FILE_PATH_HOST)
+    file(SIZE "${TRY_PATCH_FILE_PATH_HOST}" TRY_PATCH_FILE_SIZE_HOST)
+    # Valid patch file should contains "diff --git a/ b/" at least
+    if(${TRY_PATCH_FILE_SIZE_HOST} GREATER 16)
+      set(${OUTPUT_VAR}
+          "${TRY_PATCH_FILE_PATH_HOST}"
+          PARENT_SCOPE)
+    endif()
     return()
   endif()
 endfunction()
