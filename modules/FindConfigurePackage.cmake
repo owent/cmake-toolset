@@ -741,21 +741,154 @@ macro(FindConfigurePackage)
           string(REPLACE "${FindConfigurePackage_LIST_SEPARATOR}" "\\;" FindConfigurePackage_SCONS_FLAGS
                          "${FindConfigurePackage_SCONS_FLAGS}")
         endif()
-        execute_process(
-          COMMAND "scons" ${FindConfigurePackage_SCONS_FLAGS} ${BUILD_WITH_SCONS_PROJECT_DIR}
-          WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+
+        if(CMAKE_HOST_UNIX
+           OR MSYS
+           OR CYGWIN
+           OR NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          set(FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT
+              "${FindConfigurePackage_BUILD_DIRECTORY}/scons-build-run.sh")
+          project_build_tools_generate_load_env_bash("${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+                "export CFLAGS=\"\$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
+            endif()
+          endif()
+          file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+               "export CCFLAGS=\"\$CFLAGS\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+               "export LINK=\"\$LD\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+               "export LINKFLAGS=\"\$LDFLAGS\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          if(MSVC)
+            if(DEFINED CACHE{CMAKE_SYSTEM_VERSION})
+              file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+                   "export MSVC_SDK_VERSION=\"${CMAKE_SYSTEM_VERSION}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+            endif()
+            if(CMAKE_VS_PLATFORM_TOOLSET_VERSION)
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+                "export MSVC_TOOLSET_VERSION=\"$CMAKE_VS_PLATFORM_TOOLSET_VERSION\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
+            endif()
+          endif()
+
+          project_expand_list_for_command_line_to_file(
+            BASH "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}" "scons" ${FindConfigurePackage_SCONS_FLAGS}
+            ${BUILD_WITH_SCONS_PROJECT_DIR})
+          execute_process(
+            COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+            WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
+                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        else()
+          set(FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT
+              "${FindConfigurePackage_BUILD_DIRECTORY}/scons-build-run.ps1")
+          project_build_tool_generate_load_env_powershell("${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+                "$ENV:CFLAGS=$ENV:CFLAGS + \" -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
+            endif()
+          endif()
+          file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+               "$ENV:CCFLAGS=$ENV:CFLAGS${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+               "$ENV:LINK=$ENV:LD${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+               "$ENV:LINKFLAGS=$ENV:LDFLAGS${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          if(MSVC)
+            if(DEFINED CACHE{CMAKE_SYSTEM_VERSION})
+              file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+                   "$ENV:MSVC_SDK_VERSION=\"${CMAKE_SYSTEM_VERSION}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+            endif()
+            if(CMAKE_VS_PLATFORM_TOOLSET_VERSION)
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+                "$ENV:MSVC_TOOLSET_VERSION=\"$CMAKE_VS_PLATFORM_TOOLSET_VERSION\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
+            endif()
+          endif()
+
+          project_expand_list_for_command_line_to_file(
+            PWSH "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}" "scons" ${FindConfigurePackage_SCONS_FLAGS}
+            ${BUILD_WITH_SCONS_PROJECT_DIR})
+          execute_process(
+            COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" -NoProfile -InputFormat None -ExecutionPolicy Bypass
+                    -NonInteractive -NoLogo -File "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+            WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
+                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        endif()
         set(ENV{prefix} ${OLD_ENV_PREFIX})
+        unset(FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT)
 
         # build using custom commands(such as gyp)
       elseif(FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND)
-        foreach(cmd ${FindConfigurePackage_CUSTOM_BUILD_COMMAND})
-          execute_process(COMMAND ${cmd} WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                                                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-        endforeach()
+        if(CMAKE_HOST_UNIX
+           OR MSYS
+           OR CYGWIN
+           OR NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          set(FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT
+              "${FindConfigurePackage_BUILD_DIRECTORY}/custom-command-build-run.sh")
+          project_build_tools_generate_load_env_bash("${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}"
+                "export CFLAGS=\"\$CFLAGS -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
+            endif()
+          endif()
 
+          foreach(cmd ${FindConfigurePackage_CUSTOM_BUILD_COMMAND})
+            unset(FindConfigurePackage_CUSTOM_COMMAND_FLAGS)
+            if(FindConfigurePackage_LIST_SEPARATOR)
+              string(REPLACE "${FindConfigurePackage_LIST_SEPARATOR}" "\\;" FindConfigurePackage_CUSTOM_COMMAND_FLAGS
+                             "${cmd}")
+            else()
+              set(FindConfigurePackage_CUSTOM_COMMAND_FLAGS "${cmd}")
+            endif()
+            project_expand_list_for_command_line_to_file(
+              BASH "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}"
+              ${FindConfigurePackage_CUSTOM_COMMAND_FLAGS})
+          endforeach()
+          execute_process(
+            COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}"
+            WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
+                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        else()
+          set(FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT
+              "${FindConfigurePackage_BUILD_DIRECTORY}/custom-command-build-run.ps1")
+          project_build_tool_generate_load_env_powershell(
+            "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_FULL_PORT_NAME}_VISIBILITY_HIDDEN)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+              file(
+                APPEND "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}"
+                "$ENV:CFLAGS= $ENV:CFLAGS + \" -fvisibility=hidden -fvisibility-inlines-hidden\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+              )
+            endif()
+          endif()
+          foreach(cmd ${FindConfigurePackage_CUSTOM_BUILD_COMMAND})
+            unset(FindConfigurePackage_CUSTOM_COMMAND_FLAGS)
+            if(FindConfigurePackage_LIST_SEPARATOR)
+              string(REPLACE "${FindConfigurePackage_LIST_SEPARATOR}" "\\;" FindConfigurePackage_CUSTOM_COMMAND_FLAGS
+                             "${cmd}")
+            else()
+              set(FindConfigurePackage_CUSTOM_COMMAND_FLAGS "${cmd}")
+            endif()
+            project_expand_list_for_command_line_to_file(
+              PWSH "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}"
+              ${FindConfigurePackage_CUSTOM_COMMAND_FLAGS})
+          endforeach()
+          execute_process(
+            COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" -NoProfile -InputFormat None -ExecutionPolicy Bypass
+                    -NonInteractive -NoLogo -File "${FindConfigurePackage_BUILD_WITH_CUSTOM_COMMAND_RUN_SCRIPT}"
+            WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
+                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        endif()
       else()
-        message(FATAL_ERROR "build type is required")
+        message(FATAL_ERROR "Build type is required")
       endif()
 
       # afterbuild commands
