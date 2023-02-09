@@ -757,10 +757,11 @@ macro(FindConfigurePackage)
               )
             endif()
           endif()
-          file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
-               "export CCFLAGS=\"\$CFLAGS\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-               "export LINK=\"\$LD\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-               "export LINKFLAGS=\"\$LDFLAGS\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(
+            APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+            "export CCFLAGS=\"\$CFLAGS\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+            "export LINK=\"\$LD\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+            "export LINKFLAGS=\"\$LDFLAGS\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
           if(MSVC)
             if(DEFINED CACHE{CMAKE_SYSTEM_VERSION})
               file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
@@ -793,10 +794,11 @@ macro(FindConfigurePackage)
               )
             endif()
           endif()
-          file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
-               "$ENV:CCFLAGS=$ENV:CFLAGS${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-               "$ENV:LINK=$ENV:LD${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-               "$ENV:LINKFLAGS=$ENV:LDFLAGS${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(
+            APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
+            "$ENV:CCFLAGS=$ENV:CFLAGS${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+            "$ENV:LINK=$ENV:LD${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+            "$ENV:LINKFLAGS=$ENV:LDFLAGS${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
           if(MSVC)
             if(DEFINED CACHE{CMAKE_SYSTEM_VERSION})
               file(APPEND "${FindConfigurePackage_BUILD_WITH_SCONS_RUN_SCRIPT}"
