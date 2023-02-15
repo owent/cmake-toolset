@@ -20,7 +20,7 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
     project_third_party_port_declare(
       libcopp
       VERSION
-      "v2.1.2"
+      "v2.1.3"
       GIT_URL
       "https://github.com/owent/libcopp.git"
       BUILD_OPTIONS
