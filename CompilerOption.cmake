@@ -369,7 +369,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # ================== compiler flags ==================
   # Auto compiler options, support gcc,MSVC,Clang,AppleClang
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wsign-compare -Wsign-conversion)
+    list(
+      APPEND
+      COMPILER_STRICT_EXTRA_CFLAGS
+      -Wextra
+      -Wshadow
+      -Wsign-conversion
+      -Wfloat-equal
+      -Woverloaded-virtual
+      -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
 
     check_c_compiler_flag(-rdynamic LD_FLAGS_RDYNAMIC_AVAILABLE)
@@ -415,7 +423,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , try to use -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
 
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wsign-compare -Wsign-conversion)
+    list(
+      APPEND
+      COMPILER_STRICT_EXTRA_CFLAGS
+      -Wextra
+      -Wshadow
+      -Wsign-conversion
+      -Wfloat-equal
+      -Woverloaded-virtual
+      -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
@@ -533,7 +549,16 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       set(COMPILER_OPTIONS_TEST_STD_COROUTINE_TS FALSE)
     endif()
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-    list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wno-implicit-fallthrough -Wshadow -Wsign-compare -Wsign-conversion)
+    list(
+      APPEND
+      COMPILER_STRICT_EXTRA_CFLAGS
+      -Wextra
+      -Wno-implicit-fallthrough
+      -Wshadow
+      -Wsign-conversion
+      -Wfloat-equal
+      -Woverloaded-virtual
+      -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
