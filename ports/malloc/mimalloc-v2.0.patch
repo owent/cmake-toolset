@@ -1,15 +1,26 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 74c1f29..210d437 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -1,8 +1,10 @@
- cmake_minimum_required(VERSION 3.13)
- project(libmimalloc C CXX)
+diff --git a/src/alloc-override.c b/src/alloc-override.c
+index 84a0d19..9066a1d 100644
+--- a/src/alloc-override.c
++++ b/src/alloc-override.c
+@@ -57,7 +57,7 @@ typedef struct mi_nothrow_s { int _tag; } mi_nothrow_t;
+   // functions that are interposed (or the interposing does not work)
+   #define MI_OSX_IS_INTERPOSED
  
-+if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0"))
- set(CMAKE_C_STANDARD 11)
- set(CMAKE_CXX_STANDARD 17)
-+endif()
- 
- option(MI_SECURE            "Use full security mitigations (like guard pages, allocation randomization, double-free mitigation, and free-list corruption detection)" OFF)
- option(MI_DEBUG_FULL        "Use full internal heap invariant checking in DEBUG mode (expensive)" OFF)
+-  mi_decl_externc static size_t mi_malloc_size_checked(void *p) {
++  static size_t mi_malloc_size_checked(void *p) {
+     if (!mi_is_in_heap_region(p)) return 0;
+     return mi_usable_size(p);
+   }
+diff --git a/src/alloc.c b/src/alloc.c
+index 86453f1..4431894 100644
+--- a/src/alloc.c
++++ b/src/alloc.c
+@@ -876,7 +876,7 @@ but we call `exit` instead (i.e. not returning).
+ #ifdef __cplusplus
+ #include <new>
+ static bool mi_try_new_handler(bool nothrow) {
+-  #if defined(_MSC_VER) || (__cplusplus >= 201103L)
++  #if (defined(_MSC_VER) || (__cplusplus >= 201103L)) && !(defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__))
+     std::new_handler h = std::get_new_handler();
+   #else
+     std::new_handler h = std::set_new_handler();

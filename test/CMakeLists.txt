@@ -101,7 +101,12 @@ if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
     endif()
   endif()
 endif()
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
+if(COMPILER_OPTIONS_TEST_EXCEPTION)
+  # mimalloc do not support VS2019
+  if(NOT (MSVC AND MSVC_VERSION LESS 1930))
+    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
+  endif()
+endif()
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
