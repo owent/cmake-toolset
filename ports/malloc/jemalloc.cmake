@@ -82,3 +82,9 @@ if(NOT TARGET jemalloc)
     project_third_party_jemalloc_import()
   endif()
 endif()
+
+if(NOT MSVC
+   AND NOT MINGW
+   AND NOT TARGET jemalloc)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build jemalloc failed")
+endif()

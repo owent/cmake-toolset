@@ -17,6 +17,8 @@
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD
 #   CMAKE_INHERIT_FIND_ROOT_PATH
 #   CMAKE_INHERIT_SYSTEM_LINKS
 #   SCONS_FLAGS [scons options...]
@@ -188,6 +190,8 @@ macro(FindConfigurePackage)
       CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD
       CMAKE_INHERIT_FIND_ROOT_PATH
       CMAKE_INHERIT_SYSTEM_LINKS
       GIT_ENABLE_SUBMODULE
@@ -550,6 +554,12 @@ macro(FindConfigurePackage)
           endif()
           if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_ASM_FLAGS)
+          endif()
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_C_STANDARD)
+          endif()
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_CXX_STANDARD)
           endif()
           if(FindConfigurePackage_CMAKE_INHERIT_SYSTEM_LINKS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS APPEND_SYSTEM_LINKS)

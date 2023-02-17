@@ -369,16 +369,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # ================== compiler flags ==================
   # Auto compiler options, support gcc,MSVC,Clang,AppleClang
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    list(
-      APPEND
-      COMPILER_STRICT_EXTRA_CFLAGS
-      -Wextra
-      -Wshadow
-      -Wsign-conversion
-      -Wfloat-equal
-      -Woverloaded-virtual
-      -Wdelete-non-virtual-dtor)
+    list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wfloat-equal -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual)
 
     check_c_compiler_flag(-rdynamic LD_FLAGS_RDYNAMIC_AVAILABLE)
     if(LD_FLAGS_RDYNAMIC_AVAILABLE)
@@ -423,16 +416,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         "GCC Version ${CMAKE_CXX_COMPILER_VERSION} , try to use -std=c${CMAKE_C_STANDARD}/c++${CMAKE_CXX_STANDARD}.")
 
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    list(
-      APPEND
-      COMPILER_STRICT_EXTRA_CFLAGS
-      -Wextra
-      -Wshadow
-      -Wsign-conversion
-      -Wfloat-equal
-      -Woverloaded-virtual
-      -Wdelete-non-virtual-dtor)
+    list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wfloat-equal -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
@@ -555,11 +541,10 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       -Wextra
       -Wno-implicit-fallthrough
       -Wshadow
-      -Wsign-conversion
       -Wfloat-equal
-      -Woverloaded-virtual
       -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
@@ -680,6 +665,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       /wd4127
       /wd4512
       /WX)
+    list(APPEND COMPILER_STRICT_EXTRA_CFLAGS /w44986 /w15038)
+    list(APPEDN COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS /w44484 /w44485 /w45037)
     add_linker_flags_for_runtime_unique(/ignore:4217)
 
     if(NOT VCPKG_TOOLCHAIN)

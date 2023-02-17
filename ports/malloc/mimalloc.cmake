@@ -75,6 +75,11 @@ if(NOT TARGET mimalloc-secure
            ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_PATCH_FILE})
     endif()
 
+    # mimalloc can not be compiled with gcc 4.8 and -std=c++11
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_BUILD_OPTIONS
+           CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD)
+    endif()
     find_configure_package(
       PACKAGE
       mimalloc
@@ -97,4 +102,11 @@ if(NOT TARGET mimalloc-secure
 
     project_third_party_mimalloc_import()
   endif()
+endif()
+
+if(NOT TARGET mimalloc-secure
+   AND NOT TARGET mimalloc
+   AND NOT TARGET mimalloc-static-secure
+   AND NOT TARGET mimalloc-static)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build mimalloc failed")
 endif()
