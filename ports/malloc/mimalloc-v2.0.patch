@@ -12,10 +12,10 @@ index 84a0d19..9066a1d 100644
      return mi_usable_size(p);
    }
 diff --git a/src/alloc.c b/src/alloc.c
-index 86453f1..4431894 100644
+index 86453f1..b2ac4cc 100644
 --- a/src/alloc.c
 +++ b/src/alloc.c
-@@ -876,7 +876,7 @@ but we call `exit` instead (i.e. not returning).
+@@ -876,10 +876,10 @@ but we call `exit` instead (i.e. not returning).
  #ifdef __cplusplus
  #include <new>
  static bool mi_try_new_handler(bool nothrow) {
@@ -23,4 +23,8 @@ index 86453f1..4431894 100644
 +  #if (defined(_MSC_VER) || (__cplusplus >= 201103L)) && !(defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__))
      std::new_handler h = std::get_new_handler();
    #else
-     std::new_handler h = std::set_new_handler();
+-    std::new_handler h = std::set_new_handler();
++    std::new_handler h = std::set_new_handler(nullptr);
+     std::set_new_handler(h);
+   #endif
+   if (h==NULL) {
