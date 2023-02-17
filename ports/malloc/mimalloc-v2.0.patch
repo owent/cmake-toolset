@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 74c1f29..210d437 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,10 @@
+ cmake_minimum_required(VERSION 3.13)
+ project(libmimalloc C CXX)
+ 
++if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0"))
+ set(CMAKE_C_STANDARD 11)
+ set(CMAKE_CXX_STANDARD 17)
++endif()
+ 
+ option(MI_SECURE            "Use full security mitigations (like guard pages, allocation randomization, double-free mitigation, and free-list corruption detection)" OFF)
+ option(MI_DEBUG_FULL        "Use full internal heap invariant checking in DEBUG mode (expensive)" OFF)

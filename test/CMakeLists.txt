@@ -87,7 +87,9 @@ message(STATUS "ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS=${ATFRAMEWORK_CMAKE_TOOLS
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
 
 if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
+  if(COMPILER_OPTIONS_TEST_EXCEPTION)
+    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
+  endif()
   if(NOT WIN32 AND NOT MINGW)
     #[[
     # There is a BUG in gcc 4.6-4.8 and finxed in gcc 4.9
