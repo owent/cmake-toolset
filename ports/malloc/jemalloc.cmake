@@ -19,6 +19,10 @@ if(NOT TARGET jemalloc)
      AND NOT MINGW
      AND NOT TARGET jemalloc)
 
+    if(NOT COMPILER_OPTIONS_TEST_EXCEPTION)
+      message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build jemalloc require exception support.")
+    endif()
+
     project_third_party_port_declare(
       jemalloc
       VERSION
@@ -81,4 +85,10 @@ if(NOT TARGET jemalloc)
 
     project_third_party_jemalloc_import()
   endif()
+endif()
+
+if(NOT MSVC
+   AND NOT MINGW
+   AND NOT TARGET jemalloc)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build jemalloc failed")
 endif()

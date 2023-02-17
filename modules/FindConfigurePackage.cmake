@@ -17,6 +17,8 @@
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD
 #   CMAKE_INHERIT_FIND_ROOT_PATH
 #   CMAKE_INHERIT_SYSTEM_LINKS
 #   SCONS_FLAGS [scons options...]
@@ -75,6 +77,8 @@ include_guard(GLOBAL)
 include("${CMAKE_CURRENT_LIST_DIR}/ProjectBuildTools.cmake")
 
 function(FindConfigurePackageDownloadFile from to)
+  set(AVAILABLE_HASH_ALGORITHMS MD5 SHA1 SHA256)
+  cmake_parse_arguments(FindConfigurePackageDownloadFile "REQUIRED" "${AVAILABLE_HASH_ALGORITHMS}" "" ${ARGN})
   find_program(WGET_FULL_PATH wget)
   if(WGET_FULL_PATH)
     execute_process(
@@ -104,6 +108,29 @@ function(FindConfigurePackageDownloadFile from to)
         endif()
       endwhile()
     endif()
+  endif()
+
+  if(EXISTS "${to}")
+    foreach(TEST_HASH_ALGORITHM IN LISTS AVAILABLE_HASH_ALGORITHMS)
+      if(FindConfigurePackageDownloadFile_${TEST_HASH_ALGORITHM})
+        file(${TEST_HASH_ALGORITHM} "${to}" FindConfigurePackageDownloadFile_CHECK_HASH)
+        string(TOLOWER "${FindConfigurePackageDownloadFile_${TEST_HASH_ALGORITHM}}" HASH_EXCEPT)
+        string(TOLOWER "${FindConfigurePackageDownloadFile_CHECK_HASH}" HASH_REAL)
+        if(NOT HASH_EXCEPT STREQUAL HASH_REAL)
+          if(FindConfigurePackageDownloadFile_REQUIRED)
+            message(
+              FATAL_ERROR
+                "Hash(${TEST_HASH_ALGORITHM}) of ${to} mismatched.\n\tExcept: ${HASH_EXCEPT}\n\tReal: ${HASH_REAL}")
+          else()
+            message(
+              WARNING
+                "Hash(${TEST_HASH_ALGORITHM}) of ${to} mismatched.\n\tExcept: ${HASH_EXCEPT}\n\tReal: ${HASH_REAL}\n\t We will remove it."
+            )
+            file(REMOVE "${to}")
+          endif()
+        endif()
+      endif()
+    endforeach()
   endif()
 endfunction()
 
@@ -188,6 +215,8 @@ macro(FindConfigurePackage)
       CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD
       CMAKE_INHERIT_FIND_ROOT_PATH
       CMAKE_INHERIT_SYSTEM_LINKS
       GIT_ENABLE_SUBMODULE
@@ -550,6 +579,12 @@ macro(FindConfigurePackage)
           endif()
           if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_ASM_FLAGS)
+          endif()
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_C_STANDARD)
+          endif()
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_CXX_STANDARD)
           endif()
           if(FindConfigurePackage_CMAKE_INHERIT_SYSTEM_LINKS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS APPEND_SYSTEM_LINKS)

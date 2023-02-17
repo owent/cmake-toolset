@@ -1,0 +1,48 @@
+diff --git a/src/alloc-override.c b/src/alloc-override.c
+index 84a0d19..9066a1d 100644
+--- a/src/alloc-override.c
++++ b/src/alloc-override.c
+@@ -57,7 +57,7 @@ typedef struct mi_nothrow_s { int _tag; } mi_nothrow_t;
+   // functions that are interposed (or the interposing does not work)
+   #define MI_OSX_IS_INTERPOSED
+ 
+-  mi_decl_externc static size_t mi_malloc_size_checked(void *p) {
++  static size_t mi_malloc_size_checked(void *p) {
+     if (!mi_is_in_heap_region(p)) return 0;
+     return mi_usable_size(p);
+   }
+diff --git a/src/alloc.c b/src/alloc.c
+index 86453f1..b2ac4cc 100644
+--- a/src/alloc.c
++++ b/src/alloc.c
+@@ -876,10 +876,10 @@ but we call `exit` instead (i.e. not returning).
+ #ifdef __cplusplus
+ #include <new>
+ static bool mi_try_new_handler(bool nothrow) {
+-  #if defined(_MSC_VER) || (__cplusplus >= 201103L)
++  #if (defined(_MSC_VER) || (__cplusplus >= 201103L)) && !(defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__))
+     std::new_handler h = std::get_new_handler();
+   #else
+-    std::new_handler h = std::set_new_handler();
++    std::new_handler h = std::set_new_handler(nullptr);
+     std::set_new_handler(h);
+   #endif
+   if (h==NULL) {
+diff --git a/src/options.c b/src/options.c
+index 0a82ca6..a96fc44 100644
+--- a/src/options.c
++++ b/src/options.c
+@@ -509,7 +509,12 @@ static bool mi_getenv(const char* name, char* result, size_t result_size) {
+ #elif !defined(MI_USE_ENVIRON) || (MI_USE_ENVIRON!=0)
+ // On Posix systemsr use `environ` to acces environment variables
+ // even before the C runtime is initialized.
+-#if defined(__APPLE__) && defined(__has_include) && __has_include(<crt_externs.h>)
++#if defined(__APPLE__) && defined(__has_include)
++#if __has_include(<crt_externs.h>)
++#define MI_HAVE_CRT_EXTERNS
++#endif
++#endif
++#if defined(MI_HAVE_CRT_EXTERNS)
+ #include <crt_externs.h>
+ static char** mi_get_environ(void) {
+   return (*_NSGetEnviron());

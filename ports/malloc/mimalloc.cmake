@@ -40,6 +40,10 @@ if(NOT TARGET mimalloc-secure
      AND NOT TARGET mimalloc-static-secure
      AND NOT TARGET mimalloc-static)
 
+    if(NOT COMPILER_OPTIONS_TEST_EXCEPTION)
+      message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build mimalloc require exception support.")
+    endif()
+
     project_third_party_port_declare(
       mimalloc
       VERSION
@@ -97,4 +101,11 @@ if(NOT TARGET mimalloc-secure
 
     project_third_party_mimalloc_import()
   endif()
+endif()
+
+if(NOT TARGET mimalloc-secure
+   AND NOT TARGET mimalloc
+   AND NOT TARGET mimalloc-static-secure
+   AND NOT TARGET mimalloc-static)
+  message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build mimalloc failed")
 endif()
