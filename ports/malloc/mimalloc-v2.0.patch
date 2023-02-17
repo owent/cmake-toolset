@@ -28,3 +28,21 @@ index 86453f1..b2ac4cc 100644
      std::set_new_handler(h);
    #endif
    if (h==NULL) {
+diff --git a/src/options.c b/src/options.c
+index 0a82ca6..a96fc44 100644
+--- a/src/options.c
++++ b/src/options.c
+@@ -509,7 +509,12 @@ static bool mi_getenv(const char* name, char* result, size_t result_size) {
+ #elif !defined(MI_USE_ENVIRON) || (MI_USE_ENVIRON!=0)
+ // On Posix systemsr use `environ` to acces environment variables
+ // even before the C runtime is initialized.
+-#if defined(__APPLE__) && defined(__has_include) && __has_include(<crt_externs.h>)
++#if defined(__APPLE__) && defined(__has_include)
++#if __has_include(<crt_externs.h>)
++#define MI_HAVE_CRT_EXTERNS
++#endif
++#endif
++#if defined(MI_HAVE_CRT_EXTERNS)
+ #include <crt_externs.h>
+ static char** mi_get_environ(void) {
+   return (*_NSGetEnviron());
