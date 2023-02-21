@@ -235,6 +235,13 @@ else()
 endif()
 
 find_package(Threads)
+if(THREADS_PREFER_PTHREAD_FLAG)
+  add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS "-pthread")
+  add_compiler_flags_to_inherit_var_unique(CMAKE_C_FLAGS "-pthread")
+  add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-pthread")
+  add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-pthread")
+  add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-pthread")
+endif()
 
 # Max for two core when low memory detected
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE AND NOT PROJECT_FIND_CONFIGURE_PACKAGE_PARALLEL_BUILD)
