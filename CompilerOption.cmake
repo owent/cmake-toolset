@@ -371,7 +371,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wfloat-equal -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
-    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable
+         -Wuninitialized)
 
     check_c_compiler_flag(-rdynamic LD_FLAGS_RDYNAMIC_AVAILABLE)
     if(LD_FLAGS_RDYNAMIC_AVAILABLE)
@@ -418,7 +419,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wfloat-equal -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
-    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable
+         -Wuninitialized)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
@@ -544,7 +546,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       -Wfloat-equal
       -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
-    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable
+         -Wuninitialized)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
@@ -666,7 +669,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       /wd4512
       /WX)
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS /w44986 /w15038)
-    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS /w44484 /w44485 /w45037)
+    list(
+      APPEND
+      COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS
+      /w44484
+      /w44485
+      /w45037
+      /we6001
+      /we6244
+      /we6246)
     list(APPEND COMPILER_STRICT_RECOMMEND_REMOVE_CFLAGS /wd4100 /wd4127)
     add_linker_flags_for_runtime_unique(/ignore:4217)
 

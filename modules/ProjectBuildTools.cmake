@@ -1027,7 +1027,16 @@ endfunction()
 if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
   if(MSVC)
     unset(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS CACHE)
-    set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4244 /wd4251 /wd4267 /wd4309 /wd4668 /wd4946)
+    set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS
+        /wd4244
+        /wd4251
+        /wd4267
+        /wd4309
+        /wd4668
+        /wd4946
+        /wd6001
+        /wd6244
+        /wd6246)
     # upb
     list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4090)
 
@@ -1044,19 +1053,32 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
     if(MSVC_VERSION LESS 1910)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4800)
     endif()
+    set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS /w44484 /w44485 /w45037 /we6001 /we6244 /we6246)
   else()
     unset(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS CACHE)
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-type-limits -Wno-sign-compare -Wno-sign-conversion
-                                                           -Wno-shadow)
+                                                           -Wno-shadow -Wno-uninitialized)
+    set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS
+        -Wunused-but-set-variable
+        -Wtype-limits
+        -Wsign-compare
+        -Wsign-conversion
+        -Wshadow
+        -Wfloat-equal
+        -Woverloaded-virtual
+        -Wdelete-non-virtual-dtor
+        -Wuninitialized)
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(-Wno-unused-parameter project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
     if(project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-unused-parameter)
+      list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS -Wunused-parameter)
     endif()
     check_cxx_compiler_flag(-Wno-deprecated-declarations
                             project_build_tools_patch_protobuf_sources_LINT_NO_DEPRECATED_DECLARATIONS)
     if(project_build_tools_patch_protobuf_sources_LINT_NO_DEPRECATED_DECLARATIONS)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-deprecated-declarations)
+      list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS -Wdeprecated-declarations)
     endif()
 
   endif()
