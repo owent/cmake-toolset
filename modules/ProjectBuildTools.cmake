@@ -1058,6 +1058,18 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
     unset(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS CACHE)
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-type-limits -Wno-sign-compare -Wno-sign-conversion
                                                            -Wno-shadow -Wno-uninitialized)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      # gcc 5.1 or upper
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.1.0")
+        list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-suggest-override)
+      endif()
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.5.0")
+        list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-suggest-override -Wno-inconsistent-missing-override)
+      endif()
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+      list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-suggest-override -Wno-inconsistent-missing-override)
+    endif()
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS
         -Wunused-but-set-variable
         -Wtype-limits

@@ -382,6 +382,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       message(STATUS "Check Flag: -rdynamic -- no")
     endif()
 
+    # gcc 5.1 or upper 
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.1.0")
+      list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
+    endif()
+
     # gcc 4.9 or upper add colorful output
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.9.0")
       add_compile_options(-fdiagnostics-color=auto)
@@ -425,6 +430,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
       list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
+    endif()
+
+    # clang 3.5 or upper 
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.5.0")
+      list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
     endif()
 
     # See https://clang.llvm.org/cxx_status.html and https://clang.llvm.org/c_status.html
@@ -553,6 +563,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
       list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
     endif()
+
+    # Additional
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
 
     # See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0")
