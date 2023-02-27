@@ -1067,7 +1067,9 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
         -Wfloat-equal
         -Woverloaded-virtual
         -Wdelete-non-virtual-dtor
-        -Wuninitialized)
+        -Wuninitialized
+        -Wsuggest-override
+        -Winconsistent-missing-override)
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(-Wno-unused-parameter project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
     if(project_build_tools_patch_protobuf_sources_LINT_NO_UNUSED_PARAMETER)
