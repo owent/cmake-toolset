@@ -382,7 +382,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       message(STATUS "Check Flag: -rdynamic -- no")
     endif()
 
-    # gcc 5.1 or upper 
+    # gcc 5.1 or upper
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "5.1.0")
       list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
     endif()
@@ -432,7 +432,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
     endif()
 
-    # clang 3.5 or upper 
+    # clang 3.5 or upper
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.5.0")
       list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
     endif()
