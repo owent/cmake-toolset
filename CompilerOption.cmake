@@ -556,8 +556,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       -Wfloat-equal
       -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
-    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wunused-but-set-variable
-         -Wuninitialized)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wuninitialized)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
