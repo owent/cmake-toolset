@@ -18,6 +18,7 @@ portfiles are able to use find_library calls to discover dependent libraries wit
 include_guard(GLOBAL)
 
 # Helper variable to identify the Target system. ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_<targetname>.
+include(CMakePushCheckState)
 
 # Crossing compiling must be check first
 if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "Android")
@@ -76,13 +77,15 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_LINUX
    OR ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_MINGW
    OR ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_IOS
    OR ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_ANDROID)
-  set(ATFRAMEWORK_CMAKE_TOOLSET_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+  cmake_push_check_state()
   set(ATFRAMEWORK_CMAKE_TOOLSET_TEST_SYSTEM_LIBRARIES m dl pthread rt gcc gcc_s)
   include(CheckCXXSourceCompiles)
 
+  # Check libraries
   foreach(LIBNAME IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_TEST_SYSTEM_LIBRARIES)
-    if(ATFRAMEWORK_CMAKE_TOOLSET_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES)
-      set(CMAKE_REQUIRED_LIBRARIES "${ATFRAMEWORK_CMAKE_TOOLSET_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};${LIBNAME}")
+    cmake_push_check_state()
+    if(CMAKE_REQUIRED_LIBRARIES)
+      set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${LIBNAME}")
     else()
       set(CMAKE_REQUIRED_LIBRARIES "${LIBNAME}")
     endif()
@@ -94,14 +97,21 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_LINUX
     if(${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES "${LIBNAME}")
     endif()
+    cmake_pop_check_state()
   endforeach()
 
-  unset(ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
-  if(ATFRAMEWORK_CMAKE_TOOLSET_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES)
-    set(CMAKE_REQUIRED_LIBRARIES "${ATFRAMEWORK_CMAKE_TOOLSET_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES}")
+  # Check special flags
+  cmake_push_check_state()
+  if(CMAKE_REQUIRED_FLAGS)
+    set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS};-pthread")
   else()
-    unset(CMAKE_REQUIRED_LIBRARIES)
+    set(CMAKE_REQUIRED_FLAGS "-pthread")
   endif()
+  check_cxx_source_compiles("int main() { return 0; }" ATFRAMEWORK_CMAKE_TOOLSET_TEST_FLAG_PTHREAD)
+  cmake_pop_check_state()
+
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
+  cmake_pop_check_state()
 endif()
 
 # Platforms with system iconv

@@ -68,7 +68,8 @@ find_path(Libuuid_INCLUDE_DIRS NAMES uuid/uuid.h ${_LIBUUID_SEARCH_ROOT_INC})
 
 if(Libuuid_INCLUDE_DIRS)
   include(CheckCSourceCompiles)
-  set(Libuuid_BACKUP_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+  include(CMakePushCheckState)
+  cmake_push_check_state()
   list(APPEND CMAKE_REQUIRED_INCLUDES ${Libuuid_INCLUDE_DIRS})
   check_c_source_compiles(
     "#include <stdio.h>
@@ -80,8 +81,7 @@ int main () {
   return 0;
 }"
     Libuuid_CHECK_NO_LIBRARY)
-  set(CMAKE_REQUIRED_INCLUDES ${Libuuid_BACKUP_CMAKE_REQUIRED_INCLUDES})
-  unset(Libuuid_BACKUP_CMAKE_REQUIRED_INCLUDES)
+  cmake_pop_check_state()
 endif()
 
 if(Libuuid_CHECK_NO_LIBRARY)
