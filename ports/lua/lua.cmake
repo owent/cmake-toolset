@@ -43,21 +43,23 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
     if(ANDROID)
       list(APPEND PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "log" "m" "c")
     elseif(UNIX)
-      set(PROJECT_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
-
-      set(CMAKE_REQUIRED_LIBRARIES "${PROJECT_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};m")
+      cmake_push_check_state()
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "m")
       check_cxx_source_compiles("#include <cstdio>
     int main() { return 0; }" PROJECT_THIRD_PARTY_LUA_TEST_LINK_M)
       if(PROJECT_THIRD_PARTY_LUA_TEST_LINK_M)
         list(APPEND PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "m")
       endif()
+      cmake_pop_check_state()
 
-      set(CMAKE_REQUIRED_LIBRARIES "${PROJECT_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};dl")
+      cmake_push_check_state()
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "dl")
       check_cxx_source_compiles("#include <cstdio>
     int main() { return 0; }" PROJECT_THIRD_PARTY_LUA_TEST_LINK_DL)
       if(PROJECT_THIRD_PARTY_LUA_TEST_LINK_DL)
         list(APPEND PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "dl")
       endif()
+      cmake_pop_check_state()
     endif()
 
     if(PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS)
@@ -65,7 +67,6 @@ macro(PROJECT_THIRD_PARTY_LUA_IMPORT)
                                                    "${PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS}")
     endif()
 
-    unset(PROJECT_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES)
     unset(PROJECT_THIRD_PARTY_LUA_LIB_DEPEND_LIBS)
     echowithcolor(
       COLOR

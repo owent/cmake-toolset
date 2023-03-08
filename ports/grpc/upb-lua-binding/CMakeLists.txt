@@ -116,21 +116,24 @@ elseif(LUA_FOUND)
   if(ANDROID)
     list(APPEND UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "log" "m" "c")
   elseif(UNIX)
-    set(UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
-
-    set(CMAKE_REQUIRED_LIBRARIES "${UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};m")
+    include(CMakePushCheckState)
+    cmake_push_check_state()
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "m")
     check_cxx_source_compiles("#include <cstdio>
     int main() { return 0; }" UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_LINK_M)
     if(UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_LINK_M)
       list(APPEND UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "m")
     endif()
+    cmake_pop_check_state()
 
-    set(CMAKE_REQUIRED_LIBRARIES "${UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};dl")
+    cmake_push_check_state()
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "dl")
     check_cxx_source_compiles("#include <cstdio>
     int main() { return 0; }" UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_LINK_DL)
     if(UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_LINK_DL)
       list(APPEND UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS "dl")
     endif()
+    cmake_pop_check_state()
   endif()
 
   if(UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS)
@@ -138,7 +141,6 @@ elseif(LUA_FOUND)
                                                  "${UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS}")
   endif()
 
-  unset(UPB_BINDING_LUA_THIRD_PARTY_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES)
   unset(UPB_BINDING_LUA_THIRD_PARTY_LUA_LIB_DEPEND_LIBS)
   message(
     STATUS

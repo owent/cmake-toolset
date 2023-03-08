@@ -153,35 +153,39 @@ endif()
 if(ANDROID)
   list(APPEND PROJECT_LUA_LIB_DEPEND_LIBS "log" "m" "c")
 elseif(UNIX)
-  set(PROJECT_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+  include(CMakePushCheckState)
 
-  set(CMAKE_REQUIRED_LIBRARIES "${PROJECT_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};m")
+  cmake_push_check_state()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "m")
   check_cxx_source_compiles("#include <cstdio>
     int main() { return 0; }" PROJECT_LUA_TEST_LINK_M)
   if(PROJECT_LUA_TEST_LINK_M)
     list(APPEND PROJECT_LUA_LIB_DEPEND_LIBS "m")
   endif()
+  cmake_pop_check_state()
 
-  set(CMAKE_REQUIRED_LIBRARIES "${PROJECT_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};dl")
+  cmake_push_check_state()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "dl")
   check_cxx_source_compiles("#include <cstdio>
     int main() { return 0; }" PROJECT_LUA_TEST_LINK_DL)
   if(PROJECT_LUA_TEST_LINK_DL)
     list(APPEND PROJECT_LUA_LIB_DEPEND_LIBS "dl")
   endif()
+  cmake_pop_check_state()
 endif()
 
 if(NOT MSVC)
-  set(PROJECT_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+  include(CMakePushCheckState)
 
-  set(CMAKE_REQUIRED_LIBRARIES "${PROJECT_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES};readline")
+  cmake_push_check_state()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "readline")
   check_cxx_source_compiles("#include <readline/readline.h>
     int main() { return 0; }" PROJECT_LUA_TEST_HAS_READLINE)
   if(PROJECT_LUA_TEST_HAS_READLINE)
     list(APPEND PROJECT_LUA_EXT_OPTIONS "LUA_USE_READLINE")
     list(APPEND PROJECT_LUA_BIN_DEPEND_LIBS "readline")
   endif()
-
-  set(CMAKE_REQUIRED_LIBRARIES ${PROJECT_LUA_TEST_BACKUP_CMAKE_REQUIRED_LIBRARIES})
+  cmake_pop_check_state()
 endif()
 
 if(BUILD_STATIC_LIBS)
