@@ -47,6 +47,10 @@ macro(PROJECT_THIRD_PARTY_OPENSSL_IMPORT)
       endif()
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME Bcrypt)
+    endif()
+
     find_program(
       OPENSSL_EXECUTABLE
       NAMES openssl openssl.exe
