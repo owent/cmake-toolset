@@ -132,10 +132,11 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
     CMAKE_ANDROID_API
     # For MSVC
     CMAKE_MSVC_RUNTIME_LIBRARY
-    # See
+    #[[ See
     #   https://github.com/microsoft/vcpkg/issues/16165
     #   https://github.com/microsoft/vcpkg/discussions/30252
     #   https://github.com/microsoft/vcpkg/discussions/19149
+    ]]
     VS_GLOBAL_VcpkgEnabled)
 if(CMAKE_CROSSCOMPILING)
   list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_OSX_SYSROOT)
