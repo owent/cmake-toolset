@@ -90,5 +90,9 @@ endif()
 if(NOT MSVC
    AND NOT MINGW
    AND NOT TARGET jemalloc)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+    project_build_tools_print_configure_log(
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/jemalloc-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_VERSION}")
+  endif()
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build jemalloc failed")
 endif()

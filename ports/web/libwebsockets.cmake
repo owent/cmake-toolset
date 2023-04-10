@@ -424,5 +424,8 @@ endif()
 if(NOT Libwebsockets_FOUND
    AND NOT TARGET websockets
    AND NOT TARGET websockets_shared)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+    project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}")
+  endif()
   message(FATAL_ERROR "-- Dependency(${PROJECT_NAME}): libwebsockets not found")
 endif()

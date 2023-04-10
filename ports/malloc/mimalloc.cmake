@@ -107,5 +107,8 @@ if(NOT TARGET mimalloc-secure
    AND NOT TARGET mimalloc
    AND NOT TARGET mimalloc-static-secure
    AND NOT TARGET mimalloc-static)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+    project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_BUILD_DIR}")
+  endif()
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Build mimalloc failed")
 endif()

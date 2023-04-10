@@ -158,6 +158,9 @@ if(NOT TARGET hiredis::hiredis_ssl_static
 endif()
 
 if(NOT hiredis_FOUND)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+    project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_DIR}")
+  endif()
   echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): hiredis is required")
   message(FATAL_ERROR "hiredis not found")
 endif()

@@ -102,5 +102,8 @@ else()
 endif()
 
 if(NOT TARGET prometheus-cpp::core)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+    project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_DIR}")
+  endif()
   message(FATAL_ERROR "-- Dependency(${PROJECT_NAME}): prometheus-cpp not found")
 endif()

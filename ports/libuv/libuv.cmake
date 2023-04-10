@@ -116,6 +116,9 @@ if(NOT TARGET uv_a
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_GIT_URL}")
 
     if(NOT Libuv_FOUND)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+        project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_DIR}")
+      endif()
       echowithcolor(
         COLOR
         RED

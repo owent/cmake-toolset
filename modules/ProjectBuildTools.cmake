@@ -1771,3 +1771,42 @@ function(project_build_tools_auto_set_target_postfix)
     set_target_properties(${ARGN} PROPERTIES ${POSTFIX_PROPERTIES})
   endif()
 endfunction()
+
+function(project_build_tools_print_configure_log)
+  foreach(DIRNAME ${ARGN})
+    if(EXISTS "${DIRNAME}/CMakeFiles/CMakeConfigureLog.yaml")
+      file(READ "${DIRNAME}/CMakeFiles/CMakeConfigureLog.yaml" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/CMakeFiles/CMakeConfigureLog.yaml ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+
+    if(EXISTS "${DIRNAME}/CMakeFiles/CMakeOutput.log")
+      unset(LOG_CONTENT)
+      file(READ "${DIRNAME}/CMakeFiles/CMakeOutput.log" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/CMakeFiles/CMakeOutput.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+
+    if(EXISTS "${DIRNAME}/CMakeFiles/CMakeError.log")
+      unset(LOG_CONTENT)
+      file(READ "${DIRNAME}/CMakeFiles/CMakeError.log" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/CMakeFiles/CMakeError.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+
+    if(EXISTS "${DIRNAME}/config.log")
+      unset(LOG_CONTENT)
+      file(READ "${DIRNAME}/config.log" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/config.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+  endforeach()
+endfunction()
