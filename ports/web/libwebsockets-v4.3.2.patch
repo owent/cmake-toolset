@@ -85,3 +85,28 @@ index f569532..ab30e05 100644
  							  (unsigned int)pmdrx.eb_out.len);
  
  					return -1;
+diff --git a/lib/tls/CMakeLists.txt b/lib/tls/CMakeLists.txt
+index fb9a75f..04172e8 100644
+--- a/lib/tls/CMakeLists.txt
++++ b/lib/tls/CMakeLists.txt
+@@ -264,10 +264,19 @@ if (LWS_WITH_SSL)
+ 		if (NOT OPENSSL_FOUND AND NOT LWS_WITH_BORINGSSL)
+ 			# TODO: Add support for STATIC also.
+ 			if (NOT LWS_PLAT_FREERTOS)
++				find_package(OpenSSL REQUIRED)
++				if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
++					if(TARGET OpenSSL::SSL)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::SSL)
++					endif()
++					if(TARGET OpenSSL::Crypto)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::Crypto)
++					endif()
++				else()
+ 				find_package(PkgConfig QUIET)
+ 				pkg_check_modules(PC_OPENSSL openssl QUIET)
+-				find_package(OpenSSL REQUIRED)
+ 				list(APPEND OPENSSL_LIBRARIES ${PC_OPENSSL_LIBRARIES})
++				endif()
+ 				set(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} PARENT_SCOPE)
+ 			endif()
+ 			set(OPENSSL_INCLUDE_DIRS "${OPENSSL_INCLUDE_DIR}")
