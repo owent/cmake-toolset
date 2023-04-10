@@ -1804,8 +1804,7 @@ function(project_build_tools_print_configure_log)
       unset(LOG_CONTENT)
       file(READ "${DIRNAME}/config.log" LOG_CONTENT)
       message(
-        STATUS
-          "============ ${DIRNAME}/config.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+        STATUS "============ ${DIRNAME}/config.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
       )
     endif()
   endforeach()
