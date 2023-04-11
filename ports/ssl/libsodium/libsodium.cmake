@@ -94,8 +94,14 @@ if(NOT TARGET sodium
     GIT_URL
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_GIT_URL}")
 
-  if(TARGET xxHash::xxhash)
-    project_third_party_xxhash_import()
+  if(TARGET sodium
+     OR TARGET unofficial-sodium::sodium
+     OR TARGET libsodium::libsodium)
+    project_third_party_libsodium_import()
+  else()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_BUILD_DIR}")
+    endif()
   endif()
 else()
   project_third_party_libsodium_import()

@@ -131,7 +131,13 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
     CMAKE_ANDROID_ARCH_ABI
     CMAKE_ANDROID_API
     # For MSVC
-    CMAKE_MSVC_RUNTIME_LIBRARY)
+    CMAKE_MSVC_RUNTIME_LIBRARY
+    #[[ See
+    #   https://github.com/microsoft/vcpkg/issues/16165
+    #   https://github.com/microsoft/vcpkg/discussions/30252
+    #   https://github.com/microsoft/vcpkg/discussions/19149
+    ]]
+    VS_GLOBAL_VcpkgEnabled)
 if(CMAKE_CROSSCOMPILING)
   list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_OSX_SYSROOT)
 endif()
@@ -1067,11 +1073,13 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
       endif()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
       if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.5.0")
-        list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-suggest-override
-             -Wno-inconsistent-missing-override)
-      endif()
-      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.9.0")
         list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-float-conversion)
+      endif()
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.6.0")
+        list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-inconsistent-missing-override)
+      endif()
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "11.0")
+        list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-suggest-override)
       endif()
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS -Wno-suggest-override
@@ -1762,4 +1770,42 @@ function(project_build_tools_auto_set_target_postfix)
     endif()
     set_target_properties(${ARGN} PROPERTIES ${POSTFIX_PROPERTIES})
   endif()
+endfunction()
+
+function(project_build_tools_print_configure_log)
+  foreach(DIRNAME ${ARGN})
+    if(EXISTS "${DIRNAME}/CMakeFiles/CMakeConfigureLog.yaml")
+      file(READ "${DIRNAME}/CMakeFiles/CMakeConfigureLog.yaml" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/CMakeFiles/CMakeConfigureLog.yaml ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+
+    if(EXISTS "${DIRNAME}/CMakeFiles/CMakeOutput.log")
+      unset(LOG_CONTENT)
+      file(READ "${DIRNAME}/CMakeFiles/CMakeOutput.log" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/CMakeFiles/CMakeOutput.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+
+    if(EXISTS "${DIRNAME}/CMakeFiles/CMakeError.log")
+      unset(LOG_CONTENT)
+      file(READ "${DIRNAME}/CMakeFiles/CMakeError.log" LOG_CONTENT)
+      message(
+        STATUS
+          "============ ${DIRNAME}/CMakeFiles/CMakeError.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+
+    if(EXISTS "${DIRNAME}/config.log")
+      unset(LOG_CONTENT)
+      file(READ "${DIRNAME}/config.log" LOG_CONTENT)
+      message(
+        STATUS "============ ${DIRNAME}/config.log ============${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}${LOG_CONTENT}"
+      )
+    endif()
+  endforeach()
 endfunction()

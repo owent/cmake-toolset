@@ -47,6 +47,10 @@ macro(PROJECT_THIRD_PARTY_OPENSSL_IMPORT)
       endif()
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND "bcrypt" IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME "bcrypt")
+    endif()
+
     find_program(
       OPENSSL_EXECUTABLE
       NAMES openssl openssl.exe
@@ -530,6 +534,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   else()
     if(OPENSSL_ROOT_DIR)
       unset(OPENSSL_ROOT_DIR)
+    endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}")
     endif()
   endif()
 else()

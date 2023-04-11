@@ -208,6 +208,9 @@ if(NOT TARGET lua::liblua-static
      AND NOT TARGET unofficial-lua::lua
      AND NOT TARGET lua
      AND NOT LUA_FOUND)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_BUILD_DIR}")
+    endif()
     message(FATAL_ERROR "-- Dependency(${PROJECT_NAME}): lua not found")
   endif()
   project_third_party_lua_import()

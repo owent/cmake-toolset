@@ -55,6 +55,9 @@ if(NOT TARGET rapidjson
 
   project_third_party_rapidjson_import()
   if(NOT RapidJSON_FOUND)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_BUILD_DIR}")
+    endif()
     echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): rapidjson is required")
     message(FATAL_ERROR "rapidjson not found")
   endif()

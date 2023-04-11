@@ -147,6 +147,9 @@ ${OPENSSL_VERSION_STR}
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto OpenSSL::SSL)
       endif()
     endif()
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND "bcrypt" IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME "bcrypt")
+    endif()
 
     find_program(
       OPENSSL_EXECUTABLE
@@ -293,6 +296,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   if(OPENSSL_FOUND OR OpenSSL_FOUND)
     project_third_party_boringssl_import()
   else()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_BUILD_DIR}")
+    endif()
     echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): build boringssl failed.")
     message(FATAL_ERROR "boringssl is required.")
   endif()

@@ -1052,6 +1052,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # Features test finished
   cmake_policy(POP)
 
+  # Do not set it to CACHE, or it may always changes when users use set(VAR "${VAR} ...")
+  #[[
   # Store all flags into Cache variables
   foreach(COMPILER_OPTION_INHERIT_VAR_NAME
           ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
@@ -1062,4 +1064,5 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
           CACHE STRING "Update cached ${COMPILER_OPTION_INHERIT_VAR_NAME}" FORCE)
     endif()
   endforeach()
+  ]]
 endif()

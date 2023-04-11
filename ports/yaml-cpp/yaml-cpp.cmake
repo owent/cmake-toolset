@@ -61,6 +61,9 @@ if(NOT TARGET yaml-cpp::yaml-cpp
   if(NOT TARGET yaml-cpp::yaml-cpp
      AND NOT TARGET yaml-cpp
      AND (NOT YAML_CPP_INCLUDE_DIR OR NOT YAML_CPP_LIBRARIES))
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_YAML_CPP_BUILD_DIR}")
+    endif()
     echowithcolor(
       COLOR
       RED

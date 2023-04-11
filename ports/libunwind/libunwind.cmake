@@ -113,6 +113,10 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL}")
 
   if(NOT Libunwind_FOUND)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+      project_build_tools_print_configure_log(
+        "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/libunwind-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION}")
+    endif()
     echowithcolor(COLOR YELLOW "-- Dependency(${PROJECT_NAME}): Libunwind not found and skip import it.")
   else()
     project_third_party_libunwind_import()
