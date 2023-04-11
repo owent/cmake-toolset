@@ -77,6 +77,7 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   Set-Location "test/build_jobs_dir"
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -99,6 +100,7 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   Set-Location "test/build_jobs_dir"
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -121,6 +123,7 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
   Set-Location "test/build_jobs_dir"
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF" "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -143,6 +146,7 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   Set-Location "test/build_jobs_dir"
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=ON "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION=OFF" "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -165,6 +169,7 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
   Set-Location "test/build_jobs_dir"
   & cmake ../standalone-upb -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
+    "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -203,6 +208,7 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
   & cmake .. -G "Visual Studio 15 2017 Win64" "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" `
+    "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON" "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
