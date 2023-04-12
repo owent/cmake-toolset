@@ -870,7 +870,29 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
         if("${LIBTOOL_V_OUTPUT}" MATCHES ".*cctools-([0-9.]+).*")
           string(REGEX REPLACE ".*cctools-([0-9.]+).*" "\\1" LIBTOOL_VERSION "${LIBTOOL_V_OUTPUT}")
           if(NOT LIBTOOL_VERSION VERSION_LESS "862")
-            set(LIBTOOL_NO_WARNING_FLAG "-no_warning_for_no_symbols")
+            # When using public version of llvm on macOS, -no_warning_for_no_symbols is aunavailable. We need test if
+            # it's available.
+            file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.cpp"
+                 "int func(){ return 0; }")
+            execute_process(
+              COMMAND
+                "${CMAKE_CXX_COMPILER}" -c "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.cpp"
+                -o "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.o" COMMAND_ECHO STDOUT
+              OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+            execute_process(
+              COMMAND "${CMAKE_AR}" "-rcs" "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/libtest-no_warning_for_no_symbols.a"
+                      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.o" COMMAND_ECHO STDOUT
+              OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+            execute_process(
+              COMMAND "${CMAKE_RANLIB}" "-no_warning_for_no_symbols"
+                      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/libtest-no_warning_for_no_symbols.a"
+              RESULT_VARIABLE LIBTOOL_CHECK_NO_WARNING_FLAG_RESULT COMMAND_ECHO STDOUT
+              OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+            if(LIBTOOL_CHECK_NO_WARNING_FLAG_RESULT EQUAL 0)
+              set(LIBTOOL_NO_WARNING_FLAG "-no_warning_for_no_symbols")
+            else()
+              message(STATUS "${CMAKE_RANLIB} seems not support -no_warning_for_no_symbols, skip it.")
+            endif()
           endif()
         endif()
 
