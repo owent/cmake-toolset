@@ -872,14 +872,20 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
           if(NOT LIBTOOL_VERSION VERSION_LESS "862")
             # When using public version of llvm on macOS, -no_warning_for_no_symbols is aunavailable. We need test if
             # it's available.
-            file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.cpp" "int func(){ return 0; }")
+            file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.cpp"
+                 "int func(){ return 0; }")
             execute_process(
-              COMMAND "${CMAKE_CXX_COMPILER}" -c "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.cpp" -o
-                      "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.o"
-              COMMAND "${CMAKE_AR}" "-rcs" "${CMAKE_CURRENT_BINARY_DIR}/libtest-no_warning_for_no_symbols.a"
-                      "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.o"
+              COMMAND
+                "${CMAKE_CXX_COMPILER}" -c "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.cpp"
+                -o "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.o" COMMAND_ECHO STDOUT
+              OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+            execute_process(
+              COMMAND "${CMAKE_AR}" "-rcs" "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/libtest-no_warning_for_no_symbols.a"
+                      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/test-no_warning_for_no_symbols.o" COMMAND_ECHO STDOUT
+              OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+            execute_process(
               COMMAND "${CMAKE_RANLIB}" "-no_warning_for_no_symbols"
-                      "${CMAKE_CURRENT_BINARY_DIR}/libtest-no_warning_for_no_symbols.a"
+                      "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/libtest-no_warning_for_no_symbols.a"
               RESULT_VARIABLE LIBTOOL_CHECK_NO_WARNING_FLAG_RESULT COMMAND_ECHO STDOUT
               OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
             if(LIBTOOL_CHECK_NO_WARNING_FLAG_RESULT EQUAL 0)
