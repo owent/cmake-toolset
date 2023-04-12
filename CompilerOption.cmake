@@ -876,7 +876,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
             execute_process(
               COMMAND "${CMAKE_CXX_COMPILER}" -c "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.cpp" -o
                       "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.o"
-              COMMAND "${CMAKE_AR}" "rcs" "${CMAKE_CURRENT_BINARY_DIR}/libtest-no_warning_for_no_symbols.a"
+              COMMAND "${CMAKE_AR}" "-rcs" "${CMAKE_CURRENT_BINARY_DIR}/libtest-no_warning_for_no_symbols.a"
                       "${CMAKE_CURRENT_BINARY_DIR}/test-no_warning_for_no_symbols.o"
               COMMAND "${CMAKE_RANLIB}" "-no_warning_for_no_symbols"
                       "${CMAKE_CURRENT_BINARY_DIR}/libtest-no_warning_for_no_symbols.a"
