@@ -818,7 +818,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
     # Also use MultiThreaded*DLL when without VCPKG_CRT_LINKAGE
     if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      if(NOT DEFINED CACHE{CMAKE_MSVC_RUNTIME_LIBRARY})
+      if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
         set_compiler_flags_to_inherit_var(
           CMAKE_MSVC_RUNTIME_LIBRARY
           "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>")
