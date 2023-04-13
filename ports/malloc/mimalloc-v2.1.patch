@@ -1,0 +1,35 @@
+diff --git a/src/alloc.c b/src/alloc.c
+index 147e110..60103b7 100644
+--- a/src/alloc.c
++++ b/src/alloc.c
+@@ -882,10 +882,10 @@ but we call `exit` instead (i.e. not returning).
+ #ifdef __cplusplus
+ #include <new>
+ static bool mi_try_new_handler(bool nothrow) {
+-  #if defined(_MSC_VER) || (__cplusplus >= 201103L)
++  #if (defined(_MSC_VER) || (__cplusplus >= 201103L)) && !(defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__))
+     std::new_handler h = std::get_new_handler();
+   #else
+-    std::new_handler h = std::set_new_handler();
++    std::new_handler h = std::set_new_handler(nullptr);
+     std::set_new_handler(h);
+   #endif
+   if (h==NULL) {
+diff --git a/src/prim/unix/prim.c b/src/prim/unix/prim.c
+index 011ffa7..229b30b 100644
+--- a/src/prim/unix/prim.c
++++ b/src/prim/unix/prim.c
+@@ -653,7 +653,12 @@ void _mi_prim_out_stderr( const char* msg ) {
+ #if !defined(MI_USE_ENVIRON) || (MI_USE_ENVIRON!=0)
+ // On Posix systemsr use `environ` to access environment variables
+ // even before the C runtime is initialized.
+-#if defined(__APPLE__) && defined(__has_include) && __has_include(<crt_externs.h>)
++#if defined(__APPLE__) && defined(__has_include)
++#  if __has_include(<crt_externs.h>)
++#    define MI_HAVE_CRT_EXTERNS
++#  endif
++#endif
++#if defined(MI_HAVE_CRT_EXTERNS)
+ #include <crt_externs.h>
+ static char** mi_get_environ(void) {
+   return (*_NSGetEnviron());
