@@ -103,7 +103,7 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_APPEND_DEFAULT_BUILD_OPTIONS})
       endif()
     endif()
-    project_third_party_port_declare(civetweb VERSION "v1.15" GIT_URL "https://github.com/civetweb/civetweb.git")
+    project_third_party_port_declare(civetweb VERSION "v1.16" GIT_URL "https://github.com/civetweb/civetweb.git")
 
     project_third_party_append_build_shared_lib_var(
       "civetweb" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_BUILD_OPTIONS BUILD_SHARED_LIBS)

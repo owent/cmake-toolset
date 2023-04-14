@@ -191,7 +191,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     PORT_PREFIX
     "CRYPTO"
     VERSION
-    "b9232f9e27e5668bc0414879dcdedb2a59ea75f2"
+    "8872d958b7b07173bf29b8f3b8bf36a1ca8c94a3"
     GIT_URL
     "https://github.com/google/boringssl.git"
     BUILD_OPTIONS

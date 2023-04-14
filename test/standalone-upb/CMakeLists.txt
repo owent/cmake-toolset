@@ -84,8 +84,8 @@ message(STATUS "ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS=${ATFRAMEWORK_CMAKE_TOOLS
 
 # Ports
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/abseil-cpp/abseil-cpp.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/abseil-cpp.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
 
 add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")

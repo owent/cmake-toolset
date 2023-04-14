@@ -24,7 +24,7 @@ if(NOT TARGET TBB::tbb)
     project_third_party_port_declare(
       TBB
       VERSION
-      "v2021.7.0"
+      "v2021.8.0"
       GIT_URL
       "https://github.com/oneapi-src/oneTBB.git"
       BUILD_OPTIONS

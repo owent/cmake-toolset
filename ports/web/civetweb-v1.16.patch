@@ -1,0 +1,14 @@
+diff --git a/src/civetweb.c b/src/civetweb.c
+index 9e321ed..fc3be07 100644
+--- a/src/civetweb.c
++++ b/src/civetweb.c
+@@ -1775,7 +1775,9 @@ typedef struct SSL_CTX SSL_CTX;
+  * the standard memory functions.
+  *
+  * #define OPENSSL_free free */
++#ifndef free
+ #define free free
++#endif
+ // disable for boringssl
+ #define CONF_modules_unload(a) ((void)0)
+ #define ENGINE_cleanup() ((void)0)

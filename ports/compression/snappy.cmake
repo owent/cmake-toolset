@@ -25,7 +25,7 @@ if(NOT TARGET Snappy::snappy)
       PORT_PREFIX
       COMPRESSION
       VERSION
-      "1.1.9"
+      "1.1.10"
       GIT_URL
       "https://github.com/google/snappy.git"
       BUILD_OPTIONS
