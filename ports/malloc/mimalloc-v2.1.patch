@@ -1,3 +1,17 @@
+diff --git a/include/mimalloc/atomic.h b/include/mimalloc/atomic.h
+index fe79fbc..9ab88cb 100644
+--- a/include/mimalloc/atomic.h
++++ b/include/mimalloc/atomic.h
+@@ -28,6 +28,9 @@ terms of the MIT license. A copy of the license can be found in the file
+ #else
+  #define MI_ATOMIC_VAR_INIT(x)  ATOMIC_VAR_INIT(x)
+ #endif
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
++#include <stdatomic.h>
++#endif
+ #elif defined(_MSC_VER)
+ // Use MSVC C wrapper for C11 atomics
+ #define  _Atomic(tp)            tp
 diff --git a/src/alloc.c b/src/alloc.c
 index 147e110..60103b7 100644
 --- a/src/alloc.c

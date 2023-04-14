@@ -35,6 +35,13 @@ if(NOT TARGET mimalloc-secure
     project_third_party_mimalloc_import()
   endif()
 
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_DEFAULT_VERSION "v2.1.1")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_C_COMPILER_VERSION VERSION_LESS "4.9.0")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_DEFAULT_VERSION "v2.0.9")
+    endif()
+  endif()
+
   if(NOT TARGET mimalloc-secure
      AND NOT TARGET mimalloc
      AND NOT TARGET mimalloc-static-secure
@@ -47,7 +54,7 @@ if(NOT TARGET mimalloc-secure
     project_third_party_port_declare(
       mimalloc
       VERSION
-      "v2.1.1"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_DEFAULT_VERSION}"
       GIT_URL
       "https://github.com/microsoft/mimalloc.git"
       BUILD_OPTIONS
