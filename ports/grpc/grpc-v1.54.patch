@@ -106,10 +106,20 @@ index 3164b18..0c13f53 100644
  
  bool operator==(const EventEngine::TaskHandle& lhs,
 diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
-index 2071a23..6f8b3ac 100644
+index 2071a23..31087d9 100644
 --- a/src/core/lib/surface/server.cc
 +++ b/src/core/lib/surface/server.cc
-@@ -705,7 +705,7 @@ void Server::Start() {
+@@ -154,7 +154,8 @@ struct Server::RegisteredMethod {
+   const grpc_server_register_method_payload_handling payload_handling;
+   const uint32_t flags;
+   // One request matcher per method.
+-  std::unique_ptr<RequestMatcherInterface> matcher;
++  // Fix unique_ptr can not be used before declaration.
++  std::shared_ptr<RequestMatcherInterface> matcher;
+ };
+ 
+ //
+@@ -705,7 +706,7 @@ void Server::Start() {
    if (unregistered_request_matcher_ == nullptr) {
      unregistered_request_matcher_ = std::make_unique<RealRequestMatcher>(this);
    }
@@ -118,7 +128,7 @@ index 2071a23..6f8b3ac 100644
      if (rm->matcher == nullptr) {
        rm->matcher = std::make_unique<RealRequestMatcher>(this);
      }
-@@ -812,7 +812,7 @@ Server::RegisteredMethod* Server::RegisterMethod(
+@@ -812,7 +813,7 @@ Server::RegisteredMethod* Server::RegisterMethod(
              "grpc_server_register_method method string cannot be NULL");
      return nullptr;
    }
@@ -127,7 +137,7 @@ index 2071a23..6f8b3ac 100644
      if (streq(m->method, method) && streq(m->host, host)) {
        gpr_log(GPR_ERROR, "duplicate registration for %s@%s", method,
                host ? host : "*");
-@@ -877,7 +877,7 @@ void Server::KillPendingWorkLocked(grpc_error_handle error) {
+@@ -877,7 +878,7 @@ void Server::KillPendingWorkLocked(grpc_error_handle error) {
    if (started_) {
      unregistered_request_matcher_->KillRequests(error);
      unregistered_request_matcher_->ZombifyPending();
@@ -136,7 +146,7 @@ index 2071a23..6f8b3ac 100644
        rm->matcher->KillRequests(error);
        rm->matcher->ZombifyPending();
      }
-@@ -1153,7 +1153,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
+@@ -1153,7 +1154,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
      size_t slots = 2 * num_registered_methods;
      registered_methods_ =
          std::make_unique<std::vector<ChannelRegisteredMethod>>(slots);
