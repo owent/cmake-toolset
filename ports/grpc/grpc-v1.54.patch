@@ -103,9 +103,18 @@ index 2071a23..6f8b3ac 100644
        Slice method = Slice::FromExternalString(rm->method);
        const bool has_host = !rm->host.empty();
 diff --git a/src/core/lib/surface/server.h b/src/core/lib/surface/server.h
-index d635da5..3659483 100644
+index d635da5..3f98bea 100644
 --- a/src/core/lib/surface/server.h
 +++ b/src/core/lib/surface/server.h
+@@ -140,7 +140,7 @@ class Server : public InternallyRefCounted<Server>,
+   }
+ 
+   void set_config_fetcher(
+-      std::unique_ptr<grpc_server_config_fetcher> config_fetcher) {
++      std::shared_ptr<grpc_server_config_fetcher> config_fetcher) {
+     config_fetcher_ = std::move(config_fetcher);
+   }
+ 
 @@ -444,7 +444,9 @@ class Server : public InternallyRefCounted<Server>,
  
    ChannelArgs const channel_args_;
