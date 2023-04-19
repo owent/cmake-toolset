@@ -62,6 +62,88 @@ index ec370e9..d0a489e 100644
  endif()
  
  
+diff --git a/src/core/lib/surface/server.h b/src/core/lib/surface/server.h
+index d635da5..968828e 100644
+--- a/src/core/lib/surface/server.h
++++ b/src/core/lib/surface/server.h
+@@ -64,7 +64,39 @@
+ #include "src/core/lib/transport/transport.h"
+ #include "src/core/lib/transport/transport_fwd.h"
+ 
+-struct grpc_server_config_fetcher;
++
++// Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type"); in clang 16
++struct grpc_server_config_fetcher {
++ public:
++  class ConnectionManager
++      : public grpc_core::DualRefCounted<ConnectionManager> {
++   public:
++    // Ownership of \a args is transfered.
++    virtual absl::StatusOr<grpc_core::ChannelArgs>
++    UpdateChannelArgsForConnection(const grpc_core::ChannelArgs& args,
++                                   grpc_endpoint* tcp) = 0;
++  };
++
++  class WatcherInterface {
++   public:
++    virtual ~WatcherInterface() = default;
++    // UpdateConnectionManager() is invoked by the config fetcher when a new
++    // config is available. Implementations should update the connection manager
++    // and start serving if not already serving.
++    virtual void UpdateConnectionManager(
++        grpc_core::RefCountedPtr<ConnectionManager> manager) = 0;
++    // Implementations should stop serving when this is called. Serving should
++    // only resume when UpdateConfig() is invoked.
++    virtual void StopServing() = 0;
++  };
++
++  virtual ~grpc_server_config_fetcher() = default;
++
++  virtual void StartWatch(std::string listening_address,
++                          std::unique_ptr<WatcherInterface> watcher) = 0;
++  virtual void CancelWatch(WatcherInterface* watcher) = 0;
++  virtual grpc_pollset_set* interested_parties() = 0;
++};
+ 
+ namespace grpc_core {
+ 
+@@ -492,36 +524,4 @@ class Server : public InternallyRefCounted<Server>,
+ 
+ }  // namespace grpc_core
+ 
+-struct grpc_server_config_fetcher {
+- public:
+-  class ConnectionManager
+-      : public grpc_core::DualRefCounted<ConnectionManager> {
+-   public:
+-    // Ownership of \a args is transfered.
+-    virtual absl::StatusOr<grpc_core::ChannelArgs>
+-    UpdateChannelArgsForConnection(const grpc_core::ChannelArgs& args,
+-                                   grpc_endpoint* tcp) = 0;
+-  };
+-
+-  class WatcherInterface {
+-   public:
+-    virtual ~WatcherInterface() = default;
+-    // UpdateConnectionManager() is invoked by the config fetcher when a new
+-    // config is available. Implementations should update the connection manager
+-    // and start serving if not already serving.
+-    virtual void UpdateConnectionManager(
+-        grpc_core::RefCountedPtr<ConnectionManager> manager) = 0;
+-    // Implementations should stop serving when this is called. Serving should
+-    // only resume when UpdateConfig() is invoked.
+-    virtual void StopServing() = 0;
+-  };
+-
+-  virtual ~grpc_server_config_fetcher() = default;
+-
+-  virtual void StartWatch(std::string listening_address,
+-                          std::unique_ptr<WatcherInterface> watcher) = 0;
+-  virtual void CancelWatch(WatcherInterface* watcher) = 0;
+-  virtual grpc_pollset_set* interested_parties() = 0;
+-};
+-
+ #endif  // GRPC_SRC_CORE_LIB_SURFACE_SERVER_H
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
 index d64c14f..f267d24 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
