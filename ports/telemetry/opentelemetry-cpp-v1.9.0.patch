@@ -1,0 +1,12 @@
+diff --git a/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h b/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h
+index 55a488f..93d7b24 100644
+--- a/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h
++++ b/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h
+@@ -19,6 +19,7 @@
+ #include <string>
+ #include <thread>
+ #include <vector>
++#include <functional>
+ #ifdef _WIN32
+ #  include <io.h>
+ #  include <winsock2.h>
