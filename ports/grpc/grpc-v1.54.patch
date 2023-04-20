@@ -62,6 +62,137 @@ index ec370e9..d0a489e 100644
  endif()
  
  
+diff --git a/src/core/ext/gcp/metadata_query.cc b/src/core/ext/gcp/metadata_query.cc
+index 9383dae..5057732 100644
+--- a/src/core/ext/gcp/metadata_query.cc
++++ b/src/core/ext/gcp/metadata_query.cc
+@@ -46,15 +46,15 @@ namespace grpc_core {
+ 
+ TraceFlag grpc_metadata_query_trace(false, "metadata_query");
+ 
+-constexpr const char MetadataQuery::kZoneAttribute[] =
++const char MetadataQuery::kZoneAttribute[] =
+     "/computeMetadata/v1/instance/zone";
+-constexpr const char MetadataQuery::kClusterNameAttribute[] =
++const char MetadataQuery::kClusterNameAttribute[] =
+     "/computeMetadata/v1/instance/attributes/cluster-name";
+-constexpr const char MetadataQuery::kRegionAttribute[] =
++const char MetadataQuery::kRegionAttribute[] =
+     "/computeMetadata/v1/instance/region";
+-constexpr const char MetadataQuery::kInstanceIdAttribute[] =
++const char MetadataQuery::kInstanceIdAttribute[] =
+     "/computeMetadata/v1/instance/id";
+-constexpr const char MetadataQuery::kIPv6Attribute[] =
++const char MetadataQuery::kIPv6Attribute[] =
+     "/computeMetadata/v1/instance/network-interfaces/0/ipv6s";
+ 
+ MetadataQuery::MetadataQuery(
+diff --git a/src/core/lib/event_engine/event_engine.cc b/src/core/lib/event_engine/event_engine.cc
+index 3164b18..0c13f53 100644
+--- a/src/core/lib/event_engine/event_engine.cc
++++ b/src/core/lib/event_engine/event_engine.cc
+@@ -20,10 +20,10 @@
+ namespace grpc_event_engine {
+ namespace experimental {
+ 
+-constexpr EventEngine::TaskHandle EventEngine::TaskHandle::kInvalid = {-1, -1};
+-constexpr EventEngine::ConnectionHandle
++const EventEngine::TaskHandle EventEngine::TaskHandle::kInvalid = {-1, -1};
++const EventEngine::ConnectionHandle
+     EventEngine::ConnectionHandle::kInvalid = {-1, -1};
+-constexpr EventEngine::DNSResolver::LookupTaskHandle
++const EventEngine::DNSResolver::LookupTaskHandle
+     EventEngine::DNSResolver::LookupTaskHandle::kInvalid = {-1, -1};
+ 
+ bool operator==(const EventEngine::TaskHandle& lhs,
+diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
+index 2071a23..31087d9 100644
+--- a/src/core/lib/surface/server.cc
++++ b/src/core/lib/surface/server.cc
+@@ -154,7 +154,8 @@ struct Server::RegisteredMethod {
+   const grpc_server_register_method_payload_handling payload_handling;
+   const uint32_t flags;
+   // One request matcher per method.
+-  std::unique_ptr<RequestMatcherInterface> matcher;
++  // Fix unique_ptr can not be used before declaration.
++  std::shared_ptr<RequestMatcherInterface> matcher;
+ };
+ 
+ //
+@@ -705,7 +706,7 @@ void Server::Start() {
+   if (unregistered_request_matcher_ == nullptr) {
+     unregistered_request_matcher_ = std::make_unique<RealRequestMatcher>(this);
+   }
+-  for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+     if (rm->matcher == nullptr) {
+       rm->matcher = std::make_unique<RealRequestMatcher>(this);
+     }
+@@ -812,7 +813,7 @@ Server::RegisteredMethod* Server::RegisterMethod(
+             "grpc_server_register_method method string cannot be NULL");
+     return nullptr;
+   }
+-  for (std::unique_ptr<RegisteredMethod>& m : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& m : registered_methods_) {
+     if (streq(m->method, method) && streq(m->host, host)) {
+       gpr_log(GPR_ERROR, "duplicate registration for %s@%s", method,
+               host ? host : "*");
+@@ -877,7 +878,7 @@ void Server::KillPendingWorkLocked(grpc_error_handle error) {
+   if (started_) {
+     unregistered_request_matcher_->KillRequests(error);
+     unregistered_request_matcher_->ZombifyPending();
+-    for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+       rm->matcher->KillRequests(error);
+       rm->matcher->ZombifyPending();
+     }
+@@ -1153,7 +1154,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
+     size_t slots = 2 * num_registered_methods;
+     registered_methods_ =
+         std::make_unique<std::vector<ChannelRegisteredMethod>>(slots);
+-    for (std::unique_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
+       Slice host;
+       Slice method = Slice::FromExternalString(rm->method);
+       const bool has_host = !rm->host.empty();
+diff --git a/src/core/lib/surface/server.h b/src/core/lib/surface/server.h
+index d635da5..3f98bea 100644
+--- a/src/core/lib/surface/server.h
++++ b/src/core/lib/surface/server.h
+@@ -140,7 +140,7 @@ class Server : public InternallyRefCounted<Server>,
+   }
+ 
+   void set_config_fetcher(
+-      std::unique_ptr<grpc_server_config_fetcher> config_fetcher) {
++      std::shared_ptr<grpc_server_config_fetcher> config_fetcher) {
+     config_fetcher_ = std::move(config_fetcher);
+   }
+ 
+@@ -444,7 +444,9 @@ class Server : public InternallyRefCounted<Server>,
+ 
+   ChannelArgs const channel_args_;
+   RefCountedPtr<channelz::ServerNode> channelz_node_;
+-  std::unique_ptr<grpc_server_config_fetcher> config_fetcher_;
++
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<grpc_server_config_fetcher> config_fetcher_;
+ 
+   std::vector<grpc_completion_queue*> cqs_;
+   std::vector<grpc_pollset*> pollsets_;
+@@ -465,10 +467,11 @@ class Server : public InternallyRefCounted<Server>,
+   bool starting_ ABSL_GUARDED_BY(mu_global_) = false;
+   CondVar starting_cv_;
+ 
+-  std::vector<std::unique_ptr<RegisteredMethod>> registered_methods_;
++  std::vector<std::shared_ptr<RegisteredMethod>> registered_methods_;
+ 
+   // Request matcher for unregistered methods.
+-  std::unique_ptr<RequestMatcherInterface> unregistered_request_matcher_;
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<RequestMatcherInterface> unregistered_request_matcher_;
+ 
+   // The shutdown refs counter tracks whether or not shutdown has been called
+   // and whether there are any AllocatingRequestMatcher requests that have been
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
 index d64c14f..f267d24 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
