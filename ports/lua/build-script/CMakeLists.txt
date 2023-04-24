@@ -119,7 +119,7 @@ else()
     "-Wredundant-decls"
     "-Wdisabled-optimization"
     "-Wdouble-promotion"
-    "$<$<COMPILE_LANGUAGE:CXX>:-fmax-errors=5;-Wlogical-op;-Wno-aggressive-loop-optimizations>"
+    "$<$<COMPILE_LANGUAGE:CXX>:-Wlogical-op;-Wno-aggressive-loop-optimizations>"
     "$<$<COMPILE_LANGUAGE:C>:${PROJECT_LUA_LIB_DEPEND_FLAGS_FOR_C}>")
   check_cxx_compiler_flag("-fno-stack-protector" PROJECT_LUA_TEST_NO_STACK_PROTECTOR)
   check_cxx_compiler_flag("-fno-common" PROJECT_LUA_TEST_NO_COMMON)
