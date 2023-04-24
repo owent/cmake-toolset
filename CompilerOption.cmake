@@ -431,23 +431,22 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     list(APPEND COMPILER_STRICT_EXTRA_CFLAGS -Wextra -Wshadow -Wfloat-equal -Wdelete-non-virtual-dtor)
     list(APPEND COMPILER_STRICT_CFLAGS -Wall -Werror)
-    list(
-      APPEND
-      COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS
-      -Wsign-conversion
-      -Woverloaded-virtual
-      -Wunused-but-set-variable
-      -Wuninitialized
-      -Wconversion)
+    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsign-conversion -Woverloaded-virtual -Wuninitialized
+         -Wconversion)
 
     check_c_compiler_flag(-Wno-unused-local-typedefs COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
     if(COMPILER_OPTIONS_TEST_CFLAGS_WNO_UNUSED_LOCAL_TYPEDEFS)
       list(APPEND COMPILER_STRICT_CFLAGS -Wno-unused-local-typedefs)
     endif()
 
-    # clang 3.5 or upper
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "3.5.0")
+    # clang 11 or upper
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "11.0")
       list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
+    endif()
+
+    # clang 13 or upper
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "13.0")
+      list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wunused-but-set-variable)
     endif()
 
     # See https://clang.llvm.org/cxx_status.html and https://clang.llvm.org/c_status.html
@@ -574,7 +573,9 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
 
     # Additional
-    list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10.15")
+      list(APPEND COMPILER_STRICT_RECOMMEND_EXTRA_CFLAGS -Wsuggest-override)
+    endif()
 
     # See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0")
