@@ -10,6 +10,7 @@ macro(PROJECT_THIRD_PARTY_FMTLIB_IMPORT)
   else()
     message(STATUS "Dependency(${PROJECT_NAME}): fmtlib support disabled")
   endif()
+  project_build_tools_patch_default_imported_config(fmt::fmt-header-only fmt::fmt)
 endmacro()
 
 option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD "Do not compile fmt.dev if has std::format" ON)
