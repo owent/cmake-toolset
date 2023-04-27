@@ -732,20 +732,27 @@ macro(FindConfigurePackage)
           endif()
 
         else()
+          if(CMAKE_BUILD_TYPE)
+            set(FindConfigurePackageConfigBuildType --config "${CMAKE_BUILD_TYPE}")
+          else()
+            unset(FindConfigurePackageConfigBuildType)
+          endif()
           execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build . ${FindConfigurePackageCMakeBuildParallelFlags}
+            COMMAND "${CMAKE_COMMAND}" --build . ${FindConfigurePackageConfigBuildType}
+                    ${FindConfigurePackageCMakeBuildParallelFlags}
             WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                               ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
             RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
           if(NOT RUN_CMAKE_BUILD_RESULT EQUAL 0 AND FindConfigurePackageCMakeBuildParallelFlags)
             execute_process(
-              COMMAND "${CMAKE_COMMAND}" --build .
+              COMMAND "${CMAKE_COMMAND}" --build . ${FindConfigurePackageConfigBuildType}
               WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
               RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
           endif()
           execute_process(
             COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS}
+                    ${FindConfigurePackageConfigBuildType}
             WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                               ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
             RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
