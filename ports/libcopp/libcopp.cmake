@@ -4,9 +4,11 @@ macro(PROJECT_THIRD_PARTY_LIBCOPP_IMPORT)
   if(TARGET libcopp::cotask)
     message(STATUS "Dependency(${PROJECT_NAME}): libcopp using target: libcopp::cotask")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_LINK_NAME libcopp::cotask)
+    project_build_tools_patch_default_imported_config(libcopp::cotask libcopp::copp)
   elseif(TARGET cotask)
     message(STATUS "Dependency(${PROJECT_NAME}): libcopp using target: cotask")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_LINK_NAME cotask)
+    project_build_tools_patch_default_imported_config(cotask copp)
   endif()
 endmacro()
 
@@ -26,8 +28,7 @@ if(NOT TARGET libcopp::cotask AND NOT cotask)
       BUILD_OPTIONS
       "-DATFRAMEWORK_CMAKE_TOOLSET_DIR=${ATFRAMEWORK_CMAKE_TOOLSET_DIR}"
       "-DPROJECT_ENABLE_UNITTEST=OFF"
-      "-DPROJECT_ENABLE_SAMPLE=OFF"
-      "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+      "-DPROJECT_ENABLE_SAMPLE=OFF")
 
     project_third_party_append_build_shared_lib_var(
       "libcopp" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_BUILD_OPTIONS LIBCOPP_USE_DYNAMIC_LIBRARY)

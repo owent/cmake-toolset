@@ -22,6 +22,19 @@ macro(PROJECT_THIRD_PARTY_LZ4_IMPORT)
     message(STATUS "Dependency(${PROJECT_NAME}): lz4 found target LZ4::lz4")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME LZ4::lz4)
   endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME)
+    project_build_tools_patch_default_imported_config(
+      lz4::lz4_static
+      LZ4::lz4_static
+      lz4::lz4_shared
+      LZ4::lz4_shared
+      lz4::lz4
+      LZ4::lz4
+      lz4::lz4cli
+      LZ4::lz4cli
+      lz4::lz4c
+      LZ4::lz4c)
+  endif()
 
   if(TARGET lz4::lz4cli)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_BIN lz4::lz4cli)

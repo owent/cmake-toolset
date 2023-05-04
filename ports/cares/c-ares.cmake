@@ -22,6 +22,9 @@ macro(PROJECT_THIRD_PARTY_CARES_IMPORT)
   else()
     message(STATUS "Dependency(${PROJECT_NAME}): c-ares support disabled")
   endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME)
+    project_build_tools_patch_default_imported_config(c-ares::cares c-ares::cares_static c-ares::cares_shared)
+  endif()
 endmacro()
 
 if(NOT TARGET c-ares::cares

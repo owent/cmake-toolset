@@ -4,6 +4,7 @@ macro(PROJECT_THIRD_PARTY_XXHASH_IMPORT)
   if(TARGET xxHash::xxhash)
     message(STATUS "Dependency(${PROJECT_NAME}): xxHash using target xxHash::xxhash")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_LINK_NAME xxHash::xxhash)
+    project_build_tools_patch_default_imported_config(xxHash::xxhash)
   endif()
 endmacro()
 

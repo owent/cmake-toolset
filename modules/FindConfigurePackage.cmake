@@ -729,7 +729,11 @@ macro(FindConfigurePackage)
 
         else()
           project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageConfigBuildType)
-          set(FindConfigurePackageConfigBuildType --config "${FindConfigurePackageConfigBuildType}")
+          if(FindConfigurePackageConfigBuildType)
+            set(FindConfigurePackageConfigBuildType --config "${FindConfigurePackageConfigBuildType}")
+          else()
+            unset(FindConfigurePackageConfigBuildType)
+          endif()
 
           execute_process(
             COMMAND "${CMAKE_COMMAND}" --build . ${FindConfigurePackageConfigBuildType}

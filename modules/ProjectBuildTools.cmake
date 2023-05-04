@@ -180,7 +180,12 @@ set(PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON
     CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
     CMAKE_FIND_PACKAGE_PREFER_CONFIG
     CMAKE_EXPORT_NO_PACKAGE_REGISTRY
-    CMAKE_EXPORT_PACKAGE_REGISTRY)
+    CMAKE_EXPORT_PACKAGE_REGISTRY
+    CMAKE_MAP_IMPORTED_CONFIG_NOCONFIG
+    CMAKE_MAP_IMPORTED_CONFIG_DEBUG
+    CMAKE_MAP_IMPORTED_CONFIG_RELEASE
+    CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO
+    CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL)
 if(NOT MSVC AND CMAKE_AR)
   list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_AR)
   list(APPEND PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_COMMON CMAKE_HOST_AR)
@@ -502,11 +507,15 @@ macro(project_build_tools_append_cmake_build_type_for_lib OUTVAR)
       list(APPEND ${ARGV0} "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
     elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
       list(APPEND ${ARGV0} "-DCMAKE_BUILD_TYPE=RelWithDebInfo")
+      if(NOT CMAKE_MAP_IMPORTED_CONFIG_DEBUG AND UNIX)
+        list(APPEND ${ARGV0} "-DCMAKE_MAP_IMPORTED_CONFIG_DEBUG=RelWithDebInfo")
+      endif()
     else()
       list(APPEND ${ARGV0} "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
     endif()
   elseif(MSVC)
     list(APPEND ${ARGV0} "-DCMAKE_BUILD_TYPE=Release")
+    list(APPEND ${ARGV0} "-DCMAKE_MAP_IMPORTED_CONFIG_NOCONFIG=Release")
   endif()
 endmacro()
 
@@ -1218,8 +1227,10 @@ function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME
 
   if(NOT OLD_LINK_LIBRARIES STREQUAL PATCH_INNER_LIBS)
     set_target_properties(${TARGET_NAME} PROPERTIES ${PROPERTY_NAME} "${PATCH_INNER_LIBS}")
-    message(
-      STATUS "Patch: ${PROPERTY_NAME} of ${TARGET_NAME} from \"${OLD_LINK_LIBRARIES}\" to \"${PATCH_INNER_LIBS}\"")
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
+      message(
+        STATUS "Patch: ${PROPERTY_NAME} of ${TARGET_NAME} from \"${OLD_LINK_LIBRARIES}\" to \"${PATCH_INNER_LIBS}\"")
+    endif()
   endif()
 endfunction()
 
@@ -1266,10 +1277,12 @@ function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
 
   if(NOT OLD_DEFINITIONS STREQUAL PATCH_INNER_DEFINITIONS)
     set_target_properties(${TARGET_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${PATCH_INNER_DEFINITIONS}")
-    message(
-      STATUS
-        "Patch: INTERFACE_COMPILE_DEFINITIONS of ${TARGET_NAME} from \"${OLD_DEFINITIONS}\" to \"${PATCH_INNER_DEFINITIONS}\""
-    )
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
+      message(
+        STATUS
+          "Patch: INTERFACE_COMPILE_DEFINITIONS of ${TARGET_NAME} from \"${OLD_DEFINITIONS}\" to \"${PATCH_INNER_DEFINITIONS}\""
+      )
+    endif()
   endif()
 endfunction()
 
@@ -1351,6 +1364,12 @@ function(project_build_tools_patch_default_imported_config)
         get_target_property(PATCH_IMPORTED_VALUE ${TARGET_NAME} "${PATCH_IMPORTED_KEY}_${PATCH_IMPORTED_CONFIGURATION}")
         if(PATCH_IMPORTED_VALUE)
           set_target_properties(${TARGET_NAME} PROPERTIES "${PATCH_IMPORTED_KEY}" "${PATCH_IMPORTED_VALUE}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
+            message(
+              STATUS
+                "Patch: ${TARGET_NAME} ${PATCH_IMPORTED_KEY} use ${PATCH_IMPORTED_KEY}_${PATCH_IMPORTED_CONFIGURATION}(\"${PATCH_IMPORTED_VALUE}\") by default."
+            )
+          endif()
         endif()
       endforeach()
     endif()

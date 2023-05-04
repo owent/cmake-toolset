@@ -18,6 +18,10 @@ macro(PROJECT_THIRD_PARTY_ZSTD_IMPORT)
   else()
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
   endif()
+  if(zstd::zstd OR ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
+    project_build_tools_patch_default_imported_config(zstd::zstd zstd::libzstd_shared zstd::libzstd_static
+                                                      zstd::libzstd)
+  endif()
   if(TARGET zstd::zstd)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_BIN zstd::zstd)
     message(
