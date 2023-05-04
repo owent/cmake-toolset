@@ -664,11 +664,7 @@ macro(FindConfigurePackage)
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
               RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
           else()
-            if(CMAKE_BUILD_TYPE)
-              set(FindConfigurePackageFinalBuildType ${CMAKE_BUILD_TYPE})
-            else()
-              set(FindConfigurePackageFinalBuildType "Release")
-            endif()
+            project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
             if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE AND NOT FindConfigurePackageFinalBuildType STREQUAL
                                                                      "Debug")
               execute_process(
@@ -732,11 +728,9 @@ macro(FindConfigurePackage)
           endif()
 
         else()
-          if(CMAKE_BUILD_TYPE)
-            set(FindConfigurePackageConfigBuildType --config "${CMAKE_BUILD_TYPE}")
-          else()
-            unset(FindConfigurePackageConfigBuildType)
-          endif()
+          project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageConfigBuildType)
+          set(FindConfigurePackageConfigBuildType --config "${FindConfigurePackageConfigBuildType}")
+
           execute_process(
             COMMAND "${CMAKE_COMMAND}" --build . ${FindConfigurePackageConfigBuildType}
                     ${FindConfigurePackageCMakeBuildParallelFlags}
