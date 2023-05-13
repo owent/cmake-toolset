@@ -1866,6 +1866,7 @@ macro(
   project_build_tools_add_archive_library_internal
   TARGET_NAME
   AR_SCRIPT_PATH
+  WITH_DEPENDENCIES
   TARGET_MERGE_ARCHIVES
   TARGET_MERGE_LINK_LIBRARIES_VAR
   TARGET_MERGE_INCLUDE_DIRECTORIES_VAR
@@ -1921,28 +1922,33 @@ macro(
       list(APPEND ${TARGET_MERGE_INCLUDE_DIRECTORIES_VAR} ${DEP_TARGET_INCLUDE_DIRECTORIES})
     endif()
 
-    set(DEP_TARGET_DEFINITIONS)
-    get_target_property(DEP_TARGET_LINK_DEPENDS "${DEP_LINK_NAME}" INTERFACE_LINK_DEPENDS)
-    get_target_property(DEP_TARGET_LINK_LIBRARIES "${DEP_LINK_NAME}" INTERFACE_LINK_LIBRARIES)
-    if(DEP_TARGET_LINK_DEPENDS OR DEP_TARGET_LINK_LIBRARIES)
-      set(DEP_TARGET_LINK_NAMES)
-      foreach(DEP_TARGET_LINK_NAME ${DEP_TARGET_LINK_DEPENDS} ${DEP_TARGET_LINK_LIBRARIES})
-        if(NOT DEP_TARGET_LINK_NAME MATCHES "^$<")
-          list(APPEND DEP_TARGET_LINK_NAMES "${DEP_TARGET_LINK_NAME}")
-        endif()
-      endforeach()
+    set(DEP_TARGET_NEED_DEPENDENCIES ${WITH_DEPENDENCIES})
+    if(DEP_TARGET_NEED_DEPENDENCIES)
+      set(DEP_TARGET_LINK_DEPENDS)
+      set(DEP_TARGET_LINK_LIBRARIES)
+      get_target_property(DEP_TARGET_LINK_DEPENDS "${DEP_LINK_NAME}" INTERFACE_LINK_DEPENDS)
+      get_target_property(DEP_TARGET_LINK_LIBRARIES "${DEP_LINK_NAME}" INTERFACE_LINK_LIBRARIES)
+      if(DEP_TARGET_LINK_DEPENDS OR DEP_TARGET_LINK_LIBRARIES)
+        set(DEP_TARGET_LINK_NAMES)
+        foreach(DEP_TARGET_LINK_NAME ${DEP_TARGET_LINK_DEPENDS} ${DEP_TARGET_LINK_LIBRARIES})
+          if(NOT DEP_TARGET_LINK_NAME MATCHES "^$<")
+            list(APPEND DEP_TARGET_LINK_NAMES "${DEP_TARGET_LINK_NAME}")
+          endif()
+        endforeach()
 
-      if(DEP_TARGET_LINK_NAMES)
-        project_build_tools_add_archive_library_internal(
-          "${TARGET_NAME}"
-          "${AR_SCRIPT_PATH}"
-          "${TARGET_MERGE_ARCHIVES}"
-          "${TARGET_MERGE_LINK_LIBRARIES_VAR}"
-          "${TARGET_MERGE_INCLUDE_DIRECTORIES_VAR}"
-          "${TARGET_MERGE_COMPILE_DEFINITIONS_VAR}"
-          "${DEP_TARGET_LINK_NAMES}"
-          "${INCLUDE_RULE}"
-          "${EXCLUDE_RULE}")
+        if(DEP_TARGET_LINK_NAMES)
+          project_build_tools_add_archive_library_internal(
+            "${TARGET_NAME}"
+            "${AR_SCRIPT_PATH}"
+            ${WITH_DEPENDENCIES}
+            "${TARGET_MERGE_ARCHIVES}"
+            "${TARGET_MERGE_LINK_LIBRARIES_VAR}"
+            "${TARGET_MERGE_INCLUDE_DIRECTORIES_VAR}"
+            "${TARGET_MERGE_COMPILE_DEFINITIONS_VAR}"
+            "${DEP_TARGET_LINK_NAMES}"
+            "${INCLUDE_RULE}"
+            "${EXCLUDE_RULE}")
+        endif()
       endif()
     endif()
 
@@ -2053,7 +2059,8 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   endif()
 
   cmake_parse_arguments(
-    add_archive_options "ALL;MERGE_COMPILE_DEFINITIONS;MERGE_INCLUDE_DIRECTORIES;MERGE_LINK_LIBRARIES"
+    add_archive_options
+    "ALL;MERGE_COMPILE_DEFINITIONS;MERGE_INCLUDE_DIRECTORIES;MERGE_LINK_LIBRARIES;WITH_DEPENDENCIES"
     "OUTPUT_NAME;INSTALL_DESTINATION" "LINK_LIBRARIES;INCLUDE;EXCLUDE" ${ARGN})
 
   if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
@@ -2091,6 +2098,7 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   project_build_tools_add_archive_library_internal(
     "${TARGET_NAME}"
     "${AR_SCRIPT_PATH_IN}"
+    ${add_archive_options_WITH_DEPENDENCIES}
     TARGET_MERGE_ARCHIVES
     TARGET_MERGE_LINK_LIBRARIES
     TARGET_MERGE_INCLUDE_DIRECTORIES
