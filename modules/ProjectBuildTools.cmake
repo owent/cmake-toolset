@@ -23,6 +23,9 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
     CMAKE_C_COMPILER_LAUNCHER
     CMAKE_C_LINK_LIBRARY_SUFFIX
     CMAKE_C_IMPLICIT_LINK_LIBRARIES
+    CMAKE_C_COMPILER_AR
+    CMAKE_C_COMPILER_FRONTEND_VARIANT
+    CMAKE_C_COMPILER_RANLIB
     CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
     CMAKE_C_STANDARD_LIBRARIES)
 set(PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_C CMAKE_HOST_C_COMPILER CMAKE_HOST_C_COMPILER_LAUNCHER
@@ -48,6 +51,9 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
     CMAKE_CXX_COMPILER_LAUNCHER
     CMAKE_CXX_LINK_LIBRARY_SUFFIX
     CMAKE_CXX_IMPLICIT_LINK_LIBRARIES
+    CMAKE_CXX_COMPILER_AR
+    CMAKE_CXX_COMPILER_FRONTEND_VARIANT
+    CMAKE_CXX_COMPILER_RANLIB
     ANDROID_CPP_FEATURES
     ANDROID_STL
     CMAKE_ANDROID_STL_TYPE
@@ -70,7 +76,10 @@ set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM
     CMAKE_ASM_COMPILER
     CMAKE_ASM_COMPILER_TARGET
     CMAKE_ASM_COMPILER_LAUNCHER
-    CMAKE_ASM_LINK_LIBRARY_SUFFIX)
+    CMAKE_ASM_LINK_LIBRARY_SUFFIX
+    CMAKE_ASM_COMPILER_AR
+    CMAKE_ASM_COMPILER_FRONTEND_VARIANT
+    CMAKE_ASM_COMPILER_RANLIB)
 set(PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_ASM CMAKE_HOST_ASM_COMPILER CMAKE_HOST_ASM_COMPILER_TARGET
                                             CMAKE_HOST_ASM_COMPILER_LAUNCHER)
 if(NOT MSVC)
@@ -1384,6 +1393,10 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
   file(APPEND "${OUTPUT_FILE}" "export CXX=\"${CMAKE_CXX_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   if(CMAKE_AR)
     file(APPEND "${OUTPUT_FILE}" "export AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  elseif(CMAKE_CXX_COMPILER_AR)
+    file(APPEND "${OUTPUT_FILE}" "export AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  elseif(CMAKE_C_COMPILER_AR)
+    file(APPEND "${OUTPUT_FILE}" "export AR=\"${CMAKE_C_COMPILER_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   unset(FINAL_CFLAGS)
@@ -1503,6 +1516,10 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
        "$OutputEncoding = [System.Text.UTF8Encoding]::new()${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   if(CMAKE_AR)
     file(APPEND "${OUTPUT_FILE}" "$ENV:AR=\"${CMAKE_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  elseif(CMAKE_CXX_COMPILER_AR)
+    file(APPEND "${OUTPUT_FILE}" "$ENV:AR=\"${CMAKE_CXX_COMPILER_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  elseif(CMAKE_C_COMPILER_AR)
+    file(APPEND "${OUTPUT_FILE}" "$ENV:AR=\"${CMAKE_C_COMPILER_AR}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   unset(FINAL_CFLAGS)
@@ -1843,4 +1860,302 @@ function(project_build_tools_print_configure_log)
       )
     endif()
   endforeach()
+endfunction()
+
+macro(
+  project_build_tools_add_archive_library_internal
+  TARGET_NAME
+  AR_SCRIPT_PATH
+  WITH_DEPENDENCIES
+  TARGET_MERGE_ARCHIVES
+  TARGET_MERGE_LINK_LIBRARIES_VAR
+  TARGET_MERGE_INCLUDE_DIRECTORIES_VAR
+  TARGET_MERGE_COMPILE_DEFINITIONS_VAR
+  LINK_LIBRARY_NAMES
+  INCLUDE_RULE
+  EXCLUDE_RULE)
+
+  if(_add_archive_library_DEEP)
+    math(EXPR _add_archive_library_DEEP "${_add_archive_library_DEEP}+1")
+  else()
+    set(_add_archive_library_DEEP 0)
+  endif()
+  set(_add_archive_library_LINK_LIBRARY_PATHS_${_add_archive_library_DEEP})
+  foreach(DEP_LINK_NAME ${LINK_LIBRARY_NAMES})
+    if(NOT DEP_LINK_NAME)
+      continue()
+    endif()
+
+    # skip debug, optimized, general keywords
+    if(DEP_LINK_NAME MATCHES "^(debug|optimized|general)$")
+      continue()
+    endif()
+
+    if(DEP_LINK_NAME MATCHES "^\\$<LINK_ONLY:(.*)>$")
+      set(DEP_LINK_NAME "${CMAKE_MATCH_1}")
+    endif()
+
+    if(NOT TARGET "${DEP_LINK_NAME}")
+      list(APPEND _add_archive_library_LINK_LIBRARY_PATHS_${_add_archive_library_DEEP} "${DEP_LINK_NAME}")
+      continue()
+    endif()
+
+    get_target_property(DEP_LINK_ALIASED_NAME "${DEP_LINK_NAME}" ALIASED_TARGET)
+    if(DEP_LINK_ALIASED_NAME AND TARGET "${DEP_LINK_ALIASED_NAME}")
+      set(DEP_LINK_NAME "${DEP_LINK_ALIASED_NAME}")
+    endif()
+
+    if(DEFINED "_add_archive_library_internal_LINK_${TARGET_NAME}_${DEP_LINK_NAME}")
+      continue()
+    endif()
+    set("_add_archive_library_internal_LINK_${TARGET_NAME}_${DEP_LINK_NAME}" TRUE)
+
+    set(DEP_TARGET_DEFINITIONS)
+    get_target_property(DEP_TARGET_DEFINITIONS "${DEP_LINK_NAME}" INTERFACE_COMPILE_DEFINITIONS)
+    if(DEP_TARGET_DEFINITIONS)
+      list(APPEND ${TARGET_MERGE_COMPILE_DEFINITIONS_VAR} ${DEP_TARGET_DEFINITIONS})
+    endif()
+
+    set(DEP_TARGET_DEFINITIONS)
+    get_target_property(DEP_TARGET_INCLUDE_DIRECTORIES "${DEP_LINK_NAME}" INTERFACE_INCLUDE_DIRECTORIES)
+    if(DEP_TARGET_INCLUDE_DIRECTORIES)
+      list(APPEND ${TARGET_MERGE_INCLUDE_DIRECTORIES_VAR} ${DEP_TARGET_INCLUDE_DIRECTORIES})
+    endif()
+
+    set(DEP_TARGET_NEED_DEPENDENCIES ${WITH_DEPENDENCIES})
+    if(DEP_TARGET_NEED_DEPENDENCIES)
+      set(DEP_TARGET_LINK_DEPENDS)
+      set(DEP_TARGET_LINK_LIBRARIES)
+      get_target_property(DEP_TARGET_LINK_DEPENDS "${DEP_LINK_NAME}" INTERFACE_LINK_DEPENDS)
+      get_target_property(DEP_TARGET_LINK_LIBRARIES "${DEP_LINK_NAME}" INTERFACE_LINK_LIBRARIES)
+      if(DEP_TARGET_LINK_DEPENDS OR DEP_TARGET_LINK_LIBRARIES)
+        set(DEP_TARGET_LINK_NAMES)
+        foreach(DEP_TARGET_LINK_NAME ${DEP_TARGET_LINK_DEPENDS} ${DEP_TARGET_LINK_LIBRARIES})
+          if(NOT DEP_TARGET_LINK_NAME MATCHES "^$<")
+            list(APPEND DEP_TARGET_LINK_NAMES "${DEP_TARGET_LINK_NAME}")
+          endif()
+        endforeach()
+
+        if(DEP_TARGET_LINK_NAMES)
+          project_build_tools_add_archive_library_internal(
+            "${TARGET_NAME}"
+            "${AR_SCRIPT_PATH}"
+            ${WITH_DEPENDENCIES}
+            "${TARGET_MERGE_ARCHIVES}"
+            "${TARGET_MERGE_LINK_LIBRARIES_VAR}"
+            "${TARGET_MERGE_INCLUDE_DIRECTORIES_VAR}"
+            "${TARGET_MERGE_COMPILE_DEFINITIONS_VAR}"
+            "${DEP_TARGET_LINK_NAMES}"
+            "${INCLUDE_RULE}"
+            "${EXCLUDE_RULE}")
+        endif()
+      endif()
+    endif()
+
+    set(DEP_TARGET_IS_IMPORTED)
+    set(DEP_TARGET_TYPE)
+    get_target_property(DEP_TARGET_IS_IMPORTED "${DEP_LINK_NAME}" IMPORTED)
+    get_target_property(DEP_TARGET_TYPE "${DEP_LINK_NAME}" TYPE)
+    if(DEP_TARGET_IS_IMPORTED)
+      get_target_property(DEP_TARGET_IMPORTED_CONFIGURE "${DEP_LINK_NAME}" IMPORTED_CONFIGURATIONS)
+      set(DEP_TARGET_IMPORTED_LOCATION)
+      if(DEP_TARGET_IMPORTED_CONFIGURE)
+        get_target_property(DEP_TARGET_IMPORTED_LOCATION "${DEP_LINK_NAME}"
+                            IMPORTED_LOCATION_${DEP_TARGET_IMPORTED_CONFIGURE})
+      endif()
+      if(NOT DEP_TARGET_IMPORTED_LOCATION)
+        get_target_property(DEP_TARGET_IMPORTED_LOCATION "${DEP_LINK_NAME}" IMPORTED_LOCATION)
+      endif()
+      if(DEP_TARGET_IMPORTED_LOCATION)
+        list(APPEND _add_archive_library_LINK_LIBRARY_PATHS_${_add_archive_library_DEEP}
+             "${DEP_TARGET_IMPORTED_LOCATION}")
+      endif()
+    elseif(DEP_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+      list(APPEND _add_archive_library_LINK_LIBRARY_PATHS_${_add_archive_library_DEEP}
+           "$<TARGET_FILE:${DEP_LINK_NAME}>")
+    endif()
+  endforeach()
+
+  foreach(DEP_LINK_NAME ${_add_archive_library_LINK_LIBRARY_PATHS_${_add_archive_library_DEEP}})
+    get_filename_component(DEP_LINK_NAME_BASENAME "${DEP_LINK_NAME}" NAME)
+    string(REPLACE "." "\\." DEP_LINK_LIBRARY_PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}")
+    string(REPLACE "." "\\." DEP_LINK_LIBRARY_SUFFIX "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+    # Target file is always included
+    if(DEP_LINK_NAME_BASENAME MATCHES "^\\$<TARGET_FILE:")
+      set(DEP_LINK_NAME_SELECT TRUE)
+      set(DEP_LINK_NAME_IS_TARGET TRUE)
+    elseif(DEP_LINK_NAME_BASENAME MATCHES "^\\$<")
+      # Ignore $<LINK_ONLY:...> because it can not be evaluated
+      set(DEP_LINK_NAME_SELECT FALSE)
+      set(DEP_LINK_NAME_IS_TARGET FALSE)
+    else()
+      set(DEP_LINK_NAME_SELECT TRUE)
+      set(DEP_LINK_NAME_IS_TARGET FALSE)
+
+      if(NOT DEP_LINK_NAME_BASENAME MATCHES "^${DEP_LINK_LIBRARY_PREFIX}.*${DEP_LINK_LIBRARY_SUFFIX}$")
+        set(DEP_LINK_NAME_SELECT FALSE)
+      endif()
+
+      if(DEP_LINK_NAME_SELECT AND NOT EXISTS "${DEP_LINK_NAME}")
+        set(DEP_LINK_NAME_SELECT FALSE)
+      endif()
+
+      if(DEP_LINK_NAME_SELECT AND NOT "${INCLUDE_RULE}" STREQUAL "")
+        set(DEL_LINK_NAME_INC_RULE FALSE)
+        foreach(RULE ${INCLUDE_RULE})
+          if(DEP_LINK_NAME_BASENAME MATCHES "${RULE}")
+            set(DEL_LINK_NAME_INC_RULE TRUE)
+            break()
+          endif()
+        endforeach()
+        set(DEP_LINK_NAME_SELECT ${DEL_LINK_NAME_INC_RULE})
+      endif()
+
+      if(DEP_LINK_NAME_SELECT AND NOT "${EXCLUDE_RULE}" STREQUAL "")
+        foreach(RULE ${EXCLUDE_RULE})
+          if(DEP_LINK_NAME_BASENAME MATCHES "${RULE}")
+            set(DEP_LINK_NAME_SELECT FALSE)
+            break()
+          endif()
+        endforeach()
+      endif()
+    endif()
+
+    if(DEP_LINK_NAME_SELECT)
+      if(DEP_LINK_NAME_IS_TARGET)
+        list(APPEND TARGET_MERGE_ARCHIVES "addlib ${DEP_LINK_NAME}")
+      elseif(IS_ABSOLUTE "${DEP_LINK_NAME}")
+        list(APPEND TARGET_MERGE_ARCHIVES "${DEP_LINK_NAME}")
+      else()
+        list(APPEND TARGET_MERGE_ARCHIVES "${CMAKE_CURRENT_BINARY_DIR}/${DEP_LINK_NAME}")
+      endif()
+    else()
+      list(APPEND ${TARGET_MERGE_LINK_LIBRARIES_VAR} "${DEP_LINK_NAME}")
+    endif()
+  endforeach()
+
+  math(EXPR _add_archive_library_DEEP "${_add_archive_library_DEEP}-1")
+endmacro()
+
+function(project_build_tools_add_archive_library TARGET_NAME)
+  if(CMAKE_INTERPROCEDURAL_OPTIMIZATION OR CMAKE_INTERPROCEDURAL_OPTIMIZATION_${CMAKE_BUILD_TYPE})
+    if(CMAKE_CXX_COMPILER_AR)
+      set(AR_TOOL_BIN "${CMAKE_CXX_COMPILER_AR}")
+    elseif(CMAKE_C_COMPILER_AR)
+      set(AR_TOOL_BIN "${CMAKE_C_COMPILER_AR}")
+    endif()
+  endif()
+  if(NOT AR_TOOL_BIN)
+    if(CMAKE_AR)
+      set(AR_TOOL_BIN "${CMAKE_AR}")
+    elseif(CMAKE_CXX_COMPILER_AR)
+      set(AR_TOOL_BIN "${CMAKE_CXX_COMPILER_AR}")
+    elseif(CMAKE_C_COMPILER_AR)
+      set(AR_TOOL_BIN "${CMAKE_C_COMPILER_AR}")
+    else()
+      message(FATAL_ERROR "We do not support archive static for this platform now")
+    endif()
+  endif()
+
+  cmake_parse_arguments(
+    add_archive_options
+    "ALL;MERGE_COMPILE_DEFINITIONS;MERGE_INCLUDE_DIRECTORIES;MERGE_LINK_LIBRARIES;WITH_DEPENDENCIES"
+    "OUTPUT_NAME;INSTALL_DESTINATION" "LINK_LIBRARIES;INCLUDE;EXCLUDE" ${ARGN})
+
+  if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    set(OUTPUT_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  elseif(LIBRARY_OUTPUT_PATH)
+    set(OUTPUT_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+  else()
+    set(OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  endif()
+  if(add_archive_options_OUTPUT_NAME)
+    set(OUTPUT_PATH
+        "${OUTPUT_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${add_archive_options_OUTPUT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  else()
+    set(OUTPUT_PATH "${OUTPUT_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${TARGET_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  endif()
+  set(AR_WORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.dir")
+  file(MAKE_DIRECTORY "${AR_WORK_DIR}")
+  set(AR_SCRIPT_PATH "${AR_WORK_DIR}/${TARGET_NAME}.ar")
+  set(AR_SCRIPT_PATH_IN "${AR_WORK_DIR}/${TARGET_NAME}.ar.in")
+  add_custom_command(
+    OUTPUT "${OUTPUT_PATH}"
+    COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
+    DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
+    COMMENT "Generating static library ${TARGET_NAME} with \"${AR_TOOL_BIN}\" \"-M\" < \"${AR_SCRIPT_PATH}\""
+    VERBATIM)
+
+  set(TARGET_OPTIONS)
+  set(TARGET_MERGE_ARCHIVES)
+  set(TARGET_MERGE_LINK_LIBRARIES)
+  set(TARGET_MERGE_INCLUDE_DIRECTORIES)
+  set(TARGET_MERGE_COMPILE_DEFINITIONS)
+
+  file(WRITE "${AR_SCRIPT_PATH_IN}" "create ${OUTPUT_PATH}\n")
+
+  project_build_tools_add_archive_library_internal(
+    "${TARGET_NAME}"
+    "${AR_SCRIPT_PATH_IN}"
+    ${add_archive_options_WITH_DEPENDENCIES}
+    TARGET_MERGE_ARCHIVES
+    TARGET_MERGE_LINK_LIBRARIES
+    TARGET_MERGE_INCLUDE_DIRECTORIES
+    TARGET_MERGE_COMPILE_DEFINITIONS
+    "${add_archive_options_LINK_LIBRARIES}"
+    "${add_archive_options_INCLUDE}"
+    "${add_archive_options_EXCLUDE}")
+
+  list(REMOVE_DUPLICATES TARGET_MERGE_ARCHIVES)
+  # list(REVERSE TARGET_MERGE_ARCHIVES)
+
+  foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
+    if(ARCHIVE_FILE MATCHES "\\+")
+      get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
+      string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
+      file(CREATE_LINK "${ARCHIVE_FILE}" "${AR_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
+      file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${AR_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\n")
+    else()
+      file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${ARCHIVE_FILE}\n")
+    endif()
+  endforeach()
+  file(APPEND "${AR_SCRIPT_PATH_IN}" "save\nend\n")
+  file(
+    GENERATE
+    OUTPUT "${AR_SCRIPT_PATH}"
+    INPUT "${AR_SCRIPT_PATH_IN}")
+
+  if(add_archive_options_ALL)
+    list(APPEND TARGET_OPTIONS ALL)
+  endif()
+  add_custom_target(
+    "${TARGET_NAME}"
+    ${TARGET_OPTIONS}
+    BYPRODUCTS "${OUTPUT_PATH}"
+    COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
+    DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
+    VERBATIM)
+
+  if(add_archive_options_MERGE_COMPILE_DEFINITIONS AND TARGET_MERGE_COMPILE_DEFINITIONS)
+    list(REMOVE_DUPLICATES TARGET_MERGE_COMPILE_DEFINITIONS)
+    set_target_properties("${TARGET_NAME}" PROPERTIES INTERFACE_COMPILE_DEFINITIONS
+                                                      "${TARGET_MERGE_COMPILE_DEFINITIONS}")
+  endif()
+  if(add_archive_options_MERGE_INCLUDE_DIRECTORIES AND TARGET_MERGE_INCLUDE_DIRECTORIES)
+    list(REMOVE_DUPLICATES TARGET_MERGE_INCLUDE_DIRECTORIES)
+    set_target_properties("${TARGET_NAME}" PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                      "${TARGET_MERGE_INCLUDE_DIRECTORIES}")
+  endif()
+  if(add_archive_options_MERGE_LINK_LIBRARIES AND TARGET_MERGE_LINK_LIBRARIES)
+    list(REVERSE TARGET_MERGE_LINK_LIBRARIES)
+    list(REMOVE_DUPLICATES TARGET_MERGE_LINK_LIBRARIES)
+    list(REVERSE TARGET_MERGE_LINK_LIBRARIES)
+    set_target_properties("${TARGET_NAME}" PROPERTIES INTERFACE_LINK_LIBRARIES "${TARGET_MERGE_LINK_LIBRARIES}")
+  endif()
+
+  # Install
+  if(add_archive_options_INSTALL_DESTINATION)
+    install(FILES "${OUTPUT_PATH}" DESTINATION "${add_archive_options_INSTALL_DESTINATION}")
+  endif()
 endfunction()
