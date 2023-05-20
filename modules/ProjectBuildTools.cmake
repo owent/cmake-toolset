@@ -2061,7 +2061,7 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   cmake_parse_arguments(
     add_archive_options
     "ALL;MERGE_COMPILE_DEFINITIONS;MERGE_INCLUDE_DIRECTORIES;MERGE_LINK_LIBRARIES;WITH_DEPENDENCIES"
-    "OUTPUT_NAME;INSTALL_DESTINATION" "LINK_LIBRARIES;INCLUDE;EXCLUDE" ${ARGN})
+    "OUTPUT_NAME;INSTALL_DESTINATION" "LINK_LIBRARIES;INCLUDE;EXCLUDE;REMOVE_OBJECTS" ${ARGN})
 
   if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     set(OUTPUT_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
@@ -2120,6 +2120,12 @@ function(project_build_tools_add_archive_library TARGET_NAME)
       file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${ARCHIVE_FILE}\n")
     endif()
   endforeach()
+  if(add_archive_options_REMOVE_OBJECTS)
+    foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+      file(APPEND "${AR_SCRIPT_PATH_IN}" "delete ${REMOVE_OBJECT}\n")
+    endforeach()
+  endif()
+  
   file(APPEND "${AR_SCRIPT_PATH_IN}" "save\nend\n")
   file(
     GENERATE
