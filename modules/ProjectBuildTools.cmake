@@ -1862,10 +1862,29 @@ function(project_build_tools_print_configure_log)
   endforeach()
 endfunction()
 
+macro(atframework_cmake_toolset_find_bash_tools)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_BASH bash)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_CP cp)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_CP)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_GZIP gzip)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_GZIP)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_MV mv)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_MV)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_RM rm)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_TAR NAMES tar gtar)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
+endmacro()
+
+macro(atframework_cmake_toolset_find_pwsh_tools)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_PWSH NAMES pwsh pwsh.exe pwsh-preview pwsh-preview.exe)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+endmacro()
+
 macro(
   project_build_tools_add_archive_library_internal
   TARGET_NAME
-  AR_SCRIPT_PATH
   WITH_DEPENDENCIES
   TARGET_MERGE_ARCHIVES
   TARGET_MERGE_LINK_LIBRARIES_VAR
@@ -1939,7 +1958,6 @@ macro(
         if(DEP_TARGET_LINK_NAMES)
           project_build_tools_add_archive_library_internal(
             "${TARGET_NAME}"
-            "${AR_SCRIPT_PATH}"
             ${WITH_DEPENDENCIES}
             "${TARGET_MERGE_ARCHIVES}"
             "${TARGET_MERGE_LINK_LIBRARIES_VAR}"
@@ -2054,7 +2072,12 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     elseif(CMAKE_C_COMPILER_AR)
       set(AR_TOOL_BIN "${CMAKE_C_COMPILER_AR}")
     else()
-      message(FATAL_ERROR "We do not support archive static for this platform now")
+      if(WIN32)
+        find_program(LIB_TOOL_BIN NAMES lib lib.exe)
+      endif()
+      if(NOT LIB_TOOL_BIN)
+        message(FATAL_ERROR "Can not find ar or lib.exe, we do not support archive static for this platform now")
+      endif()
     endif()
   endif()
 
@@ -2076,16 +2099,8 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   else()
     set(OUTPUT_PATH "${OUTPUT_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${TARGET_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   endif()
-  set(AR_WORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.dir")
-  file(MAKE_DIRECTORY "${AR_WORK_DIR}")
-  set(AR_SCRIPT_PATH "${AR_WORK_DIR}/${TARGET_NAME}.ar")
-  set(AR_SCRIPT_PATH_IN "${AR_WORK_DIR}/${TARGET_NAME}.ar.in")
-  add_custom_command(
-    OUTPUT "${OUTPUT_PATH}"
-    COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
-    DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
-    COMMENT "Generating static library ${TARGET_NAME} with \"${AR_TOOL_BIN}\" \"-M\" < \"${AR_SCRIPT_PATH}\""
-    VERBATIM)
+  set(TARGET_WORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.dir")
+  file(MAKE_DIRECTORY "${TARGET_WORK_DIR}")
 
   set(TARGET_OPTIONS)
   set(TARGET_MERGE_ARCHIVES)
@@ -2093,11 +2108,8 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   set(TARGET_MERGE_INCLUDE_DIRECTORIES)
   set(TARGET_MERGE_COMPILE_DEFINITIONS)
 
-  file(WRITE "${AR_SCRIPT_PATH_IN}" "create ${OUTPUT_PATH}\n")
-
   project_build_tools_add_archive_library_internal(
     "${TARGET_NAME}"
-    "${AR_SCRIPT_PATH_IN}"
     ${add_archive_options_WITH_DEPENDENCIES}
     TARGET_MERGE_ARCHIVES
     TARGET_MERGE_LINK_LIBRARIES
@@ -2110,38 +2122,120 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   list(REMOVE_DUPLICATES TARGET_MERGE_ARCHIVES)
   # list(REVERSE TARGET_MERGE_ARCHIVES)
 
-  foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
-    if(ARCHIVE_FILE MATCHES "\\+")
-      get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
-      string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
-      file(CREATE_LINK "${ARCHIVE_FILE}" "${AR_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
-      file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${AR_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\n")
-    else()
-      file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${ARCHIVE_FILE}\n")
+  if(WIN32 AND LIB_TOOL_BIN)
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+      atframework_cmake_toolset_find_pwsh_tools()
     endif()
-  endforeach()
-  if(add_archive_options_REMOVE_OBJECTS)
-    foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
-      file(APPEND "${AR_SCRIPT_PATH_IN}" "delete ${REMOVE_OBJECT}\n")
-    endforeach()
-  endif()
-  
-  file(APPEND "${AR_SCRIPT_PATH_IN}" "save\nend\n")
-  file(
-    GENERATE
-    OUTPUT "${AR_SCRIPT_PATH}"
-    INPUT "${AR_SCRIPT_PATH_IN}")
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH AND NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+      atframework_cmake_toolset_find_bash_tools()
+    endif()
 
-  if(add_archive_options_ALL)
-    list(APPEND TARGET_OPTIONS ALL)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+      set(PWSH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.ps1")
+      project_build_tool_generate_load_env_powershell("${PWSH_SCRIPT_PATH}.in")
+      file(WRITE "${PWSH_SCRIPT_PATH}.in" "\"/OUT:${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    else()
+      set(BASH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.sh")
+      project_build_tools_generate_load_env_bash("${BASH_SCRIPT_PATH}.in")
+      file(WRITE "${BASH_SCRIPT_PATH}.in" "\"/OUT:${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    endif()
+
+    if(add_archive_options_REMOVE_OBJECTS)
+      foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"/REMOVE:${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"/REMOVE:${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+      endforeach()
+    endif()
+    foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
+      if(ARCHIVE_FILE MATCHES "\\+")
+        get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
+        string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
+        file(CREATE_LINK "${ARCHIVE_FILE}" "${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+      else()
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+      endif()
+    endforeach()
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+      file(
+        GENERATE
+        OUTPUT "${PWSH_SCRIPT_PATH}"
+        INPUT "${PWSH_SCRIPT_PATH}.in")
+      set(TARGET_COMMAND_ARGS "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" "${PWSH_SCRIPT_PATH}")
+      file(APPEND "${PWSH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      set(TARGET_COMMAND_SCRIPT_FILE "${PWSH_SCRIPT_PATH}")
+    else()
+      file(
+        GENERATE
+        OUTPUT "${BASH_SCRIPT_PATH}"
+        INPUT "${BASH_SCRIPT_PATH}.in")
+      set(TARGET_COMMAND_ARGS "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${BASH_SCRIPT_PATH}")
+      file(APPEND "${BASH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      set(TARGET_COMMAND_SCRIPT_FILE "${BASH_SCRIPT_PATH}")
+    endif()
+
+    if(add_archive_options_ALL)
+      list(APPEND TARGET_OPTIONS ALL)
+    endif()
+    add_custom_target(
+      "${TARGET_NAME}"
+      ${TARGET_OPTIONS}
+      BYPRODUCTS "${OUTPUT_PATH}"
+      COMMAND ${TARGET_COMMAND_ARGS}
+      DEPENDS ${add_archive_options_LINK_LIBRARIES} "${TARGET_COMMAND_SCRIPT_FILE}"
+      COMMENT "Generating static library ${TARGET_NAME} with ${TARGET_COMMAND_ARGS}"
+      VERBATIM)
+  else()
+    set(AR_SCRIPT_PATH "${TARGET_WORK_DIR}/${TARGET_NAME}.ar")
+    set(AR_SCRIPT_PATH_IN "${TARGET_WORK_DIR}/${TARGET_NAME}.ar.in")
+
+    file(WRITE "${AR_SCRIPT_PATH_IN}" "create ${OUTPUT_PATH}\n")
+    foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
+      if(ARCHIVE_FILE MATCHES "\\+")
+        get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
+        string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
+        file(CREATE_LINK "${ARCHIVE_FILE}" "${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
+        file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\n")
+      else()
+        file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${ARCHIVE_FILE}\n")
+      endif()
+    endforeach()
+    if(add_archive_options_REMOVE_OBJECTS)
+      foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+        file(APPEND "${AR_SCRIPT_PATH_IN}" "delete ${REMOVE_OBJECT}\n")
+      endforeach()
+    endif()
+
+    file(APPEND "${AR_SCRIPT_PATH_IN}" "save\nend\n")
+    file(
+      GENERATE
+      OUTPUT "${AR_SCRIPT_PATH}"
+      INPUT "${AR_SCRIPT_PATH_IN}")
+
+    if(add_archive_options_ALL)
+      list(APPEND TARGET_OPTIONS ALL)
+    endif()
+    add_custom_target(
+      "${TARGET_NAME}"
+      ${TARGET_OPTIONS}
+      BYPRODUCTS "${OUTPUT_PATH}"
+      COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
+      DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
+      COMMENT "Generating static library ${TARGET_NAME} with \"${AR_TOOL_BIN}\" \"-M\" < \"${AR_SCRIPT_PATH}\""
+      VERBATIM)
   endif()
-  add_custom_target(
-    "${TARGET_NAME}"
-    ${TARGET_OPTIONS}
-    BYPRODUCTS "${OUTPUT_PATH}"
-    COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
-    DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
-    VERBATIM)
 
   if(add_archive_options_MERGE_COMPILE_DEFINITIONS AND TARGET_MERGE_COMPILE_DEFINITIONS)
     list(REMOVE_DUPLICATES TARGET_MERGE_COMPILE_DEFINITIONS)
