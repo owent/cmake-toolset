@@ -433,8 +433,9 @@ function(project_expand_list_for_command_line_to_file MODE)
             "${project_expand_list_for_command_line_to_file_LINE} \"${project_expand_list_for_command_line_OUT_VAR}\"")
       else()
         if(MODE MATCHES "POWERSHELL|PWSH")
-          if(NOT project_expand_list_for_command_line_OUT_VAR STREQUAL "&"
-             AND EXISTS "${project_expand_list_for_command_line_OUT_VAR}")
+          if(project_expand_list_for_command_line_OUT_VAR STREQUAL "&")
+            set(project_expand_list_for_command_line_to_file_LINE "${project_expand_list_for_command_line_OUT_VAR}")
+          elseif(EXISTS "${project_expand_list_for_command_line_OUT_VAR}")
             set(project_expand_list_for_command_line_to_file_LINE
                 "& \"${project_expand_list_for_command_line_OUT_VAR}\"")
           else()
