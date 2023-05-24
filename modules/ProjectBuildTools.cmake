@@ -413,10 +413,12 @@ function(project_expand_list_for_command_line_to_file MODE)
                        "${project_expand_list_for_command_line_OUT_VAR}")
       elseif(MODE MATCHES "POWERSHELL|PWSH")
         string(REPLACE "`" "``" project_expand_list_for_command_line_OUT_VAR "${ARG}")
-        string(REPLACE "\"" "`\"" project_expand_list_for_command_line_OUT_VAR
-                       "${project_expand_list_for_command_line_OUT_VAR}")
-        string(REPLACE "\$" "`\$" project_expand_list_for_command_line_OUT_VAR
-                       "${project_expand_list_for_command_line_OUT_VAR}")
+        if(NOT project_expand_list_for_command_line_OUT_VAR STREQUAL "&")
+          string(REPLACE "\"" "`\"" project_expand_list_for_command_line_OUT_VAR
+                         "${project_expand_list_for_command_line_OUT_VAR}")
+          string(REPLACE "\$" "`\$" project_expand_list_for_command_line_OUT_VAR
+                         "${project_expand_list_for_command_line_OUT_VAR}")
+        endif()
       elseif(MODE MATCHES "BASH|SHELL|ZSH")
         string(REPLACE "\\" "\\\\" project_expand_list_for_command_line_OUT_VAR "${ARG}")
         string(REPLACE "\"" "\\\"" project_expand_list_for_command_line_OUT_VAR
@@ -431,7 +433,8 @@ function(project_expand_list_for_command_line_to_file MODE)
             "${project_expand_list_for_command_line_to_file_LINE} \"${project_expand_list_for_command_line_OUT_VAR}\"")
       else()
         if(MODE MATCHES "POWERSHELL|PWSH")
-          if(EXISTS "${project_expand_list_for_command_line_OUT_VAR}")
+          if(NOT project_expand_list_for_command_line_OUT_VAR STREQUAL "&"
+             AND EXISTS "${project_expand_list_for_command_line_OUT_VAR}")
             set(project_expand_list_for_command_line_to_file_LINE
                 "& \"${project_expand_list_for_command_line_OUT_VAR}\"")
           else()
@@ -614,9 +617,9 @@ function(project_git_clone_repository)
   unset(project_git_clone_repository_GIT_BRANCH)
 
   if(project_git_clone_repository_TAG)
-    set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_TAG})
+    set(project_git_clone_repository_GIT_BRANCH "${project_git_clone_repository_TAG}")
   elseif(project_git_clone_repository_BRANCH)
-    set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_BRANCH})
+    set(project_git_clone_repository_GIT_BRANCH "${project_git_clone_repository_BRANCH}")
   endif()
   set(git_global_options -c "advice.detachedHead=false" -c "init.defaultBranch=main")
   if(project_git_clone_repository_GIT_CONFIG)
@@ -672,14 +675,43 @@ function(project_git_clone_repository)
       OUTPUT_QUIET ERROR_QUIET)
     if(NOT project_git_clone_repository_GIT_CHECK_REPO EQUAL 0)
       message(STATUS "${project_git_clone_repository_REPO_DIRECTORY} is not a valid git repository, remove it...")
-      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
+      file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
     endif()
     unset(project_git_clone_repository_GIT_CHECK_REPO)
   endif()
 
   if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
-    if(EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
-      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
+    if(EXISTS "${project_git_clone_repository_REPO_DIRECTORY}")
+      file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
+    endif()
+  else()
+    # Check selected tag/branch/commit
+    if(project_git_clone_repository_GIT_BRANCH)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
+                "${project_git_clone_repository_GIT_BRANCH}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      if(NOT LAST_GIT_DESCRIBE_RESULT EQUAL 0)
+        message(
+          STATUS
+            "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}, remove it..."
+        )
+        file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
+      endif()
+    elseif(project_git_clone_repository_COMMIT)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
+                "${project_git_clone_repository_COMMIT}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      if(NOT LAST_GIT_DESCRIBE_RESULT EQUAL 0)
+        message(
+          STATUS
+            "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}, remove it..."
+        )
+        file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
+      endif()
     endif()
   endif()
 
@@ -743,13 +775,13 @@ function(project_git_clone_repository)
         list(APPEND project_git_fetch_repository_args "--depth=${project_git_clone_repository_DEPTH}")
       endif()
       list(APPEND project_git_fetch_repository_args "-n" # No tags
-           "origin" ${project_git_clone_repository_GIT_BRANCH})
+           "origin" "${project_git_clone_repository_GIT_BRANCH}")
       set(project_git_fetch_repository_RETRY_TIMES 0)
       while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
         if(project_git_fetch_repository_RETRY_TIMES GREATER 0)
           message(
             STATUS
-              "Retry to fetch ${project_git_clone_repository_GIT_BRANCH} from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
+              "Retry to fetch \"${project_git_clone_repository_GIT_BRANCH}\" from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
           )
         endif()
         math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
@@ -766,7 +798,8 @@ function(project_git_clone_repository)
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
+            "git fetch origin(${project_git_clone_repository_URL}) \"${project_git_clone_repository_GIT_BRANCH}\" failed"
+        )
       endif()
     else()
       set(project_git_fetch_repository_RETRY_TIMES 0)
@@ -805,7 +838,8 @@ function(project_git_clone_repository)
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
+            "git fetch origin(${project_git_clone_repository_URL}) \"${project_git_clone_repository_GIT_BRANCH}\" failed"
+        )
       endif()
     endif()
     unset(project_git_clone_repository_GIT_FETCH_RESULT)
@@ -1927,19 +1961,23 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
       set(PWSH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.ps1")
       project_build_tool_generate_load_env_powershell("${PWSH_SCRIPT_PATH}.in")
-      file(WRITE "${PWSH_SCRIPT_PATH}.in" "& \"${LIB_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      file(WRITE "${PWSH_SCRIPT_PATH}.in"
+           "& \"${LIB_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     else()
       set(BASH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.sh")
       project_build_tools_generate_load_env_bash("${BASH_SCRIPT_PATH}.in")
-      file(WRITE "${BASH_SCRIPT_PATH}.in" "\"${LIB_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      file(WRITE "${BASH_SCRIPT_PATH}.in"
+           "\"${LIB_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
 
     if(add_archive_options_REMOVE_OBJECTS)
       foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
         if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-          file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"/REMOVE:${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "  \"/REMOVE:${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         else()
-          file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"/REMOVE:${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "  \"/REMOVE:${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         endif()
       endforeach()
     endif()
@@ -1949,15 +1987,19 @@ function(project_build_tools_add_archive_library TARGET_NAME)
         string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
         file(CREATE_LINK "${ARCHIVE_FILE}" "${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
         if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-          file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         else()
-          file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         endif()
       else()
         if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-          file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         else()
-          file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         endif()
       endif()
     endforeach()
