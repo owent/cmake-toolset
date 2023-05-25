@@ -692,11 +692,13 @@ function(project_git_clone_repository)
         COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
                 "${project_git_clone_repository_GIT_BRANCH}"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT)
       if(NOT LAST_GIT_DESCRIBE_RESULT EQUAL 0)
         message(
           STATUS
-            "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}, remove it..."
+            "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}, remove it...
+[@project_git_clone_repository_REPO_DIRECTORY]: \"${GIT_EXECUTABLE}\" describe --all ${project_git_clone_repository_GIT_BRANCH} : result = ${LAST_GIT_DESCRIBE_RESULT}"
+        )
         )
         file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
       endif()
@@ -705,11 +707,12 @@ function(project_git_clone_repository)
         COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
                 "${project_git_clone_repository_COMMIT}"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT)
       if(NOT LAST_GIT_DESCRIBE_RESULT EQUAL 0)
         message(
           STATUS
-            "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}, remove it..."
+            "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}, remove it...
+[@project_git_clone_repository_REPO_DIRECTORY]: \"${GIT_EXECUTABLE}\" describe --all ${project_git_clone_repository_GIT_BRANCH} : result = ${LAST_GIT_DESCRIBE_RESULT}"
         )
         file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
       endif()
@@ -902,6 +905,7 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
         /wd4267
         /wd4309
         /wd4668
+        /wd4800
         /wd4946
         /wd6001
         /wd6244
@@ -919,9 +923,6 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4996)
     endif()
 
-    if(MSVC_VERSION LESS 1910)
-      list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4800)
-    endif()
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS /w44484 /w44485 /w45037 /we6001 /we6244 /we6246)
   else()
     unset(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS CACHE)
