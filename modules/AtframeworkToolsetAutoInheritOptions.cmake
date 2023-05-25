@@ -1,6 +1,4 @@
-
 include_guard(GLOBAL)
-
 
 set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
     CMAKE_C_FLAGS
