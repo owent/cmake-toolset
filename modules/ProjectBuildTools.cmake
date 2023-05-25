@@ -699,7 +699,6 @@ function(project_git_clone_repository)
             "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}, remove it...
 [@project_git_clone_repository_REPO_DIRECTORY]: \"${GIT_EXECUTABLE}\" describe --all ${project_git_clone_repository_GIT_BRANCH} : result = ${LAST_GIT_DESCRIBE_RESULT}"
         )
-        )
         file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
       endif()
     elseif(project_git_clone_repository_COMMIT)
