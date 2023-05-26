@@ -62,27 +62,6 @@ index b67b7aa..ecb6b45 100644
  endif()
  
  
-diff --git a/src/core/ext/gcp/metadata_query.cc b/src/core/ext/gcp/metadata_query.cc
-index 59a62dd..1667c04 100644
---- a/src/core/ext/gcp/metadata_query.cc
-+++ b/src/core/ext/gcp/metadata_query.cc
-@@ -46,11 +46,11 @@ namespace grpc_core {
- 
- TraceFlag grpc_metadata_query_trace(false, "metadata_query");
- 
--constexpr const char MetadataQuery::kZoneAttribute[];
--constexpr const char MetadataQuery::kClusterNameAttribute[];
--constexpr const char MetadataQuery::kRegionAttribute[];
--constexpr const char MetadataQuery::kInstanceIdAttribute[];
--constexpr const char MetadataQuery::kIPv6Attribute[];
-+const char MetadataQuery::kZoneAttribute[];
-+const char MetadataQuery::kClusterNameAttribute[];
-+const char MetadataQuery::kRegionAttribute[];
-+const char MetadataQuery::kInstanceIdAttribute[];
-+const char MetadataQuery::kIPv6Attribute[];
- 
- MetadataQuery::MetadataQuery(
-     std::string attribute, grpc_polling_entity* pollent,
 diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
 index 2071a23..31087d9 100644
 --- a/src/core/lib/surface/server.cc
@@ -286,7 +265,7 @@ index d64c14f..f267d24 100755
 +      "$<INSTALL_INTERFACE:include>")
 +
 +     %(toplevel)s
-+
++ 
 +    set(UPB_DESCRIPTOR_PROTO "${UPB_HOST_INCLUDE_DIR}/google/protobuf/descriptor.proto")
 +    if (UPB_BUILD_CODEGEN)
 +      set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)
