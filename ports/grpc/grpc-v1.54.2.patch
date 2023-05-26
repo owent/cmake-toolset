@@ -286,7 +286,7 @@ index d64c14f..f267d24 100755
 +      "$<INSTALL_INTERFACE:include>")
 +
 +     %(toplevel)s
-+ 
++
 +    set(UPB_DESCRIPTOR_PROTO "${UPB_HOST_INCLUDE_DIR}/google/protobuf/descriptor.proto")
 +    if (UPB_BUILD_CODEGEN)
 +      set(UPB_CODEGEN_TARGETS protoc-gen-upb protoc-gen-upbdefs protoc-gen-lua)

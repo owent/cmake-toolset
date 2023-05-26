@@ -24,10 +24,6 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++_alts)
     endif()
 
-    message(
-      STATUS
-        "Dependency(${PROJECT_NAME}): grpc using target ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME} (version: ${gRPC_VERSION})"
-    )
     if(CMAKE_CROSSCOMPILING)
       # Just like find_program(_gRPC_CPP_PLUGIN grpc_cpp_plugin) in CMakeLists.txt in grpc
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)

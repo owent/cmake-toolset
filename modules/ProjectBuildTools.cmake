@@ -597,6 +597,20 @@ function(project_git_clone_repository)
   set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+  if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
+    set(project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS
+        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+    message(
+      STATUS
+        "Try to git clone ${project_git_clone_repository_TAG}${project_git_clone_repository_GIT_BRANCH}${project_git_clone_repository_COMMIT} into ${project_git_clone_repository_REPO_DIRECTORY}"
+    )
+    if(project_git_clone_repository_PATCH_FILES)
+      message(STATUS "  Using patch files: ${project_git_clone_repository_PATCH_FILES}")
+    endif()
+  else()
+    set(project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS)
+  endif()
+
   if(NOT project_git_clone_repository_URL)
     message(FATAL_ERROR "URL is required")
   endif()
@@ -650,12 +664,14 @@ function(project_git_clone_repository)
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach --recursive "git clean -dfx"
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach --recursive "git reset --hard"
-          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
       else()
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach "git clean -dfx"
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach "git reset --hard"
-          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
@@ -673,7 +689,7 @@ function(project_git_clone_repository)
       COMMAND "${GIT_EXECUTABLE}" ${git_global_options} log -n 1 --oneline
       WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
       RESULT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
-      OUTPUT_QUIET ERROR_QUIET)
+      OUTPUT_QUIET ERROR_QUIET ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
     if(NOT project_git_clone_repository_GIT_CHECK_REPO EQUAL 0)
       message(STATUS "${project_git_clone_repository_REPO_DIRECTORY} is not a valid git repository, remove it...")
       file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
@@ -689,34 +705,24 @@ function(project_git_clone_repository)
     # Check selected tag/branch/commit
     if(project_git_clone_repository_GIT_BRANCH)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
-                "${project_git_clone_repository_GIT_BRANCH}"
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local -z --get
+                "atframework.toolset.git-clone.current-version"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT)
-      if(NOT LAST_GIT_DESCRIBE_RESULT EQUAL 0)
+        OUTPUT_VARIABLE LAST_GIT_CLONE_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
+      if(NOT LAST_GIT_CLONE_VERSION STREQUAL project_git_clone_repository_GIT_BRANCH)
         message(
           STATUS
-            "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}, remove it...
-[@project_git_clone_repository_REPO_DIRECTORY]: \"${GIT_EXECUTABLE}\" describe --all ${project_git_clone_repository_GIT_BRANCH} : result = ${LAST_GIT_DESCRIBE_RESULT}"
+            "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}(got ${LAST_GIT_CLONE_VERSION}), remove it..."
         )
-        execute_process(COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
-                                "HEAD" WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
         file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
       endif()
     elseif(project_git_clone_repository_COMMIT)
-      execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
-                "${project_git_clone_repository_COMMIT}"
-        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-        RESULT_VARIABLE LAST_GIT_DESCRIBE_RESULT)
-      if(NOT LAST_GIT_DESCRIBE_RESULT EQUAL 0)
+      if(NOT LAST_GIT_CLONE_VERSION STREQUAL project_git_clone_repository_GIT_BRANCH)
         message(
           STATUS
-            "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}, remove it...
-[@project_git_clone_repository_REPO_DIRECTORY]: \"${GIT_EXECUTABLE}\" describe --all ${project_git_clone_repository_GIT_BRANCH} : result = ${LAST_GIT_DESCRIBE_RESULT}"
+            "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}(got ${LAST_GIT_CLONE_VERSION}), remove it..."
         )
-        execute_process(COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" describe "--all"
-                                "HEAD" WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
         file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
       endif()
     endif()
@@ -895,6 +901,19 @@ function(project_git_clone_repository)
                 ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+    endif()
+    if(project_git_clone_repository_GIT_BRANCH)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local --replace-all
+                "atframework.toolset.git-clone.current-version" "${project_git_clone_repository_GIT_BRANCH}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                          ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
+    else()
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local --replace-all
+                "atframework.toolset.git-clone.current-version" "${project_git_clone_repository_COMMIT}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                          ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
     endif()
   endif()
 endfunction()
