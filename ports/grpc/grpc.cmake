@@ -24,10 +24,6 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME gRPC::grpc++_alts)
     endif()
 
-    message(
-      STATUS
-        "Dependency(${PROJECT_NAME}): grpc using target ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME} (version: ${gRPC_VERSION})"
-    )
     if(CMAKE_CROSSCOMPILING)
       # Just like find_program(_gRPC_CPP_PLUGIN grpc_cpp_plugin) in CMakeLists.txt in grpc
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
@@ -124,7 +120,8 @@ if(NOT TARGET gRPC::grpc++_alts
       # TODO MSVC can only use C++17 in find_configure_package() below, we should remove the CMAKE_CXX_STANDARD patch
       # after gRPC support MSVC with higher standard.
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.0")
+        # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.55.0")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.2")
       endif()
     endif()
 
@@ -337,6 +334,10 @@ if(NOT TARGET gRPC::grpc++_alts
        AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_PATCH_FILE}")
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS GIT_PATCH_FILES
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_PATCH_FILE}")
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): grpc use patch file ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_PATCH_FILE}."
+      )
     endif()
 
     # Patch CMAKE_CXX_STANDARD

@@ -8,213 +8,7 @@ include_guard(GLOBAL)
 
 include(GNUInstallDirs)
 include("${CMAKE_CURRENT_LIST_DIR}/AtframeworkToolsetCommonDefinitions.cmake")
-
-set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C
-    CMAKE_C_FLAGS
-    CMAKE_C_FLAGS_DEBUG
-    CMAKE_C_FLAGS_RELEASE
-    CMAKE_C_FLAGS_RELWITHDEBINFO
-    CMAKE_C_FLAGS_MINSIZEREL
-    CMAKE_C_ARCHIVE_APPEND
-    CMAKE_C_ARCHIVE_CREATE
-    CMAKE_C_ARCHIVE_FINISH
-    CMAKE_C_COMPILER
-    CMAKE_C_COMPILER_TARGET
-    CMAKE_C_COMPILER_LAUNCHER
-    CMAKE_C_LINK_LIBRARY_SUFFIX
-    CMAKE_C_IMPLICIT_LINK_LIBRARIES
-    CMAKE_C_COMPILER_AR
-    CMAKE_C_COMPILER_FRONTEND_VARIANT
-    CMAKE_C_COMPILER_RANLIB
-    CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
-    CMAKE_C_STANDARD_LIBRARIES)
-set(PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_C CMAKE_HOST_C_COMPILER CMAKE_HOST_C_COMPILER_LAUNCHER
-                                          CMAKE_HOST_C_COMPILER_TARGET)
-if(NOT MSVC)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C CMAKE_C_COMPILER_AR CMAKE_C_COMPILER_RANLIB CMAKE_C_EXTENSIONS
-       CMAKE_OBJC_EXTENSIONS)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_C CMAKE_HOST_C_COMPILER_AR CMAKE_HOST_C_COMPILER_RANLIB
-       CMAKE_HOST_C_EXTENSIONS CMAKE_HOST_OBJC_EXTENSIONS)
-endif()
-
-set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
-    CMAKE_CXX_FLAGS
-    CMAKE_CXX_FLAGS_DEBUG
-    CMAKE_CXX_FLAGS_RELEASE
-    CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    CMAKE_CXX_FLAGS_MINSIZEREL
-    CMAKE_CXX_ARCHIVE_APPEND
-    CMAKE_CXX_ARCHIVE_CREATE
-    CMAKE_CXX_ARCHIVE_FINISH
-    CMAKE_CXX_COMPILER
-    CMAKE_CXX_COMPILER_TARGET
-    CMAKE_CXX_COMPILER_LAUNCHER
-    CMAKE_CXX_LINK_LIBRARY_SUFFIX
-    CMAKE_CXX_IMPLICIT_LINK_LIBRARIES
-    CMAKE_CXX_COMPILER_AR
-    CMAKE_CXX_COMPILER_FRONTEND_VARIANT
-    CMAKE_CXX_COMPILER_RANLIB
-    ANDROID_CPP_FEATURES
-    ANDROID_STL
-    CMAKE_ANDROID_STL_TYPE
-    CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
-    CMAKE_CXX_STANDARD_LIBRARIES)
-set(PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_CXX CMAKE_HOST_CXX_COMPILER CMAKE_HOST_CXX_COMPILER_LAUNCHER
-                                            CMAKE_HOST_CXX_COMPILER_TARGET)
-if(NOT MSVC)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX CMAKE_CXX_COMPILER_AR CMAKE_CXX_COMPILER_RANLIB
-       CMAKE_CXX_EXTENSIONS CMAKE_OBJCXX_EXTENSIONS)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_CXX CMAKE_HOST_CXX_COMPILER_AR CMAKE_HOST_CXX_COMPILER_RANLIB
-       CMAKE_HOST_CXX_EXTENSIONS CMAKE_HOST_OBJCXX_EXTENSIONS)
-endif()
-
-set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM
-    CMAKE_ASM_FLAGS
-    CMAKE_ASM_ARCHIVE_APPEND
-    CMAKE_ASM_ARCHIVE_CREATE
-    CMAKE_ASM_ARCHIVE_FINISH
-    CMAKE_ASM_COMPILER
-    CMAKE_ASM_COMPILER_TARGET
-    CMAKE_ASM_COMPILER_LAUNCHER
-    CMAKE_ASM_LINK_LIBRARY_SUFFIX
-    CMAKE_ASM_COMPILER_AR
-    CMAKE_ASM_COMPILER_FRONTEND_VARIANT
-    CMAKE_ASM_COMPILER_RANLIB)
-set(PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_ASM CMAKE_HOST_ASM_COMPILER CMAKE_HOST_ASM_COMPILER_TARGET
-                                            CMAKE_HOST_ASM_COMPILER_LAUNCHER)
-if(NOT MSVC)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM CMAKE_ASM_COMPILER_AR CMAKE_ASM_COMPILER_RANLIB)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_ASM CMAKE_HOST_ASM_COMPILER_AR CMAKE_HOST_ASM_COMPILER_RANLIB)
-endif()
-
-set(PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
-    CMAKE_EXE_LINKER_FLAGS
-    CMAKE_MODULE_LINKER_FLAGS
-    CMAKE_SHARED_LINKER_FLAGS
-    CMAKE_STATIC_LINKER_FLAGS
-    CMAKE_LINK_DIRECTORIES_BEFORE
-    CMAKE_BUILD_RPATH
-    CMAKE_BUILD_RPATH_USE_ORIGIN
-    CMAKE_BUILD_WITH_INSTALL_RPATH
-    CMAKE_INSTALL_RPATH
-    CMAKE_INSTALL_RPATH_USE_LINK_PATH
-    CMAKE_INSTALL_REMOVE_ENVIRONMENT_RPATH
-    CMAKE_SYSROOT
-    CMAKE_SYSROOT_COMPILE
-    CMAKE_SYSROOT_LINK
-    CMAKE_SYSTEM_LIBRARY_PATH
-    CMAKE_SYSTEM_VERSION
-    # CMake system
-    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
-    CMAKE_FIND_USE_PACKAGE_REGISTRY
-    CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
-    CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY
-    CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
-    CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
-    CMAKE_FIND_ROOT_PATH_MODE_LIBRARY
-    CMAKE_FIND_ROOT_PATH_MODE_INCLUDE
-    CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
-    CMAKE_FIND_ROOT_PATH
-    CMAKE_FIND_PACKAGE_PREFER_CONFIG
-    CMAKE_EXPORT_NO_PACKAGE_REGISTRY
-    CMAKE_EXPORT_PACKAGE_REGISTRY
-    # For OSX
-    CMAKE_OSX_ARCHITECTURES
-    CMAKE_OSX_DEPLOYMENT_TARGET
-    CMAKE_MACOSX_RPATH
-    # For Android
-    ANDROID_TOOLCHAIN
-    ANDROID_ABI
-    ANDROID_PIE
-    ANDROID_PLATFORM
-    ANDROID_ALLOW_UNDEFINED_SYMBOLS
-    ANDROID_ARM_MODE
-    ANDROID_ARM_NEON
-    ANDROID_DISABLE_NO_EXECUTE
-    ANDROID_DISABLE_RELRO
-    ANDROID_DISABLE_FORMAT_STRING_CHECKS
-    ANDROID_CCACHE
-    ANDROID_TOOLCHAIN
-    ANDROID_USE_LEGACY_TOOLCHAIN_FILE
-    CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION
-    CMAKE_ANDROID_ARCH_ABI
-    CMAKE_ANDROID_API
-    # For MSVC
-    CMAKE_MSVC_RUNTIME_LIBRARY
-    #[[ See
-    #   https://github.com/microsoft/vcpkg/issues/16165
-    #   https://github.com/microsoft/vcpkg/discussions/30252
-    #   https://github.com/microsoft/vcpkg/discussions/19149
-    ]]
-    VS_GLOBAL_VcpkgEnabled)
-if(CMAKE_CROSSCOMPILING)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_OSX_SYSROOT)
-endif()
-set(PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_COMMON
-    CMAKE_HOST_EXE_LINKER_FLAGS
-    CMAKE_HOST_MODULE_LINKER_FLAGS
-    CMAKE_HOST_SHARED_LINKER_FLAGS
-    CMAKE_HOST_STATIC_LINKER_FLAGS
-    CMAKE_HOST_LINK_DIRECTORIES_BEFORE
-    CMAKE_HOST_BUILD_RPATH
-    CMAKE_HOST_BUILD_RPATH_USE_ORIGIN
-    CMAKE_HOST_BUILD_WITH_INSTALL_RPATH
-    CMAKE_HOST_INSTALL_RPATH
-    CMAKE_HOST_INSTALL_RPATH_USE_LINK_PATH
-    CMAKE_HOST_INSTALL_REMOVE_ENVIRONMENT_RPATH
-    CMAKE_HOST_SYSROOT
-    CMAKE_HOST_SYSROOT_COMPILE
-    CMAKE_HOST_SYSROOT_LINK
-    CMAKE_HOST_FIND_ROOT_PATH
-    CMAKE_HOST_PREFIX_PATH
-    # For OSX
-    CMAKE_HOST_OSX_SYSROOT
-    CMAKE_HOST_OSX_ARCHITECTURES
-    CMAKE_HOST_OSX_DEPLOYMENT_TARGET
-    CMAKE_HOST_MACOSX_RPATH
-    CMAKE_HOST_MACOSX_BUNDLE
-    # For MSVC
-    CMAKE_HOST_MSVC_RUNTIME_LIBRARY
-    # For CMake
-    CMAKE_HOST_FIND_ROOT_PATH_MODE_PROGRAM
-    CMAKE_HOST_FIND_ROOT_PATH_MODE_LIBRARY
-    CMAKE_HOST_FIND_ROOT_PATH_MODE_INCLUDE
-    CMAKE_HOST_FIND_ROOT_PATH_MODE_PACKAGE)
-set(PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON
-    # CMake system
-    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
-    CMAKE_FIND_USE_PACKAGE_REGISTRY
-    CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
-    CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY
-    CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
-    CMAKE_FIND_PACKAGE_PREFER_CONFIG
-    CMAKE_EXPORT_NO_PACKAGE_REGISTRY
-    CMAKE_EXPORT_PACKAGE_REGISTRY
-    CMAKE_MAP_IMPORTED_CONFIG_NOCONFIG
-    CMAKE_MAP_IMPORTED_CONFIG_DEBUG
-    CMAKE_MAP_IMPORTED_CONFIG_RELEASE
-    CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO
-    CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL)
-if(NOT MSVC AND CMAKE_AR)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_AR)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_COMMON CMAKE_HOST_AR)
-endif()
-if(NOT MSVC AND CMAKE_RANLIB)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_RANLIB)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_COMMON CMAKE_HOST_RANLIB)
-endif()
-if(VCPKG_TOOLCHAIN)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON VCPKG_TOOLCHAIN)
-endif()
-if(VCPKG_TARGET_TRIPLET)
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON VCPKG_TARGET_TRIPLET)
-endif()
-
-if(NOT CMAKE_SYSTEM_NAME STREQUAL CMAKE_HOST_SYSTEM_NAME)
-  # Set CMAKE_SYSTEM_NAME will cause cmake to set CMAKE_CROSSCOMPILING to TRUE, so we don't set it when not
-  # crosscompiling
-  list(APPEND PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON CMAKE_SYSTEM_NAME CMAKE_SYSTEM_PROCESSOR)
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/AtframeworkToolsetAutoInheritOptions.cmake")
 
 unset(ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
@@ -619,10 +413,12 @@ function(project_expand_list_for_command_line_to_file MODE)
                        "${project_expand_list_for_command_line_OUT_VAR}")
       elseif(MODE MATCHES "POWERSHELL|PWSH")
         string(REPLACE "`" "``" project_expand_list_for_command_line_OUT_VAR "${ARG}")
-        string(REPLACE "\"" "`\"" project_expand_list_for_command_line_OUT_VAR
-                       "${project_expand_list_for_command_line_OUT_VAR}")
-        string(REPLACE "\$" "`\$" project_expand_list_for_command_line_OUT_VAR
-                       "${project_expand_list_for_command_line_OUT_VAR}")
+        if(NOT project_expand_list_for_command_line_OUT_VAR STREQUAL "&")
+          string(REPLACE "\"" "`\"" project_expand_list_for_command_line_OUT_VAR
+                         "${project_expand_list_for_command_line_OUT_VAR}")
+          string(REPLACE "\$" "`\$" project_expand_list_for_command_line_OUT_VAR
+                         "${project_expand_list_for_command_line_OUT_VAR}")
+        endif()
       elseif(MODE MATCHES "BASH|SHELL|ZSH")
         string(REPLACE "\\" "\\\\" project_expand_list_for_command_line_OUT_VAR "${ARG}")
         string(REPLACE "\"" "\\\"" project_expand_list_for_command_line_OUT_VAR
@@ -637,7 +433,9 @@ function(project_expand_list_for_command_line_to_file MODE)
             "${project_expand_list_for_command_line_to_file_LINE} \"${project_expand_list_for_command_line_OUT_VAR}\"")
       else()
         if(MODE MATCHES "POWERSHELL|PWSH")
-          if(EXISTS "${project_expand_list_for_command_line_OUT_VAR}")
+          if(project_expand_list_for_command_line_OUT_VAR STREQUAL "&")
+            set(project_expand_list_for_command_line_to_file_LINE "${project_expand_list_for_command_line_OUT_VAR}")
+          elseif(EXISTS "${project_expand_list_for_command_line_OUT_VAR}")
             set(project_expand_list_for_command_line_to_file_LINE
                 "& \"${project_expand_list_for_command_line_OUT_VAR}\"")
           else()
@@ -799,6 +597,20 @@ function(project_git_clone_repository)
   set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+  if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
+    set(project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS
+        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+    message(
+      STATUS
+        "Try to git clone ${project_git_clone_repository_TAG}${project_git_clone_repository_GIT_BRANCH}${project_git_clone_repository_COMMIT} into ${project_git_clone_repository_REPO_DIRECTORY}"
+    )
+    if(project_git_clone_repository_PATCH_FILES)
+      message(STATUS "  Using patch files: ${project_git_clone_repository_PATCH_FILES}")
+    endif()
+  else()
+    set(project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS)
+  endif()
+
   if(NOT project_git_clone_repository_URL)
     message(FATAL_ERROR "URL is required")
   endif()
@@ -820,9 +632,9 @@ function(project_git_clone_repository)
   unset(project_git_clone_repository_GIT_BRANCH)
 
   if(project_git_clone_repository_TAG)
-    set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_TAG})
+    set(project_git_clone_repository_GIT_BRANCH "${project_git_clone_repository_TAG}")
   elseif(project_git_clone_repository_BRANCH)
-    set(project_git_clone_repository_GIT_BRANCH ${project_git_clone_repository_BRANCH})
+    set(project_git_clone_repository_GIT_BRANCH "${project_git_clone_repository_BRANCH}")
   endif()
   set(git_global_options -c "advice.detachedHead=false" -c "init.defaultBranch=main")
   if(project_git_clone_repository_GIT_CONFIG)
@@ -852,12 +664,14 @@ function(project_git_clone_repository)
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach --recursive "git clean -dfx"
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach --recursive "git reset --hard"
-          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
       else()
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach "git clean -dfx"
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} submodule foreach "git reset --hard"
-          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
@@ -875,17 +689,42 @@ function(project_git_clone_repository)
       COMMAND "${GIT_EXECUTABLE}" ${git_global_options} log -n 1 --oneline
       WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
       RESULT_VARIABLE project_git_clone_repository_GIT_CHECK_REPO
-      OUTPUT_QUIET ERROR_QUIET)
+      OUTPUT_QUIET ERROR_QUIET ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
     if(NOT project_git_clone_repository_GIT_CHECK_REPO EQUAL 0)
       message(STATUS "${project_git_clone_repository_REPO_DIRECTORY} is not a valid git repository, remove it...")
-      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
+      file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
     endif()
     unset(project_git_clone_repository_GIT_CHECK_REPO)
   endif()
 
   if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
-    if(EXISTS ${project_git_clone_repository_REPO_DIRECTORY})
-      file(REMOVE_RECURSE ${project_git_clone_repository_REPO_DIRECTORY})
+    if(EXISTS "${project_git_clone_repository_REPO_DIRECTORY}")
+      file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
+    endif()
+  else()
+    # Check selected tag/branch/commit
+    if(project_git_clone_repository_GIT_BRANCH)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local -z --get
+                "atframework.toolset.git-clone.current-version"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+        OUTPUT_VARIABLE LAST_GIT_CLONE_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
+      if(NOT LAST_GIT_CLONE_VERSION STREQUAL project_git_clone_repository_GIT_BRANCH)
+        message(
+          STATUS
+            "${project_git_clone_repository_REPO_DIRECTORY} is not branch/tag ${project_git_clone_repository_GIT_BRANCH}(got ${LAST_GIT_CLONE_VERSION}), remove it..."
+        )
+        file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
+      endif()
+    elseif(project_git_clone_repository_COMMIT)
+      if(NOT LAST_GIT_CLONE_VERSION STREQUAL project_git_clone_repository_GIT_BRANCH)
+        message(
+          STATUS
+            "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}(got ${LAST_GIT_CLONE_VERSION}), remove it..."
+        )
+        file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
+      endif()
     endif()
   endif()
 
@@ -949,13 +788,13 @@ function(project_git_clone_repository)
         list(APPEND project_git_fetch_repository_args "--depth=${project_git_clone_repository_DEPTH}")
       endif()
       list(APPEND project_git_fetch_repository_args "-n" # No tags
-           "origin" ${project_git_clone_repository_GIT_BRANCH})
+           "origin" "${project_git_clone_repository_GIT_BRANCH}")
       set(project_git_fetch_repository_RETRY_TIMES 0)
       while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
         if(project_git_fetch_repository_RETRY_TIMES GREATER 0)
           message(
             STATUS
-              "Retry to fetch ${project_git_clone_repository_GIT_BRANCH} from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
+              "Retry to fetch \"${project_git_clone_repository_GIT_BRANCH}\" from ${project_git_clone_repository_URL} for the ${project_git_fetch_repository_RETRY_TIMES} time(s)."
           )
         endif()
         math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
@@ -972,7 +811,8 @@ function(project_git_clone_repository)
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
+            "git fetch origin(${project_git_clone_repository_URL}) \"${project_git_clone_repository_GIT_BRANCH}\" failed"
+        )
       endif()
     else()
       set(project_git_fetch_repository_RETRY_TIMES 0)
@@ -1011,7 +851,8 @@ function(project_git_clone_repository)
       if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0 AND project_git_clone_repository_REQUIRED)
         message(
           FATAL_ERROR
-            "git fetch origin(${project_git_clone_repository_URL}) ${project_git_clone_repository_GIT_BRANCH} failed")
+            "git fetch origin(${project_git_clone_repository_URL}) \"${project_git_clone_repository_GIT_BRANCH}\" failed"
+        )
       endif()
     endif()
     unset(project_git_clone_repository_GIT_FETCH_RESULT)
@@ -1061,6 +902,19 @@ function(project_git_clone_repository)
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
+    if(project_git_clone_repository_GIT_BRANCH)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local --replace-all
+                "atframework.toolset.git-clone.current-version" "${project_git_clone_repository_GIT_BRANCH}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                          ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
+    else()
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local --replace-all
+                "atframework.toolset.git-clone.current-version" "${project_git_clone_repository_COMMIT}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                          ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
+    endif()
   endif()
 endfunction()
 
@@ -1073,6 +927,7 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
         /wd4267
         /wd4309
         /wd4668
+        /wd4800
         /wd4946
         /wd6001
         /wd6244
@@ -1090,9 +945,6 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
       list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4996)
     endif()
 
-    if(MSVC_VERSION LESS 1910)
-      list(APPEND PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS /wd4800)
-    endif()
     set(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_REMOVE_OPTIONS /w44484 /w44485 /w45037 /we6001 /we6244 /we6246)
   else()
     unset(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS CACHE)
@@ -1507,7 +1359,7 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
 endfunction()
 
 function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
-  file(WRITE "${OUTPUT_FILE}" "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  file(WRITE "${OUTPUT_FILE}" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   project_make_executable("${OUTPUT_FILE}")
 
   file(APPEND "${OUTPUT_FILE}"
@@ -1862,10 +1714,29 @@ function(project_build_tools_print_configure_log)
   endforeach()
 endfunction()
 
+macro(atframework_cmake_toolset_find_bash_tools)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_BASH bash)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_CP cp)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_CP)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_GZIP gzip)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_GZIP)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_MV mv)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_MV)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_RM rm)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_TAR NAMES tar gtar)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
+endmacro()
+
+macro(atframework_cmake_toolset_find_pwsh_tools)
+  find_program(ATFRAMEWORK_CMAKE_TOOLSET_PWSH NAMES pwsh pwsh.exe pwsh-preview pwsh-preview.exe)
+  mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+endmacro()
+
 macro(
   project_build_tools_add_archive_library_internal
   TARGET_NAME
-  AR_SCRIPT_PATH
   WITH_DEPENDENCIES
   TARGET_MERGE_ARCHIVES
   TARGET_MERGE_LINK_LIBRARIES_VAR
@@ -1939,7 +1810,6 @@ macro(
         if(DEP_TARGET_LINK_NAMES)
           project_build_tools_add_archive_library_internal(
             "${TARGET_NAME}"
-            "${AR_SCRIPT_PATH}"
             ${WITH_DEPENDENCIES}
             "${TARGET_MERGE_ARCHIVES}"
             "${TARGET_MERGE_LINK_LIBRARIES_VAR}"
@@ -2054,14 +1924,19 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     elseif(CMAKE_C_COMPILER_AR)
       set(AR_TOOL_BIN "${CMAKE_C_COMPILER_AR}")
     else()
-      message(FATAL_ERROR "We do not support archive static for this platform now")
+      if(WIN32)
+        find_program(LIB_TOOL_BIN NAMES lib lib.exe)
+      endif()
+      if(NOT LIB_TOOL_BIN)
+        message(FATAL_ERROR "Can not find ar or lib.exe, we do not support archive static for this platform now")
+      endif()
     endif()
   endif()
 
   cmake_parse_arguments(
     add_archive_options
     "ALL;MERGE_COMPILE_DEFINITIONS;MERGE_INCLUDE_DIRECTORIES;MERGE_LINK_LIBRARIES;WITH_DEPENDENCIES"
-    "OUTPUT_NAME;INSTALL_DESTINATION" "LINK_LIBRARIES;INCLUDE;EXCLUDE" ${ARGN})
+    "OUTPUT_NAME;INSTALL_DESTINATION" "LINK_LIBRARIES;INCLUDE;EXCLUDE;REMOVE_OBJECTS" ${ARGN})
 
   if(CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     set(OUTPUT_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
@@ -2076,16 +1951,8 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   else()
     set(OUTPUT_PATH "${OUTPUT_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${TARGET_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
   endif()
-  set(AR_WORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.dir")
-  file(MAKE_DIRECTORY "${AR_WORK_DIR}")
-  set(AR_SCRIPT_PATH "${AR_WORK_DIR}/${TARGET_NAME}.ar")
-  set(AR_SCRIPT_PATH_IN "${AR_WORK_DIR}/${TARGET_NAME}.ar.in")
-  add_custom_command(
-    OUTPUT "${OUTPUT_PATH}"
-    COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
-    DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
-    COMMENT "Generating static library ${TARGET_NAME} with \"${AR_TOOL_BIN}\" \"-M\" < \"${AR_SCRIPT_PATH}\""
-    VERBATIM)
+  set(TARGET_WORK_DIR "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET_NAME}.dir")
+  file(MAKE_DIRECTORY "${TARGET_WORK_DIR}")
 
   set(TARGET_OPTIONS)
   set(TARGET_MERGE_ARCHIVES)
@@ -2093,11 +1960,8 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   set(TARGET_MERGE_INCLUDE_DIRECTORIES)
   set(TARGET_MERGE_COMPILE_DEFINITIONS)
 
-  file(WRITE "${AR_SCRIPT_PATH_IN}" "create ${OUTPUT_PATH}\n")
-
   project_build_tools_add_archive_library_internal(
     "${TARGET_NAME}"
-    "${AR_SCRIPT_PATH_IN}"
     ${add_archive_options_WITH_DEPENDENCIES}
     TARGET_MERGE_ARCHIVES
     TARGET_MERGE_LINK_LIBRARIES
@@ -2110,32 +1974,128 @@ function(project_build_tools_add_archive_library TARGET_NAME)
   list(REMOVE_DUPLICATES TARGET_MERGE_ARCHIVES)
   # list(REVERSE TARGET_MERGE_ARCHIVES)
 
-  foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
-    if(ARCHIVE_FILE MATCHES "\\+")
-      get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
-      string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
-      file(CREATE_LINK "${ARCHIVE_FILE}" "${AR_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
-      file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${AR_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\n")
-    else()
-      file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${ARCHIVE_FILE}\n")
+  if(WIN32 AND LIB_TOOL_BIN)
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+      atframework_cmake_toolset_find_pwsh_tools()
     endif()
-  endforeach()
-  file(APPEND "${AR_SCRIPT_PATH_IN}" "save\nend\n")
-  file(
-    GENERATE
-    OUTPUT "${AR_SCRIPT_PATH}"
-    INPUT "${AR_SCRIPT_PATH_IN}")
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH AND NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+      atframework_cmake_toolset_find_bash_tools()
+    endif()
 
-  if(add_archive_options_ALL)
-    list(APPEND TARGET_OPTIONS ALL)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+      set(PWSH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.ps1")
+      project_build_tool_generate_load_env_powershell("${PWSH_SCRIPT_PATH}.in")
+      file(WRITE "${PWSH_SCRIPT_PATH}.in"
+           "& \"${LIB_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    else()
+      set(BASH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.sh")
+      project_build_tools_generate_load_env_bash("${BASH_SCRIPT_PATH}.in")
+      file(WRITE "${BASH_SCRIPT_PATH}.in"
+           "\"${LIB_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    endif()
+
+    if(add_archive_options_REMOVE_OBJECTS)
+      foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "  \"/REMOVE:${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "  \"/REMOVE:${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+      endforeach()
+    endif()
+    foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
+      if(ARCHIVE_FILE MATCHES "\\+")
+        get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
+        string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
+        file(CREATE_LINK "${ARCHIVE_FILE}" "${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+      else()
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "  \"${TARGET_WORK_DIR}/${ARCHIVE_FILE}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+      endif()
+    endforeach()
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+      file(
+        GENERATE
+        OUTPUT "${PWSH_SCRIPT_PATH}"
+        INPUT "${PWSH_SCRIPT_PATH}.in")
+      set(TARGET_COMMAND_ARGS "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" "${PWSH_SCRIPT_PATH}")
+      file(APPEND "${PWSH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      set(TARGET_COMMAND_SCRIPT_FILE "${PWSH_SCRIPT_PATH}")
+    else()
+      file(
+        GENERATE
+        OUTPUT "${BASH_SCRIPT_PATH}"
+        INPUT "${BASH_SCRIPT_PATH}.in")
+      set(TARGET_COMMAND_ARGS "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${BASH_SCRIPT_PATH}")
+      file(APPEND "${BASH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      set(TARGET_COMMAND_SCRIPT_FILE "${BASH_SCRIPT_PATH}")
+    endif()
+
+    if(add_archive_options_ALL)
+      list(APPEND TARGET_OPTIONS ALL)
+    endif()
+    add_custom_target(
+      "${TARGET_NAME}"
+      ${TARGET_OPTIONS}
+      BYPRODUCTS "${OUTPUT_PATH}"
+      COMMAND ${TARGET_COMMAND_ARGS}
+      DEPENDS ${add_archive_options_LINK_LIBRARIES} "${TARGET_COMMAND_SCRIPT_FILE}"
+      COMMENT "Generating static library ${TARGET_NAME} with ${TARGET_COMMAND_ARGS}"
+      VERBATIM)
+  else()
+    set(AR_SCRIPT_PATH "${TARGET_WORK_DIR}/${TARGET_NAME}.ar")
+    set(AR_SCRIPT_PATH_IN "${TARGET_WORK_DIR}/${TARGET_NAME}.ar.in")
+
+    file(WRITE "${AR_SCRIPT_PATH_IN}" "create ${OUTPUT_PATH}\n")
+    foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVES})
+      if(ARCHIVE_FILE MATCHES "\\+")
+        get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
+        string(REPLACE "+" "_" ARCHIVE_FILE_BASENAME_RENAME "${ARCHIVE_FILE_BASENAME}")
+        file(CREATE_LINK "${ARCHIVE_FILE}" "${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}" COPY_ON_ERROR SYMBOLIC)
+        file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${TARGET_WORK_DIR}/${ARCHIVE_FILE_BASENAME_RENAME}\n")
+      else()
+        file(APPEND "${AR_SCRIPT_PATH_IN}" "addlib ${ARCHIVE_FILE}\n")
+      endif()
+    endforeach()
+    if(add_archive_options_REMOVE_OBJECTS)
+      foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+        file(APPEND "${AR_SCRIPT_PATH_IN}" "delete ${REMOVE_OBJECT}\n")
+      endforeach()
+    endif()
+
+    file(APPEND "${AR_SCRIPT_PATH_IN}" "save\nend\n")
+    file(
+      GENERATE
+      OUTPUT "${AR_SCRIPT_PATH}"
+      INPUT "${AR_SCRIPT_PATH_IN}")
+
+    if(add_archive_options_ALL)
+      list(APPEND TARGET_OPTIONS ALL)
+    endif()
+    add_custom_target(
+      "${TARGET_NAME}"
+      ${TARGET_OPTIONS}
+      BYPRODUCTS "${OUTPUT_PATH}"
+      COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
+      DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
+      COMMENT "Generating static library ${TARGET_NAME} with \"${AR_TOOL_BIN}\" \"-M\" < \"${AR_SCRIPT_PATH}\""
+      VERBATIM)
   endif()
-  add_custom_target(
-    "${TARGET_NAME}"
-    ${TARGET_OPTIONS}
-    BYPRODUCTS "${OUTPUT_PATH}"
-    COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
-    DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
-    VERBATIM)
 
   if(add_archive_options_MERGE_COMPILE_DEFINITIONS AND TARGET_MERGE_COMPILE_DEFINITIONS)
     list(REMOVE_DUPLICATES TARGET_MERGE_COMPILE_DEFINITIONS)
