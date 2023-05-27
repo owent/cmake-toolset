@@ -96,6 +96,29 @@ if(NOT EXISTS ${PROJECT_THIRD_PARTY_INSTALL_DIR})
   file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
 endif()
 
+if(NOT CMAKE_BUILD_RPATH)
+  add_list_flags_to_inherit_var(CMAKE_BUILD_RPATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
+                                "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    add_compiler_flags_to_inherit_var_unique(
+      CMAKE_EXE_LINKER_FLAGS
+      "-Wl,-rpath-link,${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_inherit_var_unique(
+      CMAKE_MODULE_LINKER_FLAGS
+      "-Wl,-rpath-link,${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_inherit_var_unique(
+      CMAKE_SHARED_LINKER_FLAGS
+      "-Wl,-rpath-link,${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+  endif()
+else()
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath-link,${CMAKE_BUILD_RPATH}")
+    add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-Wl,-rpath-link,${CMAKE_BUILD_RPATH}")
+    add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-Wl,-rpath-link,${CMAKE_BUILD_RPATH}")
+  endif()
+endif()
+
 if(NOT EXISTS ${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR})
   file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR})
 endif()
