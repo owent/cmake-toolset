@@ -1,8 +1,94 @@
-diff --git a/cmake/make_cmakelists.py b/cmake/make_cmakelists.py
-index 6e552ba..61431b6 100755
---- a/cmake/make_cmakelists.py
-+++ b/cmake/make_cmakelists.py
-@@ -39,8 +39,13 @@ import sys
+diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
+index 9c67a82..d1ec553 100644
+--- a/src/core/lib/surface/server.cc
++++ b/src/core/lib/surface/server.cc
+@@ -155,7 +155,7 @@ struct Server::RegisteredMethod {
+   const grpc_server_register_method_payload_handling payload_handling;
+   const uint32_t flags;
+   // One request matcher per method.
+-  std::unique_ptr<RequestMatcherInterface> matcher;
++  std::shared_ptr<RequestMatcherInterface> matcher;
+ };
+ 
+ //
+@@ -734,7 +734,7 @@ void Server::Start() {
+   if (unregistered_request_matcher_ == nullptr) {
+     unregistered_request_matcher_ = std::make_unique<RealRequestMatcher>(this);
+   }
+-  for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+     if (rm->matcher == nullptr) {
+       rm->matcher = std::make_unique<RealRequestMatcher>(this);
+     }
+@@ -841,7 +841,7 @@ Server::RegisteredMethod* Server::RegisterMethod(
+             "grpc_server_register_method method string cannot be NULL");
+     return nullptr;
+   }
+-  for (std::unique_ptr<RegisteredMethod>& m : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& m : registered_methods_) {
+     if (streq(m->method, method) && streq(m->host, host)) {
+       gpr_log(GPR_ERROR, "duplicate registration for %s@%s", method,
+               host ? host : "*");
+@@ -906,7 +906,7 @@ void Server::KillPendingWorkLocked(grpc_error_handle error) {
+   if (started_) {
+     unregistered_request_matcher_->KillRequests(error);
+     unregistered_request_matcher_->ZombifyPending();
+-    for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+       rm->matcher->KillRequests(error);
+       rm->matcher->ZombifyPending();
+     }
+@@ -1182,7 +1182,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
+     size_t slots = 2 * num_registered_methods;
+     registered_methods_ =
+         std::make_unique<std::vector<ChannelRegisteredMethod>>(slots);
+-    for (std::unique_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
+       Slice host;
+       Slice method = Slice::FromExternalString(rm->method);
+       const bool has_host = !rm->host.empty();
+diff --git a/src/core/lib/surface/server.h b/src/core/lib/surface/server.h
+index d635da5..448563d 100644
+--- a/src/core/lib/surface/server.h
++++ b/src/core/lib/surface/server.h
+@@ -140,7 +140,7 @@ class Server : public InternallyRefCounted<Server>,
+   }
+ 
+   void set_config_fetcher(
+-      std::unique_ptr<grpc_server_config_fetcher> config_fetcher) {
++      std::shared_ptr<grpc_server_config_fetcher> config_fetcher) {
+     config_fetcher_ = std::move(config_fetcher);
+   }
+ 
+@@ -444,7 +444,8 @@ class Server : public InternallyRefCounted<Server>,
+ 
+   ChannelArgs const channel_args_;
+   RefCountedPtr<channelz::ServerNode> channelz_node_;
+-  std::unique_ptr<grpc_server_config_fetcher> config_fetcher_;
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<grpc_server_config_fetcher> config_fetcher_;
+ 
+   std::vector<grpc_completion_queue*> cqs_;
+   std::vector<grpc_pollset*> pollsets_;
+@@ -465,10 +466,11 @@ class Server : public InternallyRefCounted<Server>,
+   bool starting_ ABSL_GUARDED_BY(mu_global_) = false;
+   CondVar starting_cv_;
+ 
+-  std::vector<std::unique_ptr<RegisteredMethod>> registered_methods_;
++  std::vector<std::shared_ptr<RegisteredMethod>> registered_methods_;
+ 
+   // Request matcher for unregistered methods.
+-  std::unique_ptr<RequestMatcherInterface> unregistered_request_matcher_;
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<RequestMatcherInterface> unregistered_request_matcher_;
+ 
+   // The shutdown refs counter tracks whether or not shutdown has been called
+   // and whether there are any AllocatingRequestMatcher requests that have been
+diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
+index 6e552ba..53ac00e 100755
+--- a/third_party/upb/cmake/make_cmakelists.py
++++ b/third_party/upb/cmake/make_cmakelists.py
+@@ -39,8 +39,14 @@ import sys
  import textwrap
  import os
  
@@ -11,13 +97,14 @@ index 6e552ba..61431b6 100755
 +    return dep[13:]
 +  return dep
 +
++
  def StripFirstChar(deps):
 -  return [dep[1:] for dep in deps]
 +  return [MappingThirdPartyDep(dep[1:]) for dep in deps]
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -83,11 +88,16 @@ class BuildFileFunctions(object):
+@@ -83,11 +89,16 @@ class BuildFileFunctions(object):
  
      if list(filter(IsSourceFile, files)):
        # Has sources, make this a normal library.
@@ -37,7 +124,7 @@ index 6e552ba..61431b6 100755
      else:
        # Header-only library, have to do a couple things differently.
        # For some info, see:
-@@ -95,6 +105,7 @@ class BuildFileFunctions(object):
+@@ -95,6 +106,7 @@ class BuildFileFunctions(object):
        self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
            kwargs["name"]
        )
@@ -45,7 +132,7 @@ index 6e552ba..61431b6 100755
        self._add_deps(kwargs, " INTERFACE")
  
    def cc_binary(self, **kwargs):
-@@ -287,12 +298,14 @@ class Converter(object):
+@@ -287,12 +299,14 @@ class Converter(object):
      self.toplevel = ""
      self.if_lua = ""
      self.utf8_range_commit = ""
@@ -60,7 +147,7 @@ index 6e552ba..61431b6 100755
      }
  
    template = textwrap.dedent("""\
-@@ -322,6 +335,15 @@ class Converter(object):
+@@ -322,6 +336,15 @@ class Converter(object):
            "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
            FORCE)
      endif()
@@ -76,27 +163,29 @@ index 6e552ba..61431b6 100755
  
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
-@@ -352,7 +374,7 @@ class Converter(object):
+@@ -352,7 +375,9 @@ class Converter(object):
      if(NOT TARGET utf8_range)
        if(EXISTS ../external/utf8_range)
          # utf8_range is already installed
 -        include_directories(../external/utf8_range)
++        set(utf8_range_ENABLE_TESTS FALSE CACHE BOOL "" FORCE)
++        set(utf8_range_ENABLE_INSTALL TRUE CACHE BOOL "" FORCE)
 +        add_subdirectory(../external/utf8_range)
        else()
          include(FetchContent)
          FetchContent_Declare(
-@@ -363,7 +385,9 @@ class Converter(object):
+@@ -363,7 +388,9 @@ class Converter(object):
          FetchContent_GetProperties(utf8_range)
          if(NOT utf8_range_POPULATED)
            FetchContent_Populate(utf8_range)
 -          include_directories(${utf8_range_SOURCE_DIR})
 +          set(utf8_range_ENABLE_TESTS FALSE CACHE BOOL "" FORCE)
 +          set(utf8_range_ENABLE_INSTALL TRUE CACHE BOOL "" FORCE)
-+          add_subdirectory("${utf8_range_SOURCE_DIR}")
++          add_subdirectory(${utf8_range_SOURCE_DIR})
          endif()
        endif()
      endif()
-@@ -374,10 +398,161 @@ class Converter(object):
+@@ -374,10 +401,161 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -258,10 +347,10 @@ index 6e552ba..61431b6 100755
    """)
  
  data = {}
-diff --git a/lua/def.c b/lua/def.c
+diff --git a/third_party/upb/lua/def.c b/third_party/upb/lua/def.c
 index 90161ec..b0b8acd 100644
---- a/lua/def.c
-+++ b/lua/def.c
+--- a/third_party/upb/lua/def.c
++++ b/third_party/upb/lua/def.c
 @@ -617,7 +617,7 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
  
  static int lupb_FileDef_Dependency(lua_State* L) {
@@ -289,10 +378,10 @@ index 90161ec..b0b8acd 100644
    const upb_MessageDef* m = upb_FileDef_TopLevelMessage(f, index);
    lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
    return 1;
-diff --git a/lua/upb.c b/lua/upb.c
+diff --git a/third_party/upb/lua/upb.c b/third_party/upb/lua/upb.c
 index 8c73e5f..f6ff011 100644
---- a/lua/upb.c
-+++ b/lua/upb.c
+--- a/third_party/upb/lua/upb.c
++++ b/third_party/upb/lua/upb.c
 @@ -61,11 +61,13 @@
  /* Lua compatibility code *****************************************************/
  
@@ -307,10 +396,10 @@ index 8c73e5f..f6ff011 100644
  
  /* Utility functions **********************************************************/
  
-diff --git a/lua/upbc.cc b/lua/upbc.cc
+diff --git a/third_party/upb/lua/upbc.cc b/third_party/upb/lua/upbc.cc
 index e857f7a..8efb491 100644
---- a/lua/upbc.cc
-+++ b/lua/upbc.cc
+--- a/third_party/upb/lua/upbc.cc
++++ b/third_party/upb/lua/upbc.cc
 @@ -79,7 +79,7 @@ static void PrintString(int max_cols, absl::string_view* str,
      } else if (ch == '\'') {
        printer->PrintRaw("\\'");
