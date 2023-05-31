@@ -1751,7 +1751,7 @@ macro(
   if(_add_archive_library_DEEP)
     math(EXPR _add_archive_library_DEEP "${_add_archive_library_DEEP}+1")
   else()
-    set(_add_archive_library_DEEP 0)
+    set(_add_archive_library_DEEP 1)
   endif()
   set(_add_archive_library_LINK_LIBRARY_PATHS_${_add_archive_library_DEEP})
   foreach(DEP_LINK_NAME ${LINK_LIBRARY_NAMES})
