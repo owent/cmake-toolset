@@ -409,3 +409,16 @@ index e857f7a..8efb491 100644
        printer->WriteRaw(&ch, 1);
        max_cols--;
      } else {
+diff --git a/third_party/upb/upb/text/encode.c b/third_party/upb/upb/text/encode.c
+index c694088..33438be 100644
+--- a/third_party/upb/upb/text/encode.c
++++ b/third_party/upb/upb/text/encode.c
+@@ -308,7 +308,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+ #define CHK(x)      \
+   do {              \
+     if (!(x)) {     \
+-      return false; \
++      return NULL; \
+     }               \
+   } while (0)
+ 
