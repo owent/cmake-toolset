@@ -48,6 +48,13 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
   endif()
 endif()
 
+# Disable shared protobuf library on windows for easy to run tests
+if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS
+      OFF
+      CACHE BOOL "Allow build protobuf as dynamic(May cause duplicate symbol[File already exists in database])")
+endif()
+
 if(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL)
   if(NOT COMPILER_OPTION_DEFAULT_ENABLE_RTTI)
     if(COMPILER_OPTIONS_TEST_RTTI)
