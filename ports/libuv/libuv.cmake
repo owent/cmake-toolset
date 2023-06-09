@@ -59,7 +59,6 @@ if(NOT TARGET uv_a
    AND NOT LIBUV_FOUND)
   if(VCPKG_TOOLCHAIN)
     find_package(Libuv QUIET)
-    project_third_party_libuv_import()
   endif()
 
   if(NOT TARGET uv_a
@@ -126,9 +125,8 @@ if(NOT TARGET uv_a
       )
       message(FATAL_ERROR "Libuv not found")
     endif()
-
-    project_third_party_libuv_import()
   endif()
+  project_third_party_libuv_import()
 else()
   project_third_party_libuv_import()
 endif()
