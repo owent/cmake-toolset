@@ -258,8 +258,8 @@ index 6e552ba..53ac00e 100755
 +      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
 +    endif()
 +
-+    set(UPB_DESCRIPTOR_SOURCES 
-+      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h" 
++    set(UPB_DESCRIPTOR_SOURCES
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.h"
 +      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upb.c"
 +      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.h"
 +      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/descriptor.upbdefs.c"
