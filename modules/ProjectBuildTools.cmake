@@ -825,17 +825,13 @@ function(project_git_clone_repository)
         endif()
         math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
              OUTPUT_FORMAT DECIMAL)
-        if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
-          execute_process(
-            COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "--deepen=${project_git_clone_repository_DEPTH}"
-                    "-n" origin ${project_git_clone_repository_COMMIT}
-            RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
-            WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-        else()
-          set(project_git_clone_repository_GIT_FETCH_RESULT 1)
-        endif()
-        # Some server do not support --deepen=N , we fallback to full fetch
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n"
+                  origin ${project_git_clone_repository_COMMIT}
+          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        # Some server do not support --depth=N , we fallback to full fetch
         if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
           message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
           execute_process(
