@@ -825,17 +825,13 @@ function(project_git_clone_repository)
         endif()
         math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
              OUTPUT_FORMAT DECIMAL)
-        if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.11.0")
-          execute_process(
-            COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "--deepen=${project_git_clone_repository_DEPTH}"
-                    "-n" origin ${project_git_clone_repository_COMMIT}
-            RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
-            WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-                              ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-        else()
-          set(project_git_clone_repository_GIT_FETCH_RESULT 1)
-        endif()
-        # Some server do not support --deepen=N , we fallback to full fetch
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n"
+                  origin ${project_git_clone_repository_COMMIT}
+          RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        # Some server do not support --depth=N , we fallback to full fetch
         if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
           message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
           execute_process(
@@ -1605,6 +1601,18 @@ function(project_build_tools_set_shared_library_declaration DEFINITION_VARNAME)
     target_compile_definitions(${TARGET_NAME} INTERFACE "${DEFINITION_VARNAME}=${IMPORT_DECLARATION}")
     target_compile_definitions(${TARGET_NAME} PRIVATE "${DEFINITION_VARNAME}=${EXPORT_DECLARATION}")
   endforeach()
+endfunction()
+
+function(project_build_tools_set_static_library_declaration DEFINITION_VARNAME)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel|XL|XLClang")
+    foreach(TARGET_NAME ${ARGN})
+      target_compile_definitions(${TARGET_NAME} PUBLIC "${DEFINITION_VARNAME}=__attribute__((visibility(\"default\")))")
+    endforeach()
+  else()
+    foreach(TARGET_NAME ${ARGN})
+      target_compile_definitions(${TARGET_NAME} PUBLIC "${DEFINITION_VARNAME}=")
+    endforeach()
+  endif()
 endfunction()
 
 function(project_build_tools_get_origin_rpath OUTVAR)

@@ -18,6 +18,18 @@ macro(PROJECT_THIRD_PARTY_LIBUV_IMPORT)
                         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES
                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET})
+  elseif(TARGET libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET})
+    message(
+      STATUS
+        "Dependency(${PROJECT_NAME}): libuv using target: libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET}"
+    )
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME
+        libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET})
+    get_target_property(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS
+      libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES
+                                              libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PREFER_TARGET})
   elseif(TARGET ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET})
     message(
       STATUS
@@ -29,6 +41,18 @@ macro(PROJECT_THIRD_PARTY_LIBUV_IMPORT)
                         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES
                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET})
+  elseif(TARGET libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET})
+    message(
+      STATUS
+        "Dependency(${PROJECT_NAME}): libuv using target: libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET}"
+    )
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME
+        libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET})
+    get_target_property(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS
+      libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+    project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES
+                                              libuv::${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_FALLBACK_TARGET})
   elseif(TARGET libuv)
     message(STATUS "Dependency(${PROJECT_NAME}): libuv using target: libuv")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME libuv)
@@ -40,11 +64,59 @@ macro(PROJECT_THIRD_PARTY_LIBUV_IMPORT)
     get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS libuv::libuv
                         INTERFACE_INCLUDE_DIRECTORIES)
     project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES libuv::libuv)
+  elseif(Libuv_FOUND OR LIBUV_FOUND)
+    add_library(libuv UNKNOWN IMPORTED)
+    if(Libuv_INCLUDE_DIRS)
+      set_target_properties(libuv PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Libuv_INCLUDE_DIRS})
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS "${Libuv_INCLUDE_DIRS}")
+    elseif(LIBUV_INCLUDE_DIRS)
+      set_target_properties(libuv PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${LIBUV_INCLUDE_DIRS})
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS "${LIBUV_INCLUDE_DIRS}")
+    endif()
+    if(Libuv_LIBRARIES)
+      set_target_properties(libuv PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
+                                                                                          "${Libuv_LIBRARIES}")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES "${Libuv_LIBRARIES}")
+    elseif(LIBUV_LIBRARIES)
+      set_target_properties(libuv PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX;RC" IMPORTED_LOCATION
+                                                                                          "${LIBUV_LIBRARIES}")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES "${LIBUV_LIBRARIES}")
+    endif()
+    message(STATUS "Dependency(${PROJECT_NAME}): libuv create target: libuv")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME libuv)
+
+    if(WIN32)
+      set_target_properties(libuv PROPERTIES INTERFACE_LINK_LIBRARIES "psapi;user32;advapi32;iphlpapi;userenv;ws2_32")
+    else()
+      unset(uv_libraries)
+      if(NOT CMAKE_SYSTEM_NAME MATCHES "Android|OS390")
+        list(APPEND uv_libraries pthread)
+      endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+        list(APPEND uv_libraries perfstat)
+      endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+        list(APPEND uv_libraries dl)
+      endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(APPEND uv_libraries dl rt)
+      endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
+        list(APPEND uv_libraries kvm)
+      endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "OS390")
+        list(APPEND uv_libraries -Wl,xplink)
+      endif()
+      if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+        list(APPEND uv_libraries kstat nsl sendfile socket)
+      endif()
+      if(uv_libraries)
+        set_target_properties(libuv PROPERTIES INTERFACE_LINK_LIBRARIES "${uv_libraries}")
+        unset(uv_libraries)
+      endif()
+    endif()
   else()
     message(STATUS "Dependency(${PROJECT_NAME}): Libuv support disabled")
-  endif()
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS AND Libuv_INCLUDE_DIRS)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS "${Libuv_INCLUDE_DIRS}")
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES AND Libuv_LIBRARIES)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES "${Libuv_LIBRARIES}")
@@ -59,7 +131,6 @@ if(NOT TARGET uv_a
    AND NOT LIBUV_FOUND)
   if(VCPKG_TOOLCHAIN)
     find_package(Libuv QUIET)
-    project_third_party_libuv_import()
   endif()
 
   if(NOT TARGET uv_a
@@ -126,9 +197,8 @@ if(NOT TARGET uv_a
       )
       message(FATAL_ERROR "Libuv not found")
     endif()
-
-    project_third_party_libuv_import()
   endif()
+  project_third_party_libuv_import()
 else()
   project_third_party_libuv_import()
 endif()
