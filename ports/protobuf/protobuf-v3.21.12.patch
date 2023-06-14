@@ -1,0 +1,48 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 04cb330..2e93b19 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -219,7 +219,7 @@ else (protobuf_BUILD_SHARED_LIBS)
+     if (protobuf_MSVC_STATIC_RUNTIME)
+         set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>)
+     else()
+-        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>DLL)
++        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>")
+     endif()
+   else()
+     # In case we are building static libraries, link also the runtime library statically
+diff --git a/src/google/protobuf/compiler/cpp/file.cc b/src/google/protobuf/compiler/cpp/file.cc
+index 838e0ab..8090f2c 100644
+--- a/src/google/protobuf/compiler/cpp/file.cc
++++ b/src/google/protobuf/compiler/cpp/file.cc
+@@ -507,7 +507,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
+     // configurations (like non-opt or with certain sanitizers). NO_DESTROY is
+     // there just to improve performance and binary size in these builds.
+     format(
+-        "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
++        "$dllexport_decl PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
+         "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
+         DefaultInstanceType(generator->descriptor_, options_, /*split=*/true),
+         DefaultInstanceName(generator->descriptor_, options_, /*split=*/true));
+@@ -526,7 +526,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
+       DefaultInstanceType(generator->descriptor_, options_),
+       generator->classname_);
+   format(
+-      "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
++      "$dllexport_decl PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
+       "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
+       DefaultInstanceType(generator->descriptor_, options_),
+       DefaultInstanceName(generator->descriptor_, options_));
+diff --git a/src/google/protobuf/metadata_lite.h b/src/google/protobuf/metadata_lite.h
+index 0c31517..58e86b9 100644
+--- a/src/google/protobuf/metadata_lite.h
++++ b/src/google/protobuf/metadata_lite.h
+@@ -78,7 +78,7 @@ class PROTOBUF_EXPORT InternalMetadata {
+   // the destructor is always defined here even though it may delegate
+   // to a non-inline private method.
+   // (see https://github.com/protocolbuffers/protobuf/issues/9947)
+-  ~InternalMetadata() {
++  PROTOBUF_NOINLINE ~InternalMetadata() {
+ #if defined(NDEBUG) || defined(_MSC_VER)
+     if (HasMessageOwnedArenaTag()) {
+       delete reinterpret_cast<Arena*>(ptr_ - kMessageOwnedArenaTagMask);
