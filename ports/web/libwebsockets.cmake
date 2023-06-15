@@ -362,10 +362,10 @@ if(NOT Libwebsockets_FOUND
           BASH
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
           "${CMAKE_COMMAND}"
-          "--build"
+          "--install"
           "."
-          "--"
-          "install")
+          "--prefix"
+          "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
 
         # build & install
         execute_process(
@@ -405,10 +405,10 @@ if(NOT Libwebsockets_FOUND
           BAT
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
           "${CMAKE_COMMAND}"
-          "--build"
+          "--install"
           "."
-          "--target"
-          "INSTALL")
+          "--prefix"
+          "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
 
         # build & install
         execute_process(
