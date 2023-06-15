@@ -93,11 +93,17 @@ if(NOT Libwebsockets_FOUND
       endif()
 
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS)
+        project_build_tools_get_cmake_build_type_for_lib(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
             ${CMAKE_COMMAND}
             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_REPOSITORY_DIR}"
             "-Wno-dev"
             "-DCMAKE_INSTALL_PREFIX=${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+            "-DCMAKE_BUILD_TYPE=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE}"
+            "-DCMAKE_DEBUG_POSTFIX=-dbg"
+            "-DCMAKE_RELWITHDEBINFO_POSTFIX=-reldbg"
+            "-DCMAKE_RELEASE_POSTFIX=-rel"
             "-DLWS_STATIC_PIC=ON"
             "-DLWS_LINK_TESTAPPS_DYNAMIC=OFF"
             "-DLWS_SUPPRESS_DEPRECATED_API_WARNINGS=ON"
@@ -398,17 +404,47 @@ if(NOT Libwebsockets_FOUND
         project_expand_list_for_command_line_to_file(
           BAT "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-config.bat"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS}")
-        project_expand_list_for_command_line_to_file(
-          BAT "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
-          "${CMAKE_COMMAND}" "--build" "." "-j")
-        project_expand_list_for_command_line_to_file(
-          BAT
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
-          "${CMAKE_COMMAND}"
-          "--install"
-          "."
-          "--prefix"
-          "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
+
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES
+              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE})
+        else()
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES)
+          if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE STREQUAL "Debug")
+            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES "Debug")
+          endif()
+          if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE STREQUAL "Release")
+            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES "Release")
+          endif()
+          if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE STREQUAL "RelWithDebInfo")
+            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES "RelWithDebInfo")
+          endif()
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES
+               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_DEFAULT_BUILD_TYPE})
+        endif()
+
+        foreach(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPE
+                ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPES})
+          project_expand_list_for_command_line_to_file(
+            BAT
+            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
+            "${CMAKE_COMMAND}"
+            "--build"
+            "."
+            "--config"
+            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPE}"
+            "-j")
+          project_expand_list_for_command_line_to_file(
+            BAT
+            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
+            "${CMAKE_COMMAND}"
+            "--install"
+            "."
+            "--config"
+            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPE}"
+            "--prefix"
+            "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
+        endforeach()
 
         # build & install
         execute_process(

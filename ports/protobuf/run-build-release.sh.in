@@ -76,7 +76,7 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
       else
         "@CMAKE_COMMAND@" --build . --config Release
       fi
-      "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
+      "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@"
 
     fi
 
@@ -145,7 +145,7 @@ else
   else
     "@CMAKE_COMMAND@" --build . --config Release
   fi
-  "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
+  "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@"
 
 fi
 

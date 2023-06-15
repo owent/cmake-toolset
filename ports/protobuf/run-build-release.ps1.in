@@ -78,7 +78,12 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         else {
             & "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE"
         }
-        & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE"
+        if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
+            & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE"
+        }
+        else {
+            & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@"
+        }
 
         if ( $LastExitCode -ne 0 ) {
             exit $LastExitCode
@@ -154,7 +159,7 @@ else {
     else {
         & "@CMAKE_COMMAND@" --build . --config Release
     }
-    & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
+    & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@"
 }
 
 
