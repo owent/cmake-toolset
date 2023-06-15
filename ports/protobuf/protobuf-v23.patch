@@ -12,7 +12,7 @@ index 1fb018b..2f3c8ce 100644
    else()
      # In case we are building static libraries, link also the runtime library statically
 diff --git a/src/google/protobuf/compiler/cpp/file.cc b/src/google/protobuf/compiler/cpp/file.cc
-index 3a0e9d9..e56ac9d 100644
+index 3a0e9d9..5aef50c 100644
 --- a/src/google/protobuf/compiler/cpp/file.cc
 +++ b/src/google/protobuf/compiler/cpp/file.cc
 @@ -556,7 +556,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx, io::Printer* p) {
@@ -20,7 +20,7 @@ index 3a0e9d9..e56ac9d 100644
            };
  
 -          PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-+          $dllexport_decl PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
++          $dllexport_decl $PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
                PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const $type$ $name$;
          )cc");
    }
@@ -29,7 +29,7 @@ index 3a0e9d9..e56ac9d 100644
          };
  
 -        PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-+        $dllexport_decl PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
++        $dllexport_decl $PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$;
        )cc");
  
