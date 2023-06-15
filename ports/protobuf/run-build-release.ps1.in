@@ -46,18 +46,18 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
             if ($ALLOW_PARALLEL_BUILD_FLAGS) {
                 if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Debug")) {
-                    & "@CMAKE_COMMAND@" --build . --target install --config Debug -j
+                    & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug -j
                 }
                 if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Release")) {
-                    & "@CMAKE_COMMAND@" --build . --target install --config Release -j
+                    & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release -j
                 }
             }
             else {
                 if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Debug")) {
-                    & "@CMAKE_COMMAND@" --build . --target install --config Debug
+                    & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
                 }
                 if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Release")) {
-                    & "@CMAKE_COMMAND@" --build . --target install --config Release
+                    & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
                 }
             }
             if ( $LastExitCode -ne 0 ) {
@@ -69,10 +69,10 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
         }
 
         if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-            & "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" -j
+            & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" -j
         }
         else {
-            & "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE"
+            & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE"
         }
 
         if ( $LastExitCode -ne 0 ) {
@@ -107,18 +107,18 @@ else {
 if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MSVC@".ToLower() -eq "1")) {
     if ($ALLOW_PARALLEL_BUILD_FLAGS) {
         if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Debug")) {
-            & "@CMAKE_COMMAND@" --build . --target install --config Debug -j
+            & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug -j
         }
         if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Release")) {
-            & "@CMAKE_COMMAND@" --build . --target install --config Release -j
+            & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release -j
         }
     }
     else {
         if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Debug")) {
-            & "@CMAKE_COMMAND@" --build . --target install --config Debug
+            & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
         }
         if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Release")) {
-            & "@CMAKE_COMMAND@" --build . --target install --config Release
+            & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
         }
     }
 
@@ -131,18 +131,18 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
     }
 
     if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-        & "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" -j
+        & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" -j
     }
     else {
-        & "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE"
+        & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE"
     }
 }
 else {
     if ($ALLOW_PARALLEL_BUILD_FLAGS) {
-        & "@CMAKE_COMMAND@" --build . --target install --config Release -j
+        & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release -j
     }
     else {
-        & "@CMAKE_COMMAND@" --build . --target install --config Release
+        & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
     }
 }
 

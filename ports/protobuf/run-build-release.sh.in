@@ -44,32 +44,32 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
 
             if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
                 if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-                    "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug ;
                 fi
                 if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-                    "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
                 fi
             else
                 if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-                    "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug ;
                 fi
                 if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-                    "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
                 fi
             fi
 
             if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
+                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" ;
             else
-                "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
+                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" ;
             fi
 
         else
 
             if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
             else
-                "@CMAKE_COMMAND@" --build . --target install --config Release ;
+                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
             fi
 
         fi
@@ -107,24 +107,24 @@ if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x
 
     if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-            "@CMAKE_COMMAND@" --build . --target install --config Debug -j || "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug -j || "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug ;
         fi
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-            "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release -j || "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release ;
         fi
     else
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-            "@CMAKE_COMMAND@" --build . --target install --config Debug ;
+            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug ;
         fi
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-            "@CMAKE_COMMAND@" --build . --target install --config Release ;
+            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release ;
         fi
     fi
 
     if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
+        "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" ;
     else
-        "@CMAKE_COMMAND@" --build . --target install --config "$FINAL_BUILD_TYPE" ;
+        "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" ;
     fi
 
 else
