@@ -1,172 +1,184 @@
 #!/bin/bash
 
-BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR@" ;
-BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR@" ;
+BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR@"
+BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR@"
 BUILD_THIRD_IS_CROSS="@CMAKE_CROSSCOMPILING@"
 BUILD_THIRD_IS_CROSS="$(echo $BUILD_THIRD_IS_CROSS | tr '[:upper:]' '[:lower:]')"
 LOW_MEMORY_MODE="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE@"
 LOW_MEMORY_MODE="$(echo $LOW_MEMORY_MODE | tr '[:upper:]' '[:lower:]')"
 
-if [[ "x$LOW_MEMORY_MODE" == "xtrue" ]] || [[ "x$LOW_MEMORY_MODE" == "xyes" ]] || 
-    [[ "x$LOW_MEMORY_MODE" == "x1" ]] || [[ "x$LOW_MEMORY_MODE" == "xon" ]]; then
-    ALLOW_PARALLEL_BUILD_FLAGS=0 ;
+if [[ "x$LOW_MEMORY_MODE" == "xtrue" ]] || [[ "x$LOW_MEMORY_MODE" == "xyes" ]] \
+  || [[ "x$LOW_MEMORY_MODE" == "x1" ]] || [[ "x$LOW_MEMORY_MODE" == "xon" ]]; then
+  ALLOW_PARALLEL_BUILD_FLAGS=0
 else
-    ALLOW_PARALLEL_BUILD_FLAGS=1 ;
+  ALLOW_PARALLEL_BUILD_FLAGS=1
 fi
 
 if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]]; then
-    FINAL_BUILD_TYPE="@CMAKE_BUILD_TYPE@"
+  FINAL_BUILD_TYPE="@CMAKE_BUILD_TYPE@"
 else
-    FINAL_BUILD_TYPE="Release"
+  FINAL_BUILD_TYPE="Release"
 fi
 
-set -x ;
+set -x
 
 # build host protoc first
 if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "xyes" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "x1" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "xon" ]]; then
-    export PATH="$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR:$PATH" ;
+  export PATH="$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR:$PATH"
 
-    if [[ ! -e "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" ]]; then
-        mkdir -p "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" ;    
-    fi
+  if [[ ! -e "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" ]]; then
+    mkdir -p "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR"
+  fi
 
-    cd "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" ;
+  cd "$BUILD_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR"
 
-    if [[ -e "CMakeCache.txt" ]]; then
-        rm -f "CMakeCache.txt" ;
-    fi
+  if [[ -e "CMakeCache.txt" ]]; then
+    rm -f "CMakeCache.txt"
+  fi
 
-    if [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ]] && [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" ]]; then
-        source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_BASH@"
-        @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" ;
+  if [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc" ]] && [[ ! -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin/protoc.exe" ]]; then
+    source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_BASH@"
+    @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@"
 
-        if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
+    if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
-            if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug ;
-                fi
-                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
-                fi
-            else
-                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug ;
-                fi
-                if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-                    "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
-                fi
-            fi
-
-            if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" ;
-            else
-                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE" ;
-            fi
-
-        else
-
-            if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release -j || "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
-            else
-                "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release ;
-            fi
-
+      if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+          "@CMAKE_COMMAND@" --build . --config Debug -j || "@CMAKE_COMMAND@" --build . --config Debug
+          "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
         fi
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+          "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release
+          "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
+        fi
+      else
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+          "@CMAKE_COMMAND@" --build . --config Debug
+          "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
+        fi
+        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+          "@CMAKE_COMMAND@" --build . --config Release
+          "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
+        fi
+      fi
 
-        source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_BASH@"
+      if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+        "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE"
+      else
+        "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE"
+      fi
+      "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE"
+
+    else
+
+      if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+        "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release
+      else
+        "@CMAKE_COMMAND@" --build . --config Release
+      fi
+      "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
+
     fi
 
-    export PATH="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:$PATH" ;
+    source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_BASH@"
+  fi
+
+  export PATH="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:$PATH"
 
 else
-    export PATH="$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR:$PATH" ;
+  export PATH="$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR:$PATH"
 fi
 
 if [[ ! -e "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ]]; then
-    mkdir -p "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ;    
+  mkdir -p "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR"
 fi
 
-cd "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR" ;
+cd "$BUILD_THIRD_PARTY_PROTOBUF_BUILD_DIR"
 
 if [[ -e "CMakeCache.txt" ]]; then
-    rm -f "CMakeCache.txt" ;
+  rm -f "CMakeCache.txt"
 fi
 
 if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "xyes" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "x1" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "xon" ]]; then
 
-    @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_INSTALL_DIR@" "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" -Dprotobuf_BUILD_LIBPROTOC=ON -Dprotobuf_BUILD_PROTOC_BINARIES=OFF -Dprotobuf_BUILD_CONFORMANCE=OFF ;
+  @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_INSTALL_DIR@" "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" -Dprotobuf_BUILD_LIBPROTOC=ON -Dprotobuf_BUILD_PROTOC_BINARIES=OFF -Dprotobuf_BUILD_CONFORMANCE=OFF
 
 else
 
-    @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_INSTALL_DIR@" "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" ;
+  @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_INSTALL_DIR@" "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@"
 
 fi
 
 if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
-    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug -j || "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug ;
-        fi
-        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release -j || "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release ;
-        fi
-    else
-        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug ;
-        fi
-        if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-            "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release ;
-        fi
+  if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+    if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+      "@CMAKE_COMMAND@" --build . --config Debug -j || "@CMAKE_COMMAND@" --build . --config Debug
+      "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
     fi
+    if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+      "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release
+      "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
+    fi
+  else
+    if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
+      "@CMAKE_COMMAND@" --build . --config Debug
+      "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
+    fi
+    if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
+      "@CMAKE_COMMAND@" --build . --config Release
+      "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
+    fi
+  fi
 
-    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" ;
-    else
-        "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE" ;
-    fi
+  if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+    "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE"
+  else
+    "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE"
+  fi
+  "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE"
 
 else
 
-    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --target install --config Release -j || "@CMAKE_COMMAND@" --build . --target install --config Release ;
-    else
-        "@CMAKE_COMMAND@" --build . --target install --config Release ;
-    fi
+  if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+    "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release
+  else
+    "@CMAKE_COMMAND@" --build . --config Release
+  fi
+  "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
 
 fi
 
 if [[ $? -eq 0 ]] && [[ -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR@/python/setup.py" ]]; then
-    export PATH="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:$PATH" ;
-    if [[ -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python" ]]; then
-        rm -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python";
+  export PATH="@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/bin:$PATH"
+  if [[ -e "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python" ]]; then
+    rm -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python"
+  fi
+  cp -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR@/python" "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python"
+  cp -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/include" "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/src"
+  cd "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python"
+
+  PYTHON_BIN=""
+  if [[ "x" != "x@PYTHON_EXECUTABLE@" ]]; then
+    "@PYTHON_EXECUTABLE@" --version >/dev/null 2>&1
+    if [[ $? -eq 0 ]]; then
+      PYTHON_BIN="@PYTHON_EXECUTABLE@"
     fi
-    cp -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR@/python" "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python";
-    cp -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/include" "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/src";
-    cd "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/python";
-    
-    PYTHON_BIN="";
-    if [[ "x" != "x@PYTHON_EXECUTABLE@" ]]; then
-        "@PYTHON_EXECUTABLE@" --version > /dev/null 2>&1;
-        if [[ $? -eq 0 ]]; then
-            PYTHON_BIN="@PYTHON_EXECUTABLE@";
-        fi
+  fi
+  if [[ "x" == "x$PYTHON_BIN" ]]; then
+    python3 --version >/dev/null 2>&1
+    if [[ $? -eq 0 ]]; then
+      PYTHON_BIN="python3"
     fi
-    if [[ "x" == "x$PYTHON_BIN" ]]; then
-        python3 --version > /dev/null 2>&1;
-        if [[ $? -eq 0 ]]; then
-            PYTHON_BIN="python3";
-        fi
+  fi
+  if [[ "x" == "x$PYTHON_BIN" ]]; then
+    python --version >/dev/null 2>&1
+    if [[ $? -eq 0 ]]; then
+      PYTHON_BIN="python"
     fi
-    if [[ "x" == "x$PYTHON_BIN" ]]; then
-        python --version > /dev/null 2>&1;
-        if [[ $? -eq 0 ]]; then
-            PYTHON_BIN="python";
-        fi
-    fi
-    if [[ "x" != "x$PYTHON_BIN" ]]; then
-        "$PYTHON_BIN" ./setup.py build_py ;
-    fi
-    rm -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/src";
+  fi
+  if [[ "x" != "x$PYTHON_BIN" ]]; then
+    "$PYTHON_BIN" ./setup.py build_py
+  fi
+  rm -rf "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@/src"
 fi
