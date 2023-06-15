@@ -12,7 +12,7 @@ index 04cb330..2e93b19 100644
    else()
      # In case we are building static libraries, link also the runtime library statically
 diff --git a/src/google/protobuf/compiler/cpp/file.cc b/src/google/protobuf/compiler/cpp/file.cc
-index 838e0ab..8090f2c 100644
+index 838e0ab..90a0795 100644
 --- a/src/google/protobuf/compiler/cpp/file.cc
 +++ b/src/google/protobuf/compiler/cpp/file.cc
 @@ -507,7 +507,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
@@ -20,7 +20,7 @@ index 838e0ab..8090f2c 100644
      // there just to improve performance and binary size in these builds.
      format(
 -        "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
-+        "$dllexport_decl PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
++        "$dllexport_decl $PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
          "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
          DefaultInstanceType(generator->descriptor_, options_, /*split=*/true),
          DefaultInstanceName(generator->descriptor_, options_, /*split=*/true));
@@ -29,7 +29,7 @@ index 838e0ab..8090f2c 100644
        generator->classname_);
    format(
 -      "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
-+      "$dllexport_decl PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
++      "$dllexport_decl $PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
        "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
        DefaultInstanceType(generator->descriptor_, options_),
        DefaultInstanceName(generator->descriptor_, options_));
