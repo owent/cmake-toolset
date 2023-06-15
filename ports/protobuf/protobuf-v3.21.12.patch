@@ -12,27 +12,27 @@ index 04cb330..2e93b19 100644
    else()
      # In case we are building static libraries, link also the runtime library statically
 diff --git a/src/google/protobuf/compiler/cpp/file.cc b/src/google/protobuf/compiler/cpp/file.cc
-index 838e0ab..90a0795 100644
+index 838e0ab..10f74c0 100644
 --- a/src/google/protobuf/compiler/cpp/file.cc
 +++ b/src/google/protobuf/compiler/cpp/file.cc
-@@ -507,7 +507,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
-     // configurations (like non-opt or with certain sanitizers). NO_DESTROY is
+@@ -508,7 +508,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
      // there just to improve performance and binary size in these builds.
      format(
--        "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
-+        "$dllexport_decl $PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
-         "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
+         "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
+-        "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
++        "$dllexport_decl $PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
          DefaultInstanceType(generator->descriptor_, options_, /*split=*/true),
          DefaultInstanceName(generator->descriptor_, options_, /*split=*/true));
-@@ -526,7 +526,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
-       DefaultInstanceType(generator->descriptor_, options_),
+   }
+@@ -527,7 +527,7 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx,
        generator->classname_);
    format(
--      "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
-+      "$dllexport_decl $PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
-       "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
+       "PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT "
+-      "PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
++      "$dllexport_decl $PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $1$ $2$;\n",
        DefaultInstanceType(generator->descriptor_, options_),
        DefaultInstanceName(generator->descriptor_, options_));
+ 
 diff --git a/src/google/protobuf/metadata_lite.h b/src/google/protobuf/metadata_lite.h
 index 0c31517..58e86b9 100644
 --- a/src/google/protobuf/metadata_lite.h
