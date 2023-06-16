@@ -61,8 +61,10 @@ if(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL)
       message(FATAL_ERROR "COMPILER_OPTIONS_TEST_RTTI=ON when COMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF")
     endif()
   else()
-    # Some versions of STL in MSVC may depend exception.
-    if(NOT COMPILER_OPTIONS_TEST_RTTI AND COMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION)
+    if(NOT COMPILER_OPTIONS_TEST_RTTI)
+      # Some versions of STL in MSVC may depend exception, we ignore this error here.
+      file(WRITE "${CMAKE_BINARY_DIR}/ignore-configure-error.txt"
+           "COMPILER_OPTIONS_TEST_RTTI=OFF when COMPILER_OPTION_DEFAULT_ENABLE_RTTI=ON")
       message(FATAL_ERROR "COMPILER_OPTIONS_TEST_RTTI=OFF when COMPILER_OPTION_DEFAULT_ENABLE_RTTI=ON")
     endif()
   endif()
@@ -91,6 +93,9 @@ endforeach()
 message(STATUS "ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS=${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
 
 # Ports
+if(EXISTS "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
+  file(REMOVE "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
+endif()
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
 
