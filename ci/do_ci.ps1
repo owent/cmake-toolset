@@ -80,6 +80,12 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
@@ -103,6 +109,12 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
@@ -126,6 +138,12 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_RTTI=OFF" "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
@@ -149,6 +167,12 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DCOMPILER_OPTION_DEFAULT_ENABLE_EXCEPTION=OFF" "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
@@ -172,6 +196,12 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
@@ -189,6 +219,12 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
     -DVCPKG_TARGET_TRIPLET=x64-windows-static-md "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
@@ -211,6 +247,12 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON" "-DVS_GLOBAL_VcpkgEnabled=OFF"
   if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
