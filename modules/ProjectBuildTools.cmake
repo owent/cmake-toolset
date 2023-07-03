@@ -2035,6 +2035,12 @@ function(project_build_tools_add_archive_library TARGET_NAME)
       list(APPEND TARGET_MERGE_ARCHIVE_LIST "${ARCHIVE_FILE}")
     endif()
   endforeach()
+  if(TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES)
+    add_custom_command(
+      OUTPUT ${TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES} ${TARGET_MERGE_ARCHIVE_COPY_TARGET_COMMANDS}
+      WORKING_DIRECTORY "${TARGET_WORK_DIR}"
+      COMMENT "Copy ${TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES}")
+  endif()
 
   if(WIN32)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
@@ -2109,12 +2115,6 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     if(add_archive_options_ALL)
       list(APPEND TARGET_OPTIONS ALL)
     endif()
-    if(TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES)
-      add_custom_command(
-        OUTPUT ${TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES} ${TARGET_MERGE_ARCHIVE_COPY_TARGET_COMMANDS}
-        WORKING_DIRECTORY "${TARGET_WORK_DIR}"
-        COMMENT "Copy ${TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES}")
-    endif()
     add_custom_target(
       "${TARGET_NAME}"
       ${TARGET_OPTIONS}
@@ -2160,7 +2160,7 @@ function(project_build_tools_add_archive_library TARGET_NAME)
       ${TARGET_OPTIONS}
       BYPRODUCTS "${OUTPUT_PATH}"
       COMMAND "${AR_TOOL_BIN}" "-M" "<" "${AR_SCRIPT_PATH}"
-      DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}"
+      DEPENDS ${add_archive_options_LINK_LIBRARIES} "${AR_SCRIPT_PATH}" ${TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES}
       COMMENT "Generating static library ${TARGET_NAME} with \"${AR_TOOL_BIN}\" \"-M\" < \"${AR_SCRIPT_PATH}\""
       VERBATIM)
   endif()
