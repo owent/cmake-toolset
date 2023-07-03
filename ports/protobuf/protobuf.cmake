@@ -72,10 +72,8 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
    OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME)
 
   set(protobuf_MODULE_COMPATIBLE TRUE)
-  if(VCPKG_TOOLCHAIN)
-    find_package(Protobuf QUIET CONFIG)
-    project_third_party_protobuf_import()
-  endif()
+  find_package(Protobuf QUIET CONFIG)
+  project_third_party_protobuf_import()
 
   if(NOT TARGET protobuf::protoc
      AND NOT TARGET protobuf::libprotobuf
