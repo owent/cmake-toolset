@@ -2042,7 +2042,7 @@ function(project_build_tools_add_archive_library TARGET_NAME)
       COMMENT "Copy ${TARGET_MERGE_ARCHIVE_COPY_TARGET_FILES}")
   endif()
 
-  if(WIN32)
+  if(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows|Darwin|MinGW")
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
       atframework_cmake_toolset_find_pwsh_tools()
     endif()
@@ -2053,26 +2053,37 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
       set(PWSH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.ps1")
       project_build_tool_generate_load_env_powershell("${PWSH_SCRIPT_PATH}.in")
-      file(WRITE "${PWSH_SCRIPT_PATH}.in"
-           "& \"${AR_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      if(MSVC)
+        file(WRITE "${PWSH_SCRIPT_PATH}.in"
+             "& \"${AR_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      elseif(
+        CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin"
+        AND CMAKE_LIBTOOL
+        AND CMAKE_LIBTOOL_IS_CCTOOLS)
+        file(WRITE "${PWSH_SCRIPT_PATH}.in"
+             "& \"${CMAKE_LIBTOOL}\" \"-static\" \"-o\" \"${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      else()
+        file(WRITE "${PWSH_SCRIPT_PATH}.in"
+             "& \"${AR_TOOL_BIN}\" \"crsT\" \"${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      endif()
     else()
       set(BASH_SCRIPT_PATH "${TARGET_WORK_DIR}/build-${TARGET_NAME}.sh")
       project_build_tools_generate_load_env_bash("${BASH_SCRIPT_PATH}.in")
-      file(WRITE "${BASH_SCRIPT_PATH}.in"
-           "\"${AR_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      if(MSVC)
+        file(WRITE "${BASH_SCRIPT_PATH}.in"
+             "\"${AR_TOOL_BIN}\" \"/OUT:${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      elseif(
+        CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin"
+        AND CMAKE_LIBTOOL
+        AND CMAKE_LIBTOOL_IS_CCTOOLS)
+        file(WRITE "${BASH_SCRIPT_PATH}.in"
+             "\"${CMAKE_LIBTOOL}\" \"-static\" \"-o\" \"${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      else()
+        file(WRITE "${BASH_SCRIPT_PATH}.in"
+             "\"${AR_TOOL_BIN}\" \"crsT\" \"${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      endif()
     endif()
 
-    if(add_archive_options_REMOVE_OBJECTS)
-      foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
-        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
-          file(APPEND "${PWSH_SCRIPT_PATH}.in"
-               "  \"/REMOVE:${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-        else()
-          file(APPEND "${BASH_SCRIPT_PATH}.in"
-               "  \"/REMOVE:${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-        endif()
-      endforeach()
-    endif()
     foreach(ARCHIVE_FILE ${TARGET_MERGE_ARCHIVE_LIST})
       if(ARCHIVE_FILE MATCHES "\\+")
         get_filename_component(ARCHIVE_FILE_BASENAME "${ARCHIVE_FILE}" NAME)
@@ -2093,6 +2104,56 @@ function(project_build_tools_add_archive_library TARGET_NAME)
         endif()
       endif()
     endforeach()
+    if(add_archive_options_REMOVE_OBJECTS)
+      if(MSVC)
+        foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+          if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+            file(APPEND "${PWSH_SCRIPT_PATH}.in"
+                 "  \"/REMOVE:${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          else()
+            file(APPEND "${BASH_SCRIPT_PATH}.in"
+                 "  \"/REMOVE:${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          endif()
+        endforeach()
+      elseif(
+        CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin"
+        AND CMAKE_LIBTOOL
+        AND CMAKE_LIBTOOL_IS_CCTOOLS)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "& \"${AR_TOOL_BIN}\" \"-dTlsv\" \"${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "\"${AR_TOOL_BIN}\" \"-dTlsv\" \"${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+        foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+          if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+            file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          else()
+            file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          endif()
+        endforeach()
+      else()
+        if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+          file(APPEND "${PWSH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${PWSH_SCRIPT_PATH}.in"
+               "& \"${AR_TOOL_BIN}\" \"dsvT\" \"${OUTPUT_PATH}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        else()
+          file(APPEND "${BASH_SCRIPT_PATH}.in" "${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          file(APPEND "${BASH_SCRIPT_PATH}.in"
+               "\"${AR_TOOL_BIN}\" \"dsvT\" \"${OUTPUT_PATH}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+        endif()
+        foreach(REMOVE_OBJECT ${add_archive_options_REMOVE_OBJECTS})
+          if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+            file(APPEND "${PWSH_SCRIPT_PATH}.in" "  \"${REMOVE_OBJECT}\" `${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          else()
+            file(APPEND "${BASH_SCRIPT_PATH}.in" "  \"${REMOVE_OBJECT}\" \\${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+          endif()
+        endforeach()
+      endif()
+    endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
       file(
