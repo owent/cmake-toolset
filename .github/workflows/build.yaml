@@ -137,24 +137,25 @@ jobs:
           path: |
             /usr/local/share/vcpkg/installed
           key: ${{ runner.os }}-${{ hashFiles('/usr/local/share/vcpkg/installed/**') }}
-  msys2_mingw_static_test:
-    name: "msys2.mingw.static.test"
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: CI Job
-        shell: bash
-        run: |
-          C:/msys64/msys2_shell.cmd -mingw64 -defterm -no-start -here -lc "ci/do_ci.sh msys2.mingw.static.test"
-      - name: Cache packages
-        uses: actions/cache@v2
-        with:
-          path: |
-            third_party/test/packages
-            C:/msys64/var/cache/pacman/pkg
-            C:/msys64/var/lib/pacman
-          key: ${{ runner.os }}-${ hashFiles('.github/workflows/build.yaml') } }}
+  # Disable mingw because some versions of gRPC will generate a PATH that is too long for Windows(260)
+  # msys2_mingw_static_test:
+  #   name: "msys2.mingw.static.test"
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: CI Job
+  #       shell: bash
+  #       run: |
+  #         C:/msys64/msys2_shell.cmd -mingw64 -defterm -no-start -here -lc "ci/do_ci.sh msys2.mingw.static.test"
+  #     - name: Cache packages
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: |
+  #           third_party/test/packages
+  #           C:/msys64/var/cache/pacman/pkg
+  #           C:/msys64/var/lib/pacman
+  #         key: ${{ runner.os }}-${ hashFiles('.github/workflows/build.yaml') } }}
   msvc_static_test:
     name: "msvc.static.test"
     runs-on: windows-latest
