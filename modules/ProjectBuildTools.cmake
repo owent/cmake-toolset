@@ -337,21 +337,45 @@ macro(project_build_tools_append_cmake_cxx_standard_options)
       set(project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS TRUE)
     endif()
   endforeach()
-  if(CMAKE_C_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
-    list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-         "-DCMAKE_C_STANDARD=${CMAKE_C_STANDARD}")
+  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
+    if(CMAKE_C_STANDARD)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_C_STANDARD=${CMAKE_C_STANDARD}")
+    endif()
+    if(DEFINED CMAKE_C_STANDARD)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_C_STANDARD=${CMAKE_C_STANDARD}")
+    endif()
   endif()
-  if(CMAKE_OBJC_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
-    list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-         "-DCMAKE_OBJC_STANDARD=${CMAKE_OBJC_STANDARD}")
+  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
+    if(CMAKE_OBJC_STANDARD)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_OBJC_STANDARD=${CMAKE_OBJC_STANDARD}")
+    endif()
+    if(DEFINED CMAKE_OBJC_STANDARD)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_OBJC_STANDARD=${CMAKE_OBJC_STANDARD}")
+    endif()
   endif()
-  if(CMAKE_CXX_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
-    list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-         "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
+  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
+    if(CMAKE_CXX_STANDARD)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
+    endif()
+    if(DEFINED CMAKE_CXX_EXTENSIONS)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}")
+    endif()
   endif()
-  if(CMAKE_OBJCXX_STANDARD AND NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
-    list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-         "-DCMAKE_OBJCXX_STANDARD=${CMAKE_OBJCXX_STANDARD}")
+  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
+    if(CMAKE_OBJCXX_STANDARD)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_OBJCXX_STANDARD=${CMAKE_OBJCXX_STANDARD}")
+    endif()
+    if(DEFINED CMAKE_OBJCXX_EXTENSIONS)
+      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+           "-DCMAKE_OBJCXX_EXTENSIONS=${CMAKE_OBJCXX_EXTENSIONS}")
+    endif()
   endif()
 
   unset(project_build_tools_append_cmake_cxx_standard_options_OUTVAR)
