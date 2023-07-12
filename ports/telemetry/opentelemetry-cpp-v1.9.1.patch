@@ -1,0 +1,21 @@
+diff --git a/sdk/include/opentelemetry/sdk/metrics/aggregation/histogram_aggregation.h b/sdk/include/opentelemetry/sdk/metrics/aggregation/histogram_aggregation.h
+index 5d1097d..fa8f6c1 100644
+--- a/sdk/include/opentelemetry/sdk/metrics/aggregation/histogram_aggregation.h
++++ b/sdk/include/opentelemetry/sdk/metrics/aggregation/histogram_aggregation.h
+@@ -3,13 +3,14 @@
+ 
+ #pragma once
+ 
++#include <algorithm>
+ #include <memory>
++#include <mutex>
++
+ #include "opentelemetry/common/spin_lock_mutex.h"
+ #include "opentelemetry/sdk/metrics/aggregation/aggregation.h"
+ #include "opentelemetry/sdk/metrics/aggregation/aggregation_config.h"
+ 
+-#include <mutex>
+-
+ OPENTELEMETRY_BEGIN_NAMESPACE
+ namespace sdk
+ {
