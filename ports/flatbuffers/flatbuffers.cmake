@@ -99,7 +99,7 @@ if(NOT TARGET flatbuffers::flatbuffers)
     project_third_party_port_declare(
       flatbuffers
       VERSION
-      "v23.3.3"
+      "v23.5.26"
       GIT_URL
       "https://github.com/google/flatbuffers.git"
       BUILD_OPTIONS

@@ -142,7 +142,7 @@ if(NOT TARGET uv_a
     project_third_party_port_declare(
       libuv
       VERSION
-      "v1.44.2"
+      "v1.46.0"
       GIT_URL
       "https://github.com/libuv/libuv.git"
       BUILD_OPTIONS

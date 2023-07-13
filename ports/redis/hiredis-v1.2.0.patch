@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b7d6ee8..567e71b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -171,7 +171,7 @@ IF(ENABLE_SSL)
+     ENDIF()
+     TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE OpenSSL::SSL)
+     IF(WIN32)
+-        TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl PUBLIC hiredis)
+     ENDIF()
+     CONFIGURE_FILE(hiredis_ssl.pc.in hiredis_ssl.pc @ONLY)
+ 
