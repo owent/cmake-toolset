@@ -10,7 +10,18 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
                                                                   Libnghttp3::libnghttp3)
     endif()
 
-    find_package(Libngtcp2_crypto_openssl QUIET)
+    find_package(Libngtcp2_crypto_quictls QUIET)
+    if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
+      message(
+        STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_quictls using target Libngtcp2::libngtcp2_crypto_quictls")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_OPENSSL_LINK_NAME Libngtcp2::libngtcp2_crypto_quictls)
+      if(TARGET Libnghttp3::libnghttp3)
+        project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_quictls ADD_LIBRARIES
+                                                                    Libngtcp2::libngtcp2)
+      endif()
+    else()
+      find_package(Libngtcp2_crypto_openssl QUIET)
+    endif()
     if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
       message(
         STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_openssl using target Libngtcp2::libngtcp2_crypto_openssl")
@@ -38,6 +49,10 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_STATICLIB)
           project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2 ADD_DEFINITIONS
                                                                    "NGTCP2_STATICLIB=1")
+          if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
+            project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_quictls
+                                                                     ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
+          endif()
           if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
             project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl
                                                                      ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
@@ -49,6 +64,10 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
       if(Libngtcp2_LIBRARIES AND Libngtcp2_LIBRARIES MATCHES "\\.a$")
         project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2 ADD_DEFINITIONS
                                                                  "NGTCP2_STATICLIB=1")
+        if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
+          project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_quictls ADD_DEFINITIONS
+                                                                   "NGTCP2_STATICLIB=1")
+        endif()
         if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
           project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl ADD_DEFINITIONS
                                                                    "NGTCP2_STATICLIB=1")

@@ -40,8 +40,9 @@ endif()
 
 find_path(Libngtcp2_crypto_openssl_INCLUDE_DIRS NAMES "ngtcp2/ngtcp2_crypto.h"
                                                       ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_INCLUDE})
-find_library(Libngtcp2_crypto_openssl_LIBRARY NAMES ngtcp2_crypto_openssl ngtcp2_crypto_openssl_static
-                                                    ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB})
+find_library(
+  Libngtcp2_crypto_openssl_LIBRARY NAMES ngtcp2_crypto_quictls ngtcp2_crypto_quictls_static ngtcp2_crypto_openssl
+                                         ngtcp2_crypto_openssl_static ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB})
 unset(_Libngtcp2_crypto_openssl_LIBRARIES)
 set(Libngtcp2_crypto_openssl_LIBRARIES
     ${Libngtcp2_crypto_openssl_LIBRARY}
