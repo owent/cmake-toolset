@@ -717,3 +717,157 @@ function(project_third_party_try_patch_file OUTPUT_VAR BASE_DIRECTORY PORT_PREFI
     return()
   endif()
 endfunction()
+
+function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_DIRECTORY)
+  set(optionArgs "")
+  set(oneValueArgs VERSION PORT_PREFIX RESULT_VARIABLE)
+  set(multiValueArgs TEST_PATH TEST_PROGRAM)
+  cmake_parse_arguments(project_third_party_crosscompiling_host "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}"
+                        "${ARGN}")
+
+  if(project_third_party_crosscompiling_host_PORT_PREFIX)
+    string(
+      TOUPPER
+        "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${project_third_party_crosscompiling_host_PORT_PREFIX}_${PORT_NAME}"
+        FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  endif()
+  string(REGEX REPLACE "[-\\.]" "_" FULL_PORT_NAME "${FULL_PORT_NAME}")
+
+  if(NOT project_third_party_crosscompiling_host_VERSION AND ${FULL_PORT_NAME}_VERSION)
+    set(project_third_party_crosscompiling_host_VERSION "${${FULL_PORT_NAME}_VERSION}")
+  endif()
+
+  set(HOST_PREBUILT_EXISTED FALSE)
+  foreach(CHECK_PATH ${project_third_party_crosscompiling_host_TEST_PATH})
+    if(EXISTS "${CHECK_PATH}")
+      set(HOST_PREBUILT_EXISTED TRUE)
+      break()
+    elseif(NOT IS_ABSOLUTE "${CHECK_PATH}" AND EXISTS "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CHECK_PATH}")
+      set(HOST_PREBUILT_EXISTED TRUE)
+      break()
+    endif()
+  endforeach()
+  if(NOT HOST_PREBUILT_EXISTED AND project_third_party_crosscompiling_host_TEST_PROGRAM)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+      find_program(
+        HOST_PREBUILT_PORGRAM_EXISTED
+        NAMES ${project_third_party_crosscompiling_host_TEST_PROGRAM}
+        PATHS "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}" NO_CACHE
+        NO_DEFAULT_PATH)
+      if(HOST_PREBUILT_PORGRAM_EXISTED)
+        set(HOST_PREBUILT_EXISTED TRUE)
+      endif()
+    else()
+      foreach(TEST_PROGRAM ${project_third_party_crosscompiling_host_TEST_PROGRAM})
+        find_program(
+          project_third_party_crosscompiling_host_HOST_PREBUILT_PORGRAM_${TEST_PROGRAM}
+          NAMES "${TEST_PROGRAM}"
+          PATHS "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+          NO_DEFAULT_PATH)
+        if(project_third_party_crosscompiling_host_HOST_PREBUILT_PORGRAM_${TEST_PROGRAM})
+          set(HOST_PREBUILT_EXISTED TRUE)
+        endif()
+      endforeach()
+    endif()
+  endif()
+  if(HOST_PREBUILT_EXISTED)
+    if(project_third_party_crosscompiling_host_RESULT_VARIABLE)
+      set(${project_third_party_crosscompiling_host_RESULT_VARIABLE}
+          ${BUILD_RESULT_CODE}
+          PARENT_SCOPE)
+    endif()
+    return()
+  endif()
+
+  project_third_party_get_host_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_DIR
+                                         "${PORT_NAME}" ${project_third_party_crosscompiling_host_VERSION})
+  file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_DIR}")
+  get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR
+                         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_DIR}" DIRECTORY)
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/crosscompiling-${PORT_NAME}-host")
+  file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}")
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS "${CMAKE_COMMAND}"
+                                                                            "${HOST_PROJECT_SOURCE_DIRECTORY}")
+  message(
+    STATUS
+      "Dependency(${PROJECT_NAME}): Try to build ${PORT_NAME} fo host architecture(${PROJECT_PREBUILT_HOST_PLATFORM_NAME}@${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR})"
+  )
+  project_build_tools_append_cmake_host_options(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS)
+  # Vcpkg
+  if(DEFINED VCPKG_HOST_CRT_LINKAGE)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
+         "-DVCPKG_CRT_LINKAGE=${VCPKG_HOST_CRT_LINKAGE}")
+  elseif(DEFINED VCPKG_CRT_LINKAGE)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
+         "-DVCPKG_CRT_LINKAGE=${VCPKG_CRT_LINKAGE}")
+  endif()
+  # Shared or static
+  project_third_party_append_build_shared_lib_var(
+    "${PORT_NAME}" "${project_third_party_crosscompiling_host_PORT_PREFIX}"
+    ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS BUILD_SHARED_LIBS)
+
+  # cmake-toolset
+  list(
+    APPEND
+    ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
+    "-DPROJECT_THIRD_PARTY_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+    "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+    "-DPROJECT_THIRD_PARTY_PACKAGE_DIR=${PROJECT_THIRD_PARTY_PACKAGE_DIR}")
+  if(DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)
+    list(
+      APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
+      "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE}"
+    )
+  endif()
+
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_CMD)
+  foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS)
+    string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
+    add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_CMD
+                              "\"${CMD_ARG_UNESCAPE}\"")
+  endforeach()
+  unset(CMD_ARG_UNESCAPE)
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH
+     OR CMAKE_HOST_UNIX
+     OR MSYS)
+    configure_file(
+      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling/run-build-host.sh.in"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.sh" @ONLY
+      NEWLINE_STYLE LF)
+
+    # build
+    execute_process(
+      COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
+              "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.sh"
+      RESULT_VARIABLE BUILD_RESULT_CODE
+      WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}"
+                        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+  else()
+    configure_file(
+      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling/run-build-host.ps1.in"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.ps1" @ONLY
+      NEWLINE_STYLE CRLF)
+    configure_file(
+      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling/run-build-host.bat.in"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.bat" @ONLY
+      NEWLINE_STYLE CRLF)
+
+    # build
+    execute_process(
+      COMMAND
+        "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" -NoProfile -InputFormat None -ExecutionPolicy Bypass -NonInteractive -NoLogo
+        -File "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.ps1"
+      RESULT_VARIABLE BUILD_RESULT_CODE
+      WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}"
+                        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+  endif()
+  if(project_third_party_crosscompiling_host_RESULT_VARIABLE)
+    set(${project_third_party_crosscompiling_host_RESULT_VARIABLE}
+        ${BUILD_RESULT_CODE}
+        PARENT_SCOPE)
+  endif()
+endfunction()
