@@ -835,7 +835,7 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
      OR CMAKE_HOST_UNIX
      OR MSYS)
     configure_file(
-      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling/run-build-host.sh.in"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/crosscompiling/run-build-host.sh.in"
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.sh" @ONLY
       NEWLINE_STYLE LF)
 
@@ -848,11 +848,11 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
                         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
   else()
     configure_file(
-      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling/run-build-host.ps1.in"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/crosscompiling/run-build-host.ps1.in"
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.ps1" @ONLY
       NEWLINE_STYLE CRLF)
     configure_file(
-      "${CMAKE_CURRENT_LIST_DIR}/crosscompiling/run-build-host.bat.in"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/modules/crosscompiling/run-build-host.bat.in"
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR}/run-build-host.bat" @ONLY
       NEWLINE_STYLE CRLF)
 
