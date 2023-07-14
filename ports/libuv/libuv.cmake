@@ -140,6 +140,10 @@ if(NOT TARGET uv_a
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION "v1.46.0")
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "5.1.0")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION "v1.44.2")
+    elseif(MSVC)
+      # MSVC with v1.46.0 will report PREFIX_DIR\bin\uv.dll : fatal error LNK1107: invalid or corrupt file: cannot read
+      # at 0x380
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_DEFAULT_VERSION "v1.44.2")
     endif()
     project_third_party_port_declare(
       libuv
@@ -152,14 +156,8 @@ if(NOT TARGET uv_a
       "-DBUILD_TESTING=OFF")
 
     project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS)
-    if(MSVC AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_VERSION MATCHES "v1.46.0")
-      # v1.46.0 will report PREFIX_DIR\bin\uv.dll : fatal error LNK1107: invalid or corrupt file: cannot read at 0x380
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
-           "-DLIBUV_BUILD_SHARED=OFF")
-    else()
-      project_third_party_append_build_shared_lib_var(
-        "libuv" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS BUILD_SHARED_LIBS LIBUV_BUILD_SHARED)
-    endif()
+    project_third_party_append_build_shared_lib_var(
+      "libuv" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS BUILD_SHARED_LIBS LIBUV_BUILD_SHARED)
 
     project_third_party_try_patch_file(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "libuv"

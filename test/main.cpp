@@ -4,9 +4,12 @@
 #include <string>
 
 #if defined(HAVE_OPENTELEMETRY_CPP) && HAVE_OPENTELEMETRY_CPP
-#  include "opentelemetry/exporters/ostream/span_exporter.h"
+#  include "opentelemetry/exporters/ostream/span_exporter_factory.h"
+#  include "opentelemetry/sdk/trace/batch_span_processor_factory.h"
+#  include "opentelemetry/sdk/trace/batch_span_processor_options.h"
+#  include "opentelemetry/sdk/trace/tracer_provider_factory.h"
 #  include "opentelemetry/sdk/trace/batch_span_processor.h"
-#  include "opentelemetry/sdk/trace/tracer_provider.h"
+#  include "opentelemetry/sdk/trace/exporter.h"
 #  include "opentelemetry/trace/provider.h"
 #endif
 
@@ -66,12 +69,11 @@ constexpr int kOpentelemetryNumSpans = 3;
 namespace {
 
 static void OpentelemetryInitTracer() {
-  auto exporter =
-      std::unique_ptr<opentelemetry::sdk::trace::SpanExporter>(new opentelemetry::exporter::trace::OStreamSpanExporter);
+  auto exporter = opentelemetry::exporter::trace::OStreamSpanExporterFactory::Create();
 
   // CONFIGURE BATCH SPAN PROCESSOR PARAMETERS
 
-  opentelemetry::sdk::trace::BatchSpanProcessorOptions options{};
+  opentelemetry::sdk::trace::BatchSpanProcessorOptions options;
   // We make the queue size `kOpentelemetryNumSpans`*2+5 because when the queue is half full, a preemptive notif
   // is sent to start an export call, which we want to avoid in this simple example.
   options.max_queue_size = kOpentelemetryNumSpans * 2 + 1;
@@ -80,13 +82,11 @@ static void OpentelemetryInitTracer() {
   // We export `kOpentelemetryNumSpans` after every `schedule_delay_millis` milliseconds.
   options.max_export_batch_size = kOpentelemetryNumSpans;
 
-  auto processor = std::unique_ptr<opentelemetry::sdk::trace::SpanProcessor>(
-      new opentelemetry::sdk::trace::BatchSpanProcessor(std::move(exporter), options));
+  auto processor = opentelemetry::sdk::trace::BatchSpanProcessorFactory::Create(std::move(exporter), options);
 
-  auto provider = opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>(
-      new opentelemetry::sdk::trace::TracerProvider(std::move(processor)));
+  auto provider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor));
   // Set the global trace provider.
-  opentelemetry::trace::Provider::SetTracerProvider(provider);
+  opentelemetry::trace::Provider::SetTracerProvider(std::move(provider));
 }
 
 opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer> GetTracer() {
