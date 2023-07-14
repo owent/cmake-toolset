@@ -226,10 +226,10 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE)
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h"
     COMMAND
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE}" -I
-      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host" --cpp --allow-non-utf8
-      --natural-utf8 --gen-mutable --gen-object-api --reflect-types --reflect-names -o "${CMAKE_CURRENT_BINARY_DIR}"
-      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host/helloworld.fbs"
-    DEPENDS "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host/helloworld.fbs"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-host" --cpp --allow-non-utf8 --natural-utf8
+      --gen-mutable --gen-object-api --reflect-types --reflect-names -o "${CMAKE_CURRENT_BINARY_DIR}"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-host/helloworld.fbs"
+    DEPENDS "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-host/helloworld.fbs"
     COMMENT "Generate helloworld_generated.h into ${CMAKE_CURRENT_BINARY_DIR}")
 
   list(APPEND MAIN_TEST_SRC_FILES "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h")
