@@ -9,10 +9,8 @@ macro(PROJECT_THIRD_PARTY_TBB_IMPORT)
 endmacro()
 
 if(NOT TARGET TBB::tbb)
-  if(VCPKG_TOOLCHAIN)
-    find_package(TBB QUIET)
-    project_third_party_tbb_import()
-  endif()
+  find_package(TBB QUIET)
+  project_third_party_tbb_import()
 
   if(NOT TARGET TBB::tbb AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_LINK_NAME)
     project_third_party_port_declare(

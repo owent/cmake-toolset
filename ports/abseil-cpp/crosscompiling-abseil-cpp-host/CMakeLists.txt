@@ -18,7 +18,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.22.0")
   cmake_policy(SET CMP0128 NEW)
 endif()
 
-project(cmake-toolset-flatbuffers-host)
+project(cmake-toolset-abseil-cpp-host)
 
 if(NOT CMAKE_PARENT_LIST_FILE OR CMAKE_PARENT_LIST_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
   if(MSVC)
@@ -35,21 +35,8 @@ set(ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING TRUE)
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/abseil-cpp/abseil-cpp.cmake")
 
-# Test protobuf generator
-add_custom_command(
-  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h"
-  COMMAND
-    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE}" -I "${CMAKE_CURRENT_LIST_DIR}" --cpp --allow-non-utf8
-    --natural-utf8 --gen-mutable --gen-object-api --reflect-types --reflect-names -o "${CMAKE_CURRENT_BINARY_DIR}"
-    "${CMAKE_CURRENT_LIST_DIR}/helloworld.fbs"
-  DEPENDS "${CMAKE_CURRENT_LIST_DIR}/helloworld.fbs"
-  COMMENT "Generate helloworld.* into ${CMAKE_CURRENT_BINARY_DIR}")
+add_executable("${PROJECT_NAME}-cross-test" cross-main.cpp)
 
-add_executable("${PROJECT_NAME}-cross-test" "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h" cross-main.cpp)
-target_include_directories("${PROJECT_NAME}-cross-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-
-target_link_libraries("${PROJECT_NAME}-cross-test" ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_LINK_NAME})
-
-target_compile_options("${PROJECT_NAME}-cross-test" PRIVATE "${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS}")
+target_link_libraries("${PROJECT_NAME}-cross-test" absl::config)

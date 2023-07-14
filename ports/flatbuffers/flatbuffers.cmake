@@ -63,10 +63,8 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
 endmacro()
 
 if(NOT TARGET flatbuffers::flatbuffers)
-  if(VCPKG_TOOLCHAIN)
-    find_package(flatbuffers QUIET)
-    project_third_party_flatbuffers_import()
-  endif()
+  find_package(flatbuffers QUIET)
+  project_third_party_flatbuffers_import()
 
   if(NOT TARGET flatbuffers::flatbuffers)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_DEFAULT_BUILD_OPTIONS)
