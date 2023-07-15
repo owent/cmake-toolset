@@ -95,7 +95,7 @@ if(NOT TARGET Libnghttp2::libnghttp2)
     project_third_party_port_declare(
       Libnghttp2
       VERSION
-      "v1.52.0"
+      "v1.55.0"
       GIT_URL
       "https://github.com/nghttp2/nghttp2.git"
       BUILD_OPTIONS

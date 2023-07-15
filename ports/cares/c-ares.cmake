@@ -31,10 +31,8 @@ if(NOT TARGET c-ares::cares
    AND NOT TARGET c-ares::cares_static
    AND NOT TARGET c-ares::cares_shared
    AND NOT CARES_FOUND)
-  if(VCPKG_TOOLCHAIN)
-    find_package(c-ares QUIET)
-    project_third_party_cares_import()
-  endif()
+  find_package(c-ares QUIET)
+  project_third_party_cares_import()
 
   if(NOT TARGET c-ares::cares
      AND NOT TARGET c-ares::cares_static

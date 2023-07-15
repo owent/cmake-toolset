@@ -12,10 +12,8 @@ macro(PROJECT_THIRD_PARTY_ABSEIL_IMPORT)
 endmacro()
 
 if(NOT absl_FOUND)
-  if(VCPKG_TOOLCHAIN)
-    find_package(absl QUIET)
-    project_third_party_abseil_import()
-  endif()
+  find_package(absl QUIET)
+  project_third_party_abseil_import()
 
   if(NOT absl_FOUND)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION)
@@ -23,7 +21,7 @@ if(NOT absl_FOUND)
       if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20200225.3")
       else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20230125.2")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20230125.3")
       endif()
 
     endif()
@@ -54,6 +52,22 @@ if(NOT absl_FOUND)
     project_third_party_try_patch_file(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "abseil-cpp"
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION}")
+
+    # Build host architecture flatc first
+    if(NOT ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING AND CMAKE_CROSSCOMPILING)
+      project_third_party_crosscompiling_host(
+        "abseil"
+        "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host"
+        PORT_PREFIX
+        "GRPC"
+        RESULT_VARIABLE
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_HOST_BUILD_RESULT
+        TEST_PATH
+        "absl/base/config.h")
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_HOST_BUILD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Build host architecture abseil-cpp failed")
+      endif()
+    endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_PATCH_FILE
        AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_PATCH_FILE}")

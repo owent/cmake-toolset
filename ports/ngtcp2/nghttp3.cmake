@@ -51,7 +51,7 @@ if(NOT TARGET Libnghttp3::libnghttp3)
     project_third_party_port_declare(
       Libnghttp3
       VERSION
-      "v0.10.0"
+      "v0.13.0"
       GIT_URL
       "https://github.com/ngtcp2/nghttp3.git"
       BUILD_OPTIONS

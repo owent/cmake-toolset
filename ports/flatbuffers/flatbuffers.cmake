@@ -63,10 +63,8 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
 endmacro()
 
 if(NOT TARGET flatbuffers::flatbuffers)
-  if(VCPKG_TOOLCHAIN)
-    find_package(flatbuffers QUIET)
-    project_third_party_flatbuffers_import()
-  endif()
+  find_package(flatbuffers QUIET)
+  project_third_party_flatbuffers_import()
 
   if(NOT TARGET flatbuffers::flatbuffers)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_DEFAULT_BUILD_OPTIONS)
@@ -99,7 +97,7 @@ if(NOT TARGET flatbuffers::flatbuffers)
     project_third_party_port_declare(
       flatbuffers
       VERSION
-      "v23.3.3"
+      "v23.5.26"
       GIT_URL
       "https://github.com/google/flatbuffers.git"
       BUILD_OPTIONS
@@ -117,84 +115,16 @@ if(NOT TARGET flatbuffers::flatbuffers)
 
     # Build host architecture flatc first
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING AND CMAKE_CROSSCOMPILING)
-      project_third_party_get_host_build_dir(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_DIR
-                                             "flatbuffers" ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_VERSION})
-      get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR
-                             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_DIR}" DIRECTORY)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}/crosscompiling-flatbuffers-host")
-      file(MAKE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS
-          "${CMAKE_COMMAND}" "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-flatbuffers-host")
-      message(
-        STATUS "Dependency(${PROJECT_NAME}): Try to build flatbuffers fo host architecture when crossing compiling")
-      project_build_tools_append_cmake_host_options(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS)
-      # Vcpkg
-      if(DEFINED VCPKG_HOST_CRT_LINKAGE)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS
-             "-DVCPKG_CRT_LINKAGE=${VCPKG_HOST_CRT_LINKAGE}")
-      elseif(DEFINED VCPKG_CRT_LINKAGE)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS
-             "-DVCPKG_CRT_LINKAGE=${VCPKG_CRT_LINKAGE}")
-      endif()
-      # Shared or static
-      project_third_party_append_build_shared_lib_var(
-        "flatbuffers" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS BUILD_SHARED_LIBS)
-
-      # cmake-toolset
-      list(
-        APPEND
-        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS
-        "-DPROJECT_THIRD_PARTY_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
-        "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
-        "-DPROJECT_THIRD_PARTY_PACKAGE_DIR=${PROJECT_THIRD_PARTY_PACKAGE_DIR}")
-      if(DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)
-        list(
-          APPEND
-          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS
-          "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE}"
-        )
-      endif()
-
-      foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS)
-        string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
-        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_FLAGS_CMD
-                                  "\"${CMD_ARG_UNESCAPE}\"")
-      endforeach()
-      unset(CMD_ARG_UNESCAPE)
-
-      # Build host
-      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH
-         OR CMAKE_HOST_UNIX
-         OR MSYS)
-        configure_file(
-          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-flatbuffers-host/run-build-host.sh.in"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}/run-build-host.sh" @ONLY
-          NEWLINE_STYLE LF)
-
-        # build
-        execute_process(
-          COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
-                  "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}/run-build-host.sh"
-          WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}"
-                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      else()
-        configure_file(
-          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-flatbuffers-host/run-build-host.ps1.in"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}/run-build-host.ps1" @ONLY
-          NEWLINE_STYLE CRLF)
-        configure_file(
-          "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-flatbuffers-host/run-build-host.bat.in"
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}/run-build-host.bat" @ONLY
-          NEWLINE_STYLE CRLF)
-
-        # build
-        execute_process(
-          COMMAND
-            "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}" -NoProfile -InputFormat None -ExecutionPolicy Bypass -NonInteractive
-            -NoLogo -File "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}/run-build-host.ps1"
-          WORKING_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_TOOL_BUILD_DIR}"
-                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      project_third_party_crosscompiling_host(
+        "flatbuffers"
+        "${CMAKE_CURRENT_LIST_DIR}/crosscompiling-host"
+        RESULT_VARIABLE
+        ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_RESULT
+        TEST_PATH
+        "bin/flatc"
+        "bin/flatc.exe")
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_HOST_BUILD_RESULT EQUAL 0)
+        message(FATAL_ERROR "Build host architecture flatbuffers failed")
       endif()
     endif()
 

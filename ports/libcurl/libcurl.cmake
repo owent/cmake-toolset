@@ -109,7 +109,7 @@ if(NOT CURL_EXECUTABLE)
     project_third_party_port_declare(
       libcurl
       VERSION
-      "8.0.1"
+      "8.1.2"
       GIT_URL
       "https://github.com/curl/curl.git"
       BUILD_OPTIONS

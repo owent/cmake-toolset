@@ -167,6 +167,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
+include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/abseil-cpp/abseil-cpp.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ngtcp2/nghttp3.cmake")
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ngtcp2/ngtcp2.cmake")
@@ -185,7 +186,6 @@ if(VCPKG_TOOLCHAIN
    AND MSVC_VERSION GREATER_EQUAL 1929)
   message(STATUS "Current protobuf in vcpkg is too old to support MSVC 1929(VS 16.10)")
 else()
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/abseil-cpp.cmake")
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
   include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
@@ -226,10 +226,10 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE)
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h"
     COMMAND
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE}" -I
-      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host" --cpp --allow-non-utf8
-      --natural-utf8 --gen-mutable --gen-object-api --reflect-types --reflect-names -o "${CMAKE_CURRENT_BINARY_DIR}"
-      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host/helloworld.fbs"
-    DEPENDS "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-flatbuffers-host/helloworld.fbs"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-host" --cpp --allow-non-utf8 --natural-utf8
+      --gen-mutable --gen-object-api --reflect-types --reflect-names -o "${CMAKE_CURRENT_BINARY_DIR}"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-host/helloworld.fbs"
+    DEPENDS "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/crosscompiling-host/helloworld.fbs"
     COMMENT "Generate helloworld_generated.h into ${CMAKE_CURRENT_BINARY_DIR}")
 
   list(APPEND MAIN_TEST_SRC_FILES "${CMAKE_CURRENT_BINARY_DIR}/helloworld_generated.h")
