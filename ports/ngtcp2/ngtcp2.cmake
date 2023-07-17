@@ -120,7 +120,7 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     project_third_party_port_declare(
       Libngtcp2
       VERSION
-      "v0.17.0"
+      "v0.16.0" # curl do not support "v0.17.0" now(Rename ngtcp2_crypto_openssl to ngtcp2_crypto_quictls)
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"
       BUILD_OPTIONS
