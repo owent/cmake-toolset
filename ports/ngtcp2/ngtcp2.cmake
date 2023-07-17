@@ -117,10 +117,15 @@ if(NOT TARGET Libngtcp2::libngtcp2)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_OPENSSL=ON")
     endif()
 
+    #[[
+    # curl do not support v0.17.0 and  v0.16.0 now
+    #     v0.17.0 Rename ngtcp2_crypto_openssl to ngtcp2_crypto_quictls)
+    #     v0.16.0 Rename ngtcp2_settings.qlog.write to ngtcp2_settings.qlog_write)
+    ]]
     project_third_party_port_declare(
       Libngtcp2
       VERSION
-      "v0.16.0" # curl do not support "v0.17.0" now(Rename ngtcp2_crypto_openssl to ngtcp2_crypto_quictls)
+      "v0.15.0"
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"
       BUILD_OPTIONS
