@@ -78,6 +78,27 @@ if(Libngtcp2_crypto_quictls_FOUND)
          "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/ngtcp2_crypto_quictls.lib" COPY_ON_ERROR)
   endif()
 
+  # Patch for old version Libngtcp2_crypto_openssl
+  file(
+    GLOB
+    Libngtcp2_crypto_quictls_COMPAT_LEGACY_LIBRARIES
+    "${Libngtcp2_crypto_quictls_INCLUDE_DIRS}/ngtcp2/ngtcp2_crypto_quictls.h"
+    "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/libngtcp2_crypto_quictls*.a"
+    "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/libngtcp2_crypto_quictls*.so*"
+    "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/ngtcp2_crypto_quictls*.lib"
+    "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/ngtcp2_crypto_quictls.dll"
+    "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/../bin/ngtcp2_crypto_quictls.dll"
+    "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/pkgconfig/libngtcp2_crypto_quictls.pc")
+  foreach(Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_SOURCE ${Libngtcp2_crypto_quictls_COMPAT_LEGACY_LIBRARIES})
+    string(REPLACE "quictls" "openssl" Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_TARGET
+                   "${Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_SOURCE}")
+    if(EXISTS "${Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_SOURCE}/"
+       AND NOT EXISTS "${Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_TARGET}")
+      file(CREATE_LINK "${Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_SOURCE}"
+           "${Libngtcp2_crypto_quictls_COMPAT_LIBRARIE_TARGET}" COPY_ON_ERROR)
+    endif()
+  endforeach()
+
   if(NOT LIBNGTCP2_CRYPTO_OPENSSL_FOUND)
     set(LIBNGTCP2_CRYPTO_OPENSSL_FOUND ${Libngtcp2_crypto_quictls_FOUND})
   endif()
