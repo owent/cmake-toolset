@@ -5,7 +5,10 @@ macro(PROJECT_THIRD_PARTY_NGHTTP2_IMPORT)
     message(STATUS "Dependency(${PROJECT_NAME}): nghttp2 using target Libnghttp2::libnghttp2")
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_LINK_NAME Libnghttp2::libnghttp2)
 
-    if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
+    if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
+      project_build_tools_patch_imported_link_interface_libraries(Libnghttp2::libnghttp2 ADD_LIBRARIES
+                                                                  Libngtcp2::libngtcp2_crypto_quictls)
+    elseif(TARGET Libngtcp2::libngtcp2_crypto_openssl)
       project_build_tools_patch_imported_link_interface_libraries(Libnghttp2::libnghttp2 ADD_LIBRARIES
                                                                   Libngtcp2::libngtcp2_crypto_openssl)
     elseif(TARGET Libngtcp2::libngtcp2)

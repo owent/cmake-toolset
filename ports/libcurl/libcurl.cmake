@@ -29,7 +29,7 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
                    "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME}")
             elseif(LIBCURL_DEP_LINK_NAME MATCHES "nghttp2|nghttp3|ngtcp2")
               message(
-                "Libcurl: ignore ${LIBCURL_DEP_LINK_NAME} we will use Libnghttp2::libnghttp2 or Libngtcp2::libngtcp2_crypto_openssl"
+                "Libcurl: ignore ${LIBCURL_DEP_LINK_NAME} we will use Libnghttp2::libnghttp2 or Libngtcp2::libngtcp2_crypto_openssl/libngtcp2_crypto_quictls"
               )
             else()
               list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
@@ -67,6 +67,10 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
     if(Libngtcp2::libngtcp2_crypto_openssl)
       project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES
                                                                   Libngtcp2::libngtcp2_crypto_openssl)
+    endif()
+    if(Libngtcp2::libngtcp2_crypto_quictls)
+      project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES
+                                                                  Libngtcp2::libngtcp2_crypto_quictls)
     endif()
 
     if(TARGET CURL::curl)
@@ -200,7 +204,7 @@ if(NOT CURL_EXECUTABLE)
     endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "7.71.0")
-      if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
+      if(TARGET Libngtcp2::libngtcp2_crypto_openssl OR TARGET Libngtcp2::libngtcp2_crypto_quictls)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGTCP2=ON")
       endif()
       # The link order of libcurl has some problems and will link error with nghttp2 when building static library.
