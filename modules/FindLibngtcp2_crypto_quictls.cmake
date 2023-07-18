@@ -28,21 +28,20 @@
 # for details.
 
 if(Libngtcp2_crypto_quictls_ROOT)
-  set(LIBNGTCP2_CRYPTO_OPENSSL_ROOT ${Libngtcp2_crypto_quictls_ROOT})
+  set(LIBNGTCP2_CRYPTO_QUICTLS_ROOT ${Libngtcp2_crypto_quictls_ROOT})
 endif()
 
-if(LIBNGTCP2_CRYPTO_OPENSSL_ROOT)
-  set(_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_ROOT PATHS ${LIBNGTCP2_CRYPTO_OPENSSL_ROOT} NO_DEFAULT_PATH)
-  set(_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_INCLUDE PATHS ${LIBNGTCP2_CRYPTO_OPENSSL_ROOT}/include NO_DEFAULT_PATH)
-  set(_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB PATHS ${LIBNGTCP2_CRYPTO_OPENSSL_ROOT}/lib64
-                                           ${LIBNGTCP2_CRYPTO_OPENSSL_ROOT}/lib NO_DEFAULT_PATH)
+if(LIBNGTCP2_CRYPTO_QUICTLS_ROOT)
+  set(_LIBNGTCP2_CRYPTO_QUICTLS_SEARCH_ROOT PATHS ${LIBNGTCP2_CRYPTO_QUICTLS_ROOT} NO_DEFAULT_PATH)
+  set(_LIBNGTCP2_CRYPTO_QUICTLS_SEARCH_INCLUDE PATHS ${LIBNGTCP2_CRYPTO_QUICTLS_ROOT}/include NO_DEFAULT_PATH)
+  set(_LIBNGTCP2_CRYPTO_QUICTLS_SEARCH_LIB PATHS ${LIBNGTCP2_CRYPTO_QUICTLS_ROOT}/lib64
+                                           ${LIBNGTCP2_CRYPTO_QUICTLS_ROOT}/lib NO_DEFAULT_PATH)
 endif()
 
 find_path(Libngtcp2_crypto_quictls_INCLUDE_DIRS NAMES "ngtcp2/ngtcp2_crypto.h"
-                                                      ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_INCLUDE})
-find_library(
-  Libngtcp2_crypto_quictls_LIBRARY NAMES ngtcp2_crypto_quictls ngtcp2_crypto_quictls_static ngtcp2_crypto_openssl
-                                         ngtcp2_crypto_openssl_static ${_LIBNGTCP2_CRYPTO_OPENSSL_SEARCH_LIB})
+                                                      ${_LIBNGTCP2_CRYPTO_QUICTLS_SEARCH_INCLUDE})
+find_library(Libngtcp2_crypto_quictls_LIBRARY NAMES ngtcp2_crypto_quictls ngtcp2_crypto_quictls_static
+                                                    ${_LIBNGTCP2_CRYPTO_QUICTLS_SEARCH_LIB})
 unset(_Libngtcp2_crypto_quictls_LIBRARIES)
 set(Libngtcp2_crypto_quictls_LIBRARIES
     ${Libngtcp2_crypto_quictls_LIBRARY}
@@ -78,11 +77,11 @@ if(Libngtcp2_crypto_quictls_FOUND)
          "${Libngtcp2_crypto_quictls_LIBRARY_DIRS}/ngtcp2_crypto_quictls.lib" COPY_ON_ERROR)
   endif()
 
-  if(NOT LIBNGTCP2_CRYPTO_OPENSSL_FOUND)
-    set(LIBNGTCP2_CRYPTO_OPENSSL_FOUND ${Libngtcp2_crypto_quictls_FOUND})
+  if(NOT LIBNGTCP2_CRYPTO_QUICTLS_FOUND)
+    set(LIBNGTCP2_CRYPTO_QUICTLS_FOUND ${Libngtcp2_crypto_quictls_FOUND})
   endif()
-  set(LIBNGTCP2_CRYPTO_OPENSSL_LIBRARIES ${Libngtcp2_crypto_quictls_LIBRARIES})
-  set(LIBNGTCP2_CRYPTO_OPENSSL_INCLUDE_DIRS ${Libngtcp2_crypto_quictls_INCLUDE_DIRS})
+  set(LIBNGTCP2_CRYPTO_QUICTLS_LIBRARIES ${Libngtcp2_crypto_quictls_LIBRARIES})
+  set(LIBNGTCP2_CRYPTO_QUICTLS_INCLUDE_DIRS ${Libngtcp2_crypto_quictls_INCLUDE_DIRS})
 
   if(NOT TARGET Libngtcp2::libngtcp2_crypto_quictls)
     if(TARGET PkgConfig::Libngtcp2_crypto_quictls)
@@ -124,11 +123,11 @@ if(Libngtcp2_crypto_quictls_FOUND)
   endif()
 
   mark_as_advanced(
-    LIBNGTCP2_CRYPTO_OPENSSL_FOUND
+    LIBNGTCP2_CRYPTO_QUICTLS_FOUND
     Libngtcp2_crypto_quictls_FOUND
-    LIBNGTCP2_CRYPTO_OPENSSL_INCLUDE_DIRS
+    LIBNGTCP2_CRYPTO_QUICTLS_INCLUDE_DIRS
     Libngtcp2_crypto_quictls_INCLUDE_DIRS
-    LIBNGTCP2_CRYPTO_OPENSSL_LIBRARIES
+    LIBNGTCP2_CRYPTO_QUICTLS_LIBRARIES
     Libngtcp2_crypto_quictls_LIBRARIES
     Libngtcp2_crypto_quictls_LIBRARY_DIRS
     Libngtcp2_crypto_quictls_VERSION)

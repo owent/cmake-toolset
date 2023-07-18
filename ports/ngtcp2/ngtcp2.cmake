@@ -10,6 +10,7 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
                                                                   Libnghttp3::libnghttp3)
     endif()
 
+    # New name from v0.17.0
     find_package(Libngtcp2_crypto_quictls QUIET)
     if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
       message(
@@ -19,13 +20,16 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
         project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_quictls ADD_LIBRARIES
                                                                     Libngtcp2::libngtcp2)
       endif()
-    else()
-      find_package(Libngtcp2_crypto_openssl QUIET)
     endif()
+    # Legacy name
+    find_package(Libngtcp2_crypto_openssl QUIET)
     if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
-      message(
-        STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_openssl using target Libngtcp2::libngtcp2_crypto_openssl")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME Libngtcp2::libngtcp2_crypto_openssl)
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME)
+        message(
+          STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_openssl using target Libngtcp2::libngtcp2_crypto_openssl")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME
+            Libngtcp2::libngtcp2_crypto_openssl)
+      endif()
       if(TARGET Libnghttp3::libnghttp3)
         project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_openssl ADD_LIBRARIES
                                                                     Libngtcp2::libngtcp2)
