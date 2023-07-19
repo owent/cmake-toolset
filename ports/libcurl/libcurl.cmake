@@ -202,7 +202,8 @@ if(NOT CURL_EXECUTABLE)
     endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "7.71.0")
-      if(TARGET Libngtcp2::libngtcp2_crypto_openssl OR TARGET Libngtcp2::libngtcp2_crypto_quictls)
+      if(TARGET Libnghttp3::libnghttp3 AND (TARGET Libngtcp2::libngtcp2_crypto_openssl
+                                            OR TARGET Libngtcp2::libngtcp2_crypto_quictls))
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGTCP2=ON")
       endif()
       # The link order of libcurl has some problems and will link error with nghttp2 when building static library.
