@@ -43,6 +43,12 @@ if (!(Test-Path "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ) -
     }
 
     if ( $LastExitCode -ne 0 ) {
+        if ($ALLOW_PARALLEL_BUILD_FLAGS) {
+            & "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" -j
+        }
+        else {
+            & "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@"
+        }
         exit $LastExitCode
     }
     . "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_PWSH@"

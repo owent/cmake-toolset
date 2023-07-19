@@ -33,9 +33,9 @@ if [[ ! -e "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ]] && [[
     @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" ;
 
     if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" ;
+        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" || "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" ;
     else
-        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" ;
+        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" || "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" ;
     fi
 
     source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_BASH@"

@@ -243,9 +243,6 @@ jobs:
       - name: CI Job
         shell: bash
         run: |
-          # Ensure prebuilt directory is included before system directories.
-          export CFLAGS="-I$PWD/test/third_party/install/darwin-x86_64-appleclang/include"
-          export CXXFLAGS="-I$PWD/test/third_party/install/darwin-x86_64-appleclang/include"
           bash ci/do_ci.sh clang.test ;
   android_arm64_test:
     name: "android.arm64.test"
