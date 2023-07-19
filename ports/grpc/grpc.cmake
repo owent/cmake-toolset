@@ -94,11 +94,9 @@ endmacro()
 if(NOT TARGET gRPC::grpc++_alts
    AND NOT TARGET gRPC::grpc++
    AND NOT TARGET gRPC::grpc)
-  if(VCPKG_TOOLCHAIN)
-    find_package(gRPC QUIET)
-    find_package(grpc QUIET)
-    project_third_party_grpc_import()
-  endif()
+  find_package(gRPC QUIET)
+  find_package(grpc QUIET)
+  project_third_party_grpc_import()
 
   if(NOT TARGET gRPC::grpc++_alts
      AND NOT TARGET gRPC::grpc++

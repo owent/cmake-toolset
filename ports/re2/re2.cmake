@@ -13,10 +13,8 @@ macro(PROJECT_THIRD_PARTY_RE2_IMPORT)
 endmacro()
 
 if(NOT TARGET re2::re2)
-  if(VCPKG_TOOLCHAIN)
-    find_package(re2 QUIET)
-    project_third_party_re2_import()
-  endif()
+  find_package(re2 QUIET)
+  project_third_party_re2_import()
 
   if(NOT TARGET re2::re2)
     project_third_party_port_declare(

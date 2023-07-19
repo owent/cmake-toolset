@@ -32,10 +32,8 @@ macro(PROJECT_THIRD_PARTY_OPENTELEMETRY_CPP_IMPORT)
 endmacro()
 
 if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
-  if(VCPKG_TOOLCHAIN)
-    find_package(opentelemetry-cpp QUIET CONFIG)
-    project_third_party_opentelemetry_cpp_import()
-  endif()
+  find_package(opentelemetry-cpp QUIET CONFIG)
+  project_third_party_opentelemetry_cpp_import()
 
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)

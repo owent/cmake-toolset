@@ -9,10 +9,8 @@ macro(PROJECT_THIRD_PARTY_XXHASH_IMPORT)
 endmacro()
 
 if(NOT TARGET xxHash::xxhash)
-  if(VCPKG_TOOLCHAIN)
-    find_package(xxHash QUIET)
-    project_third_party_xxhash_import()
-  endif()
+  find_package(xxHash QUIET)
+  project_third_party_xxhash_import()
 
   if(NOT TARGET xxHash::xxhash AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_LINK_NAME)
     project_third_party_port_declare(

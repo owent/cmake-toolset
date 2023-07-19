@@ -46,10 +46,8 @@ endmacro()
 if(NOT Libwebsockets_FOUND
    AND NOT TARGET websockets
    AND NOT TARGET websockets_shared)
-  if(VCPKG_TOOLCHAIN)
-    find_package(libwebsockets QUIET CONFIG)
-    project_third_party_libwebsockets_import()
-  endif()
+  find_package(libwebsockets QUIET CONFIG)
+  project_third_party_libwebsockets_import()
 
   if(NOT Libwebsockets_FOUND
      AND NOT TARGET websockets

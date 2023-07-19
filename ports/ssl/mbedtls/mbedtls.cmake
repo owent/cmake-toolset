@@ -70,15 +70,13 @@ if(NOT
                                       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_VERSION})
   endif()
 
-  if(VCPKG_TOOLCHAIN)
-    find_package(MbedTLS QUIET)
-    if(TARGET MbedTLS::mbedtls
-       OR TARGET mbedtls_static
-       OR TARGET mbedtls
-       OR mbedTLS_FOUND
-       OR MbedTLS_FOUND)
-      project_third_party_mbedtls_import()
-    endif()
+  find_package(MbedTLS QUIET)
+  if(TARGET MbedTLS::mbedtls
+     OR TARGET mbedtls_static
+     OR TARGET mbedtls
+     OR mbedTLS_FOUND
+     OR MbedTLS_FOUND)
+    project_third_party_mbedtls_import()
   endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)

@@ -13,10 +13,8 @@ macro(PROJECT_THIRD_PARTY_LIBCOPP_IMPORT)
 endmacro()
 
 if(NOT TARGET libcopp::cotask AND NOT cotask)
-  if(VCPKG_TOOLCHAIN)
-    find_package(libcopp QUIET CONFIG)
-    project_third_party_libcopp_import()
-  endif()
+  find_package(libcopp QUIET CONFIG)
+  project_third_party_libcopp_import()
 
   if(NOT TARGET libcopp::cotask AND NOT cotask)
     project_third_party_port_declare(

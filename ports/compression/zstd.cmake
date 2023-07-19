@@ -69,10 +69,8 @@ if(NOT TARGET zstd::libzstd_shared
    AND NOT TARGET zstd::libzstd_static
    AND NOT TARGET zstd::libzstd
    AND NOT TARGET zstd::zstd)
-  if(VCPKG_TOOLCHAIN)
-    find_package(zstd QUIET)
-    project_third_party_zstd_import()
-  endif()
+  find_package(zstd QUIET)
+  project_third_party_zstd_import()
 
   if(NOT TARGET zstd::libzstd_shared
      AND NOT TARGET zstd::libzstd_static

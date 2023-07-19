@@ -30,10 +30,8 @@ if(NOT TARGET mimalloc-secure
    AND NOT TARGET mimalloc
    AND NOT TARGET mimalloc-static-secure
    AND NOT TARGET mimalloc-static)
-  if(VCPKG_TOOLCHAIN)
-    find_package(mimalloc QUIET)
-    project_third_party_mimalloc_import()
-  endif()
+  find_package(mimalloc QUIET)
+  project_third_party_mimalloc_import()
 
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_DEFAULT_VERSION "v2.1.2")
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

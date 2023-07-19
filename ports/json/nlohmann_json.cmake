@@ -13,10 +13,8 @@ macro(PROJECT_THIRD_PARTY_NLOHMANN_JSON_IMPORT)
 endmacro()
 
 if(NOT TARGET nlohmann_json::nlohmann_json)
-  if(VCPKG_TOOLCHAIN)
-    find_package(nlohmann_json QUIET CONFIG)
-    project_third_party_nlohmann_json_import()
-  endif()
+  find_package(nlohmann_json QUIET CONFIG)
+  project_third_party_nlohmann_json_import()
 
   if(NOT TARGET nlohmann_json::nlohmann_json)
     project_third_party_port_declare(

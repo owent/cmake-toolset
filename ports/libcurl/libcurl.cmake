@@ -99,10 +99,8 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
 endmacro()
 
 if(NOT CURL_EXECUTABLE)
-  if(VCPKG_TOOLCHAIN)
-    find_package(CURL QUIET)
-    project_third_party_libcurl_import()
-  endif()
+  find_package(CURL QUIET)
+  project_third_party_libcurl_import()
 
   if(NOT CURL_FOUND)
     set(Libcurl_ROOT ${PROJECT_THIRD_PARTY_INSTALL_DIR})

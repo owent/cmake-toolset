@@ -11,10 +11,8 @@ macro(PROJECT_THIRD_PARTY_MICROSOFT_GSL_IMPORT)
 endmacro()
 
 if(NOT TARGET Microsoft.GSL::GSL)
-  if(VCPKG_TOOLCHAIN)
-    find_package(Microsoft.GSL QUIET)
-    project_third_party_microsoft_gsl_import()
-  endif()
+  find_package(Microsoft.GSL QUIET)
+  project_third_party_microsoft_gsl_import()
 
   if(NOT TARGET Microsoft.GSL::GSL)
     project_third_party_port_declare(

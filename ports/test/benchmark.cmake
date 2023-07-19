@@ -19,10 +19,8 @@ macro(PROJECT_THIRD_PARTY_BENCHMARK_IMPORT)
 endmacro()
 
 if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
-  if(VCPKG_TOOLCHAIN)
-    find_package(benchmark QUIET CONFIG)
-    project_third_party_benchmark_import()
-  endif()
+  find_package(benchmark QUIET CONFIG)
+  project_third_party_benchmark_import()
 
   if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_BUILD_OPTIONS)

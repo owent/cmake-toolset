@@ -14,10 +14,8 @@ macro(PROJECT_THIRD_PARTY_SNAPPY_IMPORT)
 endmacro()
 
 if(NOT TARGET Snappy::snappy)
-  if(VCPKG_TOOLCHAIN)
-    find_package(snappy QUIET)
-    project_third_party_snappy_import()
-  endif()
+  find_package(snappy QUIET)
+  project_third_party_snappy_import()
 
   if(NOT TARGET Snappy::snappy)
     project_third_party_port_declare(

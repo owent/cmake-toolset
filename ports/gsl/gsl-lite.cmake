@@ -15,10 +15,8 @@ macro(PROJECT_THIRD_PARTY_GSL_LITE_IMPORT)
 endmacro()
 
 if(NOT TARGET gsl::gsl-lite)
-  if(VCPKG_TOOLCHAIN)
-    find_package(gsl-lite QUIET)
-    project_third_party_gsl_lite_import()
-  endif()
+  find_package(gsl-lite QUIET)
+  project_third_party_gsl_lite_import()
 
   if(NOT TARGET gsl::gsl-lite)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GSL_LITE_DEFAULT_OPTIONS

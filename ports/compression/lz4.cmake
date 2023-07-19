@@ -62,10 +62,8 @@ if(NOT TARGET lz4::lz4_static
    AND NOT TARGET LZ4::lz4
    AND NOT TARGET LZ4::lz4cli
    AND NOT TARGET LZ4::lz4c)
-  if(VCPKG_TOOLCHAIN)
-    find_package(lz4 QUIET)
-    project_third_party_lz4_import()
-  endif()
+  find_package(lz4 QUIET)
+  project_third_party_lz4_import()
 
   if(NOT TARGET lz4::lz4_static
      AND NOT TARGET lz4::lz4_shared

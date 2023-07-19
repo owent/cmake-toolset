@@ -26,10 +26,8 @@ endif()
 if(NOT TARGET fmt::fmt-header-only
    AND NOT TARGET fmt::fmt
    AND NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
-  if(VCPKG_TOOLCHAIN)
-    find_package(fmt QUIET)
-    project_third_party_fmtlib_import()
-  endif()
+  find_package(fmt QUIET)
+  project_third_party_fmtlib_import()
 
   if(NOT TARGET fmt::fmt-header-only
      AND NOT TARGET fmt::fmt

@@ -10,10 +10,8 @@ macro(PROJECT_THIRD_PARTY_JEMALLOC_IMPORT)
 endmacro()
 
 if(NOT TARGET jemalloc)
-  if(VCPKG_TOOLCHAIN)
-    find_package(jemalloc QUIET)
-    project_third_party_jemalloc_import()
-  endif()
+  find_package(jemalloc QUIET)
+  project_third_party_jemalloc_import()
 
   if(NOT MSVC
      AND NOT MINGW

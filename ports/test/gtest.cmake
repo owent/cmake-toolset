@@ -38,10 +38,8 @@ if(NOT TARGET GTest::gtest
    AND NOT TARGET GTest::gtest_main
    AND NOT TARGET GTest::GTest
    AND NOT TARGET GTest::Main)
-  if(VCPKG_TOOLCHAIN)
-    find_package(GTest QUIET CONFIG)
-    project_third_party_gtest_import()
-  endif()
+  find_package(GTest QUIET CONFIG)
+  project_third_party_gtest_import()
 
   if(NOT TARGET GTest::gtest
      AND NOT TARGET GTest::gtest_main

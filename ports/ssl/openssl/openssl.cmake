@@ -163,10 +163,12 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     endif()
   endif()
 
-  if(VCPKG_TOOLCHAIN)
-    find_package(OpenSSL QUIET)
-    project_third_party_openssl_import()
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM)
+    set(OPENSSL_ROOT_DIR "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   endif()
+
+  find_package(OpenSSL QUIET)
+  project_third_party_openssl_import()
 
   if(NOT OPENSSL_FOUND AND NOT OpenSSL_FOUND)
     set(OPENSSL_ROOT_DIR "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
