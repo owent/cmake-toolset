@@ -1,0 +1,39 @@
+diff --git a/sdk/include/opentelemetry/sdk/logs/simple_log_record_processor.h b/sdk/include/opentelemetry/sdk/logs/simple_log_record_processor.h
+index 4bb3dab..8b273c6 100644
+--- a/sdk/include/opentelemetry/sdk/logs/simple_log_record_processor.h
++++ b/sdk/include/opentelemetry/sdk/logs/simple_log_record_processor.h
+@@ -33,7 +33,7 @@ class SimpleLogRecordProcessor : public LogRecordProcessor
+ 
+ public:
+   explicit SimpleLogRecordProcessor(std::unique_ptr<LogRecordExporter> &&exporter);
+-  ~SimpleLogRecordProcessor() override = default;
++  ~SimpleLogRecordProcessor() override;
+ 
+   std::unique_ptr<Recordable> MakeRecordable() noexcept override;
+ 
+diff --git a/sdk/src/logs/simple_log_record_processor.cc b/sdk/src/logs/simple_log_record_processor.cc
+index 6514c7a..2c33739 100644
+--- a/sdk/src/logs/simple_log_record_processor.cc
++++ b/sdk/src/logs/simple_log_record_processor.cc
+@@ -23,6 +23,8 @@ SimpleLogRecordProcessor::SimpleLogRecordProcessor(std::unique_ptr<LogRecordExpo
+     : exporter_(std::move(exporter)), is_shutdown_(false)
+ {}
+ 
++SimpleLogRecordProcessor::~SimpleLogRecordProcessor() {}
++
+ std::unique_ptr<Recordable> SimpleLogRecordProcessor::MakeRecordable() noexcept
+ {
+   return exporter_->MakeRecordable();
+diff --git a/sdk/src/metrics/data/circular_buffer.cc b/sdk/src/metrics/data/circular_buffer.cc
+index 9117e67..93d8fd6 100644
+--- a/sdk/src/metrics/data/circular_buffer.cc
++++ b/sdk/src/metrics/data/circular_buffer.cc
+@@ -55,7 +55,7 @@ struct AdaptingIntegerArrayClear
+   template <typename T>
+   void operator()(std::vector<T> &backing)
+   {
+-    std::fill(backing.begin(), backing.end(), static_cast<T>(0));
++    backing.assign(backing.size(), static_cast<T>(0));
+   }
+ };
+ 
