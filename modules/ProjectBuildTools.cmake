@@ -617,7 +617,9 @@ function(project_git_clone_repository)
       BRANCH
       COMMIT
       TAG
-      CHECK_PATH)
+      CHECK_PATH
+      LOCK_TIMEOUT
+      LOCK_FILE)
   set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -674,6 +676,23 @@ function(project_git_clone_repository)
     message(FATAL_ERROR "git not found")
   endif()
 
+  # Lock the directory to prevent other process to access it
+  if(NOT project_git_clone_repository_LOCK_TIMEOUT)
+    set(project_git_clone_repository_LOCK_TIMEOUT 600)
+  endif()
+  if(NOT project_git_clone_repository_LOCK_FILE)
+    set(project_git_clone_repository_LOCK_FILE "${project_git_clone_repository_REPO_DIRECTORY}.cmake-toolset.lock")
+  endif()
+  get_filename_component(project_git_clone_repository_LOCK_FILE_DIRECTORY "${project_git_clone_repository_LOCK_FILE}"
+                         DIRECTORY)
+  if(NOT EXISTS "${project_git_clone_repository_LOCK_FILE_DIRECTORY}")
+    file(MAKE_DIRECTORY "${project_git_clone_repository_LOCK_FILE_DIRECTORY}")
+  endif()
+  file(
+    LOCK "${project_git_clone_repository_LOCK_FILE}"
+    GUARD PROCESS
+    RESULT_VARIABLE LOCK_RESULT
+    TIMEOUT ${project_git_clone_repository_LOCK_TIMEOUT})
   if(project_git_clone_repository_FORCE_RESET AND EXISTS "${project_git_clone_repository_REPO_DIRECTORY}")
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" ${git_global_options} clean -dfx
@@ -935,6 +954,11 @@ function(project_git_clone_repository)
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
     endif()
+  endif()
+
+  # unlock
+  if(LOCK_RESULT EQUAL 0)
+    file(LOCK "${project_git_clone_repository_LOCK_FILE}" RELEASE)
   endif()
 endfunction()
 
