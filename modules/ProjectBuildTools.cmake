@@ -959,6 +959,7 @@ function(project_git_clone_repository)
   # unlock
   if(LOCK_RESULT EQUAL 0)
     file(LOCK "${project_git_clone_repository_LOCK_FILE}" RELEASE)
+    file(REMOVE "${project_git_clone_repository_LOCK_FILE}")
   endif()
 endfunction()
 
