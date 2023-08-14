@@ -871,3 +871,69 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
         PARENT_SCOPE)
   endif()
 endfunction()
+
+macro(project_third_party_include_lock BASE_DIR PATH)
+  cmake_parse_arguments(project_third_party_include_lock "" "TIMEOUT" "" ${ARGN})
+  if(NOT project_third_party_include_lock_TIMEOUT)
+    set(project_third_party_include_lock_TIMEOUT 7200)
+  endif()
+
+  if(NOT project_third_party_include_lock_DEPTH)
+    set(project_third_party_include_lock_DEPTH 0)
+  endif()
+  math(EXPR project_third_party_include_lock_DEPTH "${project_third_party_include_lock_DEPTH}+1" OUTPUT_FORMAT DECIMAL)
+
+  get_filename_component(LOCK_FILE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PATH}" DIRECTORY)
+  if(NOT EXISTS "${LOCK_FILE_DIRECTORY}")
+    file(MAKE_DIRECTORY "${LOCK_FILE_DIRECTORY}")
+  endif()
+
+  file(
+    LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PATH}.lock"
+    GUARD PROCESS
+    RESULT_VARIABLE project_third_party_include_lock_${project_third_party_include_lock_DEPTH}_LOCK_RESULT
+    TIMEOUT ${project_third_party_include_lock_TIMEOUT})
+
+  include("${BASE_DIR}/${PATH}")
+
+  # Unlock
+  if(project_third_party_include_lock_${project_third_party_include_lock_DEPTH}_LOCK_RESULT EQUAL 0)
+    file(LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PATH}.lock" RELEASE)
+    file(REMOVE "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PATH}.lock")
+  endif()
+
+  math(EXPR project_third_party_include_lock_DEPTH "${project_third_party_include_lock_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
+endmacro()
+
+macro(project_third_party_include_port PATH)
+  cmake_parse_arguments(project_third_party_include_port "" "TIMEOUT" "" ${ARGN})
+  if(NOT project_third_party_include_port_TIMEOUT)
+    set(project_third_party_include_port_TIMEOUT 7200)
+  endif()
+
+  if(NOT project_third_party_include_port_DEPTH)
+    set(project_third_party_include_port_DEPTH 0)
+  endif()
+  math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}+1" OUTPUT_FORMAT DECIMAL)
+
+  get_filename_component(LOCK_FILE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PATH}" DIRECTORY)
+  if(NOT EXISTS "${LOCK_FILE_DIRECTORY}")
+    file(MAKE_DIRECTORY "${LOCK_FILE_DIRECTORY}")
+  endif()
+
+  file(
+    LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PATH}.lock"
+    GUARD PROCESS
+    RESULT_VARIABLE project_third_party_include_port_${project_third_party_include_port_DEPTH}_LOCK_RESULT
+    TIMEOUT ${project_third_party_include_port_TIMEOUT})
+
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/${PATH}")
+
+  # Unlock
+  if(project_third_party_include_port_${project_third_party_include_port_DEPTH}_LOCK_RESULT EQUAL 0)
+    file(LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PATH}.lock" RELEASE)
+    file(REMOVE "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PATH}.lock")
+  endif()
+
+  math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
+endmacro()
