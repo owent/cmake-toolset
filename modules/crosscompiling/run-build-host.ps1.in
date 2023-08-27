@@ -18,6 +18,8 @@ else {
     $ALLOW_PARALLEL_BUILD_FLAGS = $true
 }
 
+Set-PSDebug -Trace 2
+
 # build for host
 $ENV:PATH = "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR" + [IO.Path]::PathSeparator + "$ENV:PATH"
 

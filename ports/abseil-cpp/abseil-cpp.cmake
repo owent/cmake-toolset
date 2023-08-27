@@ -7,7 +7,7 @@ include_guard(DIRECTORY)
 # =========== third party abseil-cpp ==================
 macro(PROJECT_THIRD_PARTY_ABSEIL_IMPORT)
   if(absl_FOUND)
-    message(STATUS "Dependency(${PROJECT_NAME}): abseil-cpp found(${PROJECT_NAME})")
+    message(STATUS "Dependency(${PROJECT_NAME}): abseil-cpp found")
   endif()
 endmacro()
 
