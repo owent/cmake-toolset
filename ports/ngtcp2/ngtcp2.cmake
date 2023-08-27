@@ -122,14 +122,14 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     endif()
 
     #[[
-    # curl do not support v0.17.0 and  v0.16.0 now
+    # curl support v0.17.0 and v0.16.0 from 8.2
     #     v0.17.0 Rename ngtcp2_crypto_openssl to ngtcp2_crypto_quictls)
     #     v0.16.0 Rename ngtcp2_settings.qlog.write to ngtcp2_settings.qlog_write)
     ]]
     project_third_party_port_declare(
       Libngtcp2
       VERSION
-      "v0.15.0"
+      "v0.18.0"
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"
       BUILD_OPTIONS
