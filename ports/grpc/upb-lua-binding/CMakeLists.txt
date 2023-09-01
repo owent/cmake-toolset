@@ -156,8 +156,12 @@ endif()
 add_library(lupb STATIC "def.c" "msg.c" "upb.c")
 
 get_filename_component(UPB_BINDING_LUA_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY)
-get_filename_component(UPB_BINDING_LUA_SRC_DIR "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
-get_filename_component(UPB_BINDING_LUA_SRC_DIR "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR)
+  get_filename_component(UPB_BINDING_LUA_SRC_DIR "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
+  get_filename_component(UPB_BINDING_LUA_SRC_DIR "${UPB_BINDING_LUA_SRC_DIR}" DIRECTORY)
+
+  target_compile_definitions(lupb INTERFACE UPB_BINDING_LUA_WITH_LEGACY_BINDING=1)
+endif()
 
 target_include_directories(lupb PUBLIC "$<BUILD_INTERFACE:${UPB_BINDING_LUA_SRC_DIR}>" "$<INSTALL_INTERFACE:share/upb>")
 target_link_libraries(lupb PUBLIC upb::json upb::reflection upb::textformat upb::upb

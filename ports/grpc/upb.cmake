@@ -321,13 +321,6 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
 
     if(TARGET upb::upb)
       project_third_party_upb_import()
-      if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")
-        execute_process(
-          COMMAND
-            "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/upb-lua-binding/CMakeLists.txt"
-            "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua"
-            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      endif()
     endif()
   endif()
 else()
@@ -339,4 +332,19 @@ if(NOT TARGET upb::upb)
     project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}")
   endif()
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build upb.")
+endif()
+
+if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR OFF)
+  execute_process(
+    COMMAND
+      "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/upb-lua-binding/CMakeLists.txt"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+elseif(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR ON)
+  execute_process(
+    COMMAND
+      "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/upb-lua-binding/CMakeLists.txt"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua"
+      ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 endif()

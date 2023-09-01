@@ -85,7 +85,7 @@ index ac4624c..43f71ba 100644
    // The shutdown refs counter tracks whether or not shutdown has been called
    // and whether there are any AllocatingRequestMatcher requests that have been
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 6e552ba..3b534ee 100755
+index 6e552ba..884f1d7 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -461,19 +461,29 @@ index 6e552ba..3b534ee 100755
  
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
-@@ -350,9 +612,20 @@ class Converter(object):
-     include_directories(${CMAKE_CURRENT_BINARY_DIR})
+@@ -345,14 +607,27 @@ class Converter(object):
+       set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+     endif()
+ 
+-    include_directories(..)
+-    include_directories(../cmake)
+-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
++    include_directories(AFTER ..)
++    # include_directories(AFTER ../cmake)
++    include_directories(AFTER ${CMAKE_CURRENT_BINARY_DIR})
  
      if(NOT TARGET utf8_range)
 -      if(EXISTS ../external/utf8_range)
 +      find_package(utf8_range)
 +      if(TARGET utf8_range::utf8_range)
-+        add_library(utf8_range ALIAS utf8_range::utf8_range)
++        add_library(utf8_range INTERFACE)
++        target_link_libraries(utf8_range INTERFACE utf8_range::utf8_range)
 +        if(EXISTS "${utf8_range_DIR}/../../include/utf8_range.h")
-+          include_directories("${utf8_range_DIR}/../../include/")
++          target_include_directories(utf8_range SYSTEM INTERFACE "$<BUILD_INTERFACE:${utf8_range_DIR}/../../include/>")
 +        elseif(EXISTS "${utf8_range_DIR}/../../../include/utf8_range.h")
-+          include_directories("${utf8_range_DIR}/../../../include/")
++          target_include_directories(utf8_range SYSTEM INTERFACE "$<BUILD_INTERFACE:${utf8_range_DIR}/../../../include/>")
 +        endif()
++        install(TARGETS utf8_range EXPORT upb-config)
 +      elseif(EXISTS ../external/utf8_range)
          # utf8_range is already installed
 -        include_directories(../external/utf8_range)
@@ -484,7 +494,7 @@ index 6e552ba..3b534ee 100755
        else()
          include(FetchContent)
          FetchContent_Declare(
-@@ -363,7 +636,10 @@ class Converter(object):
+@@ -363,7 +638,10 @@ class Converter(object):
          FetchContent_GetProperties(utf8_range)
          if(NOT utf8_range_POPULATED)
            FetchContent_Populate(utf8_range)
@@ -496,7 +506,7 @@ index 6e552ba..3b534ee 100755
          endif()
        endif()
      endif()
-@@ -374,10 +650,118 @@ class Converter(object):
+@@ -374,10 +652,118 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -615,7 +625,7 @@ index 6e552ba..3b534ee 100755
    """)
  
  data = {}
-@@ -397,7 +781,9 @@ globs = GetDict(converter)
+@@ -397,7 +783,9 @@ globs = GetDict(converter)
  workspace_dict = GetDict(WorkspaceFileFunctions(converter))
  exec(open("bazel/workspace_deps.bzl").read(), workspace_dict)
  exec(open("WORKSPACE").read(), workspace_dict)
@@ -701,3 +711,18 @@ index c694088..33438be 100644
      }               \
    } while (0)
  
+diff --git a/third_party/upb/upbc/names.cc b/third_party/upb/upbc/names.cc
+index 4d49369..7f839c2 100644
+--- a/third_party/upb/upbc/names.cc
++++ b/third_party/upb/upbc/names.cc
+@@ -46,8 +46,8 @@ static constexpr absl::string_view kDeleteMethodPrefix = "delete_";
+ static constexpr absl::string_view kAddToRepeatedMethodPrefix = "add_";
+ static constexpr absl::string_view kResizeArrayMethodPrefix = "resize_";
+ 
+-const absl::string_view kRepeatedFieldArrayGetterPostfix = "upb_array";
+-const absl::string_view kRepeatedFieldMutableArrayGetterPostfix =
++ABSL_CONST_INIT const absl::string_view kRepeatedFieldArrayGetterPostfix = "upb_array";
++ABSL_CONST_INIT const absl::string_view kRepeatedFieldMutableArrayGetterPostfix =
+     "mutable_upb_array";
+ 
+ // List of generated accessor prefixes to check against.

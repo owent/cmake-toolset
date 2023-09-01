@@ -1201,21 +1201,21 @@ function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
   endif()
 endfunction()
 
-function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
+function(project_build_tools_get_imported_property OUTPUT_VAR_NAME TARGET_NAME VAR_NAME)
   if(CMAKE_BUILD_TYPE)
-    string(TOUPPER "IMPORTED_LOCATION_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_IMPORTED_LOCATION)
-    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${TRY_SPECIFY_IMPORTED_LOCATION})
+    string(TOUPPER "${VAR_NAME}_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_${VAR_NAME})
+    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${TRY_SPECIFY_${VAR_NAME}})
   endif()
   if(NOT ${OUTPUT_VAR_NAME})
-    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} IMPORTED_LOCATION)
+    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${VAR_NAME})
   endif()
   if(NOT ${OUTPUT_VAR_NAME})
-    get_target_property(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
+    get_target_property(project_build_tools_get_imported_property_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
                         IMPORTED_CONFIGURATIONS)
-    foreach(project_build_tools_get_imported_location_IMPORTED_CONFIGURATION IN
-            LISTS project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS)
+    foreach(project_build_tools_get_imported_property_IMPORTED_CONFIGURATION IN
+            LISTS project_build_tools_get_imported_property_IMPORTED_CONFIGURATION)
       get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME}
-                          "IMPORTED_LOCATION_${project_build_tools_get_imported_location_IMPORTED_CONFIGURATION}")
+                          "${VAR_NAME}_${project_build_tools_get_imported_property_IMPORTED_CONFIGURATION}")
       if(${OUTPUT_VAR_NAME})
         break()
       endif()
@@ -1224,6 +1224,15 @@ function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
   if(${OUTPUT_VAR_NAME})
     set(${OUTPUT_VAR_NAME}
         ${${OUTPUT_VAR_NAME}}
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
+  project_build_tools_get_imported_property(OUTPUT_VAR_VALUE "${TARGET_NAME}" IMPORTED_LOCATION)
+  if(OUTPUT_VAR_VALUE)
+    set(${OUTPUT_VAR_NAME}
+        ${OUTPUT_VAR_VALUE}
         PARENT_SCOPE)
   endif()
 endfunction()

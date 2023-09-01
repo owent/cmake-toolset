@@ -20,7 +20,11 @@ extern "C" {
 #include "lua.h"
 #include "lualib.h"
 
-#include "upb/lua/upb.h"
+#if defined (UPB_BINDING_LUA_WITH_LEGACY_BINDING)
+#  include "upb/lua/upb.h"
+#else
+#  include "lua/upb.h"
+#endif
 #ifdef __cplusplus
 }
 #endif
