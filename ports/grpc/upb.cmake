@@ -209,8 +209,12 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       endif()
 
       foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS)
-        string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
-        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_CMD
+        # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
+        set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_PWSH
+                                  "\"${CMD_ARG_UNESCAPE}\"")
+        string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_BASH
                                   "\"${CMD_ARG_UNESCAPE}\"")
       endforeach()
       unset(CMD_ARG_UNESCAPE)
