@@ -325,8 +325,8 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
            "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua" "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua"
     COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}"
             ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua" "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+            "${CMAKE_CURRENT_BINARY_DIR}"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/test_upb-and-lua-binding.lua"
             "${CMAKE_CURRENT_BINARY_DIR}"
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"

@@ -124,8 +124,8 @@ add_custom_command(
          "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
   COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}/.."
           ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto"
-  COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-          "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua" "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+          "${CMAKE_CURRENT_BINARY_DIR}"
   DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto"
   COMMENT
     "Generate test_pb_pb.lua,test_pb.upb.h,test_pb.upb.c,test_pb.upbdefs.h,test_pb.upbdefs.c into ${CMAKE_CURRENT_BINARY_DIR}"

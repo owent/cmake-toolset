@@ -1,5 +1,5 @@
 diff --git a/cmake/make_cmakelists.py b/cmake/make_cmakelists.py
-index 6e552ba..884f1d7 100755
+index 6e552ba..745fb7d 100755
 --- a/cmake/make_cmakelists.py
 +++ b/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -505,7 +505,7 @@ index 6e552ba..884f1d7 100755
 +    add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
 +      ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
 +    set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
-+    target_link_libraries(well_known_types PUBLIC upb)
++    target_link_libraries(well_known_types PUBLIC descriptor_upb_proto upb)
 +
 +    include(GNUInstallDirs)
 +    install(
