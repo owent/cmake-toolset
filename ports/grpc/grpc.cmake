@@ -13,11 +13,19 @@ function(PROJECT_THIRD_PARTY_GRPC_FIND_PLUGIN VAR_NAME PLUGIN_NAME WITH_TARGET)
     find_program(${VAR_NAME} ${PLUGIN_NAME})
     if(NOT ${VAR_NAME} AND VCPKG_INSTALLED_DIR)
       if(VCPKG_HOST_TRIPLET)
+        message(
+          STATUS
+            "Dependency(${PROJECT_NAME}): grpc try to find ${PLUGIN_NAME} in ${VCPKG_INSTALLED_DIR}/${VCPKG_HOST_TRIPLET}/tools/grpc"
+        )
         find_program(
           ${VAR_NAME} ${PLUGIN_NAME}
           PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_HOST_TRIPLET}/tools/grpc"
           NO_DEFAULT_PATH)
       else()
+        message(
+          STATUS
+            "Dependency(${PROJECT_NAME}): grpc try to find ${PLUGIN_NAME} in ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc"
+        )
         find_program(
           ${VAR_NAME} ${PLUGIN_NAME}
           PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc"
@@ -52,8 +60,7 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
 
     if(CMAKE_CROSSCOMPILING)
       # Just like find_program(_gRPC_CPP_PLUGIN grpc_cpp_plugin) in CMakeLists.txt in grpc
-      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE
-                                           grpc_cpp_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE OFF)
       project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE
                                            grpc_csharp_plugin OFF)
       project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE

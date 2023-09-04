@@ -380,6 +380,7 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   cmake .. -G "$CMAKE_GENERATOR" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static-md \
     -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" \
+    --debug-find-pkg=gRPC --debug-find-var=grpc_cpp_plugin \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
   if [[ $CMAKE_CONFIGURE_EXIT_CODE -ne 0 ]]; then
     if [[ -e "CMakeFiles/CMakeConfigureLog.yaml" ]]; then
