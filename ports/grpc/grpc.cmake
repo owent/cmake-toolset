@@ -60,7 +60,8 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
 
     if(CMAKE_CROSSCOMPILING)
       # Just like find_program(_gRPC_CPP_PLUGIN grpc_cpp_plugin) in CMakeLists.txt in grpc
-      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE
+                                           grpc_cpp_plugin OFF)
       project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE
                                            grpc_csharp_plugin OFF)
       project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE
