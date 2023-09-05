@@ -1235,7 +1235,7 @@ function(project_build_tools_get_imported_property OUTPUT_VAR_NAME TARGET_NAME V
     get_target_property(project_build_tools_get_imported_property_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
                         IMPORTED_CONFIGURATIONS)
     foreach(project_build_tools_get_imported_property_IMPORTED_CONFIGURATION IN
-            LISTS project_build_tools_get_imported_property_IMPORTED_CONFIGURATION)
+            LISTS project_build_tools_get_imported_property_IMPORTED_CONFIGURATIONS)
       get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME}
                           "${VAR_NAME}_${project_build_tools_get_imported_property_IMPORTED_CONFIGURATION}")
       if(${OUTPUT_VAR_NAME})
