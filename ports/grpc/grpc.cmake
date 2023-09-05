@@ -101,6 +101,12 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
       project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE
                                            grpc_ruby_plugin ON)
     endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME)
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): gRPC found and using targets.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME})"
+      )
+    endif()
   endif()
 endmacro()
 

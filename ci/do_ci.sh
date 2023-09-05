@@ -253,6 +253,7 @@ elif [[ "$1" == "gcc.vcpkg.test" ]]; then
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
   cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
+    --debug-find-pkg=gRPC --debug-find-var=grpc_cpp_plugin \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
   if [[ $CMAKE_CONFIGURE_EXIT_CODE -ne 0 ]]; then
     if [[ -e "CMakeFiles/CMakeConfigureLog.yaml" ]]; then
