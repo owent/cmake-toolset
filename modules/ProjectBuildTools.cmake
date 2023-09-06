@@ -225,6 +225,8 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
     list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_HOST_TOOLCHAIN_FILE}")
   endif()
 
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_host_options_VARS})
     unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
     if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME}
@@ -277,15 +279,39 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
           "-D${project_build_tools_append_cmake_inherit_VAR_NAME}= ${project_build_tools_append_cmake_inherit_VAR_VALUE}"
         )
       else()
-        list(
-          APPEND ${OUTVAR}
-          "-D${project_build_tools_append_cmake_inherit_VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}"
-        )
+        if(project_build_tools_append_cmake_inherit_VAR_NAME STREQUAL "CMAKE_FIND_ROOT_PATH")
+          list(
+            APPEND
+            ${OUTVAR}
+            "-DCMAKE_FIND_ROOT_PATH=${project_build_tools_append_cmake_inherit_VAR_VALUE}\;${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+          )
+          set(project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH TRUE)
+        elseif(project_build_tools_append_cmake_inherit_VAR_NAME STREQUAL "CMAKE_PREFIX_PATH")
+          list(
+            APPEND
+            ${OUTVAR}
+            "-DCMAKE_PREFIX_PATH=${project_build_tools_append_cmake_inherit_VAR_VALUE}\;${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+          )
+          set(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH TRUE)
+        else()
+          list(
+            APPEND
+            ${OUTVAR}
+            "-D${project_build_tools_append_cmake_inherit_VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}"
+          )
+        endif()
       endif()
     endif()
   endforeach()
   unset(project_build_tools_append_cmake_inherit_VAR_NAME)
   unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
+
+  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+    list(APPEND ${OUTVAR} "-DCMAKE_FIND_ROOT_PATH=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
+  endif()
+  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
+    list(APPEND ${OUTVAR} "-DCMAKE_PREFIX_PATH=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
+  endif()
 
   # vcpkg
   if(VCPKG_HOST_TRIPLET)
@@ -305,6 +331,8 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
   # Policy
   project_build_tools_append_cmake_inherit_policy(${OUTVAR})
 
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
   unset(project_build_tools_append_cmake_host_options_DISABLE_C_FLAGS)
   unset(project_build_tools_append_cmake_host_options_DISABLE_CXX_FLAGS)
   unset(project_build_tools_append_cmake_host_options_DISABLE_ASM_FLAGS)
