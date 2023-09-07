@@ -678,7 +678,7 @@ function(project_git_clone_repository)
         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     message(
       STATUS
-        "Try to git clone ${project_git_clone_repository_TAG}${project_git_clone_repository_GIT_BRANCH}${project_git_clone_repository_COMMIT} into ${project_git_clone_repository_REPO_DIRECTORY}"
+        "Try to git clone ${project_git_clone_repository_TAG}${project_git_clone_repository_BRANCH}${project_git_clone_repository_COMMIT} into ${project_git_clone_repository_REPO_DIRECTORY}"
     )
     if(project_git_clone_repository_PATCH_FILES)
       message(STATUS "  Using patch files: ${project_git_clone_repository_PATCH_FILES}")
@@ -1883,11 +1883,19 @@ macro(atframework_cmake_toolset_find_bash_tools)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_TAR NAMES tar gtar)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
+
+  if(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+    message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_BASH=${ATFRAMEWORK_CMAKE_TOOLSET_BASH}")
+  endif()
 endmacro()
 
 macro(atframework_cmake_toolset_find_pwsh_tools)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_PWSH NAMES pwsh pwsh.exe pwsh-preview pwsh-preview.exe)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+
+  if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+    message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_PWSH=${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}")
+  endif()
 endmacro()
 
 macro(
