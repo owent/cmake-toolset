@@ -94,14 +94,19 @@ endmacro()
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   cmake_parse_arguments(
     project_build_tools_append_cmake_inherit_options
-    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;APPEND_SYSTEM_LINKS" "" "" ${ARGN})
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;DISABLE_CMAKE_FIND_ROOT_FLAGS;APPEND_SYSTEM_LINKS"
+    ""
+    ""
+    ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
   if(DEFINED CACHE{CMAKE_MAKE_PROGRAM})
     list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
   endif()
 
   set(project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
-
+  if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_FIND_ROOT_FLAGS)
+    list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS)
+  endif()
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
     list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C)
   endif()
@@ -185,6 +190,7 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
+  unset(project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_FIND_ROOT_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_VARS)
 endmacro()
 
