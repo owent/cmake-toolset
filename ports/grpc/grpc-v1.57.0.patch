@@ -85,7 +85,7 @@ index ac4624c..43f71ba 100644
    // The shutdown refs counter tracks whether or not shutdown has been called
    // and whether there are any AllocatingRequestMatcher requests that have been
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 6e552ba..93f9ad6 100755
+index 6e552ba..aff4cb0 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -319,8 +319,8 @@ index 6e552ba..93f9ad6 100755
 +      )
 +      self.converter.toplevel += "  COMMAND\n"
 +      self.converter.toplevel += "    \"${PROTOC_PROGRAM}\"\n    \"-I${UPB_HOST_INCLUDE_DIR}\"\n"
-+      self.converter.toplevel += "    \"--plugin=protoc-gen-upbdefs=\\${PROTOC_GEN_UPBDEFS_PROGRAM}\"\n"
-+      self.converter.toplevel += "    \"--plugin=protoc-gen-lua=\\${PROTOC_GEN_UPBLUA_PROGRAM}\"\n"
++      self.converter.toplevel += "    \"--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}\"\n"
++      self.converter.toplevel += "    \"--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}\"\n"
 +      self.converter.toplevel += "    \"--upbdefs_out={0}\"\n".format(stage2_generated_dir)
 +      self.converter.toplevel += "    \"--lua_out={0}\"\n".format(stage2_generated_dir)
 +      self.converter.toplevel += "    {0}\n".format(
