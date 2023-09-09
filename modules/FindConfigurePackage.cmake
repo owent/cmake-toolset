@@ -476,7 +476,7 @@ macro(FindConfigurePackage)
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             execute_process(
               COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-                      ${FindConfigurePackage_AUTOGEN_CONFIGURE}
+                      "${FindConfigurePackage_AUTOGEN_CONFIGURE}"
               WORKING_DIRECTORY "${FindConfigurePackage_PROJECT_DIRECTORY}"
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
           endif()
@@ -498,7 +498,7 @@ macro(FindConfigurePackage)
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             execute_process(
               COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-                      ${FindConfigurePackage_AUTOGEN_CONFIGURE}
+                      "${FindConfigurePackage_AUTOGEN_CONFIGURE}"
               WORKING_DIRECTORY "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}"
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
           endif()
@@ -511,7 +511,7 @@ macro(FindConfigurePackage)
                          "${FindConfigurePackage_CONFIGURE_FLAGS}")
         endif()
         execute_process(
-          COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" ${CONFIGURE_EXEC_FILE}
+          COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "${CONFIGURE_EXEC_FILE}"
                   "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}" ${FindConfigurePackage_CONFIGURE_FLAGS}
           WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -624,7 +624,7 @@ macro(FindConfigurePackage)
 
         execute_process(
           COMMAND "${CMAKE_COMMAND}" "${BUILD_WITH_CMAKE_PROJECT_DIR}"
-                  ${FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR} ${FindConfigurePackage_CMAKE_FLAGS}
+                  "${FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR}" ${FindConfigurePackage_CMAKE_FLAGS}
           WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
         unset(FindConfigurePackage_CMAKE_CONCAT_FLAGS)
@@ -638,7 +638,7 @@ macro(FindConfigurePackage)
           set(FindConfigurePackageCMakeBuildParallelFlags "-j")
         endif()
         if(FindConfigurePackage_INSTALL_TARGET)
-          set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --build . --target ${FindConfigurePackage_INSTALL_TARGET}
+          set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --build . --target "${FindConfigurePackage_INSTALL_TARGET}"
                                                          ${FindConfigurePackageCMakeBuildParallelFlags})
         else()
           set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --install . --prefix
