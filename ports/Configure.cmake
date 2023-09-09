@@ -146,21 +146,23 @@ if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR IN_LIST CMAKE_FIND_ROOT_PATH)
   endif()
 endif()
 if(NOT PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR IN_LIST CMAKE_MODULE_PATH)
-prepend_list_flags_to_inherit_var_unique(CMAKE_MODULE_PATH "${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR}")
+  prepend_list_flags_to_inherit_var_unique(CMAKE_MODULE_PATH "${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR}")
 endif()
 if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR IN_LIST CMAKE_PREFIX_PATH)
   if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
-  prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/cmake"
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}"
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}/cmake")
+    prepend_list_flags_to_inherit_var_unique(
+      CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/cmake"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}/cmake")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/cmake"
-           "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/cmake")
+      prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/cmake"
+                                               "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/cmake")
     else()
-    prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake")
+      prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH
+                                               "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake")
     endif()
   else()
-  prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
+    prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   endif()
 endif()
 if(CMAKE_CROSSCOMPILING)
