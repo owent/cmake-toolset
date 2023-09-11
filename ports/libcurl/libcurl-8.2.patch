@@ -1,8 +1,25 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7a4c36f..88dd0f9 100644
+index 7a4c36f..1464a6c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -552,13 +552,6 @@ if(CURL_ZSTD)
+@@ -464,8 +464,16 @@ if(CURL_USE_MBEDTLS)
+   find_package(MbedTLS REQUIRED)
+   set(SSL_ENABLED ON)
+   set(USE_MBEDTLS ON)
++  if(TARGET MbedTLS::mbedtls)
++  list(APPEND CURL_LIBS MbedTLS::mbedtls)
++  elseif(TARGET mbedtls_static)
++  list(APPEND CURL_LIBS mbedtls_static)
++  elseif(TARGET mbedtls)
++  list(APPEND CURL_LIBS mbedtls)
++  else()
+   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
+   include_directories(${MBEDTLS_INCLUDE_DIRS})
++  endif()
+ endif()
+ 
+ if(CURL_USE_BEARSSL)
+@@ -552,13 +560,6 @@ if(CURL_ZSTD)
    endif()
  endif()
  
@@ -16,7 +33,7 @@ index 7a4c36f..88dd0f9 100644
  function(CheckQuicSupportInOpenSSL)
    # Be sure that the OpenSSL/wolfSSL library actually supports QUIC.
    if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
-@@ -581,6 +574,12 @@ function(CheckQuicSupportInOpenSSL)
+@@ -581,6 +582,12 @@ function(CheckQuicSupportInOpenSSL)
        if(HAVE_LIBZ)
          list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
        endif()
@@ -29,7 +46,7 @@ index 7a4c36f..88dd0f9 100644
        if(WIN32)
          list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
          if(NOT HAVE_MINGW_ORIGINAL)
-@@ -621,6 +620,60 @@ if(USE_NGTCP2)
+@@ -621,6 +628,60 @@ if(USE_NGTCP2)
    set(USE_NGHTTP3 ON)
    include_directories(${NGHTTP3_INCLUDE_DIRS})
    list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
@@ -90,7 +107,7 @@ index 7a4c36f..88dd0f9 100644
  endif()
  
  option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
-@@ -677,7 +730,7 @@ if(NOT CURL_DISABLE_LDAP)
+@@ -677,7 +738,7 @@ if(NOT CURL_DISABLE_LDAP)
    # Now that we know, we're not using windows LDAP...
    if(NOT USE_WIN32_LDAP)
      # Check for LDAP

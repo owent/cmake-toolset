@@ -1,5 +1,5 @@
 diff --git a/cmake/make_cmakelists.py b/cmake/make_cmakelists.py
-index 6e552ba..42f2e57 100755
+index 6e552ba..56fd994 100755
 --- a/cmake/make_cmakelists.py
 +++ b/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -134,7 +134,7 @@ index 6e552ba..42f2e57 100755
  
    def cc_test(self, **kwargs):
      # Disable this until we properly support upb_proto_library().
-@@ -204,11 +259,223 @@ class BuildFileFunctions(object):
+@@ -204,11 +259,217 @@ class BuildFileFunctions(object):
      pass
  
    def bootstrap_upb_proto_library(self, **kwargs):
@@ -154,7 +154,7 @@ index 6e552ba..42f2e57 100755
 +      base_dir = base_dir[0:-1]
 +
 +    oss_src_files_prefix = [".".join(x.split(".")[0:-1]) for x in oss_src_files]
-+    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\nif (NOT CMAKE_CROSSCOMPILING)\n"
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
 +    # Stage0
 +    self.converter.toplevel += "add_library({0}\n  {1})\n".format(
 +      kwargs["name"] + _stages[0],
@@ -269,21 +269,20 @@ index 6e552ba..42f2e57 100755
 +          kwargs["name"] + _stages[2] + "_defs",
 +          "upb-" + kwargs["name"] + _stages[2] + "_defs"
 +      )
-+    self.converter.toplevel += "endif()\n"
 +
-+    self.converter.toplevel += "install(\n"
-+    self.converter.toplevel += "  FILES\n    {0}\n".format(
-+      "\n    ".join([
-+        "\n    ".join(["{0}/{1}.upb.h\n    {0}/{1}.upb.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
-+        "\n    ".join(["{0}/{1}.upbdefs.h\n    {0}/{1}.upbdefs.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
-+        "\n    ".join(["{0}/{1}_pb.lua".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
-+      ])
-+    )
-+    self.converter.toplevel += "  DESTINATION \"include/{0}\"\n".format(os.path.dirname(oss_src_files_prefix[0]))
-+    self.converter.toplevel += ")\n"
++      self.converter.toplevel += "install(\n"
++      self.converter.toplevel += "  FILES\n    {0}\n".format(
++        "\n    ".join([
++          "\n    ".join(["{0}/{1}.upb.h\n    {0}/{1}.upb.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
++          "\n    ".join(["{0}/{1}.upbdefs.h\n    {0}/{1}.upbdefs.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
++          "\n    ".join(["{0}/{1}_pb.lua".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
++        ])
++      )
++      self.converter.toplevel += "  DESTINATION \"include/{0}\"\n".format(os.path.dirname(oss_src_files_prefix[0]))
++      self.converter.toplevel += ")\n"
 +
-+    self.converter.export_targets.append(kwargs["name"] + _stages[2])
-+    self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
++      self.converter.export_targets.append(kwargs["name"] + _stages[2])
++      self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
 +
 +    self.converter.toplevel += "endif()\n"
  
@@ -296,7 +295,7 @@ index 6e552ba..42f2e57 100755
 +    for file in files:
 +      found_files.append("../" + self.subdir + file)
 +
-+    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\nif (NOT CMAKE_CROSSCOMPILING)\n"
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
 +    stages = [s for s in _stages]
 +    stages.append("CROSSCOMPILING")
 +    for stage in _stages:
@@ -327,7 +326,7 @@ index 6e552ba..42f2e57 100755
 +        self._add_deps(kwargs, " INTERFACE", stage)
 +        self._add_bootstrap_deps(kwargs, " INTERFACE", stage)
 +    self.converter.export_targets.append(kwargs["name"])
-+    self.converter.toplevel += "endif()\nendif()\n"
++    self.converter.toplevel += "endif()\n"
  
 +  def bootstrap_cc_binary(self, **kwargs):
 +    if kwargs["name"] in _block_targets:
@@ -338,14 +337,9 @@ index 6e552ba..42f2e57 100755
 +      found_files.append("../" + self.subdir + file)
 +
 +    # Has sources, make this a normal library.
-+    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\nif (NOT CMAKE_CROSSCOMPILING)\n"
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
 +    stages = [s for s in _stages]
-+    stages.append("CROSSCOMPILING")
 +    for stage in stages:
-+      if stage == "CROSSCOMPILING":
-+        stage = ""
-+        self.converter.toplevel += "else()\n"
-+
 +      stage_name = kwargs["name"] + stage
 +      output_name = kwargs["name"]
 +      self.converter.toplevel += "add_executable({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
@@ -356,11 +350,11 @@ index 6e552ba..42f2e57 100755
 +      self._add_deps(kwargs, " PRIVATE", stage)
 +      self._add_bootstrap_deps(kwargs, " PRIVATE", stage)
 +    self.converter.export_targets.append(kwargs["name"])
-+    self.converter.toplevel += "endif()\nendif()\n"
++    self.converter.toplevel += "endif()\n"
  
  class WorkspaceFileFunctions(object):
    def __init__(self, converter):
-@@ -287,12 +554,14 @@ class Converter(object):
+@@ -287,12 +548,14 @@ class Converter(object):
      self.toplevel = ""
      self.if_lua = ""
      self.utf8_range_commit = ""
@@ -375,7 +369,7 @@ index 6e552ba..42f2e57 100755
      }
  
    template = textwrap.dedent("""\
-@@ -322,6 +591,15 @@ class Converter(object):
+@@ -322,6 +585,15 @@ class Converter(object):
            "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
            FORCE)
      endif()
@@ -391,7 +385,7 @@ index 6e552ba..42f2e57 100755
  
      # When using Ninja, compiler output won't be colorized without this.
      include(CheckCXXCompilerFlag)
-@@ -345,14 +623,27 @@ class Converter(object):
+@@ -345,14 +617,27 @@ class Converter(object):
        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
      endif()
  
@@ -424,7 +418,7 @@ index 6e552ba..42f2e57 100755
        else()
          include(FetchContent)
          FetchContent_Declare(
-@@ -363,7 +654,10 @@ class Converter(object):
+@@ -363,7 +648,10 @@ class Converter(object):
          FetchContent_GetProperties(utf8_range)
          if(NOT utf8_range_POPULATED)
            FetchContent_Populate(utf8_range)
@@ -436,7 +430,7 @@ index 6e552ba..42f2e57 100755
          endif()
        endif()
      endif()
-@@ -374,10 +668,122 @@ class Converter(object):
+@@ -374,10 +662,120 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -450,24 +444,22 @@ index 6e552ba..42f2e57 100755
 +      find_package(absl CONFIG REQUIRED)
 +      find_package(protobuf CONFIG REQUIRED)
 +
-+      if (CMAKE_CROSSCOMPILING)
-+        find_program(PROTOC_PROGRAM protoc)
-+        find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
-+        find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
-+        find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
-+        set(PROTOC_GEN_UPB_STAGE1_PROGRAM "${PROTOC_GEN_UPB_PROGRAM}")
-+      else()
-+        set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
-+        set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
-+        set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
-+        set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
-+        set(PROTOC_GEN_UPB_STAGE1_PROGRAM "\$<TARGET_FILE:protoc-gen-upb_stage1>")
-+      endif()
++      set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
++      set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
++      set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
++      set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
++      set(PROTOC_GEN_UPB_STAGE1_PROGRAM "\$<TARGET_FILE:protoc-gen-upb_stage1>")
++    else()
++      find_program(PROTOC_PROGRAM protoc)
++      find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
++      find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
++      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
++      set(PROTOC_GEN_UPB_STAGE1_PROGRAM "${PROTOC_GEN_UPB_PROGRAM}")
 +    endif()
 +
      %(toplevel)s
  
-+    if (UPB_BUILD_CODEGEN AND NOT CMAKE_CROSSCOMPILING)
++    if (UPB_BUILD_CODEGEN)
 +      set(UPB_CODEGEN_TARGETS protoc-gen-lua)
 +      add_executable(protoc-gen-lua
 +        ../lua/upbc.cc
@@ -559,7 +551,7 @@ index 6e552ba..42f2e57 100755
    """)
  
  data = {}
-@@ -397,7 +803,9 @@ globs = GetDict(converter)
+@@ -397,7 +795,9 @@ globs = GetDict(converter)
  workspace_dict = GetDict(WorkspaceFileFunctions(converter))
  exec(open("bazel/workspace_deps.bzl").read(), workspace_dict)
  exec(open("WORKSPACE").read(), workspace_dict)
