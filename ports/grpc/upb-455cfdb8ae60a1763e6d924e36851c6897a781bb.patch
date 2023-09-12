@@ -1,5 +1,5 @@
 diff --git a/cmake/make_cmakelists.py b/cmake/make_cmakelists.py
-index 6e552ba..56fd994 100755
+index 6e552ba..5ccfe42 100755
 --- a/cmake/make_cmakelists.py
 +++ b/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -281,8 +281,8 @@ index 6e552ba..56fd994 100755
 +      self.converter.toplevel += "  DESTINATION \"include/{0}\"\n".format(os.path.dirname(oss_src_files_prefix[0]))
 +      self.converter.toplevel += ")\n"
 +
-+      self.converter.export_targets.append(kwargs["name"] + _stages[2])
-+      self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
++    self.converter.export_targets.append(kwargs["name"] + _stages[2])
++    self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
 +
 +    self.converter.toplevel += "endif()\n"
  

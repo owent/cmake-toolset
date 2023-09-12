@@ -85,7 +85,7 @@ index ac4624c..43f71ba 100644
    // The shutdown refs counter tracks whether or not shutdown has been called
    // and whether there are any AllocatingRequestMatcher requests that have been
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 6e552ba..56fd994 100755
+index 6e552ba..5ccfe42 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -367,8 +367,8 @@ index 6e552ba..56fd994 100755
 +      self.converter.toplevel += "  DESTINATION \"include/{0}\"\n".format(os.path.dirname(oss_src_files_prefix[0]))
 +      self.converter.toplevel += ")\n"
 +
-+      self.converter.export_targets.append(kwargs["name"] + _stages[2])
-+      self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
++    self.converter.export_targets.append(kwargs["name"] + _stages[2])
++    self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
 +
 +    self.converter.toplevel += "endif()\n"
  
