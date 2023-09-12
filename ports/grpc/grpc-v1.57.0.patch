@@ -85,7 +85,7 @@ index ac4624c..43f71ba 100644
    // The shutdown refs counter tracks whether or not shutdown has been called
    // and whether there are any AllocatingRequestMatcher requests that have been
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 6e552ba..5ccfe42 100755
+index 6e552ba..8de18f3 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -384,7 +384,7 @@ index 6e552ba..5ccfe42 100755
 +    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
 +    stages = [s for s in _stages]
 +    stages.append("CROSSCOMPILING")
-+    for stage in _stages:
++    for stage in stages:
 +      if stage == "CROSSCOMPILING":
 +        stage = ""
 +        self.converter.toplevel += "else()\n"
