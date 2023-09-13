@@ -1,0 +1,741 @@
+diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
+index 9c67a82..d1ec553 100644
+--- a/src/core/lib/surface/server.cc
++++ b/src/core/lib/surface/server.cc
+@@ -155,7 +155,7 @@ struct Server::RegisteredMethod {
+   const grpc_server_register_method_payload_handling payload_handling;
+   const uint32_t flags;
+   // One request matcher per method.
+-  std::unique_ptr<RequestMatcherInterface> matcher;
++  std::shared_ptr<RequestMatcherInterface> matcher;
+ };
+ 
+ //
+@@ -734,7 +734,7 @@ void Server::Start() {
+   if (unregistered_request_matcher_ == nullptr) {
+     unregistered_request_matcher_ = std::make_unique<RealRequestMatcher>(this);
+   }
+-  for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+     if (rm->matcher == nullptr) {
+       rm->matcher = std::make_unique<RealRequestMatcher>(this);
+     }
+@@ -841,7 +841,7 @@ Server::RegisteredMethod* Server::RegisterMethod(
+             "grpc_server_register_method method string cannot be NULL");
+     return nullptr;
+   }
+-  for (std::unique_ptr<RegisteredMethod>& m : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& m : registered_methods_) {
+     if (streq(m->method, method) && streq(m->host, host)) {
+       gpr_log(GPR_ERROR, "duplicate registration for %s@%s", method,
+               host ? host : "*");
+@@ -906,7 +906,7 @@ void Server::KillPendingWorkLocked(grpc_error_handle error) {
+   if (started_) {
+     unregistered_request_matcher_->KillRequests(error);
+     unregistered_request_matcher_->ZombifyPending();
+-    for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+       rm->matcher->KillRequests(error);
+       rm->matcher->ZombifyPending();
+     }
+@@ -1182,7 +1182,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
+     size_t slots = 2 * num_registered_methods;
+     registered_methods_ =
+         std::make_unique<std::vector<ChannelRegisteredMethod>>(slots);
+-    for (std::unique_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
+       Slice host;
+       Slice method = Slice::FromExternalString(rm->method);
+       const bool has_host = !rm->host.empty();
+diff --git a/src/core/lib/surface/server.h b/src/core/lib/surface/server.h
+index ac4624c..43f71ba 100644
+--- a/src/core/lib/surface/server.h
++++ b/src/core/lib/surface/server.h
+@@ -140,7 +140,7 @@ class Server : public InternallyRefCounted<Server>,
+   }
+ 
+   void set_config_fetcher(
+-      std::unique_ptr<grpc_server_config_fetcher> config_fetcher) {
++      std::shared_ptr<grpc_server_config_fetcher> config_fetcher) {
+     config_fetcher_ = std::move(config_fetcher);
+   }
+ 
+@@ -444,7 +444,8 @@ class Server : public InternallyRefCounted<Server>,
+ 
+   ChannelArgs const channel_args_;
+   RefCountedPtr<channelz::ServerNode> channelz_node_;
+-  std::unique_ptr<grpc_server_config_fetcher> config_fetcher_;
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<grpc_server_config_fetcher> config_fetcher_;
+ 
+   std::vector<grpc_completion_queue*> cqs_;
+   std::vector<grpc_pollset*> pollsets_;
+@@ -465,10 +466,11 @@ class Server : public InternallyRefCounted<Server>,
+   bool starting_ ABSL_GUARDED_BY(mu_global_) = false;
+   CondVar starting_cv_;
+ 
+-  std::vector<std::unique_ptr<RegisteredMethod>> registered_methods_;
++  std::vector<std::shared_ptr<RegisteredMethod>> registered_methods_;
+ 
+   // Request matcher for unregistered methods.
+-  std::unique_ptr<RequestMatcherInterface> unregistered_request_matcher_;
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<RequestMatcherInterface> unregistered_request_matcher_;
+ 
+   // The shutdown refs counter tracks whether or not shutdown has been called
+   // and whether there are any AllocatingRequestMatcher requests that have been
+diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
+index 6e552ba..488dfc3 100755
+--- a/third_party/upb/cmake/make_cmakelists.py
++++ b/third_party/upb/cmake/make_cmakelists.py
+@@ -39,34 +39,65 @@ import sys
+ import textwrap
+ import os
+ 
++_stages = ["_stage0", "_stage1", ""]
++_block_targets = ["upbc_so", "upbdev", "protoc-gen-upbdev"]
++
++def MappingThirdPartyDep(dep):
++  if dep.startswith("/:"):
++    return dep[2:]
++  if dep == "com_google_protobuf//:protobuf":
++    return "protobuf::libprotobuf"
++  if dep == "com_google_protobuf//src/google/protobuf/compiler:code_generator":
++    return "protobuf::libprotoc"
++  if dep.startswith("com_google_absl//"):
++    p = dep.rfind(":")
++    if p < 0:
++      return "absl::" + dep[dep.rfind("/")+1:]
++    return "absl::" + dep[p+1:]
++  p = dep.rfind(":")
++  if p > 0:
++    return dep[p+1:]
++  p = dep.rfind("/")
++  if p > 0:
++    return dep[p+1:]
++  return dep
++
+ def StripFirstChar(deps):
+-  return [dep[1:] for dep in deps]
++  return [MappingThirdPartyDep(dep[1:]) for dep in deps]
+ 
+ def IsSourceFile(name):
+   return name.endswith(".c") or name.endswith(".cc")
+ 
+ class BuildFileFunctions(object):
+-  def __init__(self, converter):
++  def __init__(self, converter, subdir):
+     self.converter = converter
++    self.subdir = subdir
+ 
+-  def _add_deps(self, kwargs, keyword=""):
++  def _add_deps(self, kwargs, keyword="", stage = ""):
+     if "deps" not in kwargs:
+       return
+     self.converter.toplevel += "target_link_libraries(%s%s\n  %s)\n" % (
+-        kwargs["name"],
++        kwargs["name"] + stage,
+         keyword,
+         "\n  ".join(StripFirstChar(kwargs["deps"]))
+     )
+ 
++  def _add_bootstrap_deps(self, kwargs, keyword="", stage = "", deps_key = "bootstrap_deps"):
++    if deps_key not in kwargs:
++      return
++    self.converter.toplevel += "target_link_libraries({0}{1}\n  {2})\n".format(
++        kwargs["name"] + stage,
++        keyword,
++        "\n  ".join([dep + stage for dep in StripFirstChar(kwargs[deps_key])])
++    )
++
+   def load(self, *args):
+     pass
+ 
+   def cc_library(self, **kwargs):
+     if kwargs["name"].endswith("amalgamation"):
+       return
+-    if kwargs["name"] == "upbc_generator":
+-      return
+-    if kwargs["name"] == "lupb":
++    if kwargs["name"] in _block_targets:
+       return
+     if "testonly" in kwargs:
+       return
+@@ -77,17 +108,22 @@ class BuildFileFunctions(object):
+     ]
+     for file in files:
+       if os.path.basename(file) in pregenerated_files:
+-        found_files.append("../cmake/" + file)
++        found_files.append("../cmake/" + self.subdir + file)
+       else:
+-        found_files.append("../" + file)
++        found_files.append("../" + self.subdir + file)
+ 
+     if list(filter(IsSourceFile, files)):
+       # Has sources, make this a normal library.
+-      self.converter.toplevel += "add_library(%s\n  %s)\n" % (
++      output_name = kwargs["name"]
++      if output_name.lower() != "upb":
++        output_name = "upb-" + output_name
++      self.converter.toplevel += "add_library({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
+           kwargs["name"],
+-          "\n  ".join(found_files)
++          "\n  ".join(found_files),
++          output_name
+       )
+-      self._add_deps(kwargs)
++      self.converter.export_targets.append(kwargs["name"])
++      self._add_deps(kwargs, " PUBLIC")
+     else:
+       # Header-only library, have to do a couple things differently.
+       # For some info, see:
+@@ -95,10 +131,29 @@ class BuildFileFunctions(object):
+       self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
+           kwargs["name"]
+       )
++      self.converter.export_targets.append(kwargs["name"])
+       self._add_deps(kwargs, " INTERFACE")
+ 
+   def cc_binary(self, **kwargs):
+-    pass
++    if kwargs["name"] in _block_targets:
++      return
++
++    files = kwargs.get("srcs", []) + kwargs.get("hdrs", [])
++    found_files = []
++    for file in files:
++      found_files.append("../" + self.subdir + file)
++
++    # Has sources, make this a normal library.
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
++    output_name = kwargs["name"]
++    self.converter.toplevel += "add_executable({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
++        kwargs["name"],
++        "\n  ".join(found_files),
++        output_name
++    )
++    self._add_deps(kwargs, " PRIVATE")
++    self.converter.toplevel += "list(APPEND UPB_CODEGEN_TARGETS {0})\n".format(kwargs["name"])
++    self.converter.toplevel += "endif()\n"
+ 
+   def cc_test(self, **kwargs):
+     # Disable this until we properly support upb_proto_library().
+@@ -204,11 +259,217 @@ class BuildFileFunctions(object):
+     pass
+ 
+   def bootstrap_upb_proto_library(self, **kwargs):
+-    pass
++    if kwargs["name"] in _block_targets:
++      return
++    if "oss_src_files" not in kwargs:
++      return
++    oss_src_files = kwargs["oss_src_files"]
++    if not oss_src_files:
++      return
++    if "base_dir" not in kwargs:
++      base_dir = self.subdir
++    else:
++      base_dir = self.subdir + kwargs["base_dir"]
++    while base_dir.endswith("/") or base_dir.endswith("\\"):
++      base_dir = base_dir[0:-1]
++
++    oss_src_files_prefix = [".".join(x.split(".")[0:-1]) for x in oss_src_files]
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
++    # Stage0
++    self.converter.toplevel += "add_library({0}\n  {1})\n".format(
++      kwargs["name"] + _stages[0],
++      "\n  ".join(["../{0}/stage0/{1}.upb.h\n  ../{0}/stage0/{1}.upb.c".format(base_dir, x) for x in oss_src_files_prefix])
++    )
++    self.converter.toplevel += "target_include_directories({0}\n".format(kwargs["name"] + _stages[0])
++    self.converter.toplevel += "  BEFORE PUBLIC \"../{0}/stage0\")\n".format(base_dir)
++    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(kwargs["name"] + _stages[0])
++    self.converter.toplevel += "  generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
++    self.converter.toplevel += "  mini_table)\n".format(kwargs["name"] + _stages[0])
++    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[0], "deps")
++
++    # Stage1
++    stage1_generated_dir = "${CMAKE_CURRENT_BINARY_DIR}/" + _stages[1] + "/" + kwargs["name"]
++    self.converter.toplevel += "file(MAKE_DIRECTORY \"{0}\")\n".format(stage1_generated_dir)
++    self.converter.toplevel += "add_custom_command(\n"
++    self.converter.toplevel += "  OUTPUT\n    {0}\n".format(
++      "\n    ".join(["{0}/{1}.upb.h\n    {0}/{1}.upb.c".format(stage1_generated_dir, x) for x in oss_src_files_prefix])
++    )
++    self.converter.toplevel += "  DEPENDS\n    {0}\n".format(
++      "\n    ".join(["{0}/{1}".format("${UPB_HOST_INCLUDE_DIR}", x) for x in oss_src_files])
++    )
++    self.converter.toplevel += "  COMMAND\n"
++    self.converter.toplevel += "    \"${PROTOC_PROGRAM}\"\n    \"-I${UPB_HOST_INCLUDE_DIR}\"\n"
++    self.converter.toplevel += "    \"--plugin=protoc-gen-upb=\\$<TARGET_FILE:protoc-gen-upb_stage0>\"\n"
++    self.converter.toplevel += "    \"--upb_out={0}\"\n".format(stage1_generated_dir)
++    self.converter.toplevel += "    {0}\n".format(
++      "\n    ".join(["{0}/{1}".format("${UPB_HOST_INCLUDE_DIR}", x) for x in oss_src_files])
++    )
++    self.converter.toplevel += ")\n"
++
++    self.converter.toplevel += "add_library({0}\n  {1})\n".format(
++      kwargs["name"] + _stages[1],
++      "\n  ".join(["{0}/{1}.upb.h\n  {0}/{1}.upb.c".format(stage1_generated_dir, x) for x in oss_src_files_prefix])
++    )
++    self.converter.toplevel += "target_include_directories({0}\n".format(kwargs["name"] + _stages[1])
++    self.converter.toplevel += "  BEFORE PUBLIC \"{0}\")\n".format(stage1_generated_dir)
++    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(kwargs["name"] + _stages[1])
++    self.converter.toplevel += "  generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
++    self.converter.toplevel += ")\n".format(kwargs["name"] + _stages[1])
++    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[1], "deps")
++
++    # Stage2
++    for crosscompiling in ["", "else()\n"]:
++      if crosscompiling:
++        self.converter.toplevel += crosscompiling
++      stage2_generated_dir = "${CMAKE_CURRENT_BINARY_DIR}/stage2/" + kwargs["name"]
++      self.converter.toplevel += "file(MAKE_DIRECTORY \"{0}\")\n".format(stage2_generated_dir)
++      self.converter.toplevel += "add_custom_command(\n"
++      self.converter.toplevel += "  OUTPUT\n    {0}\n".format(
++        "\n    ".join([
++          "\n    ".join(["{0}/{1}.upb.h\n    {0}/{1}.upb.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
++        ])
++      )
++      self.converter.toplevel += "  DEPENDS\n    {0}\n".format(
++        "\n    ".join(["{0}/{1}".format("${UPB_HOST_INCLUDE_DIR}", x) for x in oss_src_files])
++      )
++      self.converter.toplevel += "  COMMAND\n"
++      self.converter.toplevel += "    \"${PROTOC_PROGRAM}\"\n    \"-I${UPB_HOST_INCLUDE_DIR}\"\n"
++      self.converter.toplevel += "    \"--plugin=protoc-gen-upb=${PROTOC_GEN_UPB_STAGE1_PROGRAM}\"\n"
++      self.converter.toplevel += "    \"--upb_out={0}\"\n".format(stage2_generated_dir)
++      self.converter.toplevel += "    {0}\n".format(
++        "\n    ".join(["{0}/{1}".format("${UPB_HOST_INCLUDE_DIR}", x) for x in oss_src_files])
++      )
++      self.converter.toplevel += ")\n"
++
++      self.converter.toplevel += "add_custom_command(\n"
++      self.converter.toplevel += "  OUTPUT\n    {0}\n".format(
++        "\n    ".join([
++          "\n    ".join(["{0}/{1}.upbdefs.h\n    {0}/{1}.upbdefs.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
++          "\n    ".join(["{0}/{1}_pb.lua".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
++        ])
++      )
++      self.converter.toplevel += "  DEPENDS\n    {0}\n".format(
++        "\n    ".join(["{0}/{1}".format("${UPB_HOST_INCLUDE_DIR}", x) for x in oss_src_files])
++      )
++      self.converter.toplevel += "  COMMAND\n"
++      self.converter.toplevel += "    \"${PROTOC_PROGRAM}\"\n    \"-I${UPB_HOST_INCLUDE_DIR}\"\n"
++      self.converter.toplevel += "    \"--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}\"\n"
++      self.converter.toplevel += "    \"--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}\"\n"
++      self.converter.toplevel += "    \"--upbdefs_out={0}\"\n".format(stage2_generated_dir)
++      self.converter.toplevel += "    \"--lua_out={0}\"\n".format(stage2_generated_dir)
++      self.converter.toplevel += "    {0}\n".format(
++        "\n    ".join(["{0}/{1}".format("${UPB_HOST_INCLUDE_DIR}", x) for x in oss_src_files])
++      )
++      self.converter.toplevel += ")\n"
++
++      self.converter.toplevel += "add_library({0}\n  {1})\n".format(
++        kwargs["name"] + _stages[2],
++        "\n  ".join(["{0}/{1}.upb.h\n  {0}/{1}.upb.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
++      )
++      self.converter.toplevel += "target_include_directories({0}\n".format(kwargs["name"] + _stages[2])
++      self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:{0}>\")\n".format(stage2_generated_dir)
++      self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(kwargs["name"] + _stages[2])
++      self.converter.toplevel += "  upb\n"
++      self.converter.toplevel += ")\n".format(kwargs["name"] + _stages[2])
++      self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[2], "deps")
++      self.converter.toplevel += "set_target_properties({0} PROPERTIES OUTPUT_NAME \"{1}\")\n".format(
++          kwargs["name"] + _stages[2],
++          "upb-" + kwargs["name"] + _stages[2]
++      )
++      self.converter.toplevel += "add_library({0}\n  {1})\n".format(
++        kwargs["name"] + _stages[2] + "_defs",
++        "\n  ".join(["{0}/{1}.upbdefs.h\n  {0}/{1}.upbdefs.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
++      )
++      self.converter.toplevel += "target_include_directories({0}\n".format(kwargs["name"] + _stages[2] + "_defs")
++      self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:{0}>\")\n".format(stage2_generated_dir)
++      self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(kwargs["name"] + _stages[2] + "_defs")
++      self.converter.toplevel += "  {0}\n".format(kwargs["name"] + _stages[2])
++      self.converter.toplevel += ")\n".format(kwargs["name"] + _stages[2])
++      self.converter.toplevel += "set_target_properties({0} PROPERTIES OUTPUT_NAME \"{1}\")\n".format(
++          kwargs["name"] + _stages[2] + "_defs",
++          "upb-" + kwargs["name"] + _stages[2] + "_defs"
++      )
++
++      self.converter.toplevel += "install(\n"
++      self.converter.toplevel += "  FILES\n    {0}\n".format(
++        "\n    ".join([
++          "\n    ".join(["{0}/{1}.upb.h\n    {0}/{1}.upb.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
++          "\n    ".join(["{0}/{1}.upbdefs.h\n    {0}/{1}.upbdefs.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix]),
++          "\n    ".join(["{0}/{1}_pb.lua".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
++        ])
++      )
++      self.converter.toplevel += "  DESTINATION \"include/{0}\"\n".format(os.path.dirname(oss_src_files_prefix[0]))
++      self.converter.toplevel += ")\n"
++
++    self.converter.export_targets.append(kwargs["name"] + _stages[2])
++    self.converter.export_targets.append(kwargs["name"] + _stages[2] + "_defs")
++
++    self.converter.toplevel += "endif()\n"
+ 
+   def bootstrap_cc_library(self, **kwargs):
+-    pass
++    if kwargs["name"] in _block_targets:
++      return
++    files = kwargs.get("srcs", []) + kwargs.get("hdrs", [])
++    found_files = []
++    for file in files:
++      found_files.append("../" + self.subdir + file)
++
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
++    stages = [s for s in _stages]
++    stages.append("CROSSCOMPILING")
++    for stage in stages:
++      if stage == "CROSSCOMPILING":
++        stage = ""
++        self.converter.toplevel += "else()\n"
++
++      stage_name = kwargs["name"] + stage
++      if list(filter(IsSourceFile, files)):
++        # Has sources, make this a normal library.
++        output_name = stage_name
++        if output_name.lower() != "upb":
++          output_name = "upb-" + output_name
++        self.converter.toplevel += "add_library({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
++            stage_name,
++            "\n  ".join(found_files),
++            output_name
++        )
++        self._add_deps(kwargs, " PUBLIC", stage)
++        self._add_bootstrap_deps(kwargs, " PUBLIC", stage)
++      else:
++        # Header-only library, have to do a couple things differently.
++        # For some info, see:
++        #  http://mariobadr.com/creating-a-header-only-library-with-cmake.html
++        self.converter.toplevel += "add_library(%s INTERFACE)\n" % (
++            stage_name
++        )
++        self._add_deps(kwargs, " INTERFACE", stage)
++        self._add_bootstrap_deps(kwargs, " INTERFACE", stage)
++    self.converter.export_targets.append(kwargs["name"])
++    self.converter.toplevel += "endif()\n"
+ 
++  def bootstrap_cc_binary(self, **kwargs):
++    if kwargs["name"] in _block_targets:
++      return
++    files = kwargs.get("srcs", []) + kwargs.get("hdrs", [])
++    found_files = []
++    for file in files:
++      found_files.append("../" + self.subdir + file)
++
++    # Has sources, make this a normal library.
++    self.converter.toplevel += "if (UPB_BUILD_CODEGEN)\n"
++    stages = [s for s in _stages]
++    for stage in stages:
++      stage_name = kwargs["name"] + stage
++      output_name = kwargs["name"]
++      self.converter.toplevel += "add_executable({0}\n  {1})\nset_target_properties({0} PROPERTIES OUTPUT_NAME \"{2}\")\n".format(
++          stage_name,
++          "\n  ".join(found_files),
++          output_name
++      )
++      self._add_deps(kwargs, " PRIVATE", stage)
++      self._add_bootstrap_deps(kwargs, " PRIVATE", stage)
++    self.converter.toplevel += "list(APPEND UPB_CODEGEN_TARGETS {0})\n".format(kwargs["name"])
++    self.converter.toplevel += "endif()\n"
+ 
+ class WorkspaceFileFunctions(object):
+   def __init__(self, converter):
+@@ -287,12 +548,14 @@ class Converter(object):
+     self.toplevel = ""
+     self.if_lua = ""
+     self.utf8_range_commit = ""
++    self.export_targets = []
+ 
+   def convert(self):
+     return self.template % {
+         "prelude": converter.prelude,
+         "toplevel": converter.toplevel,
+         "utf8_range_commit": converter.utf8_range_commit,
++        "export_targets": ' '.join(converter.export_targets),
+     }
+ 
+   template = textwrap.dedent("""\
+@@ -322,6 +585,15 @@ class Converter(object):
+           "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+           FORCE)
+     endif()
++    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH YES)
++    set(CMAKE_BUILD_RPATH_USE_ORIGIN YES)
++    if (UNIX AND NOT APPLE)
++      set(CMAKE_INSTALL_RPATH "$ORIGIN" "$ORIGIN/../lib64" "$ORIGIN/../lib")
++      set(CMAKE_BUILD_RPATH  "$ORIGIN" "$ORIGIN/../lib64" "$ORIGIN/../lib")
++    elseif (APPLE)
++      set(CMAKE_INSTALL_RPATH "@rpath" "@rpath/../lib64" "@rpath/../lib")
++      set(CMAKE_BUILD_RPATH  "@rpath" "@rpath/../lib64" "@rpath/../lib")
++    endif()
+ 
+     # When using Ninja, compiler output won't be colorized without this.
+     include(CheckCXXCompilerFlag)
+@@ -345,14 +617,27 @@ class Converter(object):
+       set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+     endif()
+ 
+-    include_directories(..)
+-    include_directories(../cmake)
+-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
++    include_directories(AFTER ..)
++    # include_directories(AFTER ../cmake)
++    include_directories(AFTER ${CMAKE_CURRENT_BINARY_DIR})
+ 
+     if(NOT TARGET utf8_range)
+-      if(EXISTS ../external/utf8_range)
++      find_package(utf8_range)
++      if(TARGET utf8_range::utf8_range)
++        add_library(utf8_range INTERFACE)
++        target_link_libraries(utf8_range INTERFACE utf8_range::utf8_range)
++        if(EXISTS "${utf8_range_DIR}/../../include/utf8_range.h")
++          target_include_directories(utf8_range SYSTEM INTERFACE "$<BUILD_INTERFACE:${utf8_range_DIR}/../../include/>")
++        elseif(EXISTS "${utf8_range_DIR}/../../../include/utf8_range.h")
++          target_include_directories(utf8_range SYSTEM INTERFACE "$<BUILD_INTERFACE:${utf8_range_DIR}/../../../include/>")
++        endif()
++        install(TARGETS utf8_range EXPORT upb-config)
++      elseif(EXISTS ../external/utf8_range)
+         # utf8_range is already installed
+-        include_directories(../external/utf8_range)
++        set(utf8_range_ENABLE_TESTS FALSE CACHE BOOL "" FORCE)
++        set(utf8_range_ENABLE_INSTALL TRUE CACHE BOOL "" FORCE)
++        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/upb-utf8_range")
++        add_subdirectory(../external/utf8_range "${CMAKE_CURRENT_BINARY_DIR}/upb-utf8_range")
+       else()
+         include(FetchContent)
+         FetchContent_Declare(
+@@ -363,7 +648,10 @@ class Converter(object):
+         FetchContent_GetProperties(utf8_range)
+         if(NOT utf8_range_POPULATED)
+           FetchContent_Populate(utf8_range)
+-          include_directories(${utf8_range_SOURCE_DIR})
++          set(utf8_range_ENABLE_TESTS FALSE CACHE BOOL "" FORCE)
++          set(utf8_range_ENABLE_INSTALL TRUE CACHE BOOL "" FORCE)
++          file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/upb-utf8_range")
++          add_subdirectory(${utf8_range_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}/upb-utf8_range")
+         endif()
+       endif()
+     endif()
+@@ -374,10 +662,121 @@ class Converter(object):
+       set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
+     endif()
+ 
++    if (MSVC)
++      add_compile_options(/wd4146 /wd4703 -D_CRT_SECURE_NO_WARNINGS)
++    endif()
++
+     enable_testing()
+ 
++    if (UPB_BUILD_CODEGEN)
++      find_package(absl CONFIG REQUIRED)
++      find_package(protobuf CONFIG REQUIRED)
++
++      set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
++      set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:protoc-gen-upb>")
++      set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:protoc-gen-upbdefs>")
++      set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:protoc-gen-lua>")
++      set(PROTOC_GEN_UPB_STAGE1_PROGRAM "\$<TARGET_FILE:protoc-gen-upb_stage1>")
++    else()
++      find_program(PROTOC_PROGRAM protoc)
++      find_program(PROTOC_GEN_UPB_PROGRAM protoc-gen-upb)
++      find_program(PROTOC_GEN_UPBDEFS_PROGRAM protoc-gen-upbdefs)
++      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
++      set(PROTOC_GEN_UPB_STAGE1_PROGRAM "${PROTOC_GEN_UPB_PROGRAM}")
++    endif()
++    unset(UPB_CODEGEN_TARGETS)
++
+     %(toplevel)s
+ 
++    if (UPB_BUILD_CODEGEN)
++      add_executable(protoc-gen-lua
++        ../lua/upbc.cc
++      )
++      target_link_libraries(protoc-gen-lua PRIVATE
++        absl::strings
++        protobuf::libprotobuf
++        protobuf::libprotoc
++      )
++      list(APPEND UPB_CODEGEN_TARGETS protoc-gen-lua)
++    endif()
++
++    set(UPB_COMPILER_PLUGIN_SOURCES
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/compiler/plugin.upb.h"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/compiler/plugin.upb.c"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/compiler/plugin.upbdefs.h"
++      "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/compiler/plugin.upbdefs.c"
++    )
++
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES)
++    unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES)
++    set(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES any api duration empty
++        field_mask source_context struct timestamp type wrappers)
++    foreach(PROTO_NAME IN LISTS UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_NAMES)
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES
++            "${UPB_HOST_INCLUDE_DIR}/google/protobuf/${PROTO_NAME}.proto")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}_pb.lua")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.h"
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.h")
++      list(APPEND UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upb.c"
++            "${CMAKE_CURRENT_BINARY_DIR}/google/protobuf/${PROTO_NAME}.upbdefs.c")
++    endforeach()
++
++    add_custom_command(
++      OUTPUT ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++            ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES}
++      DEPENDS ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++      COMMAND
++        "${PROTOC_PROGRAM}"
++        "-I${UPB_HOST_INCLUDE_DIR}"
++        "--plugin=protoc-gen-upb=${PROTOC_GEN_UPB_PROGRAM}"
++        "--plugin=protoc-gen-upbdefs=${PROTOC_GEN_UPBDEFS_PROGRAM}"
++        "--plugin=protoc-gen-lua=${PROTOC_GEN_UPBLUA_PROGRAM}"
++        "--upb_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}"
++        "--lua_out=${CMAKE_CURRENT_BINARY_DIR}"
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_PROTO_FILES}
++    )
++
++    add_library(well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++      ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
++    set_target_properties(well_known_types PROPERTIES OUTPUT_NAME "upb-well_known_types")
++    target_link_libraries(well_known_types PUBLIC descriptor_upb_proto upb)
++
++    include(GNUInstallDirs)
++    install(
++      DIRECTORY ../upb
++      DESTINATION include
++      FILES_MATCHING
++      PATTERN "*.h"
++      PATTERN "*.hpp"
++      PATTERN "*.inc"
++      PATTERN "*.int.h"
++    )
++    install(
++      FILES
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS}
++        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
++      DESTINATION include/google/protobuf
++    )
++    install(
++      DIRECTORY ../lua/
++      DESTINATION share/upb/lua
++    )
++    target_include_directories(upb INTERFACE $<INSTALL_INTERFACE:include>)
++    install(TARGETS
++      well_known_types
++      %(export_targets)s
++      ${UPB_CODEGEN_TARGETS}
++      EXPORT upb-config
++    )
++    install(EXPORT upb-config NAMESPACE upb:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
++
+   """)
+ 
+ data = {}
+@@ -397,7 +796,9 @@ globs = GetDict(converter)
+ workspace_dict = GetDict(WorkspaceFileFunctions(converter))
+ exec(open("bazel/workspace_deps.bzl").read(), workspace_dict)
+ exec(open("WORKSPACE").read(), workspace_dict)
+-exec(open("BUILD").read(), GetDict(BuildFileFunctions(converter)))
++exec(open("BUILD").read(), GetDict(BuildFileFunctions(converter, "")))
++exec(open("upb/util/BUILD").read(), GetDict(BuildFileFunctions(converter, "upb/util/")))
++exec(open("upbc/BUILD").read(), GetDict(BuildFileFunctions(converter, "upbc/")))
+ 
+ with open(sys.argv[1], "w") as f:
+   f.write(converter.convert())
+diff --git a/third_party/upb/lua/def.c b/third_party/upb/lua/def.c
+index 90161ec..b0b8acd 100644
+--- a/third_party/upb/lua/def.c
++++ b/third_party/upb/lua/def.c
+@@ -617,7 +617,7 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
+ 
+ static int lupb_FileDef_Dependency(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_FileDef* dep = upb_FileDef_Dependency(f, index);
+   lupb_wrapper_pushwrapper(L, 1, dep, LUPB_FILEDEF);
+   return 1;
+@@ -631,7 +631,7 @@ static int lupb_FileDef_DependencyCount(lua_State* L) {
+ 
+ static int lupb_FileDef_enum(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_EnumDef* e = upb_FileDef_TopLevelEnum(f, index);
+   lupb_wrapper_pushwrapper(L, 1, e, LUPB_ENUMDEF);
+   return 1;
+@@ -645,7 +645,7 @@ static int lupb_FileDef_enumcount(lua_State* L) {
+ 
+ static int lupb_FileDef_msg(lua_State* L) {
+   const upb_FileDef* f = lupb_FileDef_check(L, 1);
+-  int index = luaL_checkint(L, 2);
++  int index = luaL_checkinteger(L, 2);
+   const upb_MessageDef* m = upb_FileDef_TopLevelMessage(f, index);
+   lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
+   return 1;
+diff --git a/third_party/upb/lua/upb.c b/third_party/upb/lua/upb.c
+index 8c73e5f..f6ff011 100644
+--- a/third_party/upb/lua/upb.c
++++ b/third_party/upb/lua/upb.c
+@@ -61,11 +61,13 @@
+ /* Lua compatibility code *****************************************************/
+ 
+ /* Shims for upcoming Lua 5.3 functionality. */
++#if LUA_VERSION_NUM < 503
+ static bool lua_isinteger(lua_State* L, int argn) {
+   LUPB_UNUSED(L);
+   LUPB_UNUSED(argn);
+   return false;
+ }
++#endif
+ 
+ /* Utility functions **********************************************************/
+ 
+diff --git a/third_party/upb/lua/upbc.cc b/third_party/upb/lua/upbc.cc
+index e857f7a..8efb491 100644
+--- a/third_party/upb/lua/upbc.cc
++++ b/third_party/upb/lua/upbc.cc
+@@ -79,7 +79,7 @@ static void PrintString(int max_cols, absl::string_view* str,
+     } else if (ch == '\'') {
+       printer->PrintRaw("\\'");
+       max_cols--;
+-    } else if (isprint(ch)) {
++    } else if (isprint(static_cast<int>(static_cast<unsigned char>(ch)))) {
+       printer->WriteRaw(&ch, 1);
+       max_cols--;
+     } else {
+diff --git a/third_party/upb/upb/text/encode.c b/third_party/upb/upb/text/encode.c
+index c694088..33438be 100644
+--- a/third_party/upb/upb/text/encode.c
++++ b/third_party/upb/upb/text/encode.c
+@@ -308,7 +308,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+ #define CHK(x)      \
+   do {              \
+     if (!(x)) {     \
+-      return false; \
++      return NULL; \
+     }               \
+   } while (0)
+ 
+diff --git a/third_party/upb/upbc/names.cc b/third_party/upb/upbc/names.cc
+index 4d49369..7f839c2 100644
+--- a/third_party/upb/upbc/names.cc
++++ b/third_party/upb/upbc/names.cc
+@@ -46,8 +46,8 @@ static constexpr absl::string_view kDeleteMethodPrefix = "delete_";
+ static constexpr absl::string_view kAddToRepeatedMethodPrefix = "add_";
+ static constexpr absl::string_view kResizeArrayMethodPrefix = "resize_";
+ 
+-const absl::string_view kRepeatedFieldArrayGetterPostfix = "upb_array";
+-const absl::string_view kRepeatedFieldMutableArrayGetterPostfix =
++ABSL_CONST_INIT const absl::string_view kRepeatedFieldArrayGetterPostfix = "upb_array";
++ABSL_CONST_INIT const absl::string_view kRepeatedFieldMutableArrayGetterPostfix =
+     "mutable_upb_array";
+ 
+ // List of generated accessor prefixes to check against.

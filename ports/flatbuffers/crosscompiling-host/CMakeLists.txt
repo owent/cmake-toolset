@@ -35,7 +35,7 @@ set(ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING TRUE)
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
+project_third_party_include_port("flatbuffers/flatbuffers.cmake")
 
 # Test protobuf generator
 add_custom_command(

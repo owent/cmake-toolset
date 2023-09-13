@@ -22,6 +22,28 @@ if(NOT PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
   set(PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES 3)
 endif()
 
+macro(project_build_tools_append_space_one_flag_to_var VARNAME)
+  if(${VARNAME})
+    set(${VARNAME} "${${VARNAME}} ${ARGN}")
+  else()
+    set(${VARNAME} "${ARGN}")
+  endif()
+endmacro()
+
+macro(project_build_tools_append_space_one_flag_to_var_unique VARNAME)
+  if(${VARNAME})
+    if(NOT "${${VARNAME}}" STREQUAL "${ARGN}")
+      string(FIND "${${VARNAME}}" "${ARGN} " add_compiler_flags_to_var_unique_FIND_POSL)
+      string(FIND "${${VARNAME}}" " ${ARGN}" add_compiler_flags_to_var_unique_FIND_POSR)
+      if(add_compiler_flags_to_var_unique_FIND_POSL LESS 0 AND add_compiler_flags_to_var_unique_FIND_POSR LESS 0)
+        set(${VARNAME} "${${VARNAME}} ${ARGN}")
+      endif()
+    endif()
+  else()
+    set(${VARNAME} "${ARGN}")
+  endif()
+endmacro()
+
 macro(project_build_tools_append_space_flags_to_var VARNAME)
   foreach(def ${ARGN})
     if(${VARNAME})
@@ -72,14 +94,19 @@ endmacro()
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   cmake_parse_arguments(
     project_build_tools_append_cmake_inherit_options
-    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;APPEND_SYSTEM_LINKS" "" "" ${ARGN})
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;DISABLE_CMAKE_FIND_ROOT_FLAGS;APPEND_SYSTEM_LINKS"
+    ""
+    ""
+    ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
   if(DEFINED CACHE{CMAKE_MAKE_PROGRAM})
     list(APPEND ${OUTVAR} "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
   endif()
 
   set(project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
-
+  if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_FIND_ROOT_FLAGS)
+    list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS)
+  endif()
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
     list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C)
   endif()
@@ -122,6 +149,8 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
       endif()
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES project_build_tools_append_cmake_inherit_VAR_VALUE)
+        string(REPLACE ";" "\\;" project_build_tools_append_cmake_inherit_VAR_VALUE
+                       "${project_build_tools_append_cmake_inherit_VAR_VALUE}")
       endif()
     elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS) # Add system links into standard libraries even not set
       if(project_build_tools_append_cmake_inherit_options_APPEND_SYSTEM_LINKS
@@ -163,6 +192,7 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_CXX_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_ASM_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_TOOLCHAIN_FILE)
+  unset(project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_FIND_ROOT_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_VARS)
 endmacro()
 
@@ -203,6 +233,8 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
     list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_HOST_TOOLCHAIN_FILE}")
   endif()
 
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_host_options_VARS})
     unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
     if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME}
@@ -255,15 +287,39 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
           "-D${project_build_tools_append_cmake_inherit_VAR_NAME}= ${project_build_tools_append_cmake_inherit_VAR_VALUE}"
         )
       else()
-        list(
-          APPEND ${OUTVAR}
-          "-D${project_build_tools_append_cmake_inherit_VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}"
-        )
+        if(project_build_tools_append_cmake_inherit_VAR_NAME STREQUAL "CMAKE_FIND_ROOT_PATH")
+          list(
+            APPEND
+            ${OUTVAR}
+            "-DCMAKE_FIND_ROOT_PATH=${project_build_tools_append_cmake_inherit_VAR_VALUE}\;${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+          )
+          set(project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH TRUE)
+        elseif(project_build_tools_append_cmake_inherit_VAR_NAME STREQUAL "CMAKE_PREFIX_PATH")
+          list(
+            APPEND
+            ${OUTVAR}
+            "-DCMAKE_PREFIX_PATH=${project_build_tools_append_cmake_inherit_VAR_VALUE}\;${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
+          )
+          set(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH TRUE)
+        else()
+          list(
+            APPEND
+            ${OUTVAR}
+            "-D${project_build_tools_append_cmake_inherit_VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}"
+          )
+        endif()
       endif()
     endif()
   endforeach()
   unset(project_build_tools_append_cmake_inherit_VAR_NAME)
   unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
+
+  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+    list(APPEND ${OUTVAR} "-DCMAKE_FIND_ROOT_PATH=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
+  endif()
+  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
+    list(APPEND ${OUTVAR} "-DCMAKE_PREFIX_PATH=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
+  endif()
 
   # vcpkg
   if(VCPKG_HOST_TRIPLET)
@@ -283,6 +339,8 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
   # Policy
   project_build_tools_append_cmake_inherit_policy(${OUTVAR})
 
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+  unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
   unset(project_build_tools_append_cmake_host_options_DISABLE_C_FLAGS)
   unset(project_build_tools_append_cmake_host_options_DISABLE_CXX_FLAGS)
   unset(project_build_tools_append_cmake_host_options_DISABLE_ASM_FLAGS)
@@ -617,7 +675,9 @@ function(project_git_clone_repository)
       BRANCH
       COMMIT
       TAG
-      CHECK_PATH)
+      CHECK_PATH
+      LOCK_TIMEOUT
+      LOCK_FILE)
   set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -626,7 +686,7 @@ function(project_git_clone_repository)
         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     message(
       STATUS
-        "Try to git clone ${project_git_clone_repository_TAG}${project_git_clone_repository_GIT_BRANCH}${project_git_clone_repository_COMMIT} into ${project_git_clone_repository_REPO_DIRECTORY}"
+        "Try to git clone ${project_git_clone_repository_TAG}${project_git_clone_repository_BRANCH}${project_git_clone_repository_COMMIT} into ${project_git_clone_repository_REPO_DIRECTORY}"
     )
     if(project_git_clone_repository_PATCH_FILES)
       message(STATUS "  Using patch files: ${project_git_clone_repository_PATCH_FILES}")
@@ -674,6 +734,23 @@ function(project_git_clone_repository)
     message(FATAL_ERROR "git not found")
   endif()
 
+  # Lock the directory to prevent other process to access it
+  if(NOT project_git_clone_repository_LOCK_TIMEOUT)
+    set(project_git_clone_repository_LOCK_TIMEOUT 600)
+  endif()
+  if(NOT project_git_clone_repository_LOCK_FILE)
+    set(project_git_clone_repository_LOCK_FILE "${project_git_clone_repository_REPO_DIRECTORY}.cmake-toolset.lock")
+  endif()
+  get_filename_component(project_git_clone_repository_LOCK_FILE_DIRECTORY "${project_git_clone_repository_LOCK_FILE}"
+                         DIRECTORY)
+  if(NOT EXISTS "${project_git_clone_repository_LOCK_FILE_DIRECTORY}")
+    file(MAKE_DIRECTORY "${project_git_clone_repository_LOCK_FILE_DIRECTORY}")
+  endif()
+  file(
+    LOCK "${project_git_clone_repository_LOCK_FILE}"
+    GUARD PROCESS
+    RESULT_VARIABLE LOCK_RESULT
+    TIMEOUT ${project_git_clone_repository_LOCK_TIMEOUT})
   if(project_git_clone_repository_FORCE_RESET AND EXISTS "${project_git_clone_repository_REPO_DIRECTORY}")
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" ${git_global_options} clean -dfx
@@ -936,6 +1013,12 @@ function(project_git_clone_repository)
                           ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
     endif()
   endif()
+
+  # unlock
+  if(LOCK_RESULT EQUAL 0)
+    file(LOCK "${project_git_clone_repository_LOCK_FILE}" RELEASE)
+    file(REMOVE "${project_git_clone_repository_LOCK_FILE}")
+  endif()
 endfunction()
 
 if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
@@ -1176,21 +1259,21 @@ function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
   endif()
 endfunction()
 
-function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
+function(project_build_tools_get_imported_property OUTPUT_VAR_NAME TARGET_NAME VAR_NAME)
   if(CMAKE_BUILD_TYPE)
-    string(TOUPPER "IMPORTED_LOCATION_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_IMPORTED_LOCATION)
-    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${TRY_SPECIFY_IMPORTED_LOCATION})
+    string(TOUPPER "${VAR_NAME}_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_${VAR_NAME})
+    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${TRY_SPECIFY_${VAR_NAME}})
   endif()
   if(NOT ${OUTPUT_VAR_NAME})
-    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} IMPORTED_LOCATION)
+    get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${VAR_NAME})
   endif()
   if(NOT ${OUTPUT_VAR_NAME})
-    get_target_property(project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
+    get_target_property(project_build_tools_get_imported_property_IMPORTED_CONFIGURATIONS ${TARGET_NAME}
                         IMPORTED_CONFIGURATIONS)
-    foreach(project_build_tools_get_imported_location_IMPORTED_CONFIGURATION IN
-            LISTS project_build_tools_get_imported_location_IMPORTED_CONFIGURATIONS)
+    foreach(project_build_tools_get_imported_property_IMPORTED_CONFIGURATION IN
+            LISTS project_build_tools_get_imported_property_IMPORTED_CONFIGURATIONS)
       get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME}
-                          "IMPORTED_LOCATION_${project_build_tools_get_imported_location_IMPORTED_CONFIGURATION}")
+                          "${VAR_NAME}_${project_build_tools_get_imported_property_IMPORTED_CONFIGURATION}")
       if(${OUTPUT_VAR_NAME})
         break()
       endif()
@@ -1199,6 +1282,15 @@ function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
   if(${OUTPUT_VAR_NAME})
     set(${OUTPUT_VAR_NAME}
         ${${OUTPUT_VAR_NAME}}
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_get_imported_location OUTPUT_VAR_NAME TARGET_NAME)
+  project_build_tools_get_imported_property(OUTPUT_VAR_VALUE "${TARGET_NAME}" IMPORTED_LOCATION)
+  if(OUTPUT_VAR_VALUE)
+    set(${OUTPUT_VAR_NAME}
+        ${OUTPUT_VAR_VALUE}
         PARENT_SCOPE)
   endif()
 endfunction()
@@ -1799,11 +1891,19 @@ macro(atframework_cmake_toolset_find_bash_tools)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_RM)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_TAR NAMES tar gtar)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_TAR)
+
+  if(ATFRAMEWORK_CMAKE_TOOLSET_BASH)
+    message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_BASH=${ATFRAMEWORK_CMAKE_TOOLSET_BASH}")
+  endif()
 endmacro()
 
 macro(atframework_cmake_toolset_find_pwsh_tools)
   find_program(ATFRAMEWORK_CMAKE_TOOLSET_PWSH NAMES pwsh pwsh.exe pwsh-preview pwsh-preview.exe)
   mark_as_advanced(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+
+  if(ATFRAMEWORK_CMAKE_TOOLSET_PWSH)
+    message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_PWSH=${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}")
+  endif()
 endmacro()
 
 macro(

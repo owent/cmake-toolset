@@ -37,7 +37,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
 
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
-    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.10.0" GIT_URL
+    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.11.0" GIT_URL
                                      "https://github.com/open-telemetry/opentelemetry-cpp.git")
 
     project_third_party_try_patch_file(
@@ -98,10 +98,6 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
 
       if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_ETW AND WIN32)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_ETW ON)
-      endif()
-
-      if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_JAEGER)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_JAEGER OFF)
       endif()
 
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZLIB_ROOT_DIR)
@@ -167,12 +163,6 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
         endif()
         if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_ZIPKIN)
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_ZIPKIN ON)
-        endif()
-      endif()
-
-      if(TARGET nlohmann_json::nlohmann_json)
-        if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_ZPAGES)
-          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_WITH_ZPAGES ON)
         endif()
       endif()
 

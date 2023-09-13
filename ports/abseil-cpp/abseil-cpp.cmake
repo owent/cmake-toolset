@@ -7,7 +7,7 @@ include_guard(DIRECTORY)
 # =========== third party abseil-cpp ==================
 macro(PROJECT_THIRD_PARTY_ABSEIL_IMPORT)
   if(absl_FOUND)
-    message(STATUS "Dependency(${PROJECT_NAME}): abseil-cpp found(${PROJECT_NAME})")
+    message(STATUS "Dependency(${PROJECT_NAME}): abseil-cpp found")
   endif()
 endmacro()
 
@@ -21,7 +21,7 @@ if(NOT absl_FOUND)
       if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20200225.3")
       else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20230125.3")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20230802.0")
       endif()
 
     endif()

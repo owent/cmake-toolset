@@ -35,7 +35,7 @@ set(ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING TRUE)
 
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/abseil-cpp/abseil-cpp.cmake")
+project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")
 
 add_executable("${PROJECT_NAME}-cross-test" cross-main.cpp)
 

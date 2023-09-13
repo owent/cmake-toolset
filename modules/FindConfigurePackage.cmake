@@ -14,6 +14,7 @@
 #   CMAKE_FLAGS [cmake options...]
 #   FIND_PACKAGE_FLAGS [options will be passed into find_package(...)]
 #   CMAKE_INHERIT_BUILD_ENV
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_CMAKE_FIND_ROOT_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
@@ -213,6 +214,7 @@ macro(FindConfigurePackage)
       BUILD_WITH_SCONS
       BUILD_WITH_CUSTOM_COMMAND
       CMAKE_INHERIT_BUILD_ENV
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_CMAKE_FIND_ROOT_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
@@ -511,7 +513,7 @@ macro(FindConfigurePackage)
                          "${FindConfigurePackage_CONFIGURE_FLAGS}")
         endif()
         execute_process(
-          COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" ${CONFIGURE_EXEC_FILE}
+          COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "${CONFIGURE_EXEC_FILE}"
                   "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}" ${FindConfigurePackage_CONFIGURE_FLAGS}
           WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -588,6 +590,12 @@ macro(FindConfigurePackage)
           if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_CXX_STANDARD)
           endif()
+          # When with CMAKE_INHERIT_FIND_ROOT_PATH, some variables will be append by
+          # project_build_tools_append_cmake_options_for_lib() below.
+          if(FindConfigurePackage_CMAKE_INHERIT_FIND_ROOT_PATH
+             OR FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CMAKE_FIND_ROOT_FLAGS)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_CMAKE_FIND_ROOT_FLAGS)
+          endif()
           if(FindConfigurePackage_CMAKE_INHERIT_SYSTEM_LINKS)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS APPEND_SYSTEM_LINKS)
           endif()
@@ -602,16 +610,14 @@ macro(FindConfigurePackage)
                    "-DCMAKE_CXX_VISIBILITY_PRESET=hidden" "-DCMAKE_VISIBILITY_INLINES_HIDDEN=ON")
             endif()
           endif()
+
           project_build_tools_append_cmake_options_for_lib(
             ${project_build_tools_append_cmake_inherit_options_CALL_VARS})
           unset(project_build_tools_append_cmake_inherit_options_CALL_VARS)
 
         endif()
         if(FindConfigurePackage_CMAKE_INHERIT_FIND_ROOT_PATH)
-          list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
-                               "-DCMAKE_FIND_ROOT_PATH=${CMAKE_FIND_ROOT_PATH}")
-          list_append_unescape(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR
-                               "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
+          project_third_party_append_find_root_args(FindConfigurePackage_BUILD_WITH_CMAKE_GENERATOR)
         endif()
 
         if(EXISTS "${FindConfigurePackage_BUILD_DIRECTORY}/CMakeCache.txt")
@@ -638,7 +644,7 @@ macro(FindConfigurePackage)
           set(FindConfigurePackageCMakeBuildParallelFlags "-j")
         endif()
         if(FindConfigurePackage_INSTALL_TARGET)
-          set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --build . --target ${FindConfigurePackage_INSTALL_TARGET}
+          set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --build . --target "${FindConfigurePackage_INSTALL_TARGET}"
                                                          ${FindConfigurePackageCMakeBuildParallelFlags})
         else()
           set(FindConfigurePackage_CMAKE_INSTALL_OPTIONS --install . --prefix

@@ -130,35 +130,39 @@ endif()
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR IN_LIST CMAKE_FIND_ROOT_PATH)
   if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
-    list(PREPEND CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/cmake"
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}"
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}/cmake")
+    prepend_list_flags_to_inherit_var_unique(
+      CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/cmake"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}/cmake")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      list(PREPEND CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/cmake"
-           "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/cmake")
+      prepend_list_flags_to_inherit_var_unique(CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/cmake"
+                                               "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/cmake")
     else()
-      list(PREPEND CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake")
+      prepend_list_flags_to_inherit_var_unique(CMAKE_FIND_ROOT_PATH
+                                               "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake")
     endif()
   else()
-    list(PREPEND CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
+    prepend_list_flags_to_inherit_var_unique(CMAKE_FIND_ROOT_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   endif()
 endif()
 if(NOT PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR IN_LIST CMAKE_MODULE_PATH)
-  list(PREPEND CMAKE_MODULE_PATH "${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR}")
+  prepend_list_flags_to_inherit_var_unique(CMAKE_MODULE_PATH "${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR}")
 endif()
 if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR IN_LIST CMAKE_PREFIX_PATH)
   if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
-    list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/cmake"
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}"
-         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}/cmake")
+    prepend_list_flags_to_inherit_var_unique(
+      CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}/cmake"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_DATADIR}/cmake")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/cmake"
-           "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/cmake")
+      prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/cmake"
+                                               "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/cmake")
     else()
-      list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake")
+      prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH
+                                               "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake")
     endif()
   else()
-    list(PREPEND CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
+    prepend_list_flags_to_inherit_var_unique(CMAKE_PREFIX_PATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   endif()
 endif()
 if(CMAKE_CROSSCOMPILING)
@@ -204,6 +208,20 @@ function(project_third_party_print_find_information)
   endforeach()
   if(UNIX)
     message(STATUS "cmake-toolset: ENV{PKG_CONFIG_PATH}=$ENV{PKG_CONFIG_PATH}")
+  endif()
+  if(VCPKG_TOOLCHAIN)
+    if(VCPKG_INSTALLED_DIR)
+      message(STATUS "cmake-toolset: VCPKG_INSTALLED_DIR=${VCPKG_INSTALLED_DIR}")
+    endif()
+    if(Z_VCPKG_ROOT_DIR)
+      message(STATUS "cmake-toolset: Z_VCPKG_ROOT_DIR=${Z_VCPKG_ROOT_DIR}")
+    endif()
+    if(VCPKG_TARGET_TRIPLET)
+      message(STATUS "cmake-toolset: VCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET}")
+    endif()
+    if(VCPKG_HOST_TRIPLET)
+      message(STATUS "cmake-toolset: VCPKG_HOST_TRIPLET=${VCPKG_HOST_TRIPLET}")
+    endif()
   endif()
 endfunction()
 project_third_party_print_find_information()
@@ -719,6 +737,10 @@ function(project_third_party_try_patch_file OUTPUT_VAR BASE_DIRECTORY PORT_PREFI
 endfunction()
 
 function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_DIRECTORY)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING)
+    return()
+  endif()
+
   set(optionArgs "")
   set(oneValueArgs VERSION PORT_PREFIX RESULT_VARIABLE)
   set(multiValueArgs TEST_PATH TEST_PROGRAM)
@@ -815,7 +837,13 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
     ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
     "-DPROJECT_THIRD_PARTY_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
     "-DPROJECT_THIRD_PARTY_HOST_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}"
-    "-DPROJECT_THIRD_PARTY_PACKAGE_DIR=${PROJECT_THIRD_PARTY_PACKAGE_DIR}")
+    "-DPROJECT_THIRD_PARTY_PACKAGE_DIR=${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
+    "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}"
+    "-DATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING=ON")
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
+         "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}")
+  endif()
   if(DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)
     list(
       APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS
@@ -823,10 +851,15 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
     )
   endif()
 
-  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_CMD)
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_PWSH)
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_BASH)
   foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS)
-    string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
-    add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_CMD
+    # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
+    set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+    add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_PWSH
+                              "\"${CMD_ARG_UNESCAPE}\"")
+    string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+    add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS_BASH
                               "\"${CMD_ARG_UNESCAPE}\"")
   endforeach()
   unset(CMD_ARG_UNESCAPE)
@@ -871,3 +904,75 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
         PARENT_SCOPE)
   endif()
 endfunction()
+
+macro(project_third_party_include_lock BASE_DIR PATH)
+  cmake_parse_arguments(project_third_party_include_lock "" "TIMEOUT" "" ${ARGN})
+  if(NOT project_third_party_include_lock_TIMEOUT)
+    set(project_third_party_include_lock_TIMEOUT 7200)
+  endif()
+
+  if(NOT project_third_party_include_lock_DEPTH)
+    set(project_third_party_include_lock_DEPTH 0)
+  endif()
+  math(EXPR project_third_party_include_lock_DEPTH "${project_third_party_include_lock_DEPTH}+1" OUTPUT_FORMAT DECIMAL)
+
+  get_filename_component(
+    LOCK_FILE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}"
+    DIRECTORY)
+  if(NOT EXISTS "${LOCK_FILE_DIRECTORY}")
+    file(MAKE_DIRECTORY "${LOCK_FILE_DIRECTORY}")
+  endif()
+
+  file(
+    LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}.lock"
+    GUARD PROCESS
+    RESULT_VARIABLE project_third_party_include_lock_${project_third_party_include_lock_DEPTH}_LOCK_RESULT
+    TIMEOUT ${project_third_party_include_lock_TIMEOUT})
+
+  include("${BASE_DIR}/${PATH}")
+
+  # Unlock
+  if(project_third_party_include_lock_${project_third_party_include_lock_DEPTH}_LOCK_RESULT EQUAL 0)
+    file(LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}.lock" RELEASE)
+    file(REMOVE "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/custom/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}.lock")
+  endif()
+
+  math(EXPR project_third_party_include_lock_DEPTH "${project_third_party_include_lock_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
+endmacro()
+
+macro(project_third_party_include_port PATH)
+  cmake_parse_arguments(project_third_party_include_port "" "TIMEOUT" "" ${ARGN})
+  if(NOT project_third_party_include_port_TIMEOUT)
+    set(project_third_party_include_port_TIMEOUT 7200)
+  endif()
+
+  if(NOT project_third_party_include_port_DEPTH)
+    set(project_third_party_include_port_DEPTH 0)
+  endif()
+  math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}+1" OUTPUT_FORMAT DECIMAL)
+
+  get_filename_component(
+    LOCK_FILE_DIRECTORY "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}"
+    DIRECTORY)
+  if(NOT EXISTS "${LOCK_FILE_DIRECTORY}")
+    file(MAKE_DIRECTORY "${LOCK_FILE_DIRECTORY}")
+  endif()
+
+  file(
+    LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}.lock"
+    GUARD PROCESS
+    RESULT_VARIABLE project_third_party_include_port_${project_third_party_include_port_DEPTH}_LOCK_RESULT
+    TIMEOUT ${project_third_party_include_port_TIMEOUT})
+
+  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/${PATH}")
+
+  # Unlock
+  if(project_third_party_include_port_${project_third_party_include_port_DEPTH}_LOCK_RESULT EQUAL 0)
+    file(LOCK "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}.lock" RELEASE)
+    file(REMOVE "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/.lock/ports/${PROJECT_PREBUILT_PLATFORM_NAME}/${PATH}.lock")
+  endif()
+
+  math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
+endmacro()
+
+message(STATUS "cmake-toolset: Configure for third party ports done.")

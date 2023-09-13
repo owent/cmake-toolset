@@ -43,9 +43,11 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
     else()
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE flatc)
     endif()
-    message(
-      STATUS "Dependency(${PROJECT_NAME}): flatbuffers: flatc=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE}"
-    )
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE)
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): flatbuffers: flatc=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE}")
+    endif()
   endif()
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATHASH_EXECUTABLE)
     if(TARGET flatbuffers::flathash)
@@ -55,10 +57,12 @@ macro(PROJECT_THIRD_PARTY_FLATBUFFERS_IMPORT)
     else()
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATHASH_EXECUTABLE flathash)
     endif()
-    message(
-      STATUS
-        "Dependency(${PROJECT_NAME}): flatbuffers: flathash=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATHASH_EXECUTABLE}"
-    )
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATHASH_EXECUTABLE)
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): flatbuffers: flathash=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATHASH_EXECUTABLE}"
+      )
+    endif()
   endif()
 endmacro()
 

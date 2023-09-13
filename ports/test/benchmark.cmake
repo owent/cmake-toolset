@@ -52,7 +52,6 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
       endif()
     endif()
 
-    # Do not use benchmark v1.7.0, which has a lot symbol exporting problems.
     project_third_party_port_declare(benchmark VERSION "v1.8.2" GIT_URL "https://github.com/google/benchmark.git")
 
     project_third_party_try_patch_file(

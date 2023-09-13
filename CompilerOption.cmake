@@ -41,10 +41,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
     ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM}
     ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON}
+    ${PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS}
     ${PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_C}
     ${PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_CXX}
     ${PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_ASM}
-    ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+    ${PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON})
     if(DEFINED CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}})
       set(COMPILER_OPTION_INHERIT_${COMPILER_OPTION_INHERIT_VAR_NAME} "$CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}}")
     endif()
@@ -173,6 +174,18 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endmacro()
 
+  macro(prepend_list_flags_to_var_unique VARNAME)
+    if(${VARNAME})
+      foreach(def ${ARGN})
+        if(NOT "${def}" IN_LIST ${VARNAME})
+          list(PREPEND ${VARNAME} "${def}")
+        endif()
+      endforeach()
+    else()
+      list(PREPEND ${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
   macro(add_list_flags_to_inherit_var VARNAME)
     add_list_flags_to_var(${VARNAME} "${ARGN}")
     if("${VARNAME}" MATCHES "^CMAKE_")
@@ -180,10 +193,24 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endmacro()
 
+  macro(prepend_list_flags_to_inherit_var VARNAME)
+    list(PREPEND ${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      list(PREPEND COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
   macro(add_list_flags_to_inherit_var_unique VARNAME)
     add_list_flags_to_var_unique(${VARNAME} "${ARGN}")
     if("${VARNAME}" MATCHES "^CMAKE_")
       add_list_flags_to_var_unique(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
+    endif()
+  endmacro()
+
+  macro(prepend_list_flags_to_inherit_var_unique VARNAME)
+    prepend_list_flags_to_var_unique(${VARNAME} "${ARGN}")
+    if("${VARNAME}" MATCHES "^CMAKE_")
+      prepend_list_flags_to_var_unique(COMPILER_OPTION_INHERIT_${VARNAME} "${ARGN}")
     endif()
   endmacro()
 
@@ -1093,7 +1120,8 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
   # Store all flags into Cache variables
   foreach(COMPILER_OPTION_INHERIT_VAR_NAME
           ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
-          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+          ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON}
+          ${PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS})
     if(DEFINED CACHE{${COMPILER_OPTION_INHERIT_VAR_NAME}} AND DEFINED ${COMPILER_OPTION_INHERIT_VAR_NAME})
       set(${COMPILER_OPTION_INHERIT_VAR_NAME}
           "${${COMPILER_OPTION_INHERIT_VAR_NAME}}"

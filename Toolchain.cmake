@@ -7,3 +7,6 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
 else()
   list(APPEND CMAKE_PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/Import.cmake")
 endif()
+
+# Propogate these values to try-compile configurations so the toolchains load
+list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES ATFRAMEWORK_CHAINLOAD_TOOLCHAIN_FILE)

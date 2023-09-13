@@ -237,17 +237,19 @@ if(NOT Libwebsockets_FOUND
         endif()
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES)
           # Prefer static library on windows
-          if((CMAKE_SYSTEM_NAME STREQUAL "Windows"
-              OR MINGW
-              OR CYGWIN)
-             AND TARGET uv_a)
-            project_build_tools_get_imported_location(LWS_LIBUV_LIBRARIES uv_a)
-            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-                 "-DLWS_LIBUV_LIBRARIES=${LWS_LIBUV_LIBRARIES}")
-          else()
-            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-                 "-DLWS_LIBUV_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES}")
-          endif()
+          #[[
+          # if((CMAKE_SYSTEM_NAME STREQUAL "Windows"
+          #     OR MINGW
+          #     OR CYGWIN)
+          #    AND TARGET uv_a)
+          #   project_build_tools_get_imported_location(LWS_LIBUV_LIBRARIES uv_a)
+          #   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+          #        "-DLWS_LIBUV_LIBRARIES=${LWS_LIBUV_LIBRARIES}")
+          # else()
+          ]]
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+               "-DLWS_LIBUV_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LIBRARIES}")
+          # endif()
         endif()
       endif()
 

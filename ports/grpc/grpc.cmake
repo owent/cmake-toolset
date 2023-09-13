@@ -6,6 +6,40 @@
 include_guard(DIRECTORY)
 
 # =========== third party grpc ==================
+function(PROJECT_THIRD_PARTY_GRPC_FIND_PLUGIN VAR_NAME PLUGIN_NAME WITH_TARGET)
+  if(${WITH_TARGET} AND TARGET gRPC::${PLUGIN_NAME})
+    project_build_tools_get_imported_location(${VAR_NAME} gRPC::${PLUGIN_NAME})
+  else()
+    find_program(${VAR_NAME} ${PLUGIN_NAME})
+    if(NOT ${VAR_NAME} AND VCPKG_INSTALLED_DIR)
+      if(VCPKG_HOST_TRIPLET)
+        message(
+          STATUS
+            "Dependency(${PROJECT_NAME}): grpc try to find ${PLUGIN_NAME} in ${VCPKG_INSTALLED_DIR}/${VCPKG_HOST_TRIPLET}/tools/grpc"
+        )
+        find_program(
+          ${VAR_NAME} ${PLUGIN_NAME}
+          PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_HOST_TRIPLET}/tools/grpc"
+          NO_DEFAULT_PATH)
+      else()
+        message(
+          STATUS
+            "Dependency(${PROJECT_NAME}): grpc try to find ${PLUGIN_NAME} in ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc"
+        )
+        find_program(
+          ${VAR_NAME} ${PLUGIN_NAME}
+          PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/grpc"
+          NO_DEFAULT_PATH)
+      endif()
+    endif()
+  endif()
+  if(${VAR_NAME})
+    set(${VAR_NAME}
+        ${${VAR_NAME}}
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
 macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
   if(TARGET gRPC::grpc++_alts
      OR TARGET gRPC::grpc++
@@ -26,13 +60,20 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
 
     if(CMAKE_CROSSCOMPILING)
       # Just like find_program(_gRPC_CPP_PLUGIN grpc_cpp_plugin) in CMakeLists.txt in grpc
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE grpc_csharp_plugin)
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE grpc_node_plugin)
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE grpc_objective_c_plugin)
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE grpc_php_plugin)
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE grpc_python_plugin)
-      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE grpc_ruby_plugin)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE
+                                           grpc_cpp_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE
+                                           grpc_csharp_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE
+                                           grpc_node_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE
+                                           grpc_objective_c_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE
+                                           grpc_php_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE
+                                           grpc_python_plugin OFF)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE
+                                           grpc_ruby_plugin OFF)
       message(
         STATUS
           "Dependency(${PROJECT_NAME}): grpc executables for crosscompiling:
@@ -45,48 +86,26 @@ macro(PROJECT_THIRD_PARTY_GRPC_IMPORT)
   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE}
           ")
     else()
-      if(TARGET gRPC::grpc_cpp_plugin)
-        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE
-                                                  gRPC::grpc_cpp_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
-      endif()
-      if(TARGET gRPC::grpc_csharp_plugin)
-        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE
-                                                  gRPC::grpc_csharp_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE grpc_csharp_plugin)
-      endif()
-      if(TARGET gRPC::grpc_node_plugin)
-        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE
-                                                  gRPC::grpc_node_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE grpc_node_plugin)
-      endif()
-      if(TARGET gRPC::grpc_objective_c_plugin)
-        project_build_tools_get_imported_location(
-          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE gRPC::grpc_objective_c_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE grpc_objective_c_plugin)
-      endif()
-      if(TARGET gRPC::grpc_php_plugin)
-        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE
-                                                  gRPC::grpc_php_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE grpc_php_plugin)
-      endif()
-      if(TARGET gRPC::grpc_python_plugin)
-        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE
-                                                  gRPC::grpc_python_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE grpc_python_plugin)
-      endif()
-      if(TARGET gRPC::grpc_ruby_plugin)
-        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE
-                                                  gRPC::grpc_ruby_plugin)
-      else()
-        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE grpc_ruby_plugin)
-      endif()
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CPP_PLUGIN_EXECUTABLE
+                                           grpc_cpp_plugin ON)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_CSHARP_PLUGIN_EXECUTABLE
+                                           grpc_csharp_plugin ON)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_NODE_PLUGIN_EXECUTABLE
+                                           grpc_node_plugin ON)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_OBJECTIVE_C_PLUGIN_EXECUTABLE
+                                           grpc_objective_c_plugin ON)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PHP_PLUGIN_EXECUTABLE
+                                           grpc_php_plugin ON)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PYTHON_PLUGIN_EXECUTABLE
+                                           grpc_python_plugin ON)
+      project_third_party_grpc_find_plugin(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_RUBY_PLUGIN_EXECUTABLE
+                                           grpc_ruby_plugin ON)
+    endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME)
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): gRPC found and using targets.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME})"
+      )
     endif()
   endif()
 endmacro()
@@ -118,8 +137,11 @@ if(NOT TARGET gRPC::grpc++_alts
       # TODO MSVC can only use C++17 in find_configure_package() below, we should remove the CMAKE_CXX_STANDARD patch
       # after gRPC support MSVC with higher standard.
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
-        # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.56.1")
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.2")
+        if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.57.0")
+        else()
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.2")
+        endif()
       endif()
     endif()
 
@@ -173,9 +195,13 @@ if(NOT TARGET gRPC::grpc++_alts
       endif()
 
       foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS)
-        string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
-        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_CMD
-                                  "\"${CMD_ARG_UNESCAPE}\"")
+        # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
+        set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+        project_build_tools_append_space_one_flag_to_var(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_PWSH "\"${CMD_ARG_UNESCAPE}\"")
+        string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+        project_build_tools_append_space_one_flag_to_var(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_BASH "\"${CMD_ARG_UNESCAPE}\"")
       endforeach()
       unset(CMD_ARG_UNESCAPE)
 

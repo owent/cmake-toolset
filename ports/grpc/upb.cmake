@@ -97,10 +97,15 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GRPC_VERSION)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_STANDALONE FALSE)
     else()
+      if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_DEFAULT_VERSION "455cfdb8ae60a1763e6d924e36851c6897a781bb")
+      else()
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_DEFAULT_VERSION "e4635f223e7d36dfbea3b722a4ca4807a7e882e2")
+      endif()
       project_third_party_port_declare(
         upb
         VERSION
-        "e4635f223e7d36dfbea3b722a4ca4807a7e882e2"
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_DEFAULT_VERSION}"
         GIT_URL
         "https://github.com/protocolbuffers/upb.git"
         BUILD_OPTIONS
@@ -204,9 +209,13 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       endif()
 
       foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS)
-        string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
-        add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_CMD
-                                  "\"${CMD_ARG_UNESCAPE}\"")
+        # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
+        set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+        project_build_tools_append_space_one_flag_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_PWSH
+                                                         "\"${CMD_ARG_UNESCAPE}\"")
+        string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+        project_build_tools_append_space_one_flag_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_BASH
+                                                         "\"${CMD_ARG_UNESCAPE}\"")
       endforeach()
       unset(CMD_ARG_UNESCAPE)
 
@@ -316,13 +325,6 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
 
     if(TARGET upb::upb)
       project_third_party_upb_import()
-      if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")
-        execute_process(
-          COMMAND
-            "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/upb-lua-binding/CMakeLists.txt"
-            "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua"
-            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      endif()
     endif()
   endif()
 else()
@@ -334,4 +336,19 @@ if(NOT TARGET upb::upb)
     project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}")
   endif()
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Can not build upb.")
+endif()
+
+if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR OFF)
+  execute_process(
+    COMMAND
+      "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/upb-lua-binding/CMakeLists.txt"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+elseif(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR ON)
+  execute_process(
+    COMMAND
+      "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/upb-lua-binding/CMakeLists.txt"
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua"
+      ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 endif()

@@ -26,6 +26,8 @@ else {
     $FINAL_BUILD_TYPE = "Release"
 }
 
+Set-PSDebug -Trace 2
+
 # build host protoc first
 if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@".ToLower() -eq "yes") -or ("@CMAKE_CROSSCOMPILING@".ToLower() -eq "1") -or ("@CMAKE_CROSSCOMPILING@".ToLower() -eq "on")) {
     $ENV:PATH = "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_DIR" + [IO.Path]::PathSeparator + "$ENV:PATH"

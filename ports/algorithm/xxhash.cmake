@@ -16,7 +16,7 @@ if(NOT TARGET xxHash::xxhash)
     project_third_party_port_declare(
       xxHash
       VERSION
-      "v0.8.1"
+      "v0.8.2"
       GIT_URL
       "https://github.com/Cyan4973/xxHash.git"
       BUILD_OPTIONS

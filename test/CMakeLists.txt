@@ -83,9 +83,11 @@ if(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL)
   endif()
 endif()
 
-foreach(COMPILER_OPTION_INHERIT_VAR_NAME
-        ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
-        ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+foreach(
+  COMPILER_OPTION_INHERIT_VAR_NAME
+  ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
+  ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON}
+  ${PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS})
   if(DEFINED COMPILER_OPTION_INHERIT_${COMPILER_OPTION_INHERIT_VAR_NAME})
     message(
       STATUS
@@ -100,11 +102,11 @@ if(EXISTS "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
   file(REMOVE "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
 endif()
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
+project_third_party_include_port("compression/import.cmake")
 
 if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
   if(COMPILER_OPTIONS_TEST_EXCEPTION)
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/jemalloc/jemalloc.cmake")
+    project_third_party_include_port("jemalloc/jemalloc.cmake")
   endif()
   if(NOT WIN32 AND NOT MINGW)
     #[[
@@ -113,72 +115,72 @@ if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
     #   @see https://gcc.gnu.org/gcc-4.9/changes.html
     #]]
     if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "4.9")
-      include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+      project_third_party_include_port("libunwind/libunwind.cmake")
     endif()
   endif()
 endif()
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
   # mimalloc do not support VS2019
   if(NOT (MSVC AND MSVC_VERSION LESS 1930))
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
+    project_third_party_include_port("malloc/mimalloc.cmake")
   endif()
 endif()
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
+project_third_party_include_port("algorithm/xxhash.cmake")
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
   # tbb do not support -fno-exceptions now
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/tbb.cmake")
+  project_third_party_include_port("algorithm/tbb.cmake")
 endif()
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
+project_third_party_include_port("libuv/libuv.cmake")
+project_third_party_include_port("lua/lua.cmake")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "8")
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
+    project_third_party_include_port("gsl/ms-gsl.cmake")
   endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10")
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
+    project_third_party_include_port("gsl/ms-gsl.cmake")
   endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10.3")
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
+    project_third_party_include_port("gsl/ms-gsl.cmake")
   endif()
 elseif(MSVC)
   if(MSVC_VERSION GREATER_EQUAL 1916)
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
+    project_third_party_include_port("gsl/ms-gsl.cmake")
   endif()
 endif()
 if(NOT TARGET Microsoft.GSL::GSL)
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/gsl-lite.cmake")
+  project_third_party_include_port("gsl/gsl-lite.cmake")
 endif()
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/fmtlib/fmtlib.cmake")
+project_third_party_include_port("fmtlib/fmtlib.cmake")
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
+  project_third_party_include_port("yaml-cpp/yaml-cpp.cmake")
 endif()
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/rapidjson.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/nlohmann_json.cmake")
+project_third_party_include_port("json/rapidjson.cmake")
+project_third_party_include_port("json/nlohmann_json.cmake")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/gtest.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/benchmark.cmake")
+project_third_party_include_port("test/gtest.cmake")
+project_third_party_include_port("test/benchmark.cmake")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/abseil-cpp/abseil-cpp.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ngtcp2/nghttp3.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ngtcp2/ngtcp2.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/nghttp2/nghttp2.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
+project_third_party_include_port("flatbuffers/flatbuffers.cmake")
+project_third_party_include_port("ssl/port.cmake")
+project_third_party_include_port("redis/hiredis.cmake")
+project_third_party_include_port("cares/c-ares.cmake")
+project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")
+project_third_party_include_port("re2/re2.cmake")
+project_third_party_include_port("ngtcp2/nghttp3.cmake")
+project_third_party_include_port("ngtcp2/ngtcp2.cmake")
+project_third_party_include_port("nghttp2/nghttp2.cmake")
+project_third_party_include_port("libcurl/libcurl.cmake")
 
 if(COMPILER_OPTIONS_TEST_EXCEPTION)
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/civetweb.cmake")
+  project_third_party_include_port("web/civetweb.cmake")
 endif()
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL)
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/libwebsockets.cmake")
+  project_third_party_include_port("web/libwebsockets.cmake")
 endif()
 
 if(VCPKG_TOOLCHAIN
@@ -186,22 +188,22 @@ if(VCPKG_TOOLCHAIN
    AND MSVC_VERSION GREATER_EQUAL 1929)
   message(STATUS "Current protobuf in vcpkg is too old to support MSVC 1929(VS 16.10)")
 else()
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
-  include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
+  project_third_party_include_port("protobuf/protobuf.cmake")
+  project_third_party_include_port("grpc/import.cmake")
+  project_third_party_include_port("grpc/upb.cmake")
 
   if(COMPILER_OPTIONS_TEST_EXCEPTION)
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/prometheus-cpp.cmake")
+    project_third_party_include_port("telemetry/prometheus-cpp.cmake")
   endif()
   if(MSVC AND MSVC_VERSION LESS 1920)
     message(
       STATUS "Opentelemetry-cpp only support Visual Studio 2019 and upper. Skip it for MSVC_VERSION=${MSVC_VERSION}")
   else()
-    include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/opentelemetry-cpp.cmake")
+    project_third_party_include_port("telemetry/opentelemetry-cpp.cmake")
   endif()
 endif()
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
+project_third_party_include_port("libcopp/libcopp.cmake")
 
 # Test protobuf generator
 set(MAIN_TEST_SRC_FILES main.cpp)
@@ -306,9 +308,9 @@ endif()
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
    AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME
    AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
-   AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua/CMakeLists.txt")
+   AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/CMakeLists.txt")
 
-  add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")
+  add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
 
   set(UPB_COMMAND_OPTIONS
       "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
@@ -325,8 +327,8 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
            "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua" "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua"
     COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}"
             ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua/upb.lua" "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+            "${CMAKE_CURRENT_BINARY_DIR}"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/test_upb-and-lua-binding.lua"
             "${CMAKE_CURRENT_BINARY_DIR}"
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"

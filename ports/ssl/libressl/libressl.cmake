@@ -333,6 +333,8 @@ if(NOT TARGET LibreSSL::Crypto)
     endif()
     find_package(LibreSSL)
     project_third_party_libressl_import()
+  else()
+    project_third_party_libressl_import()
   endif()
 
   if(LIBRESSL_FOUND)

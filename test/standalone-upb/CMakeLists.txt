@@ -83,9 +83,11 @@ if(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL)
   endif()
 endif()
 
-foreach(COMPILER_OPTION_INHERIT_VAR_NAME
-        ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
-        ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON})
+foreach(
+  COMPILER_OPTION_INHERIT_VAR_NAME
+  ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX}
+  ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM} ${PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON}
+  ${PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS})
   if(DEFINED COMPILER_OPTION_INHERIT_${COMPILER_OPTION_INHERIT_VAR_NAME})
     message(
       STATUS
@@ -100,12 +102,13 @@ if(EXISTS "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
   file(REMOVE "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
 endif()
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/abseil-cpp/abseil-cpp.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/upb.cmake")
+project_third_party_include_port("compression/zlib.cmake")
+project_third_party_include_port("lua/lua.cmake")
+project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")
+project_third_party_include_port("protobuf/protobuf.cmake")
+project_third_party_include_port("grpc/upb.cmake")
 
-add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua")
+add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
 
 set(UPB_COMMAND_OPTIONS
     "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
@@ -123,8 +126,8 @@ add_custom_command(
          "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
   COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}/.."
           ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto"
-  COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-          "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/upb/bindings/lua/upb.lua" "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+          "${CMAKE_CURRENT_BINARY_DIR}"
   DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto"
   COMMENT
     "Generate test_pb_pb.lua,test_pb.upb.h,test_pb.upb.c,test_pb.upbdefs.h,test_pb.upbdefs.c into ${CMAKE_CURRENT_BINARY_DIR}"
