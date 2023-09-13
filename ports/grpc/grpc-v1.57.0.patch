@@ -85,7 +85,7 @@ index ac4624c..43f71ba 100644
    // The shutdown refs counter tracks whether or not shutdown has been called
    // and whether there are any AllocatingRequestMatcher requests that have been
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index 6e552ba..8de18f3 100755
+index 6e552ba..488dfc3 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -39,34 +39,65 @@ import sys
@@ -214,8 +214,8 @@ index 6e552ba..8de18f3 100755
 +        "\n  ".join(found_files),
 +        output_name
 +    )
-+    self.converter.export_targets.append(kwargs["name"])
 +    self._add_deps(kwargs, " PRIVATE")
++    self.converter.toplevel += "list(APPEND UPB_CODEGEN_TARGETS {0})\n".format(kwargs["name"])
 +    self.converter.toplevel += "endif()\n"
  
    def cc_test(self, **kwargs):
@@ -435,7 +435,7 @@ index 6e552ba..8de18f3 100755
 +      )
 +      self._add_deps(kwargs, " PRIVATE", stage)
 +      self._add_bootstrap_deps(kwargs, " PRIVATE", stage)
-+    self.converter.export_targets.append(kwargs["name"])
++    self.converter.toplevel += "list(APPEND UPB_CODEGEN_TARGETS {0})\n".format(kwargs["name"])
 +    self.converter.toplevel += "endif()\n"
  
  class WorkspaceFileFunctions(object):
@@ -516,7 +516,7 @@ index 6e552ba..8de18f3 100755
          endif()
        endif()
      endif()
-@@ -374,10 +662,120 @@ class Converter(object):
+@@ -374,10 +662,121 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -542,11 +542,11 @@ index 6e552ba..8de18f3 100755
 +      find_program(PROTOC_GEN_UPBLUA_PROGRAM protoc-gen-lua)
 +      set(PROTOC_GEN_UPB_STAGE1_PROGRAM "${PROTOC_GEN_UPB_PROGRAM}")
 +    endif()
++    unset(UPB_CODEGEN_TARGETS)
 +
      %(toplevel)s
  
 +    if (UPB_BUILD_CODEGEN)
-+      set(UPB_CODEGEN_TARGETS protoc-gen-lua)
 +      add_executable(protoc-gen-lua
 +        ../lua/upbc.cc
 +      )
@@ -555,6 +555,7 @@ index 6e552ba..8de18f3 100755
 +        protobuf::libprotobuf
 +        protobuf::libprotoc
 +      )
++      list(APPEND UPB_CODEGEN_TARGETS protoc-gen-lua)
 +    endif()
 +
 +    set(UPB_COMPILER_PLUGIN_SOURCES
@@ -637,7 +638,7 @@ index 6e552ba..8de18f3 100755
    """)
  
  data = {}
-@@ -397,7 +795,9 @@ globs = GetDict(converter)
+@@ -397,7 +796,9 @@ globs = GetDict(converter)
  workspace_dict = GetDict(WorkspaceFileFunctions(converter))
  exec(open("bazel/workspace_deps.bzl").read(), workspace_dict)
  exec(open("WORKSPACE").read(), workspace_dict)
