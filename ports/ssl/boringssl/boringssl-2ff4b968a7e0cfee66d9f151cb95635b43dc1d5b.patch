@@ -1,3 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 50e81c1a1..d4712f37e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -577,3 +577,10 @@ if(WIN32)
+   target_link_libraries(crypto ws2_32)
+ endif()
+ 
++include(GNUInstallDirs)
++install(TARGETS bssl crypto ssl
++  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
++
++install(DIRECTORY src/include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index 1529526b2..bfb56fcd8 100644
 --- a/src/CMakeLists.txt
