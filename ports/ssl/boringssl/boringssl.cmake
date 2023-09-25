@@ -149,17 +149,6 @@ ${OPENSSL_VERSION_STR}
       # Reset OPENSSL_CRYPTO_LIBRARY, OPENSSL_CRYPTO_LIBRARIES, OPENSSL_SSL_LIBRARY, The OpenSSLConfig.cmake in
       # boringssl has wrong settings
       macro(_cmake_toolset_openssl_config_libraries libraries target)
-        get_property(
-          _DEPS
-          TARGET ${target}
-          PROPERTY INTERFACE_LINK_LIBRARIES)
-        foreach(_DEP ${_DEPS})
-          if(TARGET ${_DEP})
-            _cmake_toolset_openssl_config_libraries(${libraries} ${_DEP})
-          elseif(_DEP)
-            list(APPEND ${libraries} ${_DEP})
-          endif()
-        endforeach()
         get_target_property(_IS_IMPORTED_TARGET ${target} IMPORTED)
         if(_IS_IMPORTED_TARGET)
           get_property(
@@ -189,6 +178,17 @@ ${OPENSSL_VERSION_STR}
         if(_LOC)
           list(APPEND ${libraries} ${_LOC})
         endif()
+        get_property(
+          _DEPS
+          TARGET ${target}
+          PROPERTY INTERFACE_LINK_LIBRARIES)
+        foreach(_DEP ${_DEPS})
+          if(TARGET ${_DEP})
+            _cmake_toolset_openssl_config_libraries(${libraries} ${_DEP})
+          elseif(_DEP)
+            list(APPEND ${libraries} ${_DEP})
+          endif()
+        endforeach()
       endmacro()
 
       if(TARGET OpenSSL::Crypto)

@@ -47,34 +47,62 @@ index 1529526b2..bfb56fcd8 100644
    target_link_libraries(boringssl_gtest libcxx)
  endif()
 diff --git a/src/cmake/OpenSSLConfig.cmake b/src/cmake/OpenSSLConfig.cmake
-index 3ebaf19ba..3eefbac73 100644
+index 3ebaf19ba..bdef00db8 100644
 --- a/src/cmake/OpenSSLConfig.cmake
 +++ b/src/cmake/OpenSSLConfig.cmake
-@@ -10,17 +10,38 @@ macro(_openssl_config_libraries libraries target)
+@@ -2,25 +2,63 @@ include(${CMAKE_CURRENT_LIST_DIR}/OpenSSLTargets.cmake)
+ 
+ # Recursively collect dependency locations for the imported targets.
+ macro(_openssl_config_libraries libraries target)
++  get_target_property(_IS_IMPORTED_TARGET ${target} IMPORTED)
++  if(_IS_IMPORTED_TARGET)
++    get_property(
++      _LOC
++      TARGET ${target}
++      PROPERTY IMPORTED_LOCATION)
++    if(NOT _LOC)
++      get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
++      get_property(
++        _LOC
++        TARGET ${target}
++        PROPERTY IMPORTED_LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
++    endif()
++  else()
++    get_property(
++      _LOC
++      TARGET ${target}
++      PROPERTY LOCATION)
++    if(NOT _LOC)
++      get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
++      get_property(
++        _LOC
++        TARGET ${target}
++        PROPERTY LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
++    endif()
++  endif()
++  if(_LOC)
++    list(APPEND ${libraries} ${_LOC})
++  endif()
+   get_property(_DEPS TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES)
+   foreach(_DEP ${_DEPS})
+     if(TARGET ${_DEP})
+       _openssl_config_libraries(${libraries} ${_DEP})
+-    else()
++    elseif(_DEP)
        list(APPEND ${libraries} ${_DEP})
      endif()
    endforeach()
 -  get_property(_LOC TARGET ${target} PROPERTY LOCATION)
-+  get_target_property(_IS_IMPORTED_TARGET ${target} IMPORTED)
-+  if(_IS_IMPORTED_TARGET)
-+    get_property(_LOC TARGET ${target} PROPERTY IMPORTED_LOCATION)
-+    if(NOT _LOC)
-+      get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
-+      get_property(_LOC TARGET ${target} PROPERTY IMPORTED_LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
-+    endif()
-+  else()
-+    get_property(_LOC TARGET ${target} PROPERTY LOCATION)
-+    if(NOT _LOC)
-+      get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
-+      get_property(_LOC TARGET ${target} PROPERTY LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
-+    endif()
-+  endif()
-   list(APPEND ${libraries} ${_LOC})
+-  list(APPEND ${libraries} ${_LOC})
  endmacro()
  
  set(OPENSSL_FOUND YES)
- get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::SSL PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+-get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::SSL PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 -get_property(OPENSSL_CRYPTO_LIBRARY TARGET OpenSSL::Crypto PROPERTY LOCATION)
++get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::Crypto PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
++if(NOT OPENSSL_INCLUDE_DIR)
++  get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::SSL PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
++endif()
 +get_property(OPENSSL_CRYPTO_LIBRARY TARGET OpenSSL::Crypto PROPERTY IMPORTED_LOCATION)
 +if(NOT OPENSSL_CRYPTO_LIBRARY)
 +  get_target_property(OPENSSL_CRYPTO_IMPORTED_CONFIGURATIONS OpenSSL::Crypto IMPORTED_CONFIGURATIONS)
