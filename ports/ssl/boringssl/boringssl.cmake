@@ -90,6 +90,10 @@ ${OPENSSL_VERSION_STR}
       endif()
     endif()
     message(STATUS "Dependency(${PROJECT_NAME}): boringssl found.(openssl: ${OPENSSL_VERSION})")
+    message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}")
+    if(NOT OPENSSL_VERSION AND openssl_version_str)
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl openssl_version_str=${openssl_version_str}")
+    endif()
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME)
 
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
@@ -130,51 +134,69 @@ ${OPENSSL_VERSION_STR}
           project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ${CMAKE_DL_LIBS})
         endif()
       endif()
-      # Reset OPENSSL_INCLUDE_DIR, OPENSSL_CRYPTO_LIBRARY, OPENSSL_CRYPTO_LIBRARIES, OPENSSL_SSL_LIBRARY, The
-      # OpenSSLConfig.cmake in boringssl has wrong settings
-      if(TARGET OpenSSL::Crypto)
-        unset(OPENSSL_INCLUDE_DIR CACHE)
-        project_build_tools_get_imported_property(OPENSSL_INCLUDE_DIR OpenSSL::Crypto INTERFACE_INCLUDE_DIRECTORIES)
-      elseif(TARGET OpenSSL::SSL)
-        unset(OPENSSL_INCLUDE_DIR CACHE)
-        project_build_tools_get_imported_property(OPENSSL_INCLUDE_DIR OpenSSL::SSL INTERFACE_INCLUDE_DIRECTORIES)
-      endif()
+      # Reset OPENSSL_CRYPTO_LIBRARY, OPENSSL_CRYPTO_LIBRARIES, OPENSSL_SSL_LIBRARY, The OpenSSLConfig.cmake in
+      # boringssl has wrong settings
+      macro(_cmake_toolset_openssl_config_libraries libraries target)
+        get_property(
+          _DEPS
+          TARGET ${target}
+          PROPERTY INTERFACE_LINK_LIBRARIES)
+        foreach(_DEP ${_DEPS})
+          if(TARGET ${_DEP})
+            _cmake_toolset_openssl_config_libraries(${libraries} ${_DEP})
+          else()
+            list(APPEND ${libraries} ${_DEP})
+          endif()
+        endforeach()
+        get_target_property(_IS_IMPORTED_TARGET ${target} IMPORTED)
+        if(_IS_IMPORTED_TARGET)
+          get_property(
+            _LOC
+            TARGET ${target}
+            PROPERTY IMPORTED_LOCATION)
+          if(NOT _LOC)
+            get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
+            get_property(
+              _LOC
+              TARGET ${target}
+              PROPERTY IMPORTED_LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
+          endif()
+        else()
+          get_property(
+            _LOC
+            TARGET ${target}
+            PROPERTY LOCATION)
+          if(NOT _LOC)
+            get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
+            get_property(
+              _LOC
+              TARGET ${target}
+              PROPERTY LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
+          endif()
+        endif()
+        list(APPEND ${libraries} ${_LOC})
+      endmacro()
+
       if(TARGET OpenSSL::Crypto)
         unset(OPENSSL_CRYPTO_LIBRARY CACHE)
         unset(OPENSSL_CRYPTO_LIBRARIES CACHE)
         project_build_tools_get_imported_location(OPENSSL_CRYPTO_LIBRARY OpenSSL::Crypto)
-        get_property(
-          OPENSSL_CRYPTO_INTERFACE_LINK_LIBRARIES
-          TARGET OpenSSL::Crypto
-          PROPERTY INTERFACE_LINK_LIBRARIES)
-        foreach(_DEP ${OPENSSL_CRYPTO_INTERFACE_LINK_LIBRARIES})
-          if(_DEP)
-            list(APPEND OPENSSL_CRYPTO_LIBRARIES "${_DEP}")
-          endif()
-        endforeach()
-        unset(OPENSSL_CRYPTO_INTERFACE_LINK_LIBRARIES)
-        list(APPEND OPENSSL_CRYPTO_LIBRARIES "${OPENSSL_CRYPTO_LIBRARY}")
+        _cmake_toolset_openssl_config_libraries(OPENSSL_CRYPTO_LIBRARIES OpenSSL::Crypto)
         list(REMOVE_DUPLICATES OPENSSL_CRYPTO_LIBRARIES)
       endif()
       if(TARGET OpenSSL::SSL)
         unset(OPENSSL_SSL_LIBRARY CACHE)
         unset(OPENSSL_SSL_LIBRARIES CACHE)
         project_build_tools_get_imported_location(OPENSSL_SSL_LIBRARY OpenSSL::SSL)
-        get_property(
-          OPENSSL_SSL_INTERFACE_LINK_LIBRARIES
-          TARGET OpenSSL::SSL
-          PROPERTY INTERFACE_LINK_LIBRARIES)
-        foreach(_DEP ${OPENSSL_SSL_INTERFACE_LINK_LIBRARIES})
-          if(_DEP)
-            list(APPEND OPENSSL_SSL_LIBRARIES "${_DEP}")
-          endif()
-        endforeach()
-        list(APPEND OPENSSL_SSL_LIBRARIES "${OPENSSL_SSL_LIBRARY}")
+        _cmake_toolset_openssl_config_libraries(OPENSSL_SSL_LIBRARIES OpenSSL::SSL)
         list(REMOVE_DUPLICATES OPENSSL_SSL_LIBRARIES)
       endif()
       unset(OPENSSL_LIBRARIES CACHE)
       set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES})
       list(REMOVE_DUPLICATES OPENSSL_LIBRARIES)
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_CRYPTO_LIBRARIES=${OPENSSL_CRYPTO_LIBRARIES}")
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_SSL_LIBRARY=${OPENSSL_SSL_LIBRARY}")
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_LIBRARIES=${OPENSSL_LIBRARIES}")
     else()
       if(NOT OPENSSL_LIBRARIES)
         set(OPENSSL_LIBRARIES
