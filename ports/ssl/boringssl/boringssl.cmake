@@ -109,6 +109,22 @@ ${OPENSSL_VERSION_STR}
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME)
 
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
+      if(TARGET OpenSSL::SSL)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::SSL)
+
+        if(TARGET Libunwind::libunwind)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Libunwind::libunwind)
+        endif()
+        if(TARGET ZLIB::ZLIB)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ZLIB::ZLIB)
+        endif()
+        if(TARGET Threads::Threads)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Threads::Threads
+                                                                      ${CMAKE_DL_LIBS})
+        elseif(CMAKE_DL_LIBS)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ${CMAKE_DL_LIBS})
+        endif()
+      endif()
       if(TARGET OpenSSL::Crypto)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto)
 
@@ -128,22 +144,6 @@ ${OPENSSL_VERSION_STR}
         elseif(CMAKE_DL_LIBS)
           project_build_tools_patch_imported_link_interface_libraries(OpenSSL::Crypto ADD_LIBRARIES ${CMAKE_DL_LIBS})
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME ${CMAKE_DL_LIBS})
-        endif()
-      endif()
-      if(TARGET OpenSSL::SSL)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::SSL)
-
-        if(TARGET Libunwind::libunwind)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Libunwind::libunwind)
-        endif()
-        if(TARGET ZLIB::ZLIB)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ZLIB::ZLIB)
-        endif()
-        if(TARGET Threads::Threads)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Threads::Threads
-                                                                      ${CMAKE_DL_LIBS})
-        elseif(CMAKE_DL_LIBS)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ${CMAKE_DL_LIBS})
         endif()
       endif()
       # Reset OPENSSL_CRYPTO_LIBRARY, OPENSSL_CRYPTO_LIBRARIES, OPENSSL_SSL_LIBRARY, The OpenSSLConfig.cmake in
@@ -230,7 +230,7 @@ ${OPENSSL_VERSION_STR}
         set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${OPENSSL_INCLUDE_DIR})
         set_target_properties(OpenSSL::SSL PROPERTIES IMPORTED_LOCATION ${OPENSSL_SSL_LIBRARIES} OpenSSL::Crypto)
 
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto OpenSSL::SSL)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::SSL OpenSSL::Crypto)
       endif()
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND "bcrypt" IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
