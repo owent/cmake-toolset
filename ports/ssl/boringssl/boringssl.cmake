@@ -4,6 +4,18 @@ include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_BORINGSSL_IMPORT)
   if(OPENSSL_FOUND OR OpenSSL_FOUND)
+    if(NOT OPENSSL_INCLUDE_DIR AND TARGET OpenSSL::Crypto)
+      get_property(
+        OPENSSL_INCLUDE_DIR
+        TARGET OpenSSL::Crypto
+        PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    endif()
+    if(NOT OPENSSL_INCLUDE_DIR AND TARGET OpenSSL::SSL)
+      get_property(
+        OPENSSL_INCLUDE_DIR
+        TARGET OpenSSL::SSL
+        PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    endif()
     if(NOT OPENSSL_VERSION AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/base.h")
       function(from_hex HEX DEC)
         string(TOUPPER "${HEX}" HEX)
@@ -90,9 +102,29 @@ ${OPENSSL_VERSION_STR}
       endif()
     endif()
     message(STATUS "Dependency(${PROJECT_NAME}): boringssl found.(openssl: ${OPENSSL_VERSION})")
+    message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}")
+    if(NOT OPENSSL_VERSION AND openssl_version_str)
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl openssl_version_str=${openssl_version_str}")
+    endif()
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME)
 
     if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
+      if(TARGET OpenSSL::SSL)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::SSL)
+
+        if(TARGET Libunwind::libunwind)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Libunwind::libunwind)
+        endif()
+        if(TARGET ZLIB::ZLIB)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ZLIB::ZLIB)
+        endif()
+        if(TARGET Threads::Threads)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Threads::Threads
+                                                                      ${CMAKE_DL_LIBS})
+        elseif(CMAKE_DL_LIBS)
+          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ${CMAKE_DL_LIBS})
+        endif()
+      endif()
       if(TARGET OpenSSL::Crypto)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto)
 
@@ -114,22 +146,76 @@ ${OPENSSL_VERSION_STR}
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME ${CMAKE_DL_LIBS})
         endif()
       endif()
-      if(TARGET OpenSSL::SSL)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::SSL)
+      # Reset OPENSSL_CRYPTO_LIBRARY, OPENSSL_CRYPTO_LIBRARIES, OPENSSL_SSL_LIBRARY, The OpenSSLConfig.cmake in
+      # boringssl has wrong settings
+      macro(_cmake_toolset_openssl_config_libraries libraries target)
+        get_target_property(_IS_IMPORTED_TARGET ${target} IMPORTED)
+        if(_IS_IMPORTED_TARGET)
+          get_property(
+            _LOC
+            TARGET ${target}
+            PROPERTY IMPORTED_LOCATION)
+          if(NOT _LOC)
+            get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
+            get_property(
+              _LOC
+              TARGET ${target}
+              PROPERTY IMPORTED_LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
+          endif()
+        else()
+          get_property(
+            _LOC
+            TARGET ${target}
+            PROPERTY LOCATION)
+          if(NOT _LOC)
+            get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
+            get_property(
+              _LOC
+              TARGET ${target}
+              PROPERTY LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
+          endif()
+        endif()
+        if(_LOC)
+          list(APPEND ${libraries} ${_LOC})
+        endif()
+        get_property(
+          _DEPS
+          TARGET ${target}
+          PROPERTY INTERFACE_LINK_LIBRARIES)
+        foreach(_DEP ${_DEPS})
+          if(TARGET ${_DEP})
+            _cmake_toolset_openssl_config_libraries(${libraries} ${_DEP})
+          elseif(_DEP)
+            list(APPEND ${libraries} ${_DEP})
+          endif()
+        endforeach()
+      endmacro()
 
-        if(TARGET Libunwind::libunwind)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Libunwind::libunwind)
-        endif()
-        if(TARGET ZLIB::ZLIB)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ZLIB::ZLIB)
-        endif()
-        if(TARGET Threads::Threads)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES Threads::Threads
-                                                                      ${CMAKE_DL_LIBS})
-        elseif(CMAKE_DL_LIBS)
-          project_build_tools_patch_imported_link_interface_libraries(OpenSSL::SSL ADD_LIBRARIES ${CMAKE_DL_LIBS})
-        endif()
+      if(TARGET OpenSSL::Crypto)
+        unset(OPENSSL_CRYPTO_LIBRARY)
+        unset(OPENSSL_CRYPTO_LIBRARY CACHE)
+        unset(OPENSSL_CRYPTO_LIBRARIES)
+        unset(OPENSSL_CRYPTO_LIBRARIES CACHE)
+        project_build_tools_get_imported_location(OPENSSL_CRYPTO_LIBRARY OpenSSL::Crypto)
+        _cmake_toolset_openssl_config_libraries(OPENSSL_CRYPTO_LIBRARIES OpenSSL::Crypto)
+        list(REMOVE_DUPLICATES OPENSSL_CRYPTO_LIBRARIES)
       endif()
+      if(TARGET OpenSSL::SSL)
+        unset(OPENSSL_SSL_LIBRARY)
+        unset(OPENSSL_SSL_LIBRARY CACHE)
+        unset(OPENSSL_SSL_LIBRARIES)
+        unset(OPENSSL_SSL_LIBRARIES CACHE)
+        project_build_tools_get_imported_location(OPENSSL_SSL_LIBRARY OpenSSL::SSL)
+        _cmake_toolset_openssl_config_libraries(OPENSSL_SSL_LIBRARIES OpenSSL::SSL)
+        list(REMOVE_DUPLICATES OPENSSL_SSL_LIBRARIES)
+      endif()
+      unset(OPENSSL_LIBRARIES)
+      unset(OPENSSL_LIBRARIES CACHE)
+      set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES})
+      list(REMOVE_DUPLICATES OPENSSL_LIBRARIES)
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}")
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_SSL_LIBRARY=${OPENSSL_SSL_LIBRARY}")
+      message(STATUS "Dependency(${PROJECT_NAME}):    boringssl OPENSSL_LIBRARIES=${OPENSSL_LIBRARIES}")
     else()
       if(NOT OPENSSL_LIBRARIES)
         set(OPENSSL_LIBRARIES
@@ -144,7 +230,7 @@ ${OPENSSL_VERSION_STR}
         set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${OPENSSL_INCLUDE_DIR})
         set_target_properties(OpenSSL::SSL PROPERTIES IMPORTED_LOCATION ${OPENSSL_SSL_LIBRARIES} OpenSSL::Crypto)
 
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::Crypto OpenSSL::SSL)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME OpenSSL::SSL OpenSSL::Crypto)
       endif()
     endif()
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND "bcrypt" IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
@@ -186,7 +272,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
   if(CMAKE_CROSSCOMPILING)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_DEFAULT_BUILD_OPTIONS "-DOPENSSL_NO_ASM=ON")
   endif()
-  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_DEFAULT_VERSION "e46383fc18d08def901b2ed5a194295693e905c7")
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_DEFAULT_VERSION "2ff4b968a7e0cfee66d9f151cb95635b43dc1d5b")
   if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_DEFAULT_VERSION
@@ -279,7 +365,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
     SRC_DIRECTORY_NAME
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_SRC_DIRECTORY_NAME}"
     PROJECT_DIRECTORY
-    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_SRC_DIRECTORY_NAME}"
+    "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_SRC_DIRECTORY_NAME}/src"
     GIT_BRANCH
     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_BORINGSSL_VERSION}"
     GIT_URL

@@ -138,7 +138,7 @@ if(NOT TARGET gRPC::grpc++_alts
       # after gRPC support MSVC with higher standard.
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
         if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
-          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.57.0")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.58.1")
         else()
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.2")
         endif()
@@ -366,7 +366,8 @@ if(NOT TARGET gRPC::grpc++_alts
 
     # Patch CMAKE_CXX_STANDARD
     if(CMAKE_CXX_STANDARD)
-      if(MSVC AND CMAKE_CXX_STANDARD GREATER 17)
+      # Some versions of gcc will crash with C++20 or upper and some versions of MSVC won't compile
+      if(CMAKE_CXX_STANDARD GREATER 17)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD ${CMAKE_CXX_STANDARD})
         set(CMAKE_CXX_STANDARD 17)
       endif()
