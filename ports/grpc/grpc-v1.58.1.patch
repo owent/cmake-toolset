@@ -1,3 +1,25 @@
+diff --git a/src/core/lib/gprpp/per_cpu.h b/src/core/lib/gprpp/per_cpu.h
+index 5d287f8..95f3937 100644
+--- a/src/core/lib/gprpp/per_cpu.h
++++ b/src/core/lib/gprpp/per_cpu.h
+@@ -56,7 +56,7 @@ class PerCpu {
+  public:
+   // Options are not defaulted to try and force consideration of what the
+   // options specify.
+-  explicit PerCpu(PerCpuOptions options) : cpus_(options.Shards()) {}
++  explicit PerCpu(PerCpuOptions options) : cpus_(options.Shards()), data_{new T[options.Shards()]} {}
+ 
+   T& this_cpu() { return data_[ExecCtx::Get()->starting_cpu() % cpus_]; }
+ 
+@@ -67,7 +67,7 @@ class PerCpu {
+ 
+  private:
+   const size_t cpus_;
+-  std::unique_ptr<T[]> data_{new T[cpus_]};
++  std::unique_ptr<T[]> data_;
+ };
+ 
+ }  // namespace grpc_core
 diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
 index be829a0..4a9862d 100644
 --- a/src/core/lib/surface/server.cc

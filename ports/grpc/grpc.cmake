@@ -366,10 +366,12 @@ if(NOT TARGET gRPC::grpc++_alts
 
     # Patch CMAKE_CXX_STANDARD
     if(CMAKE_CXX_STANDARD)
-      # Some versions of gcc will crash with C++20 or upper and some versions of MSVC won't compile
-      if(CMAKE_CXX_STANDARD GREATER 17)
+      if(MSVC AND CMAKE_CXX_STANDARD GREATER 17)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD ${CMAKE_CXX_STANDARD})
         set(CMAKE_CXX_STANDARD 17)
+      elseif(CMAKE_CXX_STANDARD GREATER 20)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BACKUP_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+        set(CMAKE_CXX_STANDARD 20)
       endif()
     endif()
 
