@@ -29,6 +29,7 @@ if(NOT TARGET re2::re2)
 
     project_third_party_append_build_shared_lib_var("re2" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS
                                                     BUILD_SHARED_LIBS)
+    project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS)
 
     find_configure_package(
       PACKAGE
@@ -39,8 +40,6 @@ if(NOT TARGET re2::re2)
       CMAKE_INHERIT_FIND_ROOT_PATH
       CMAKE_FLAGS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS}
-      MSVC_CONFIGURE
-      ${gRPC_MSVC_CONFIGURE}
       WORKING_DIRECTORY
       "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
       BUILD_DIRECTORY
