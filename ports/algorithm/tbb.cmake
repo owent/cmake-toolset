@@ -25,6 +25,21 @@ if(NOT TARGET TBB::tbb)
       "-DTBB_EXAMPLES=OFF"
       "-DTBB_STRICT=OFF"
       "-DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+      include(CheckCSourceCompiles)
+      cmake_push_check_state()
+      list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--undefined-version")
+      message(STATUS "Test -Wl,--undefined-version")
+      check_c_source_compiles("int main() { return 0; }"
+                              ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_TEST_UNDEFINED_VERSION)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_TEST_UNDEFINED_VERSION)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_BUILD_OPTIONS
+             "-DTBB_LIB_LINK_FLAGS=-Wl,--undefined-version")
+      endif()
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_TEST_UNDEFINED_VERSION CACHE)
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_TEST_UNDEFINED_VERSION)
+      cmake_pop_check_state()
+    endif()
     project_third_party_try_patch_file(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}"
                                        "tbb" "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_VERSION}")
 
