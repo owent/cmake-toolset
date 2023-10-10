@@ -33,13 +33,15 @@ if(NOT absl_FOUND)
           "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DBUILD_TESTING=OFF" "-DABSL_BUILD_TESTING=OFF"
           "-DABSL_ENABLE_INSTALL=ON")
       # abseil do not set export, which may lead to unresolved external symbol
+      #[[
       if(MSVC)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
              "-DABSL_BUILD_DLL=OFF")
       else()
-        project_third_party_append_build_shared_lib_var(
-          "abseil" "GRPC" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS BUILD_SHARED_LIBS)
-      endif()
+      ]]
+      project_third_party_append_build_shared_lib_var(
+        "abseil" "GRPC" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS BUILD_SHARED_LIBS)
+      # endif()
 
       project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS)
 
