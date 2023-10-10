@@ -1,8 +1,25 @@
-cmake_minimum_required(VERSION 3.14.0)
-cmake_policy(SET CMP0054 NEW)
+cmake_minimum_required(VERSION 3.16)
 cmake_policy(SET CMP0022 NEW)
+cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0067 NEW)
 cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0077 NEW)
+cmake_policy(SET CMP0091 NEW)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.19.0")
+  cmake_policy(SET CMP0111 NEW)
+endif()
+
+# MSVC RTTI flag /GR should not be not added to CMAKE_CXX_FLAGS by default. @see
+# https://cmake.org/cmake/help/latest/policy/CMP0117.html
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0")
+  cmake_policy(SET CMP0117 NEW)
+endif()
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.22.0")
+  cmake_policy(SET CMP0128 NEW)
+endif()
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
+  cmake_policy(SET CMP0144 NEW)
+endif()
 
 project(lua)
 
