@@ -1,8 +1,7 @@
 include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
-  if(TARGET protobuf::protoc
-     OR TARGET protobuf::libprotobuf
+  if(TARGET protobuf::libprotobuf
      OR TARGET protobuf::libprotobuf-lite)
     if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
       if(TARGET protobuf::libprotobuf)
@@ -80,8 +79,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
   endif()
   project_third_party_protobuf_import()
 
-  if(NOT TARGET protobuf::protoc
-     AND NOT TARGET protobuf::libprotobuf
+  if(NOT TARGET protobuf::libprotobuf
      AND NOT TARGET protobuf::libprotobuf-lite)
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
@@ -464,8 +462,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
     project_third_party_protobuf_import()
   endif()
 
-  if(TARGET protobuf::protoc
-     OR TARGET protobuf::libprotobuf
+  if(TARGET protobuf::libprotobuf
      OR TARGET protobuf::libprotobuf-lite)
     echowithcolor(
       COLOR GREEN

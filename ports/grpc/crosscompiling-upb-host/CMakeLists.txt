@@ -46,13 +46,6 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_STANDALONE)
 else()
   project_third_party_include_port("compression/import.cmake")
 
-  if(NOT ANDROID AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    project_third_party_include_port("jemalloc/jemalloc.cmake")
-    if(NOT WIN32 AND NOT MINGW)
-      project_third_party_include_port("libunwind/libunwind.cmake")
-    endif()
-  endif()
-
   project_third_party_include_port("algorithm/xxhash.cmake")
 
   project_third_party_include_port("test/gtest.cmake")
