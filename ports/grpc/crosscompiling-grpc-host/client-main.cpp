@@ -1,10 +1,10 @@
 // Copyright 2022 atframework
 
+#include <grpcpp/grpcpp.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
-
-#include <grpcpp/grpcpp.h>
 
 #include "helloworld.grpc.pb.h"
 
@@ -17,7 +17,7 @@ using helloworld::HelloRequest;
 
 class GreeterClient {
  public:
-  GreeterClient(std::shared_ptr<Channel> channel) : stub_(Greeter::NewStub(channel)) {}
+  explicit GreeterClient(std::shared_ptr<Channel> channel) : stub_(Greeter::NewStub(channel)) {}
 
   // Assembles the client's payload, sends it and presents the response back
   // from the server.
