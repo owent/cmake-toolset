@@ -87,7 +87,28 @@ function(FindConfigurePackageDownloadFile from to)
       COMMAND "${WGET_FULL_PATH}" "--no-check-certificate" "-t" "${PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES}" "-v"
               "${from}" "-O" "${to}" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
   else()
-    find_program(CURL_FULL_PATH curl)
+    if(CMAKE_CROSSCOMPILING)
+      set(CURL_CROSSING_FIND_PATHS)
+      if(PROJECT_THIRD_PARTY_HOST_INSTALL_DIR)
+        list(APPEND CURL_CROSSING_FIND_PATHS "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/bin")
+      endif()
+      if(CMAKE_STAGING_PREFIX)
+        list(APPEND CURL_CROSSING_FIND_PATHS "${CMAKE_STAGING_PREFIX}/bin")
+      endif()
+      if(CMAKE_HOST_PROGRAM_PATH)
+        list(APPEND CURL_CROSSING_FIND_PATHS "${CMAKE_HOST_PROGRAM_PATH}")
+      endif()
+      if(CMAKE_HOST_SYSTEM_PROGRAM_PATH)
+        list(APPEND CURL_CROSSING_FIND_PATHS "${CMAKE_HOST_SYSTEM_PROGRAM_PATH}")
+      endif()
+      find_program(
+        CURL_EXECUTABLE
+        NAMES curl curl.exe
+        PATHS ${CURL_CROSSING_FIND_PATHS} NO_PACKAGE_ROOT_PATH
+        NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH NO_CMAKE_FIND_ROOT_PATH)
+    else()
+      find_program(CURL_FULL_PATH curl)
+    endif()
     if(CURL_FULL_PATH)
       execute_process(COMMAND "${CURL_FULL_PATH}" "--insecure" "--retry" "${PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES}"
                               "-L" "${from}" "-o" "${to}" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
