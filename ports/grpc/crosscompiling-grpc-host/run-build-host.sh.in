@@ -8,9 +8,9 @@ LOW_MEMORY_MODE="$(echo $LOW_MEMORY_MODE | tr '[:upper:]' '[:lower:]')"
 
 if [[ "x$LOW_MEMORY_MODE" == "xtrue" ]] || [[ "x$LOW_MEMORY_MODE" == "xyes" ]] || 
     [[ "x$LOW_MEMORY_MODE" == "x1" ]] || [[ "x$LOW_MEMORY_MODE" == "xon" ]]; then
-    ALLOW_PARALLEL_BUILD_FLAGS=0 ;
+    LOW_MEMORY_MODE_FLAGS=1 ;
 else
-    ALLOW_PARALLEL_BUILD_FLAGS=1 ;
+    LOW_MEMORY_MODE_FLAGS=0 ;
 fi
 
 set -x ;
@@ -32,10 +32,10 @@ if [[ ! -e "@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@/bin/grpc_cpp_plugin" ]] && [[
     source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESET_BUILD_ENVS_BASH@"
     @ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_HOST_BUILD_FLAGS_BASH@ "-DCMAKE_INSTALL_PREFIX=@PROJECT_THIRD_PARTY_HOST_INSTALL_DIR@" ;
 
-    if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" || "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" ;
+    if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
+        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" -j || "@CMAKE_COMMAND@" --build . "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" --config "@CMAKE_BUILD_TYPE@" || "@CMAKE_COMMAND@" --build . "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" --verbose --config "@CMAKE_BUILD_TYPE@" ;
     else
-        "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" || "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" ;
+        "@CMAKE_COMMAND@" --build . "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" --config "@CMAKE_BUILD_TYPE@" || "@CMAKE_COMMAND@" --build . "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" --verbose --config "@CMAKE_BUILD_TYPE@" ;
     fi
 
     source "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_RESTORE_BUILD_ENVS_BASH@"

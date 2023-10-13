@@ -9,9 +9,9 @@ LOW_MEMORY_MODE="$(echo $LOW_MEMORY_MODE | tr '[:upper:]' '[:lower:]')"
 
 if [[ "x$LOW_MEMORY_MODE" == "xtrue" ]] || [[ "x$LOW_MEMORY_MODE" == "xyes" ]] \
   || [[ "x$LOW_MEMORY_MODE" == "x1" ]] || [[ "x$LOW_MEMORY_MODE" == "xon" ]]; then
-  ALLOW_PARALLEL_BUILD_FLAGS=0
+  LOW_MEMORY_MODE_FLAGS=1
 else
-  ALLOW_PARALLEL_BUILD_FLAGS=1
+  LOW_MEMORY_MODE_FLAGS=0
 fi
 
 if [[ "x@CMAKE_BUILD_TYPE@" != "x" ]]; then
@@ -42,39 +42,57 @@ if [[ "x$BUILD_THIRD_IS_CROSS" == "xtrue" ]] || [[ "x$BUILD_THIRD_IS_CROSS" == "
 
     if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
-      if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+      if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-          "@CMAKE_COMMAND@" --build . --config Debug -j || "@CMAKE_COMMAND@" --build . --config Debug || "@CMAKE_COMMAND@" --build . --verbose --config Debug 
+          "@CMAKE_COMMAND@" --build . --config Debug -j || "@CMAKE_COMMAND@" --build . --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+          if [[ $? -ne 0 ]]; then
+            exit 1
+          fi
           "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
         fi
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-          "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+          "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+          if [[ $? -ne 0 ]]; then
+            exit 1
+          fi
           "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
         fi
       else
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-          "@CMAKE_COMMAND@" --build . --config Debug || "@CMAKE_COMMAND@" --build . --verbose --config Debug
+          "@CMAKE_COMMAND@" --build . --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+          if [[ $? -ne 0 ]]; then
+            exit 1
+          fi
           "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
         fi
         if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-          "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+          "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+          if [[ $? -ne 0 ]]; then
+            exit 1
+          fi
           "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
         fi
       fi
 
-      if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE"
+      if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
+        "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
       else
-        "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE"
+        "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+      fi
+      if [[ $? -ne 0 ]]; then
+        exit 1
       fi
       "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config "$FINAL_BUILD_TYPE"
 
     else
 
-      if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-        "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+      if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
+        "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
       else
-        "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+        "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+      fi
+      if [[ $? -ne 0 ]]; then
+        exit 1
       fi
       "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@"
 
@@ -111,39 +129,57 @@ fi
 
 if [[ "x@MSVC@" == "xTrue" ]] || [[ "x@MSVC@" == "xYes" ]] || [[ "x@MSVC@" == "x1" ]]; then
 
-  if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
+  if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
     if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-      "@CMAKE_COMMAND@" --build . --config Debug -j || "@CMAKE_COMMAND@" --build . --config Debug || "@CMAKE_COMMAND@" --build . --verbose --config Debug
+      "@CMAKE_COMMAND@" --build . --config Debug -j || "@CMAKE_COMMAND@" --build . --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+      if [[ $? -ne 0 ]]; then
+        exit 1
+      fi
       "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
     fi
     if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-      "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+      "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+      if [[ $? -ne 0 ]]; then
+        exit 1
+      fi
       "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
     fi
   else
     if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Debug" ]]; then
-      "@CMAKE_COMMAND@" --build . --config Debug || "@CMAKE_COMMAND@" --build . --verbose --config Debug
+      "@CMAKE_COMMAND@" --build . --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+      if [[ $? -ne 0 ]]; then
+        exit 1
+      fi
       "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
     fi
     if [[ -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE" ]] && [[ "$FINAL_BUILD_TYPE" != "Release" ]]; then
-      "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+      "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+      if [[ $? -ne 0 ]]; then
+        exit 1
+      fi
       "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
     fi
   fi
 
-  if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-    "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE"
+  if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
+    "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" -j || "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
   else
-    "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE"
+    "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+  fi
+  if [[ $? -ne 0 ]]; then
+    exit 1
   fi
   "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE"
 
 else
 
-  if [[ $ALLOW_PARALLEL_BUILD_FLAGS -eq 1 ]]; then
-    "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+  if [[ $LOW_MEMORY_MODE_FLAGS -eq 0 ]]; then
+    "@CMAKE_COMMAND@" --build . --config Release -j || "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
   else
-    "@CMAKE_COMMAND@" --build . --config Release || "@CMAKE_COMMAND@" --build . --verbose --config Release
+    "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@" || "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+  fi
+  if [[ $? -ne 0 ]]; then
+    exit 1
   fi
   "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@"
 

@@ -79,11 +79,6 @@ if(NOT absl_FOUND)
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_PATCH_FILE}")
     endif()
 
-    # Other flags for find_configure_package
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_BUILD_OPTIONS DISABLE_PARALLEL_BUILD)
-    endif()
-
     find_configure_package(
       PACKAGE
       absl

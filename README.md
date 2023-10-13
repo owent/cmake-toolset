@@ -220,6 +220,8 @@ For example, if we want to use the same python3 executable on target and host bu
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE` : Where to build packages in CI mode(Only one triplet for MSVC).
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_DEFAULT_VISIBILITY_HIDDEN` : Build third party libraries with `-fvisibility=hidden` by default.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG` : Whether to show patch log.
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE` : Use lower concurrency to reduce memory cost.
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS` : Jobs to use in low memory mode(default: 2).
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")

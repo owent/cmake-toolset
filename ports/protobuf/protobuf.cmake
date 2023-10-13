@@ -1,8 +1,7 @@
 include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
-  if(TARGET protobuf::libprotobuf
-     OR TARGET protobuf::libprotobuf-lite)
+  if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
     if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
       if(TARGET protobuf::libprotobuf)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf)
@@ -79,8 +78,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
   endif()
   project_third_party_protobuf_import()
 
-  if(NOT TARGET protobuf::libprotobuf
-     AND NOT TARGET protobuf::libprotobuf-lite)
+  if(NOT TARGET protobuf::libprotobuf AND NOT TARGET protobuf::libprotobuf-lite)
 
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
       if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
@@ -462,8 +460,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
     project_third_party_protobuf_import()
   endif()
 
-  if(TARGET protobuf::libprotobuf
-     OR TARGET protobuf::libprotobuf-lite)
+  if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
     echowithcolor(
       COLOR GREEN
       "-- Dependency(${PROJECT_NAME}): Protobuf found.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC})")
