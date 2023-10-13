@@ -112,6 +112,8 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin"
+  $TEST_BIN_PATH = Get-ChildItem -Recurse -Path bin -File "*.exe" | Foreach-object {echo $_.Directory.FullName} | Select-Object -First 1
+  Get-ChildItem -Recurse -Path ../third_party/install/ -File "*.dll" | Foreach-object { Copy-Item -Force $_ -Destination $TEST_BIN_PATH }
   & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -141,6 +143,8 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin"
+  $TEST_BIN_PATH = Get-ChildItem -Recurse -Path bin -File "*.exe" | Foreach-object {echo $_.Directory.FullName} | Select-Object -First 1
+  Get-ChildItem -Recurse -Path ../third_party/install/ -File "*.dll" | Foreach-object { Copy-Item -Force $_ -Destination $TEST_BIN_PATH }
   Write-Output "PATH=$Env:PATH"
   & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
@@ -171,6 +175,8 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin"
+  $TEST_BIN_PATH = Get-ChildItem -Recurse -Path bin -File "*.exe" | Foreach-object {echo $_.Directory.FullName} | Select-Object -First 1
+  Get-ChildItem -Recurse -Path ../third_party/install/ -File "*.dll" | Foreach-object { Copy-Item -Force $_ -Destination $TEST_BIN_PATH }
   & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -206,6 +212,8 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin"
+  $TEST_BIN_PATH = Get-ChildItem -Recurse -Path bin -File "*.exe" | Foreach-object {echo $_.Directory.FullName} | Select-Object -First 1
+  Get-ChildItem -Recurse -Path ../third_party/install/ -File "*.dll" | Foreach-object { Copy-Item -Force $_ -Destination $TEST_BIN_PATH }
   & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -259,6 +267,8 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin"
+  $TEST_BIN_PATH = Get-ChildItem -Recurse -Path bin -File "*.exe" | Foreach-object {echo $_.Directory.FullName} | Select-Object -First 1
+  Get-ChildItem -Recurse -Path ../third_party/install/ -File "*.dll" | Foreach-object { Copy-Item -Force $_ -Destination $TEST_BIN_PATH }
   & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
@@ -287,6 +297,8 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
   $Env:PATH = $Env:PATH + [IO.Path]::PathSeparator + "$THIRD_PARTY_PREBUILT_PATH/bin"
+  $TEST_BIN_PATH = Get-ChildItem -Recurse -Path bin -File "*.exe" | Foreach-object {echo $_.Directory.FullName} | Select-Object -First 1
+  Get-ChildItem -Recurse -Path ../third_party/install/ -File "*.dll" | Foreach-object { Copy-Item -Force $_ -Destination $TEST_BIN_PATH }
   & ctest . -V -C "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
