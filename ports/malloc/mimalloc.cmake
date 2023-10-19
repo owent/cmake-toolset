@@ -39,10 +39,6 @@ if(NOT TARGET mimalloc-secure
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_DEFAULT_VERSION "v2.0.9")
     endif()
   endif()
-  # Android NDK declare __cplusplus when compiling C++, which will cause mimalloc fail to compile
-  if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_ANDROID)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_DEFAULT_VERSION "v2.0.9")
-  endif()
 
   if(NOT TARGET mimalloc-secure
      AND NOT TARGET mimalloc
