@@ -819,7 +819,13 @@ function(project_git_clone_repository)
         file(REMOVE_RECURSE "${project_git_clone_repository_REPO_DIRECTORY}")
       endif()
     elseif(project_git_clone_repository_COMMIT)
-      if(NOT LAST_GIT_CLONE_VERSION STREQUAL project_git_clone_repository_GIT_BRANCH)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local -z --get
+                "atframework.toolset.git-clone.current-version"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+        OUTPUT_VARIABLE LAST_GIT_CLONE_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
+      if(NOT LAST_GIT_CLONE_VERSION STREQUAL project_git_clone_repository_COMMIT)
         message(
           STATUS
             "${project_git_clone_repository_REPO_DIRECTORY} is not commit ${project_git_clone_repository_COMMIT}(got ${LAST_GIT_CLONE_VERSION}), remove it..."
