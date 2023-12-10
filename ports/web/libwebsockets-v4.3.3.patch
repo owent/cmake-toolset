@@ -1,0 +1,104 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bd1f9a3..dc5f08a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -850,7 +850,7 @@ if (MSVC)
+ 	# Turn off pointless microsoft security warnings.
+ 	add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+ 	# Fail the build if any warnings
+-	add_compile_options(/W3 /WX)
++	# add_compile_options(/W3 /WX)
+ 	# Unbreak MSVC broken preprocessor __VA_ARGS__ behaviour
+ 	if (MSVC_VERSION GREATER 1925)
+ 		add_compile_options(/Zc:preprocessor /wd5105)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 786fa3d..c8a6247 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -176,7 +176,7 @@ if (LWS_WITH_STATIC)
+ 	)
+ 	target_include_directories(websockets PRIVATE ${LWS_LIB_BUILD_INC_PATHS})
+ 	target_compile_definitions(websockets PRIVATE LWS_BUILDING_STATIC)
+-	target_include_directories(websockets PUBLIC ${LWS_PUBLIC_INCLUDES})
++	target_include_directories(websockets BEFORE PUBLIC ${LWS_PUBLIC_INCLUDES})
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+ 	if (WIN32)
+@@ -204,7 +204,7 @@ if (LWS_WITH_SHARED)
+ 	)
+ 	target_include_directories(websockets_shared PRIVATE ${LWS_LIB_BUILD_INC_PATHS})
+ 	target_compile_definitions(websockets_shared PRIVATE LWS_BUILDING_SHARED)
+-	target_include_directories(websockets_shared PUBLIC ${LWS_PUBLIC_INCLUDES})
++	target_include_directories(websockets_shared BEFORE PUBLIC ${LWS_PUBLIC_INCLUDES})
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+ 	# We want the shared lib to be named "libwebsockets"
+diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
+index fb810a8..2cde19b 100644
+--- a/lib/event-libs/libuv/CMakeLists.txt
++++ b/lib/event-libs/libuv/CMakeLists.txt
+@@ -47,6 +47,7 @@ message("libuv include dir: ${LIBUV_INCLUDE_DIRS}")
+ message("libuv libraries: ${LIBUV_LIBRARIES}")
+ 
+ include_directories("${LIBUV_INCLUDE_DIRS}")
++list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBUV_INCLUDE_DIRS}")
+ 
+ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   # libuv changed the location in 1.21.0. Retain both
+@@ -54,6 +55,7 @@ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   if (NOT LWS_HAVE_UV_VERSION_H)
+     CHECK_INCLUDE_FILE(uv/version.h LWS_HAVE_NEW_UV_VERSION_H)
+   endif()
++	list(POP_BACK CMAKE_REQUIRED_INCLUDES)
+   
+   if (LWS_WITH_EVLIB_PLUGINS AND LWS_WITH_LIBUV)
+ 
+diff --git a/lib/roles/ws/client-parser-ws.c b/lib/roles/ws/client-parser-ws.c
+index f67927b..474ae29 100644
+--- a/lib/roles/ws/client-parser-ws.c
++++ b/lib/roles/ws/client-parser-ws.c
+@@ -476,7 +476,8 @@ ping_drop:
+ 
+ 		case LWSWSOPC_PONG:
+ 			lwsl_wsi_info(wsi, "Received pong");
+-			lwsl_hexdump_wsi_debug(wsi, &wsi->ws->rx_ubuf[LWS_PRE],
++			// Patch for bug of VS2017
++			lwsl_hexdump_wsi(wsi, LLL_DEBUG, &wsi->ws->rx_ubuf[LWS_PRE],
+ 				     wsi->ws->rx_ubuf_head);
+ 
+ 			lws_validity_confirmed(wsi);
+@@ -594,7 +595,8 @@ drain_extension:
+ 						(uint8_t *)"partial utf8", 12);
+ utf8_fail:
+ 					lwsl_wsi_info(wsi, "utf8 error");
+-					lwsl_hexdump_wsi_info(wsi, pmdrx.eb_out.token,
++					// Patch for bug of VS2017
++					lwsl_hexdump_wsi(wsi, LLL_INFO, pmdrx.eb_out.token,
+ 							  (unsigned int)pmdrx.eb_out.len);
+ 
+ 					return -1;
+diff --git a/lib/tls/CMakeLists.txt b/lib/tls/CMakeLists.txt
+index 9b15d9c..f181bdc 100644
+--- a/lib/tls/CMakeLists.txt
++++ b/lib/tls/CMakeLists.txt
+@@ -264,10 +264,19 @@ if (LWS_WITH_SSL)
+ 		if (NOT OPENSSL_FOUND AND NOT LWS_WITH_BORINGSSL)
+ 			# TODO: Add support for STATIC also.
+ 			if (NOT LWS_PLAT_FREERTOS)
++				find_package(OpenSSL REQUIRED)
++				if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
++					if(TARGET OpenSSL::SSL)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::SSL)
++					endif()
++					if(TARGET OpenSSL::Crypto)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::Crypto)
++					endif()
++				else()
+ 				find_package(PkgConfig QUIET)
+ 				pkg_check_modules(PC_OPENSSL openssl QUIET)
+-				find_package(OpenSSL REQUIRED)
+ 				list(APPEND OPENSSL_LIBRARIES ${PC_OPENSSL_LINK_LIBRARIES})
++				endif()
+ 				set(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} PARENT_SCOPE)
+ 			endif()
+ 			set(OPENSSL_INCLUDE_DIRS "${OPENSSL_INCLUDE_DIR}")

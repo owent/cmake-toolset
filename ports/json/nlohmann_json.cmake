@@ -20,7 +20,7 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
     project_third_party_port_declare(
       nlohmann_json
       VERSION
-      "v3.11.2"
+      "v3.11.3"
       GIT_URL
       "https://github.com/nlohmann/json.git"
       BUILD_OPTIONS
