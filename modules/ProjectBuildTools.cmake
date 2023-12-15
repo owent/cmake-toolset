@@ -2409,3 +2409,129 @@ function(project_build_tools_add_archive_library TARGET_NAME)
         PARENT_SCOPE)
   endif()
 endfunction()
+
+macro(project_build_tools_push_patch_inherit_compile_flags_state)
+  if(NOT __inherit_compile_flags_state_STACK_LEVEL)
+    set(__inherit_compile_flags_state_STACK_LEVEL 0)
+  else()
+    math(EXPR __inherit_compile_flags_state_STACK_LEVEL "${__inherit_compile_flags_state_STACK_LEVEL}+1")
+  endif()
+  foreach(__inherit_compile_flags_state_INHERIT_VAR "PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT"
+                                                    "PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE")
+    foreach(__inherit_compile_flags_state_LANG "ASM" "C" "CXX")
+      foreach(__inherit_compile_flags_state_FLAG "FLAGS" "FLAGS_DEBUG" "FLAGS_MINSIZEREL" "FLAGS_RELEASE"
+                                                 "FLAGS_RELWITHDEBINFO")
+        set(__inherit_compile_flags_state_INHERIT_SRC_NAME
+            ${__inherit_compile_flags_state_INHERIT_VAR}_CMAKE_${__inherit_compile_flags_state_LANG}_${__inherit_compile_flags_state_FLAG}
+        )
+        set(__inherit_compile_flags_state_INHERIT_BACKUP_NAME
+            __inherit_compile_flags_state_BACKUP_${__inherit_compile_flags_state_STACK_LEVEL}_${__inherit_compile_flags_state_INHERIT_VAR}_CMAKE_${__inherit_compile_flags_state_LANG}_${__inherit_compile_flags_state_FLAG}
+        )
+        if(DEFINED ${__inherit_compile_flags_state_INHERIT_SRC_NAME})
+          set(${__inherit_compile_flags_state_INHERIT_BACKUP_NAME}
+              "${${__inherit_compile_flags_state_INHERIT_SRC_NAME}}")
+        else()
+          unset(${__inherit_compile_flags_state_INHERIT_BACKUP_NAME})
+        endif()
+      endforeach()
+    endforeach()
+  endforeach()
+
+  unset(__inherit_compile_flags_state_INHERIT_SRC_NAME)
+  unset(__inherit_compile_flags_state_INHERIT_BACKUP_NAME)
+endmacro()
+
+macro(project_build_tools_pop_patch_compile_flags_state)
+  if(__inherit_compile_flags_state_STACK_LEVEL)
+    foreach(__inherit_compile_flags_state_INHERIT_VAR "PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT"
+                                                      "PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE")
+      foreach(__inherit_compile_flags_state_LANG "ASM" "C" "CXX")
+        foreach(__inherit_compile_flags_state_FLAG "FLAGS" "FLAGS_DEBUG" "FLAGS_MINSIZEREL" "FLAGS_RELEASE"
+                                                   "FLAGS_RELWITHDEBINFO")
+          set(__inherit_compile_flags_state_INHERIT_SRC_NAME
+              ${__inherit_compile_flags_state_INHERIT_VAR}_CMAKE_${__inherit_compile_flags_state_LANG}_${__inherit_compile_flags_state_FLAG}
+          )
+          set(__inherit_compile_flags_state_INHERIT_BACKUP_NAME
+              __inherit_compile_flags_state_BACKUP_${__inherit_compile_flags_state_STACK_LEVEL}_${__inherit_compile_flags_state_INHERIT_VAR}_CMAKE_${__inherit_compile_flags_state_LANG}_${__inherit_compile_flags_state_FLAG}
+          )
+          if(DEFINED ${__inherit_compile_flags_state_INHERIT_BACKUP_NAME})
+            set(${__inherit_compile_flags_state_INHERIT_SRC_NAME}
+                "${${__inherit_compile_flags_state_INHERIT_BACKUP_NAME}}")
+            unset(${__inherit_compile_flags_state_INHERIT_BACKUP_NAME})
+          endif()
+        endforeach()
+      endforeach()
+    endforeach()
+
+    if(__inherit_compile_flags_state_STACK_LEVEL LESS 1)
+      unset(__inherit_compile_flags_state_STACK_LEVEL)
+    else()
+      math(EXPR __inherit_compile_flags_state_STACK_LEVEL "${__inherit_compile_flags_state_STACK_LEVEL}-1")
+    endif()
+  endif()
+
+  unset(__inherit_compile_flags_state_INHERIT_SRC_NAME)
+  unset(__inherit_compile_flags_state_INHERIT_BACKUP_NAME)
+endmacro()
+
+macro(project_build_tools_push_patch_inherit_link_flags_state)
+  if(NOT __inherit_link_flags_state_STACK_LEVEL)
+    set(__inherit_link_flags_state_STACK_LEVEL 0)
+  else()
+    math(EXPR __inherit_link_flags_state_STACK_LEVEL "${__inherit_link_flags_state_STACK_LEVEL}+1")
+  endif()
+  foreach(__inherit_link_flags_state_INHERIT_VAR "PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT"
+                                                 "PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE")
+    foreach(__inherit_link_flags_state_TYPE "STATIC" "SHARED" "MODULE" "EXE")
+      foreach(__inherit_link_flags_state_FLAG "LINKER_FLAGS" "LINKER_FLAGS_DEBUG" "LINKER_FLAGS_MINSIZEREL"
+                                              "LINKER_FLAGS_RELEASE" "LINKER_FLAGS_RELWITHDEBINFO")
+        set(__inherit_link_flags_state_INHERIT_SRC_NAME
+            ${__inherit_link_flags_state_INHERIT_VAR}_CMAKE_${__inherit_link_flags_state_TYPE}_${__inherit_link_flags_state_FLAG}
+        )
+        set(__inherit_link_flags_state_INHERIT_BACKUP_NAME
+            __inherit_link_flags_state_BACKUP_${__inherit_link_flags_state_STACK_LEVEL}_${__inherit_link_flags_state_INHERIT_VAR}_CMAKE_${__inherit_link_flags_state_TYPE}_${__inherit_link_flags_state_FLAG}
+        )
+        if(DEFINED ${__inherit_link_flags_state_INHERIT_SRC_NAME})
+          set(${__inherit_link_flags_state_INHERIT_BACKUP_NAME} "${${__inherit_link_flags_state_INHERIT_SRC_NAME}}")
+        else()
+          unset(${__inherit_link_flags_state_INHERIT_BACKUP_NAME})
+        endif()
+      endforeach()
+    endforeach()
+  endforeach()
+
+  unset(__inherit_link_flags_state_INHERIT_SRC_NAME)
+  unset(__inherit_link_flags_state_INHERIT_BACKUP_NAME)
+endmacro()
+
+macro(project_build_tools_pop_patch_link_flags_state)
+  if(__inherit_link_flags_state_STACK_LEVEL)
+    foreach(__inherit_link_flags_state_INHERIT_VAR "PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT"
+                                                   "PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE")
+      foreach(__inherit_link_flags_state_TYPE "STATIC" "SHARED" "MODULE" "EXE")
+        foreach(__inherit_link_flags_state_FLAG "LINKER_FLAGS" "LINKER_FLAGS_DEBUG" "LINKER_FLAGS_MINSIZEREL"
+                                                "LINKER_FLAGS_RELEASE" "LINKER_FLAGS_RELWITHDEBINFO")
+          set(__inherit_link_flags_state_INHERIT_SRC_NAME
+              ${__inherit_link_flags_state_INHERIT_VAR}_CMAKE_${__inherit_link_flags_state_TYPE}_${__inherit_link_flags_state_FLAG}
+          )
+          set(__inherit_link_flags_state_INHERIT_BACKUP_NAME
+              __inherit_link_flags_state_BACKUP_${__inherit_link_flags_state_STACK_LEVEL}_${__inherit_link_flags_state_INHERIT_VAR}_CMAKE_${__inherit_link_flags_state_TYPE}_${__inherit_link_flags_state_FLAG}
+          )
+          if(DEFINED ${__inherit_link_flags_state_INHERIT_BACKUP_NAME})
+            set(${__inherit_link_flags_state_INHERIT_SRC_NAME} "${${__inherit_link_flags_state_INHERIT_BACKUP_NAME}}")
+            unset(${__inherit_link_flags_state_INHERIT_BACKUP_NAME})
+          endif()
+        endforeach()
+      endforeach()
+    endforeach()
+
+    if(__inherit_link_flags_state_STACK_LEVEL LESS 1)
+      unset(__inherit_link_flags_state_STACK_LEVEL)
+    else()
+      math(EXPR __inherit_link_flags_state_STACK_LEVEL "${__inherit_link_flags_state_STACK_LEVEL}-1")
+    endif()
+  endif()
+
+  unset(__inherit_link_flags_state_INHERIT_SRC_NAME)
+  unset(__inherit_link_flags_state_INHERIT_BACKUP_NAME)
+endmacro()

@@ -9,35 +9,60 @@ include_guard(DIRECTORY)
 # The version is the same as in gRPC e4635f223e7d36dfbea3b722a4ca4807a7e882e2
 
 macro(PROJECT_THIRD_PARTY_UPB_IMPORT)
-  if(TARGET upb::upb)
-    message(STATUS "Dependency(${PROJECT_NAME}): upb using target upb::upb")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME upb::upb)
+  if(TARGET upb::upb OR TARGET protobuf::upb)
+    if(TARGET protobuf::upb)
+      message(STATUS "Dependency(${PROJECT_NAME}): upb using target protobuf::upb")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME protobuf::upb)
+    else()
+      message(STATUS "Dependency(${PROJECT_NAME}): upb using target upb::upb")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME upb::upb)
+    endif()
 
     if(CMAKE_CROSSCOMPILING)
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB protoc-gen-upb)
+      find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE protoc-gen-upb_minitable)
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS protoc-gen-upbdefs)
       find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA protoc-gen-lua)
       message(
         STATUS
           "Dependency(${PROJECT_NAME}): upb executables for crosscompiling:
   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}
+  ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE}
   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}
   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}
           ")
     else()
-      if(TARGET upb::protoc-gen-upb)
+      if(TARGET protobuf::protoc-gen-upb)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB
+                                                  protobuf::protoc-gen-upb)
+      elseif(TARGET upb::protoc-gen-upb)
         project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB
                                                   upb::protoc-gen-upb)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB protoc-gen-upb)
       endif()
-      if(TARGET upb::protoc-gen-upbdefs)
+      if(TARGET protobuf::protoc-gen-upb_minitable)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE
+                                                  protobuf::protoc-gen-upb_minitable)
+      elseif(TARGET upb::protoc-gen-upb_minitable)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE
+                                                  upb::protoc-gen-upb_minitable)
+      else()
+        find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE protoc-gen-upb_minitable)
+      endif()
+      if(TARGET protobuf::protoc-gen-upbdefs)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS
+                                                  protobuf::protoc-gen-upbdefs)
+      elseif(TARGET upb::protoc-gen-upbdefs)
         project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS
                                                   upb::protoc-gen-upbdefs)
       else()
         find_program(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS protoc-gen-upbdefs)
       endif()
-      if(TARGET upb::protoc-gen-lua)
+      if(TARGET protobuf::protoc-gen-lua)
+        project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
+                                                  protobuf::protoc-gen-lua)
+      elseif(TARGET upb::protoc-gen-lua)
         project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
                                                   upb::protoc-gen-lua)
       else()
@@ -47,11 +72,11 @@ macro(PROJECT_THIRD_PARTY_UPB_IMPORT)
   endif()
 endmacro()
 
-if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
+if((NOT TARGET upb::upb AND NOT TARGET protobuf::upb) OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
   find_package(upb QUIET)
   project_third_party_upb_import()
 
-  if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
+  if((NOT TARGET upb::upb AND NOT TARGET protobuf::upb) OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
     find_package(PythonInterp)
     if(PYTHONINTERP_FOUND AND NOT Python_EXECUTABLE)
       set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
@@ -65,8 +90,28 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       message(FATAL_ERROR "abseil-cpp and protobuf is required to build upb")
     endif()
 
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION
-       AND EXISTS "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/grpc-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKE_MODE "LEGACY")
+    if(Protobuf_VERSION AND Protobuf_VERSION VERSION_GREATER_EQUAL "25.0")
+      include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf-declare.cmake")
+      include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf-pull.cmake")
+      project_third_party_port_declare(
+        upb
+        VERSION
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION}"
+        GIT_URL
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_GIT_URL}"
+        BUILD_OPTIONS
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_ROOT
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR}/upb")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROJECT_DIRECTORY
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_ROOT}/cmake")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_SRC_DIRECTORY_NAME
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_SRC_DIRECTORY_NAME}")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKE_MODE "PROTOBUF")
+    elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION
+           AND EXISTS
+               "${PROJECT_THIRD_PARTY_PACKAGE_DIR}/grpc-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION}")
       project_third_party_port_declare(
         upb
         VERSION
@@ -140,10 +185,17 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       file(
         APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.ps1"
         "Set-Location \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_ROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-      file(
-        APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.ps1"
-        "& \"${Python_EXECUTABLE}\" cmake/make_cmakelists.py cmake/CMakeLists.txt${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-      )
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKE_MODE STREQUAL "LEGACY")
+        file(
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.ps1"
+          "& \"${Python_EXECUTABLE}\" cmake/make_cmakelists.py cmake/CMakeLists.txt${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+        )
+      else()
+        file(
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.ps1"
+          "& \"${Python_EXECUTABLE}\" cmake/make_cmakelists.py BUILD cmake/CMakeLists.txt${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+        )
+      endif()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKELISTS_SCRIPT
           "${ATFRAMEWORK_CMAKE_TOOLSET_PWSH}"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.ps1")
@@ -153,10 +205,17 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
            "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
       file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.sh"
            "cd \"${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_ROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-      file(
-        APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.sh"
-        "\"${Python_EXECUTABLE}\" cmake/make_cmakelists.py cmake/CMakeLists.txt${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-      )
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKE_MODE STREQUAL "LEGACY")
+        file(
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.sh"
+          "\"${Python_EXECUTABLE}\" cmake/make_cmakelists.py cmake/CMakeLists.txt${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+        )
+      else()
+        file(
+          APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.sh"
+          "\"${Python_EXECUTABLE}\" cmake/make_cmakelists.py BUILD cmake/CMakeLists.txt${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
+        )
+      endif()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKELISTS_SCRIPT
           "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}"
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}/run-generate-cmakelists.sh")
@@ -260,13 +319,18 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
         APPEND
         ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS
         "-DUPB_BUILD_CODEGEN=OFF"
+        "-DUPB_ENABLE_CODEGEN=OFF"
         "-DPROTOC_GEN_UPB_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
         "-DPROTOC_GEN_UPBDEFS_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}"
         "-DPROTOC_GEN_UPBLUA_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}")
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS "-DUPB_BUILD_CODEGEN=OFF"
-             "-DPROTOC_GEN_UPB_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
-             "-DPROTOC_GEN_UPBLUA_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}")
+        list(
+          APPEND
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS
+          "-DUPB_BUILD_CODEGEN=OFF"
+          "-DUPB_ENABLE_CODEGEN=OFF"
+          "-DPROTOC_GEN_UPB_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
+          "-DPROTOC_GEN_UPBLUA_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}")
         message(
           STATUS
             "Dependency(${PROJECT_NAME}): upb using PROTOC_GEN_UPBDEFS_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}"
@@ -281,7 +345,8 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
           "Dependency(${PROJECT_NAME}): upb using PROTOC_GEN_UPBLUA_PROGRAM=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}"
       )
     else()
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS "-DUPB_BUILD_CODEGEN=ON")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS "-DUPB_BUILD_CODEGEN=ON"
+           "-DUPB_ENABLE_CODEGEN=ON")
     endif()
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_OPTIONS
          "-DUPB_HOST_INCLUDE_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/include"
@@ -324,7 +389,7 @@ if(NOT TARGET upb::upb OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_G
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GIT_URL}")
 
-    if(TARGET upb::upb)
+    if(TARGET upb::upb OR TARGET protobuf::upb)
       project_third_party_upb_import()
     endif()
   endif()
@@ -332,7 +397,7 @@ else()
   project_third_party_upb_import()
 endif()
 
-if(NOT TARGET upb::upb)
+if(NOT TARGET upb::upb AND NOT TARGET protobuf::upb)
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
     project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}")
   endif()

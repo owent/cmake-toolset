@@ -324,10 +324,24 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
          "--plugin=protoc-gen-upbdefs=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}"
          "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}")
   endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE)
+    list(APPEND UPB_COMMAND_OPTIONS
+         "--plugin=protoc-gen-upb_minitable=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE}"
+         "--upb_minitable_out=${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
+
+  set(UPB_TEST_GENERATE_CXX_FILES
+      "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
+      "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c")
+  set(UPB_TEST_GENERATE_LUA_FILES "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
+                                  "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua")
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE)
+    list(APPEND UPB_TEST_GENERATE_CXX_FILES "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb_minitable.h"
+         "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb_minitable.c")
+  endif()
+
   add_custom_command(
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
-           "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c"
-           "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua" "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua"
+    OUTPUT ${UPB_TEST_GENERATE_CXX_FILES} ${UPB_TEST_GENERATE_LUA_FILES}
     COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}"
             ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
@@ -335,15 +349,9 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/test_upb-and-lua-binding.lua"
             "${CMAKE_CURRENT_BINARY_DIR}"
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
-    COMMENT
-      "Generate test_pb_pb.lua,test_pb.upb.h,test_pb.upb.c,test_pb.upbdefs.h,test_pb.upbdefs.c into ${CMAKE_CURRENT_BINARY_DIR}"
-  )
+    COMMENT "Generate ${UPB_TEST_GENERATE_CXX_FILES};${UPB_TEST_GENERATE_LUA_FILES} into ${CMAKE_CURRENT_BINARY_DIR}")
 
-  add_executable(
-    cmake-toolset-upb-and-lua-binding-test
-    "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
-    "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c"
-    upb-and-lua-binding.cpp)
+  add_executable(cmake-toolset-upb-and-lua-binding-test ${UPB_TEST_GENERATE_CXX_FILES} upb-and-lua-binding.cpp)
 
   target_include_directories("cmake-toolset-upb-and-lua-binding-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
