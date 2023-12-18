@@ -1,5 +1,5 @@
 diff --git a/cmake/compilers/Clang.cmake b/cmake/compilers/Clang.cmake
-index 7ce4d46..95870f1 100644
+index 7ce4d46d..95870f1e 100644
 --- a/cmake/compilers/Clang.cmake
 +++ b/cmake/compilers/Clang.cmake
 @@ -57,7 +57,7 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(AMD64|amd64|i.86|x86)")
@@ -12,7 +12,7 @@ index 7ce4d46..95870f1 100644
  # -z switch is not supported on MacOS
  if (NOT APPLE)
 diff --git a/cmake/compilers/GNU.cmake b/cmake/compilers/GNU.cmake
-index 08c7f2e..51727b2 100644
+index 08c7f2e5..51727b2f 100644
 --- a/cmake/compilers/GNU.cmake
 +++ b/cmake/compilers/GNU.cmake
 @@ -70,7 +70,7 @@ endif ()
@@ -24,3 +24,27 @@ index 08c7f2e..51727b2 100644
  # -z switch is not supported on MacOS
  if (NOT APPLE)
      set(TBB_LIB_LINK_FLAGS ${TBB_LIB_LINK_FLAGS} -Wl,-z,relro,-z,now,-z,noexecstack)
+diff --git a/src/tbb/threading_control.cpp b/src/tbb/threading_control.cpp
+index f253c83d..d0c7e256 100644
+--- a/src/tbb/threading_control.cpp
++++ b/src/tbb/threading_control.cpp
+@@ -65,7 +65,8 @@ cache_aligned_unique_ptr<permit_manager> threading_control_impl::make_permit_man
+      if (tcm_adaptor::is_initialized()) {
+         auto tcm = make_cache_aligned_unique<tcm_adaptor>();
+         if (tcm->is_connected()) {
+-            return tcm;
++            // Patch for GCC 4.8
++            return tcm.release();
+         }
+     }
+     return make_cache_aligned_unique<market>(workers_soft_limit);
+@@ -85,7 +86,8 @@ cache_aligned_unique_ptr<thread_dispatcher> threading_control_impl::make_thread_
+             td->my_server->default_concurrency(), workers_soft_limit);
+     }
+ 
+-    return td;
++    // Patch for GCC 4.8
++    return td.release();
+ }
+ 
+ threading_control_impl::threading_control_impl(threading_control* tc) {

@@ -41,6 +41,10 @@ endif()
 project_git_clone_repository(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_GIT_OPTIONS} ENABLE_SUBMODULE)
 
 if(NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR}/.git")
-  echowithcolor(COLOR RED "-- Dependency(${PROJECT_NAME}): Pull protobuf from ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_GIT_URL} failed")
+  echowithcolor(
+    COLOR
+    RED
+    "-- Dependency(${PROJECT_NAME}): Pull protobuf from ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_GIT_URL} failed"
+  )
   message(FATAL_ERROR "Dependency(${PROJECT_NAME}): Protobuf is required")
 endif()
