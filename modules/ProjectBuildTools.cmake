@@ -1321,6 +1321,11 @@ function(project_build_tools_patch_default_imported_config)
         continue()
       endif()
 
+      get_target_property(IS_ALIAS_TARGET ${TARGET_NAME} ALIASED_TARGET)
+      if(IS_ALIAS_TARGET)
+        continue()
+      endif()
+
       if(CMAKE_VERSION VERSION_LESS "3.19.0")
         get_target_property(TARGET_TYPE_NAME ${TARGET_NAME} TYPE)
         if(TARGET_TYPE_NAME STREQUAL "INTERFACE_LIBRARY")
