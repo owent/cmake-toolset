@@ -1133,10 +1133,39 @@ function(project_build_tools_patch_protobuf_sources)
   endif()
 endfunction()
 
-function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME)
-  set(multiValueArgs ADD_LIBRARIES REMOVE_LIBRARIES)
-  cmake_parse_arguments(PATCH_OPTIONS "" "" "${multiValueArgs}" ${ARGN})
+function(project_build_tools_resolve_alias_target __OUTPUT_VAR_NAME __TARGET_NAME)
+  if(NOT TARGET ${__TARGET_NAME})
+    set(${__OUTPUT_VAR_NAME}
+        ${__TARGET_NAME}
+        PARENT_SCOPE)
+  endif()
 
+  get_target_property(IS_ALIAS_TARGET ${__TARGET_NAME} ALIASED_TARGET)
+  if(IS_ALIAS_TARGET)
+    project_build_tools_resolve_alias(${__OUTPUT_VAR_NAME} ${IS_ALIAS_TARGET})
+    set(${__OUTPUT_VAR_NAME}
+        ${${__OUTPUT_VAR_NAME}}
+        PARENT_SCOPE)
+  else()
+    set(${__OUTPUT_VAR_NAME}
+        ${__TARGET_NAME}
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME)
+  set(optionArgs RESOLVE_ALIAS)
+  set(multiValueArgs ADD_LIBRARIES REMOVE_LIBRARIES)
+  cmake_parse_arguments(PATCH_OPTIONS "${optionArgs}" "" "${multiValueArgs}" ${ARGN})
+
+  if(PATCH_OPTIONS_RESOLVE_ALIAS)
+    project_build_tools_resolve_alias_target(TARGET_NAME ${TARGET_NAME})
+  else()
+    get_target_property(IS_ALIAS_TARGET ${__TARGET_NAME} ALIASED_TARGET)
+    if(IS_ALIAS_TARGET)
+      return()
+    endif()
+  endif()
   get_target_property(OLD_LINK_LIBRARIES ${TARGET_NAME} INTERFACE_LINK_LIBRARIES)
   set(PROPERTY_NAME "")
   if(OLD_LINK_LIBRARIES)
@@ -1215,9 +1244,18 @@ function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME
 endfunction()
 
 function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
+  set(optionArgs RESOLVE_ALIAS)
   set(multiValueArgs ADD_DEFINITIONS REMOVE_DEFINITIONS)
-  cmake_parse_arguments(PATCH_OPTIONS "" "" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(PATCH_OPTIONS "${RESOLVE_ALIAS}" "" "${multiValueArgs}" ${ARGN})
 
+  if(PATCH_OPTIONS_RESOLVE_ALIAS)
+    project_build_tools_resolve_alias_target(TARGET_NAME ${TARGET_NAME})
+  else()
+    get_target_property(IS_ALIAS_TARGET ${__TARGET_NAME} ALIASED_TARGET)
+    if(IS_ALIAS_TARGET)
+      return()
+    endif()
+  endif()
   get_target_property(OLD_DEFINITIONS ${TARGET_NAME} INTERFACE_COMPILE_DEFINITIONS)
   if(NOT OLD_DEFINITIONS)
     set(OLD_DEFINITIONS "") # Reset NOTFOUND
@@ -1267,6 +1305,7 @@ function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
 endfunction()
 
 function(project_build_tools_get_imported_property OUTPUT_VAR_NAME TARGET_NAME VAR_NAME)
+  project_build_tools_resolve_alias_target(TARGET_NAME ${TARGET_NAME})
   if(CMAKE_BUILD_TYPE)
     string(TOUPPER "${VAR_NAME}_${CMAKE_BUILD_TYPE}" TRY_SPECIFY_${VAR_NAME})
     get_target_property(${OUTPUT_VAR_NAME} ${TARGET_NAME} ${TRY_SPECIFY_${VAR_NAME}})

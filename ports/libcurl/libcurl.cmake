@@ -1,51 +1,89 @@
 include_guard(DIRECTORY)
 # =========== third party libcurl ==================
+
 macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
   if(CURL_FOUND)
-    if(TARGET CURL::libcurl)
+    if(TARGET CURL::libcurl
+       OR TARGET CURL::libcurl_static
+       OR TARGET CURL::libcurl_shared)
+      set(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES CURL::libcurl CURL::libcurl_static CURL::libcurl_shared)
       if(LIBRESSL_FOUND
          AND TARGET LibreSSL::Crypto
          AND TARGET LibreSSL::SSL)
-        project_build_tools_patch_imported_link_interface_libraries(
-          CURL::libcurl REMOVE_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto" ADD_LIBRARIES "LibreSSL::SSL;LibreSSL::Crypto")
+        foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+          if(TARGET PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+            project_build_tools_patch_imported_link_interface_libraries(
+              ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} REMOVE_LIBRARIES "OpenSSL::SSL;OpenSSL::Crypto" ADD_LIBRARIES
+              "LibreSSL::SSL;LibreSSL::Crypto")
+          endif()
+        endforeach()
       endif()
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl)
-      project_build_tools_patch_default_imported_config(CURL::libcurl)
-      get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES CURL::libcurl
-                          INTERFACE_LINK_LIBRARIES)
-      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES)
-      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES)
-        foreach(LIBCURL_DEP_LINK_NAME ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES})
-          if(IS_ABSOLUTE "${LIBCURL_DEP_LINK_NAME}")
-            if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME AND LIBCURL_DEP_LINK_NAME MATCHES "cares")
-              list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
-                   "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME}")
-            elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME AND LIBCURL_DEP_LINK_NAME MATCHES "zstd")
-              list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
-                   "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME}")
-            elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME AND LIBCURL_DEP_LINK_NAME MATCHES
-                                                                            "libz\\.|zlib")
-              list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
-                   "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME}")
-            elseif(LIBCURL_DEP_LINK_NAME MATCHES "nghttp2|nghttp3|ngtcp2")
-              message(
-                "Libcurl: ignore ${LIBCURL_DEP_LINK_NAME} we will use Libnghttp2::libnghttp2 or Libngtcp2::libngtcp2_crypto_openssl/libngtcp2_crypto_quictls"
-              )
+      if(TARGET CURL::libcurl)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl)
+      elseif(TARGET CURL::libcurl_static AND TARGET CURL::libcurl_shared)
+        project_third_party_check_build_shared_lib("libcurl" ""
+                                                   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_USE_SHARED)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_USE_SHARED)
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl_shared)
+        else()
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl_static)
+        endif()
+      elseif(TARGET CURL::libcurl_static)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl_static)
+      elseif(TARGET CURL::libcurl_shared)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME CURL::libcurl_shared)
+      endif()
+      project_build_tools_patch_default_imported_config(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+      foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+        if(NOT TARGET PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+          continue()
+        endif()
+        get_target_property(PROJECT_THIRD_PARTY_LIBCURL_ALIAS_TARGET ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME}
+                            ALIASED_TARGET)
+        if(PROJECT_THIRD_PARTY_LIBCURL_ALIAS_TARGET)
+          unset(PROJECT_THIRD_PARTY_LIBCURL_ALIAS_TARGET)
+          continue()
+        endif()
+        get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES
+                            ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} INTERFACE_LINK_LIBRARIES)
+        unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES)
+          foreach(LIBCURL_DEP_LINK_NAME
+                  ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES})
+            if(IS_ABSOLUTE "${LIBCURL_DEP_LINK_NAME}")
+              if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME AND LIBCURL_DEP_LINK_NAME MATCHES "cares")
+                list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
+                     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME}")
+              elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME AND LIBCURL_DEP_LINK_NAME MATCHES "zstd")
+                list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
+                     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME}")
+              elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME AND LIBCURL_DEP_LINK_NAME MATCHES
+                                                                              "libz\\.|zlib")
+                list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
+                     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME}")
+              elseif(LIBCURL_DEP_LINK_NAME MATCHES "nghttp2|nghttp3|ngtcp2")
+                message(
+                  "Libcurl: ignore ${LIBCURL_DEP_LINK_NAME} we will use Libnghttp2::libnghttp2 or Libngtcp2::libngtcp2_crypto_openssl/libngtcp2_crypto_quictls"
+                )
+              else()
+                list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
+                     "${LIBCURL_DEP_LINK_NAME}")
+              endif()
             else()
               list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
                    "${LIBCURL_DEP_LINK_NAME}")
             endif()
-          else()
-            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
-                 "${LIBCURL_DEP_LINK_NAME}")
-          endif()
-        endforeach()
-        set_target_properties(
-          CURL::libcurl PROPERTIES INTERFACE_LINK_LIBRARIES
-                                   "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES}")
-        unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES)
-      endif()
-      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES)
+          endforeach()
+
+          set_target_properties(
+            ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME}
+            PROPERTIES INTERFACE_LINK_LIBRARIES
+                       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES}")
+          unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES)
+        endif()
+        unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_ALIAS_TARGET)
+      endforeach()
     else()
       add_library(CURL::libcurl UNKNOWN IMPORTED)
       if(CURL_INCLUDE_DIRS)
@@ -62,15 +100,30 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
     endif()
 
     if(TARGET Libnghttp2::libnghttp2)
-      project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES Libnghttp2::libnghttp2)
+      foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+        if(TARGET PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+          project_build_tools_patch_imported_link_interface_libraries(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME}
+                                                                      ADD_LIBRARIES Libnghttp2::libnghttp2)
+        endif()
+      endforeach()
+
     endif()
     if(Libngtcp2::libngtcp2_crypto_openssl)
-      project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES
-                                                                  Libngtcp2::libngtcp2_crypto_openssl)
+      foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+        if(TARGET PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+          project_build_tools_patch_imported_link_interface_libraries(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME}
+                                                                      ADD_LIBRARIES Libngtcp2::libngtcp2_crypto_openssl)
+        endif()
+      endforeach()
+
     endif()
     if(Libngtcp2::libngtcp2_crypto_quictls)
-      project_build_tools_patch_imported_link_interface_libraries(CURL::libcurl ADD_LIBRARIES
-                                                                  Libngtcp2::libngtcp2_crypto_quictls)
+      foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+        if(TARGET PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+          project_build_tools_patch_imported_link_interface_libraries(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME}
+                                                                      ADD_LIBRARIES Libngtcp2::libngtcp2_crypto_quictls)
+        endif()
+      endforeach()
     endif()
 
     if(CMAKE_CROSSCOMPILING)
@@ -127,7 +180,9 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
   endif()
 endmacro()
 
-if(NOT TARGET CURL::libcurl)
+if(NOT TARGET CURL::libcurl
+   OR TARGET CURL::libcurl_static
+   OR TARGET CURL::libcurl_shared)
   find_package(CURL QUIET)
   project_third_party_libcurl_import()
 
@@ -293,8 +348,22 @@ if(NOT TARGET CURL::libcurl)
     endif()
 
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_STATIC_LINK_NAMES)
-    if(TARGET CURL::libcurl)
-      message(STATUS "Dependency(${PROJECT_NAME}): libcurl found target: CURL::libcurl")
+    if(TARGET CURL::libcurl
+       OR TARGET CURL::libcurl_static
+       OR TARGET CURL::libcurl_shared)
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_FOUND_NAMES)
+      foreach(TEST_TARGET TARGET CURL::libcurl CURL::libcurl_static CURL::libcurl_shared)
+        if(TARGET ${TEST_TARGET})
+          list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_FOUND_NAMES ${TEST_TARGET})
+        endif()
+      endforeach()
+
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): libcurl found target: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_FOUND_NAMES}"
+      )
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_FOUND_NAMES)
+      unset(TEST_TARGET)
     else()
       message(STATUS "Dependency(${PROJECT_NAME}): libcurl found.(${CURL_INCLUDE_DIRS}|${CURL_LIBRARIES})")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_TEST_SRC
