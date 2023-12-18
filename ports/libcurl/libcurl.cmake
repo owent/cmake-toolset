@@ -140,7 +140,7 @@ if(NOT TARGET CURL::libcurl)
     project_third_party_port_declare(
       libcurl
       VERSION
-      "8.2.1"
+      "8.5.0"
       GIT_URL
       "https://github.com/curl/curl.git"
       BUILD_OPTIONS
