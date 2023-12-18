@@ -25,7 +25,7 @@ index 08c7f2e5..51727b2f 100644
  if (NOT APPLE)
      set(TBB_LIB_LINK_FLAGS ${TBB_LIB_LINK_FLAGS} -Wl,-z,relro,-z,now,-z,noexecstack)
 diff --git a/src/tbb/threading_control.cpp b/src/tbb/threading_control.cpp
-index f253c83d..d0c7e256 100644
+index f253c83d..0ee6b914 100644
 --- a/src/tbb/threading_control.cpp
 +++ b/src/tbb/threading_control.cpp
 @@ -65,7 +65,8 @@ cache_aligned_unique_ptr<permit_manager> threading_control_impl::make_permit_man
@@ -34,7 +34,7 @@ index f253c83d..d0c7e256 100644
          if (tcm->is_connected()) {
 -            return tcm;
 +            // Patch for GCC 4.8
-+            return tcm.release();
++            return cache_aligned_unique_ptr<permit_manager>{std::move(tcm)};
          }
      }
      return make_cache_aligned_unique<market>(workers_soft_limit);
@@ -44,7 +44,7 @@ index f253c83d..d0c7e256 100644
  
 -    return td;
 +    // Patch for GCC 4.8
-+    return td.release();
++    return cache_aligned_unique_ptr<thread_dispatcher>{std::move(td)};
  }
  
  threading_control_impl::threading_control_impl(threading_control* tc) {
