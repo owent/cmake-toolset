@@ -263,7 +263,7 @@ if(NOT Libwebsockets_FOUND
 
       if(ZLIB_INCLUDE_DIRS AND ZLIB_LIBRARIES)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_ZLIB=ON"
-             "-DLWS_ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
+             "-DLWS_WITH_BUNDLED_ZLIB=OFF" "-DLWS_ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
         list_append_unescape(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
                              "-DLWS_ZLIB_LIBRARIES=${ZLIB_LIBRARIES}")
       endif()
@@ -364,6 +364,8 @@ if(NOT Libwebsockets_FOUND
         project_expand_list_for_command_line_to_file(
           BASH "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
           "${CMAKE_COMMAND}" "--build" "." "-j")
+        file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
+             "if [[ $? -ne 0 ]]; then exit 1; fi${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
         project_expand_list_for_command_line_to_file(
           BASH
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.sh"
@@ -434,6 +436,8 @@ if(NOT Libwebsockets_FOUND
             "--config"
             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_TYPE}"
             "-j")
+          file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
+               "IF %ERRORLEVEL% NEQ 0 ( exit %ERRORLEVEL% )${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
           project_expand_list_for_command_line_to_file(
             BAT
             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/run-build-release.bat"
