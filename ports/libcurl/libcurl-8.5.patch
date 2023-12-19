@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a54c2ff..abd74b2 100644
+index a54c2fff9..724c97d1e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -484,6 +484,7 @@ if(use_core_foundation_and_core_services)
@@ -27,7 +27,29 @@ index a54c2ff..abd74b2 100644
  
    if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
      set(valid_default_ssl_backend TRUE)
-@@ -628,6 +637,12 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
+@@ -612,8 +621,19 @@ if(CURL_ZSTD)
+   find_package(Zstd REQUIRED)
+   if(Zstd_FOUND AND NOT Zstd_VERSION VERSION_LESS "1.0.0")
+     set(HAVE_ZSTD ON)
+-    list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
+-    include_directories(${Zstd_INCLUDE_DIRS})
++      if(TARGET zstd::libzstd_shared)
++      set(HAVE_ZSTD ON)
++      list(APPEND CURL_LIBS zstd::libzstd_shared)
++    elseif(TARGET zstd::libzstd_static)
++      set(HAVE_ZSTD ON)
++      list(APPEND CURL_LIBS zstd::libzstd_static)
++    elseif(TARGET zstd::libzstd)
++      set(HAVE_ZSTD ON)
++      list(APPEND CURL_LIBS zstd::libzstd)
++    else()
++      list(APPEND CURL_LIBS ${Zstd_LIBRARIES})
++      include_directories(${Zstd_INCLUDE_DIRS})
++    endif()
+   else()
+     message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
+   endif()
+@@ -628,6 +648,12 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE)
      if(HAVE_LIBZ)
        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
      endif()
@@ -40,7 +62,7 @@ index a54c2ff..abd74b2 100644
      if(WIN32)
        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
        list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
-@@ -671,13 +686,6 @@ if(USE_OPENSSL OR USE_WOLFSSL)
+@@ -671,13 +697,6 @@ if(USE_OPENSSL OR USE_WOLFSSL)
    endif()
  endif()
  
@@ -54,7 +76,7 @@ index a54c2ff..abd74b2 100644
  option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
  if(USE_NGTCP2)
    if(USE_OPENSSL OR USE_WOLFSSL)
-@@ -702,6 +710,60 @@ if(USE_NGTCP2)
+@@ -702,6 +721,60 @@ if(USE_NGTCP2)
    set(USE_NGHTTP3 ON)
    include_directories(${NGHTTP3_INCLUDE_DIRS})
    list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
@@ -115,7 +137,7 @@ index a54c2ff..abd74b2 100644
  endif()
  
  option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
-@@ -757,7 +819,7 @@ if(NOT CURL_DISABLE_LDAP)
+@@ -757,7 +830,7 @@ if(NOT CURL_DISABLE_LDAP)
    # Now that we know, we're not using windows LDAP...
    if(NOT USE_WIN32_LDAP)
      # Check for LDAP

@@ -70,10 +70,10 @@ index 4a274f22a..27dba82f9 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index d1a6bb2ee..783462e22 100755
+index d1a6bb2ee..86bb72b3c 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
-@@ -43,9 +43,40 @@ from __future__ import print_function
+@@ -43,9 +43,58 @@ from __future__ import print_function
  import sys
  import textwrap
  import os
@@ -86,38 +86,56 @@ index d1a6bb2ee..783462e22 100755
 +_stages = ["_stage0", "_stage1", ""]
 +_block_targets = ["libupb.so", "libupb_generator.so", "conformance_upb", "conformance_upb_dynamic_minitable", "upbdev", "protoc-gen-upbdev"]
 +_special_targets_mapping = {
-+  "//:protobuf" : "protobuf::libprotobuf",
-+  "//src/google/protobuf/compiler:code_generator" : "protobuf::libprotoc",
-+  "@utf8_range": "utf8_range",
++  "//:protobuf" : ["protobuf::libprotobuf"],
++  "//src/google/protobuf/compiler:code_generator" : ["protobuf::libprotoc", "protobuf::libprotobuf"],
++  "@utf8_range": ["utf8_range"],
 +}
 +_directory_sep = re.compile('[/\\:]')
 +
-+def MappingThirdPartyDep(dep, target_prefix):
++def MappingThirdPartyDep(output, dep, target_prefix):
 +  if dep.startswith("//upb/"):
-+    return "upb_" + _directory_sep.sub("_", dep[6:])
++    output.append("upb_" + _directory_sep.sub("_", dep[6:]))
++    return
 +  if dep.startswith("//upb_generator/"):
-+    return "upb_generator_" + _directory_sep.sub("_", dep[16:])
++    output.append("upb_generator_" + _directory_sep.sub("_", dep[16:]))
++    return
 +  if dep.startswith("//lua/"):
-+    return "lua_" + _directory_sep.sub("_", dep[6:])
++    output.append("lua_" + _directory_sep.sub("_", dep[6:]))
++    return
 +  if dep in _special_targets_mapping:
-+    return _special_targets_mapping[dep]
++    output += _special_targets_mapping[dep]
++    return
 +  if dep.startswith("@com_google_absl//"):
 +    p = dep.rfind(":")
 +    if p < 0:
-+      return "absl::" + dep[dep.rfind("/")+1:]
-+    return "absl::" + dep[p+1:]
++      output.append("absl::" + dep[dep.rfind("/")+1:])
++      return
++    output.append("absl::" + dep[p+1:])
++    return
 +  if dep.startswith(":"):
-+    return _directory_sep.sub("_", target_prefix + dep[1:])
-+  if dep.startswith("//"):
-+    return _directory_sep.sub("_", dep[2:])
-+  return _directory_sep.sub("_", dep)
++    output.append(_directory_sep.sub("_", target_prefix + dep[1:]))
++  elif dep.startswith("//"):
++    output.append(_directory_sep.sub("_", dep[2:]))
++  else:
++    output.append(_directory_sep.sub("_", dep))
 +
-+def StripFirstChar(deps, target_prefix):
-+  return [MappingThirdPartyDep(dep, target_prefix) for dep in deps]
++def MappingThirdPartyDeps(deps, target_prefix):
++  origin_deps = []
++  for dep in deps:
++    MappingThirdPartyDep(origin_deps, dep, target_prefix)
++  origin_deps.reverse()
++  duplicated_checker = set()
++  result_deps = []
++  for dep in origin_deps:
++    if dep not in duplicated_checker:
++      result_deps.append(dep)
++      duplicated_checker.add(dep)
++  result_deps.reverse()
++  return result_deps
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -56,24 +87,62 @@ add_library(%(name)s %(type)s
+@@ -56,24 +105,62 @@ add_library(%(name)s %(type)s
      %(sources)s
  )
  target_include_directories(%(name)s %(keyword)s
@@ -171,7 +189,7 @@ index d1a6bb2ee..783462e22 100755
 +        self.target_prefix + kwargs["name"] + stage,
          keyword,
 -        "\n  ".join(StripFirstChar(kwargs["deps"]))
-+        "\n  ".join(StripFirstChar(kwargs["deps"], self.target_prefix))
++        "\n  ".join(MappingThirdPartyDeps(kwargs["deps"], self.target_prefix))
 +    )
 +
 +  def _add_bootstrap_deps(self, kwargs, keyword="", stage = "", deps_key = "bootstrap_deps", target_name = None):
@@ -182,11 +200,11 @@ index d1a6bb2ee..783462e22 100755
 +    self.converter.toplevel += "target_link_libraries({0}{1}\n  {2})\n".format(
 +        self.target_prefix + target_name + stage,
 +        keyword,
-+        "\n  ".join([dep + stage for dep in StripFirstChar(kwargs[deps_key], self.target_prefix)])
++        "\n  ".join([dep + stage for dep in MappingThirdPartyDeps(kwargs[deps_key], self.target_prefix)])
      )
  
    def load(self, *args):
-@@ -82,9 +151,7 @@ class BuildFileFunctions(object):
+@@ -82,9 +169,7 @@ class BuildFileFunctions(object):
    def cc_library(self, **kwargs):
      if kwargs["name"].endswith("amalgamation"):
        return
@@ -197,7 +215,7 @@ index d1a6bb2ee..783462e22 100755
        return
      if "testonly" in kwargs:
        return
-@@ -95,33 +162,82 @@ class BuildFileFunctions(object):
+@@ -95,33 +180,82 @@ class BuildFileFunctions(object):
      ]
      for file in files:
        if os.path.basename(file) in pregenerated_files:
@@ -286,7 +304,7 @@ index d1a6bb2ee..783462e22 100755
  
    def cc_test(self, **kwargs):
      # Disable this until we properly support upb_proto_library().
-@@ -229,24 +345,309 @@ class BuildFileFunctions(object):
+@@ -229,24 +363,309 @@ class BuildFileFunctions(object):
    def bool_flag(self, **kwargs):
      pass
  
@@ -599,7 +617,7 @@ index d1a6bb2ee..783462e22 100755
      }
  
    template = textwrap.dedent("""\
-@@ -257,6 +658,23 @@ class Converter(object):
+@@ -257,6 +676,23 @@ class Converter(object):
      project(upb)
      set(CMAKE_C_STANDARD 99)
  
@@ -619,11 +637,11 @@ index d1a6bb2ee..783462e22 100755
 +    else()
 +      option(UPB_ENABLE_CODEGEN "Build codegens plugins of upb" ON)
 +    endif()
-+                             
++
      # Prevent CMake from setting -rdynamic on Linux (!!).
      SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
      SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-@@ -291,7 +709,15 @@ class Converter(object):
+@@ -291,7 +727,15 @@ class Converter(object):
        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
      endif()
  
@@ -640,14 +658,14 @@ index d1a6bb2ee..783462e22 100755
        if(EXISTS ../../external/utf8_range)
          # utf8_range is already installed
          include_directories(../external/utf8_range)
-@@ -318,10 +744,113 @@ class Converter(object):
+@@ -318,10 +762,113 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
 +    if (MSVC)
 +      add_compile_options(/wd4146 /wd4703 -D_CRT_SECURE_NO_WARNINGS)
 +    endif()
-+                             
++
      enable_testing()
  
 +    if (UPB_ENABLE_CODEGEN)
@@ -663,16 +681,16 @@ index d1a6bb2ee..783462e22 100755
 +        endif()
 +      endif()
 +    endif()
-+                             
++
      %(toplevel)s
  
 +    if (UPB_ENABLE_CODEGEN)
-+      set(PROTOC_PROGRAM "\$<TARGET_FILE:protobuf::protoc>")
-+      set(PROTOC_GEN_UPB_PROGRAM "\$<TARGET_FILE:upb_generator_protoc-gen-upb>")
-+      set(PROTOC_GEN_UPB_MINITABLE_PROGRAM "\$<TARGET_FILE:upb_generator_protoc-gen-upb_minitable>")
-+      set(PROTOC_GEN_UPBDEFS_PROGRAM "\$<TARGET_FILE:upb_generator_protoc-gen-upbdefs>")
-+      set(PROTOC_GEN_UPBLUA_PROGRAM "\$<TARGET_FILE:lua_protoc-gen-lua>")
-+                             
++      set(PROTOC_PROGRAM "\\$<TARGET_FILE:protobuf::protoc>")
++      set(PROTOC_GEN_UPB_PROGRAM "\\$<TARGET_FILE:upb_generator_protoc-gen-upb>")
++      set(PROTOC_GEN_UPB_MINITABLE_PROGRAM "\\$<TARGET_FILE:upb_generator_protoc-gen-upb_minitable>")
++      set(PROTOC_GEN_UPBDEFS_PROGRAM "\\$<TARGET_FILE:upb_generator_protoc-gen-upbdefs>")
++      set(PROTOC_GEN_UPBLUA_PROGRAM "\\$<TARGET_FILE:lua_protoc-gen-lua>")
++
 +      unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS)
 +      unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS)
 +      unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES)
@@ -714,11 +732,11 @@ index d1a6bb2ee..783462e22 100755
 +      )
 +      add_library(upb_well_known_types ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS}
 +        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
-+      target_include_directories(upb_well_known_types PUBLIC "\$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/stage2/upb_well_known_types>")
++      target_include_directories(upb_well_known_types PUBLIC "\\$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/stage2/upb_well_known_types>")
 +      set_target_properties(upb_well_known_types PROPERTIES EXPORT_NAME "well_known_types")
 +      target_link_libraries(upb_well_known_types PUBLIC upb_upb upb_descriptor_upb_proto)
 +    endif()
-+                             
++
 +    include(GNUInstallDirs)
 +    install(
 +      DIRECTORY ../../upb
@@ -754,7 +772,7 @@ index d1a6bb2ee..783462e22 100755
    """)
  
  data = {}
-@@ -340,7 +869,13 @@ globs = GetDict(converter)
+@@ -340,7 +887,13 @@ globs = GetDict(converter)
  
  # We take the BUILD path as a command-line argument to ensure that we can find
  # it regardless of how exactly Bazel was invoked.
