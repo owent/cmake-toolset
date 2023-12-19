@@ -45,7 +45,7 @@ if(NOT TARGET sodium
   project_third_party_port_declare(
     libsodium
     VERSION
-    "1.0.18-RELEASE"
+    "1.0.19-RELEASE"
     GIT_URL
     "https://github.com/jedisct1/libsodium.git"
     BUILD_OPTIONS

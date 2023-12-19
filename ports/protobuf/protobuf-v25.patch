@@ -1,0 +1,46 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4137ce2e9..149b8616f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,7 +209,7 @@ else (protobuf_BUILD_SHARED_LIBS)
+     if (protobuf_MSVC_STATIC_RUNTIME)
+         set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>)
+     else()
+-        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>DLL)
++        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>")
+     endif()
+   else()
+     # In case we are building static libraries, link also the runtime library statically
+diff --git a/src/google/protobuf/compiler/objectivec/names.cc b/src/google/protobuf/compiler/objectivec/names.cc
+index 306f98b46..45149860d 100644
+--- a/src/google/protobuf/compiler/objectivec/names.cc
++++ b/src/google/protobuf/compiler/objectivec/names.cc
+@@ -947,6 +947,7 @@ std::string FragmentName(const FieldDescriptor* field,
+   // Some compilers report reaching end of function even though all cases of
+   // the enum are handed in the switch.
+   ABSL_LOG(FATAL) << "Can't get here.";
++  return "";
+ }
+ 
+ std::string FieldObjCTypeInternal(const FieldDescriptor* field,
+@@ -1076,6 +1077,7 @@ std::string FieldObjCTypeInternal(const FieldDescriptor* field,
+   // Some compilers report reaching end of function even though all cases of
+   // the enum are handed in the switch.
+   ABSL_LOG(FATAL) << "Can't get here.";
++  return "";
+ }
+ 
+ }  // namespace
+diff --git a/src/google/protobuf/map_field.h b/src/google/protobuf/map_field.h
+index 8aa9e45fe..4dfe873a7 100644
+--- a/src/google/protobuf/map_field.h
++++ b/src/google/protobuf/map_field.h
+@@ -678,7 +678,7 @@ class MapField final : public TypeDefinedMapFieldBase<Key, T> {
+ template <typename Derived, typename Key, typename T,
+           WireFormatLite::FieldType kKeyFieldType_,
+           WireFormatLite::FieldType kValueFieldType_>
+-constexpr MapFieldBase::VTable
++const MapFieldBase::VTable
+     MapField<Derived, Key, T, kKeyFieldType_, kValueFieldType_>::kVTable =
+         MapField::template MakeVTable<MapField>();
+ 

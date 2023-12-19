@@ -170,10 +170,15 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR)
 endif()
 
 target_include_directories(lupb PUBLIC "$<BUILD_INTERFACE:${UPB_BINDING_LUA_SRC_DIR}>" "$<INSTALL_INTERFACE:share/upb>")
-target_link_libraries(lupb PUBLIC upb::json upb::reflection upb::textformat upb::upb
-                                  ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
+if(TARGET upb::upb)
+  target_link_libraries(lupb PUBLIC upb::json upb::reflection upb::upb ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
+else()
+  target_link_libraries(lupb PUBLIC protobuf::upb_json protobuf::upb_reflection protobuf::upb_text protobuf::upb
+                                    ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
+endif()
 
 add_library(upb::lupb ALIAS lupb)
+add_library(protobuf::lupb ALIAS lupb)
 
 if(MSVC)
   set_property(TARGET lupb PROPERTY FOLDER "upb")

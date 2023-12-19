@@ -1,0 +1,28 @@
+diff --git a/exporters/prometheus/src/exporter_utils.cc b/exporters/prometheus/src/exporter_utils.cc
+index 4b1ee054..9b2294e2 100644
+--- a/exporters/prometheus/src/exporter_utils.cc
++++ b/exporters/prometheus/src/exporter_utils.cc
+@@ -357,7 +357,7 @@ std::string PrometheusExporterUtils::GetPrometheusPerUnit(const std::string &per
+ 
+ std::string PrometheusExporterUtils::RemoveUnitPortionInBraces(const std::string &unit)
+ {
+-  return std::regex_replace(unit, CHARACTERS_BETWEEN_BRACES_PATTERN, "");
++  return std::regex_replace(unit, CHARACTERS_BETWEEN_BRACES_PATTERN, std::string(""));
+ }
+ 
+ std::string PrometheusExporterUtils::ConvertRateExpressedToPrometheusUnit(
+@@ -386,10 +386,10 @@ std::string PrometheusExporterUtils::ConvertRateExpressedToPrometheusUnit(
+ 
+ std::string PrometheusExporterUtils::CleanUpString(const std::string &str)
+ {
+-  std::string cleaned_string = std::regex_replace(str, INVALID_CHARACTERS_PATTERN, "_");
+-  cleaned_string = std::regex_replace(cleaned_string, SANITIZE_CONSECUTIVE_UNDERSCORES, "_");
+-  cleaned_string = std::regex_replace(cleaned_string, SANITIZE_TRAILING_UNDERSCORES, "");
+-  cleaned_string = std::regex_replace(cleaned_string, SANITIZE_LEADING_UNDERSCORES, "");
++  std::string cleaned_string = std::regex_replace(str, INVALID_CHARACTERS_PATTERN, std::string("_"));
++  cleaned_string = std::regex_replace(cleaned_string, SANITIZE_CONSECUTIVE_UNDERSCORES, std::string("_"));
++  cleaned_string = std::regex_replace(cleaned_string, SANITIZE_TRAILING_UNDERSCORES, std::string(""));
++  cleaned_string = std::regex_replace(cleaned_string, SANITIZE_LEADING_UNDERSCORES, std::string(""));
+ 
+   return cleaned_string;
+ }

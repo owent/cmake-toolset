@@ -25,7 +25,7 @@ But if you want a special version of some packages or just download packages fro
 > # openssl options
 > set(ATFRAMEWORK_CMAKE_TOOLSET_PORTS_OPENSSL_VERSION "1.1.0k")
 > set(ATFRAMEWORK_CMAKE_TOOLSET_PORTS_OPENSSL_OPTIONS "no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers")
-> include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/openssl/openssl.cmake")
+> project_third_party_include_port("ssl/openssl/openssl.cmake")
 > ```
 
 This toolset also works with iOS toolchain and Android NDK.
@@ -42,6 +42,18 @@ cmake_policy(SET CMP0077 NEW)
 cmake_policy(SET CMP0091 NEW)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.19.0")
   cmake_policy(SET CMP0111 NEW)
+endif()
+
+# MSVC RTTI flag /GR should not be not added to CMAKE_CXX_FLAGS by default. @see
+# https://cmake.org/cmake/help/latest/policy/CMP0117.html
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0")
+  cmake_policy(SET CMP0117 NEW)
+endif()
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.22.0")
+  cmake_policy(SET CMP0128 NEW)
+endif()
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
+  cmake_policy(SET CMP0144 NEW)
 endif()
 
 set(ATFRAMEWORK_CMAKE_TOOLSET_DIR "${PROJECT_SOURCE_DIR}/cmake")
@@ -229,7 +241,7 @@ For example, if we want to use the same python3 executable on target and host bu
 # Import.cmake is required by all ports and just need to include once
 include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/<package dir>[/package sub dir]/<which package you need>.cmake")
+project_third_party_include_port("<package dir>[/package sub dir]/<which package you need>.cmake")
 ```
 
 ### Package - jemalloc
@@ -238,7 +250,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/<package dir>[/package sub dir]/
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_MODE "release")  # debug/release
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_VERSION "5.2.1")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_GIT_URL "https://github.com/jemalloc/jemalloc.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/jemalloc.cmake")
+project_third_party_include_port("malloc/jemalloc.cmake")
 ```
 
 ### Package - mimalloc
@@ -248,7 +260,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/jemalloc.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_SECURE OFF)      # Use full security mitigations (like guard pages, allocation randomization, double-free mitigation, and free-list corruption detection)
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_VERSION "v2.0.6")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_GIT_URL "https://github.com/microsoft/mimalloc.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
+project_third_party_include_port("malloc/mimalloc.cmake")
 ```
 
 ### Package - algorithm - xxhash
@@ -258,7 +270,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/malloc/mimalloc.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_GIT_URL "https://github.com/Cyan4973/xxHash.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_BUILD_OPTIONS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
+project_third_party_include_port("algorithm/xxhash.cmake")
 ```
 
 ### Package - fmtlib/std::format
@@ -270,7 +282,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/algorithm/xxhash.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_BUILD_OPTIONS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DFMT_DOC=OFF" "-DFMT_INSTALL=ON"
 #   "-DFMT_TEST=OFF" "-DFMT_FUZZ=OFF" "-DFMT_CUDA_TEST=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/fmtlib/fmtlib.cmake")
+project_third_party_include_port("fmtlib/fmtlib.cmake")
 ```
 
 ### Package - compression
@@ -308,7 +320,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/fmtlib/fmtlib.cmake")
 #   "-DZSTD_ZLIB_SUPPORT=ON"
 #   "-DZSTD_LZ4_SUPPORT=ON")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
+project_third_party_include_port("compression/import.cmake")
 ```
 
 ### Package - libuv
@@ -318,7 +330,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/compression/import.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_GIT_URL "https://github.com/libuv/libuv.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_BUILD_OPTIONS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBUILD_TESTING=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
+project_third_party_include_port("libuv/libuv.cmake")
 ```
 
 ### Package - libunwind
@@ -326,7 +338,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libuv/libuv.cmake")
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_VERSION "v1.5")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_GIT_URL "https://github.com/libunwind/libunwind.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
+project_third_party_include_port("libunwind/libunwind.cmake")
 ```
 
 ### Package - GTest
@@ -336,7 +348,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libunwind/libunwind.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_GIT_URL "https://github.com/google/googletest.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GTEST_BUILD_OPTIONS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBUILD_GMOCK=ON" "-DINSTALL_GTEST=ON")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/gtest.cmake")
+project_third_party_include_port("test/gtest.cmake")
 ```
 
 ### Package - benchmark
@@ -348,7 +360,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/gtest.cmake")
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBENCHMARK_ENABLE_TESTING=OFF"
 #   "-DBENCHMARK_ENABLE_LTO=OFF" "-DBENCHMARK_ENABLE_INSTALL=ON"
 #   "-DALLOW_DOWNLOADING_GOOGLETEST=ON" "-DBENCHMARK_ENABLE_GTEST_TESTS=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/benchmark.cmake")
+project_third_party_include_port("test/benchmark.cmake")
 ```
 
 ### Package - rapidjson
@@ -359,7 +371,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/test/benchmark.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_BUILD_OPTIONS
 #   "-DRAPIDJSON_BUILD_DOC=OFF" "-DRAPIDJSON_BUILD_EXAMPLES=OFF" "-DRAPIDJSON_BUILD_TESTS=OFF"
 #   "-DRAPIDJSON_BUILD_THIRDPARTY_GTEST=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/rapidjson.cmake")
+project_third_party_include_port("json/rapidjson.cmake")
 ```
 
 ### Package - nlohmann_json
@@ -369,7 +381,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/rapidjson.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_GIT_URL "https://github.com/nlohmann/json.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_BUILD_OPTIONS
 #   "-DJSON_Install=ON" "-DJSON_BuildTests=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/nlohmann_json.cmake")
+project_third_party_include_port("json/nlohmann_json.cmake")
 ```
 
 ### Package - flatbuffers
@@ -386,7 +398,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/json/nlohmann_json.cmake")
 #   -DFLATBUFFERS_BUILD_FLATHASH=ON
 #   -DFLATBUFFERS_BUILD_GRPCTEST=OFF
 #   -DFLATBUFFERS_BUILD_SHAREDLIB=OFF)
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
+project_third_party_include_port("flatbuffers/flatbuffers.cmake")
 ```
 
 ### Package - protobuf
@@ -403,7 +415,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/flatbuffers/flatbuffers.cmake")
 #   "-Dprotobuf_BUILD_EXAMPLES=OFF"
 #   "-Dprotobuf_BUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}"
 #   "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
+project_third_party_include_port("protobuf/protobuf.cmake")
 ```
 
 ### Package - crypto(openssl/boringssl/libressl/mbedtls/libsodium)
@@ -458,7 +470,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_MBEDTLS_BUILD_FLAGS
 #   "-DENABLE_TESTING=OFF" "-DUSE_STATIC_MBEDTLS_LIBRARY=ON" "-DENABLE_PROGRAMS=OFF")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
+project_third_party_include_port("ssl/port.cmake")
 ```
 
 ### Package - c-ares
@@ -469,7 +481,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/ssl/port.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS
 #  "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DCARES_STATIC_PIC=ON")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
+project_third_party_include_port("cares/c-ares.cmake")
 ```
 
 ### Package - re2
@@ -480,7 +492,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/cares/c-ares.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS 
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DRE2_BUILD_TESTING=OFF")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
+project_third_party_include_port("re2/re2.cmake")
 ```
 
 ### Package - libcurl
@@ -491,7 +503,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/re2/re2.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DISABLE_ARES OFF)
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_FLAGS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DBUILD_TESTING=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
+project_third_party_include_port("libcurl/libcurl.cmake")
 ```
 
 ### Package - civetweb
@@ -509,7 +521,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcurl/libcurl.cmake")
 #   "-DCIVETWEB_ENABLE_IPV6=ON"
 #   "-DCIVETWEB_ENABLE_SSL_DYNAMIC_LOADING=OFF"
 #   "-DCIVETWEB_ENABLE_WEBSOCKETS=ON")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/civetweb.cmake")
+project_third_party_include_port("web/civetweb.cmake")
 ```
 
 ### Package - libwebsockets
@@ -529,7 +541,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/civetweb.cmake")
 #   "-DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON"
 #   "-DLWS_WITH_PLUGINS=ON"
 #   "-DLWS_WITHOUT_EXTENSIONS=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/libwebsockets.cmake")
+project_third_party_include_port("web/libwebsockets.cmake")
 ```
 
 ### Package - lua
@@ -537,7 +549,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/web/libwebsockets.cmake")
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_VERSION "v5.4.3")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_GIT_URL "https://github.com/lua/lua.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
+project_third_party_include_port("lua/lua.cmake")
 ```
 
 ### Package - Microsoft.GSL
@@ -546,7 +558,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/lua/lua.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MICROSOFT_GSL_VERSION "v3.1.0")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MICROSOFT_GSL_GIT_URL "https://github.com/microsoft/GSL.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MICROSOFT_GSL_BUILD_OPTIONS "-DGSL_TEST=OFF" "-DGSL_INSTALL=ON")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
+project_third_party_include_port("gsl/ms-gsl.cmake")
 ```
 
 ### Package - gsl-lite
@@ -563,7 +575,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/ms-gsl.cmake")
 #   "-DGSL_LITE_OPT_INSTALL_COMPAT_HEADER=OFF"
 #   "-DGSL_LITE_OPT_INSTALL_LEGACY_HEADERS=OFF"
 # )
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/gsl-lite.cmake")
+project_third_party_include_port("gsl/gsl-lite.cmake")
 ```
 
 ### Package - yaml-cpp
@@ -571,7 +583,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/gsl/gsl-lite.cmake")
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_VERSION "0.6.3")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_GIT_URL "https://github.com/jbeder/yaml-cpp.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
+project_third_party_include_port("yaml-cpp/yaml-cpp.cmake")
 ```
 
 ### Package - hiredis
@@ -580,7 +592,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/yaml-cpp/yaml-cpp.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_VERSION "2a5a57b90a57af5142221aa71f38c08f4a737376") # v1.0.0 with some patch
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_GIT_URL "https://github.com/redis/hiredis.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS "-DDISABLE_TESTS=YES" "-DENABLE_EXAMPLES=OFF")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
+project_third_party_include_port("redis/hiredis.cmake")
 ```
 
 ### Package - libcopp
@@ -588,7 +600,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/redis/hiredis.cmake")
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_VERSION "v2")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_GIT_URL "https://github.com/owent/libcopp.git")
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
+project_third_party_include_port("libcopp/libcopp.cmake")
 ```
 
 ### Package - gRPC
@@ -603,7 +615,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/libcopp/libcopp.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_BUILD_OPTIONS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DgRPC_INSTALL=ON")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
+project_third_party_include_port("grpc/import.cmake")
 ```
 
 ### Package - prometheus-cpp
@@ -615,7 +627,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/grpc/import.cmake")
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DENABLE_TESTING=OFF"
 #   "-DUSE_THIRDPARTY_LIBRARIES=OFF" "-DRUN_IWYU=OFF" "-DENABLE_WARNINGS_AS_ERRORS=OFF")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/prometheus-cpp.cmake")
+project_third_party_include_port("telemetry/prometheus-cpp.cmake")
 ```
 
 ### Package - opentelemetry-cpp
@@ -633,7 +645,7 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/prometheus-cpp.cmake")
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=ON" "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON"
 #   "-Dprotobuf_MODULE_COMPATIBLE=ON" "-DBUILD_TESTING=OFF" "-DWITH_EXAMPLES=OFF")
 
-include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/telemetry/opentelemetry-cpp.cmake")
+project_third_party_include_port("telemetry/opentelemetry-cpp.cmake")
 ```
 
 ## Custom ports

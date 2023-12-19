@@ -1,0 +1,138 @@
+diff --git a/src/core/lib/gprpp/per_cpu.h b/src/core/lib/gprpp/per_cpu.h
+index 92eed5e..f630fc0 100644
+--- a/src/core/lib/gprpp/per_cpu.h
++++ b/src/core/lib/gprpp/per_cpu.h
+@@ -84,7 +84,7 @@ class PerCpu {
+  public:
+   // Options are not defaulted to try and force consideration of what the
+   // options specify.
+-  explicit PerCpu(PerCpuOptions options) : shards_(options.Shards()) {}
++  explicit PerCpu(PerCpuOptions options) : shards_(options.Shards()), data_{new T[options.Shards()]} {}
+ 
+   T& this_cpu() { return data_[sharding_helper_.GetShardingBits() % shards_]; }
+ 
+@@ -96,7 +96,7 @@ class PerCpu {
+  private:
+   PerCpuShardingHelper sharding_helper_;
+   const size_t shards_;
+-  std::unique_ptr<T[]> data_{new T[shards_]};
++  std::unique_ptr<T[]> data_;
+ };
+ 
+ }  // namespace grpc_core
+diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
+index 2402f45..eaadb05 100644
+--- a/src/core/lib/surface/server.cc
++++ b/src/core/lib/surface/server.cc
+@@ -154,7 +154,7 @@ struct Server::RegisteredMethod {
+   const grpc_server_register_method_payload_handling payload_handling;
+   const uint32_t flags;
+   // One request matcher per method.
+-  std::unique_ptr<RequestMatcherInterface> matcher;
++  std::shared_ptr<RequestMatcherInterface> matcher;
+ };
+ 
+ //
+@@ -838,7 +838,7 @@ void Server::Start() {
+   if (unregistered_request_matcher_ == nullptr) {
+     unregistered_request_matcher_ = make_real_request_matcher();
+   }
+-  for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+     if (rm->matcher == nullptr) {
+       rm->matcher = make_real_request_matcher();
+     }
+@@ -949,7 +949,7 @@ Server::RegisteredMethod* Server::RegisterMethod(
+             "grpc_server_register_method method string cannot be NULL");
+     return nullptr;
+   }
+-  for (std::unique_ptr<RegisteredMethod>& m : registered_methods_) {
++  for (std::shared_ptr<RegisteredMethod>& m : registered_methods_) {
+     if (streq(m->method, method) && streq(m->host, host)) {
+       gpr_log(GPR_ERROR, "duplicate registration for %s@%s", method,
+               host ? host : "*");
+@@ -1014,7 +1014,7 @@ void Server::KillPendingWorkLocked(grpc_error_handle error) {
+   if (started_) {
+     unregistered_request_matcher_->KillRequests(error);
+     unregistered_request_matcher_->ZombifyPending();
+-    for (std::unique_ptr<RegisteredMethod>& rm : registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : registered_methods_) {
+       rm->matcher->KillRequests(error);
+       rm->matcher->ZombifyPending();
+     }
+@@ -1283,7 +1283,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
+     size_t slots = 2 * num_registered_methods;
+     old_registered_methods_ =
+         std::make_unique<std::vector<ChannelRegisteredMethod>>(slots);
+-    for (std::unique_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
+       Slice host;
+       Slice method = Slice::FromExternalString(rm->method);
+       const bool has_host = !rm->host.empty();
+@@ -1310,7 +1310,7 @@ void Server::ChannelData::InitTransport(RefCountedPtr<Server> server,
+     GPR_ASSERT(slots <= UINT32_MAX);
+     registered_method_max_probes_ = max_probes;
+   } else if (IsRegisteredMethodsMapEnabled()) {
+-    for (std::unique_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
++    for (std::shared_ptr<RegisteredMethod>& rm : server_->registered_methods_) {
+       auto key = std::make_pair(!rm->host.empty() ? rm->host : "", rm->method);
+       registered_methods_.emplace(
+           key, std::make_unique<ChannelRegisteredMethod>(
+diff --git a/src/core/lib/surface/server.h b/src/core/lib/surface/server.h
+index f5999bc..7be8399 100644
+--- a/src/core/lib/surface/server.h
++++ b/src/core/lib/surface/server.h
+@@ -151,7 +151,7 @@ class Server : public InternallyRefCounted<Server>,
+   }
+ 
+   void set_config_fetcher(
+-      std::unique_ptr<grpc_server_config_fetcher> config_fetcher);
++      std::shared_ptr<grpc_server_config_fetcher> config_fetcher);
+ 
+   bool HasOpenConnections() ABSL_LOCKS_EXCLUDED(mu_global_);
+ 
+@@ -476,7 +476,8 @@ class Server : public InternallyRefCounted<Server>,
+ 
+   ChannelArgs const channel_args_;
+   RefCountedPtr<channelz::ServerNode> channelz_node_;
+-  std::unique_ptr<grpc_server_config_fetcher> config_fetcher_;
++  // Fix static_assert(sizeof(_Tp) >= 0, "cannot delete an incomplete type");
++  std::shared_ptr<grpc_server_config_fetcher> config_fetcher_;
+   ServerCallTracerFactory* const server_call_tracer_factory_;
+ 
+   std::vector<grpc_completion_queue*> cqs_;
+@@ -498,10 +499,10 @@ class Server : public InternallyRefCounted<Server>,
+   bool starting_ ABSL_GUARDED_BY(mu_global_) = false;
+   CondVar starting_cv_;
+ 
+-  std::vector<std::unique_ptr<RegisteredMethod>> registered_methods_;
++  std::vector<std::shared_ptr<RegisteredMethod>> registered_methods_;
+ 
+   // Request matcher for unregistered methods.
+-  std::unique_ptr<RequestMatcherInterface> unregistered_request_matcher_;
++  std::shared_ptr<RequestMatcherInterface> unregistered_request_matcher_;
+ 
+   // The shutdown refs counter tracks whether or not shutdown has been called
+   // and whether there are any AllocatingRequestMatcher requests that have been
+@@ -570,7 +571,7 @@ struct grpc_server_config_fetcher {
+ namespace grpc_core {
+ 
+ inline void Server::set_config_fetcher(
+-    std::unique_ptr<grpc_server_config_fetcher> config_fetcher) {
++    std::shared_ptr<grpc_server_config_fetcher> config_fetcher) {
+   config_fetcher_ = std::move(config_fetcher);
+ }
+ 
+diff --git a/third_party/upb/upb/text/encode.c b/third_party/upb/upb/text/encode.c
+index 6d26fac..26dca2d 100644
+--- a/third_party/upb/upb/text/encode.c
++++ b/third_party/upb/upb/text/encode.c
+@@ -288,7 +288,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+ #define CHK(x)      \
+   do {              \
+     if (!(x)) {     \
+-      return false; \
++      return NULL;  \
+     }               \
+   } while (0)
+ 
