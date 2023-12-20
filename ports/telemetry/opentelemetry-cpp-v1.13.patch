@@ -1,3 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c27a910f..2fbaee5c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -303,6 +303,11 @@ if(WITH_OTLP_HTTP_SSL_TLS_PREVIEW AND NOT WITH_OTLP_HTTP_SSL_PREVIEW)
+ endif()
+ 
+ find_package(Threads)
++find_package(zstd QUIET)
++find_package(c-ares QUIET)
++find_package(Libnghttp3 QUIET)
++find_package(Libngtcp2 QUIET)
++find_package(Libnghttp2 QUIET)
+ 
+ function(install_windows_deps)
+   # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
 diff --git a/cmake/patch-imported-config.cmake b/cmake/patch-imported-config.cmake
 index ec68d740..a2d22ed3 100644
 --- a/cmake/patch-imported-config.cmake
