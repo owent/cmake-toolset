@@ -81,6 +81,20 @@ index 96ca5f5..d4306ce 100644
      auto ports = exposer_->GetListeningPorts();
      base_url_ = std::string("http://127.0.0.1:") + std::to_string(ports.at(0));
    }
+diff --git a/push/CMakeLists.txt b/push/CMakeLists.txt
+index bc116ed..8111eca 100644
+--- a/push/CMakeLists.txt
++++ b/push/CMakeLists.txt
+@@ -1,4 +1,9 @@
+ 
++find_package(zstd QUIET)
++find_package(c-ares QUIET)
++find_package(Libnghttp3 QUIET)
++find_package(Libngtcp2 QUIET)
++find_package(Libnghttp2 QUIET)
+ find_package(CURL REQUIRED)
+ 
+ add_library(push
 diff --git a/push/src/gateway.cc b/push/src/gateway.cc
 index e1ec9d5..095e057 100644
 --- a/push/src/gateway.cc
