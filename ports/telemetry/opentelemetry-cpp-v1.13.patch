@@ -32,7 +32,7 @@ index ee191121..fa66342a 100644
        if(CMAKE_VERSION VERSION_LESS "3.19.0")
          get_target_property(TARGET_TYPE_NAME ${TARGET_NAME} TYPE)
 diff --git a/exporters/prometheus/src/exporter_utils.cc b/exporters/prometheus/src/exporter_utils.cc
-index 4b1ee054..c32763be 100644
+index 4b1ee054..90583b0f 100644
 --- a/exporters/prometheus/src/exporter_utils.cc
 +++ b/exporters/prometheus/src/exporter_utils.cc
 @@ -1,6 +1,7 @@
@@ -104,8 +104,8 @@ index 4b1ee054..c32763be 100644
 +    if (trim_end != i)
 +    {
 +      cleaned_string[trim_end] = cleaned_string[i];
-+      ++trim_end;
 +    }
++    ++trim_end;
 +  }
 +
 +  if (trim_start >= trim_end)
