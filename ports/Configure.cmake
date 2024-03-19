@@ -13,15 +13,75 @@ else()
   set_compiler_flags_to_inherit_var(CMAKE_EXPORT_PACKAGE_REGISTRY OFF) # cmake_policy(SET CMP0090 NEW)
 endif()
 
+# Patch for `FindGit.cmake` on windows
+find_program(GIT_EXECUTABLE NAMES git git.cmd)
+find_package(Git)
+if(NOT GIT_FOUND AND NOT Git_FOUND)
+  message(FATAL_ERROR "git is required to use ports")
+endif()
+
+project_git_get_ambiguous_name(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}")
+
+if(NOT project_third_party_get_build_dir_HASH)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
+    set(project_third_party_get_build_dir_HASH_TOOLSET "${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
+  else()
+    file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH_TOOLSET)
+  endif()
+  string(SHA256 project_third_party_get_build_dir_HASH_PROJECT "${PROJECT_SOURCE_DIR}")
+
+  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 8
+                   project_third_party_get_build_dir_HASH_TOOLSET)
+  string(SUBSTRING "${project_third_party_get_build_dir_HASH_PROJECT}" 0 5
+                   project_third_party_get_build_dir_HASH_PROJECT)
+  set(project_third_party_get_build_dir_HASH
+      "${project_third_party_get_build_dir_HASH_TOOLSET}-${project_third_party_get_build_dir_HASH_PROJECT}")
+endif()
+if(DEFINED ENV{HOME})
+  set(project_third_party_get_build_dir_USER_BASE "$ENV{HOME}")
+elseif(DEFINED ENV{USERPROFILE})
+  set(project_third_party_get_build_dir_USER_BASE "$ENV{USERPROFILE}")
+elseif(DEFINED ENV{TEMP})
+  set(project_third_party_get_build_dir_USER_BASE "$ENV{TEMP}")
+endif()
+string(REPLACE "\\" "/" project_third_party_get_build_dir_USER_BASE "${project_third_party_get_build_dir_USER_BASE}")
+
+if(WIN32
+   AND NOT MINGW
+   AND NOT CYGWIN)
+  message(
+    STATUS
+      "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}"
+  )
+  if(CMAKE_BINARY_DIR MATCHES "^[cC]:" OR CMAKE_BINARY_DIR MATCHES "^/[cC]/")
+    set(project_third_party_get_build_dir_SELECT_BASE "${project_third_party_get_build_dir_USER_BASE}")
+  elseif(CMAKE_BINARY_DIR MATCHES "^([A-Za-z]:)")
+    set(project_third_party_get_build_dir_SELECT_BASE "${CMAKE_MATCH_1}")
+  elseif(CMAKE_BINARY_DIR MATCHES "^(/[A-Za-z])/")
+    set(project_third_party_get_build_dir_SELECT_BASE "${CMAKE_MATCH_1}")
+  else()
+    set(project_third_party_get_build_dir_SELECT_BASE "${project_third_party_get_build_dir_USER_BASE}")
+  endif()
+endif()
+message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH=${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
+
 # Migrate from PROJECT_3RD_PARTY_PACKAGE_DIR
 if(NOT PROJECT_THIRD_PARTY_PACKAGE_DIR AND PROJECT_3RD_PARTY_PACKAGE_DIR)
   set(PROJECT_THIRD_PARTY_PACKAGE_DIR
       "${PROJECT_3RD_PARTY_PACKAGE_DIR}"
       CACHE PATH "Where to store packages for third party packages")
 elseif(NOT PROJECT_THIRD_PARTY_PACKAGE_DIR)
-  set(PROJECT_THIRD_PARTY_PACKAGE_DIR
-      "${PROJECT_SOURCE_DIR}/third_party/packages"
-      CACHE PATH "Where to store packages for third party packages")
+  if(WIN32
+     AND NOT MINGW
+     AND NOT CYGWIN)
+    set(PROJECT_THIRD_PARTY_PACKAGE_DIR
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/packages"
+        CACHE PATH "Where to store packages for third party packages")
+  else()
+    set(PROJECT_THIRD_PARTY_PACKAGE_DIR
+        "${PROJECT_SOURCE_DIR}/third_party/packages"
+        CACHE PATH "Where to store packages for third party packages")
+  endif()
 endif()
 
 # Migrate from PROJECT_3RD_PARTY_INSTALL_DIR
@@ -361,58 +421,6 @@ macro(project_third_party_append_find_root_args VARNAME)
   endforeach()
 endmacro()
 
-# Patch for `FindGit.cmake` on windows
-find_program(GIT_EXECUTABLE NAMES git git.cmd)
-find_package(Git)
-if(NOT GIT_FOUND AND NOT Git_FOUND)
-  message(FATAL_ERROR "git is required to use ports")
-endif()
-
-project_git_get_ambiguous_name(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH "${ATFRAMEWORK_CMAKE_TOOLSET_DIR}")
-
-if(NOT project_third_party_get_build_dir_HASH)
-  if(ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH)
-    set(project_third_party_get_build_dir_HASH_TOOLSET "${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
-  else()
-    file(SHA256 "${CMAKE_CURRENT_LIST_FILE}" project_third_party_get_build_dir_HASH_TOOLSET)
-  endif()
-  string(SHA256 project_third_party_get_build_dir_HASH_PROJECT "${PROJECT_SOURCE_DIR}")
-
-  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 8
-                   project_third_party_get_build_dir_HASH_TOOLSET)
-  string(SUBSTRING "${project_third_party_get_build_dir_HASH_PROJECT}" 0 5
-                   project_third_party_get_build_dir_HASH_PROJECT)
-  set(project_third_party_get_build_dir_HASH
-      "${project_third_party_get_build_dir_HASH_TOOLSET}-${project_third_party_get_build_dir_HASH_PROJECT}")
-endif()
-if(DEFINED ENV{HOME})
-  set(project_third_party_get_build_dir_USER_BASE "$ENV{HOME}")
-elseif(DEFINED ENV{USERPROFILE})
-  set(project_third_party_get_build_dir_USER_BASE "$ENV{USERPROFILE}")
-elseif(DEFINED ENV{TEMP})
-  set(project_third_party_get_build_dir_USER_BASE "$ENV{TEMP}")
-endif()
-string(REPLACE "\\" "/" project_third_party_get_build_dir_USER_BASE "${project_third_party_get_build_dir_USER_BASE}")
-
-if(WIN32
-   AND NOT MINGW
-   AND NOT CYGWIN)
-  message(
-    STATUS
-      "CMake Toolset using buildtree: ${project_third_party_get_build_dir_USER_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}"
-  )
-  if(CMAKE_BINARY_DIR MATCHES "^[cC]:" OR CMAKE_BINARY_DIR MATCHES "^/[cC]/")
-    set(project_third_party_get_build_dir_SELECT_BASE "${project_third_party_get_build_dir_USER_BASE}")
-  elseif(CMAKE_BINARY_DIR MATCHES "^([A-Za-z]:)")
-    set(project_third_party_get_build_dir_SELECT_BASE "${CMAKE_MATCH_1}")
-  elseif(CMAKE_BINARY_DIR MATCHES "^(/[A-Za-z])/")
-    set(project_third_party_get_build_dir_SELECT_BASE "${CMAKE_MATCH_1}")
-  else()
-    set(project_third_party_get_build_dir_SELECT_BASE "${project_third_party_get_build_dir_USER_BASE}")
-  endif()
-endif()
-message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH=${ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH}")
-
 function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION)
   string(LENGTH "${PORT_VERSION}" project_third_party_get_build_dir_PORT_VERSION_LEN)
   if(project_third_party_get_build_dir_PORT_VERSION_LEN GREATER 12 AND PORT_VERSION MATCHES "[0-9A-Fa-f]+")
@@ -430,7 +438,7 @@ function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION
     AND NOT MINGW
     AND NOT CYGWIN)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}"
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/build/${PORT_NAME}/${PROJECT_PREBUILT_PLATFORM_NAME}"
         PARENT_SCOPE)
   else()
     set(${OUTPUT_VARNAME}
@@ -460,7 +468,7 @@ function(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VE
     AND NOT MINGW
     AND NOT CYGWIN)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/build/${PORT_NAME}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}"
         PARENT_SCOPE)
   else()
     get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_BASE_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
