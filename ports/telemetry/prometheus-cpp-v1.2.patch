@@ -1,0 +1,14 @@
+diff --git a/push/CMakeLists.txt b/push/CMakeLists.txt
+index bf21e81..b0c923b 100644
+--- a/push/CMakeLists.txt
++++ b/push/CMakeLists.txt
+@@ -1,4 +1,9 @@
+ 
++find_package(zstd QUIET)
++find_package(c-ares QUIET)
++find_package(Libnghttp3 QUIET)
++find_package(Libngtcp2 QUIET)
++find_package(Libnghttp2 QUIET)
+ find_package(CURL REQUIRED)
+ 
+ add_library(push
