@@ -20,6 +20,19 @@ index 92eed5e..f630fc0 100644
  };
  
  }  // namespace grpc_core
+diff --git a/src/core/lib/promise/detail/promise_like.h b/src/core/lib/promise/detail/promise_like.h
+index 395c325..4649afd 100644
+--- a/src/core/lib/promise/detail/promise_like.h
++++ b/src/core/lib/promise/detail/promise_like.h
+@@ -71,7 +71,7 @@ class PromiseLike<void>;
+ 
+ template <typename F>
+ class PromiseLike<F, absl::enable_if_t<!std::is_void<
+-                         typename std::result_of<F()>::type>::value>> {
++                         absl::result_of_t<F()> >::value>> {
+  private:
+   GPR_NO_UNIQUE_ADDRESS F f_;
+ 
 diff --git a/src/core/lib/surface/server.cc b/src/core/lib/surface/server.cc
 index 1b67f69..592bf19 100644
 --- a/src/core/lib/surface/server.cc
