@@ -35,12 +35,26 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
                                                                     Libngtcp2::libngtcp2)
       endif()
     endif()
+    # Boringssl
+    find_package(Libngtcp2_crypto_boringssl QUIET)
+    if(TARGET Libngtcp2::libngtcp2_crypto_boringssl)
+      message(
+        STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_boringssl using target Libngtcp2::libngtcp2_crypto_boringssl"
+      )
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_BORINGSSL_LINK_NAME
+          Libngtcp2::libngtcp2_crypto_boringssl)
+      if(TARGET Libnghttp3::libnghttp3)
+        project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_boringssl ADD_LIBRARIES
+                                                                    Libngtcp2::libngtcp2)
+      endif()
+    endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
       include(CMakePushCheckState)
       include(CheckCXXSymbolExists)
       cmake_push_check_state()
-      set(CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME})
+      set(CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME}
+                                   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_BORINGSSL_LINK_NAME})
       if(MSVC)
         set(CMAKE_REQUIRED_FLAGS "/utf-8")
       endif()
@@ -61,6 +75,10 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
             project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl
                                                                      ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
           endif()
+          if(TARGET Libngtcp2::libngtcp2_crypto_boringssl)
+            project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_boringssl
+                                                                     ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
+          endif()
         endif()
       endif()
       cmake_pop_check_state()
@@ -75,6 +93,10 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
         if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
           project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl ADD_DEFINITIONS
                                                                    "NGTCP2_STATICLIB=1")
+        endif()
+        if(TARGET Libngtcp2::libngtcp2_crypto_boringssl)
+          project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_boringssl
+                                                                   ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
         endif()
       endif()
     endif()
@@ -96,7 +118,8 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_BORINGSSL=ON")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_BORINGSSL=ON"
+           "-DENABLE_OPENSSL=OFF")
       if(OPENSSL_INCLUDE_DIR)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_DEFAULT_BUILD_OPTIONS
              "-DBORINGSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}")
@@ -129,7 +152,7 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     project_third_party_port_declare(
       Libngtcp2
       VERSION
-      "v1.1.0"
+      "v1.4.0"
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"
       BUILD_OPTIONS
@@ -172,7 +195,8 @@ if(NOT TARGET Libngtcp2::libngtcp2)
       GIT_BRANCH
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_VERSION}"
       GIT_URL
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_GIT_URL}")
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_GIT_URL}"
+      GIT_ENABLE_SUBMODULE)
 
     if(TARGET Libngtcp2::libngtcp2)
       project_third_party_ngtcp2_import()

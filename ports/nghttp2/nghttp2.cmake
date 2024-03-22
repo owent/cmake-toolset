@@ -83,12 +83,16 @@ if(NOT TARGET Libnghttp2::libnghttp2)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_DEFAULT_BUILD_OPTIONS "-DENABLE_STATIC_CRT=OFF")
     endif()
 
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_LINK_NAME AND (TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto))
+    # nghttp2 only support openssl-quic1 now
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_LINK_NAME
+       AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME
+       AND (TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto))
       cmake_push_check_state()
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME}
            ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME})
       include(CheckSymbolExists)
-      check_symbol_exists(SSL_is_quic "openssl/ssl.h" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_HAVE_SSL_IS_QUIC)
+      check_symbol_exists(SSL_provide_quic_data "openssl/ssl.h"
+                          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_HAVE_SSL_IS_QUIC)
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_HAVE_SSL_IS_QUIC)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_DEFAULT_BUILD_OPTIONS "-DENABLE_HTTP3=ON")
       endif()
@@ -98,7 +102,7 @@ if(NOT TARGET Libnghttp2::libnghttp2)
     project_third_party_port_declare(
       Libnghttp2
       VERSION
-      "v1.58.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
+      "v1.60.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
       GIT_URL
       "https://github.com/nghttp2/nghttp2.git"
       BUILD_OPTIONS
@@ -110,7 +114,7 @@ if(NOT TARGET Libnghttp2::libnghttp2)
     project_third_party_append_build_shared_lib_var(
       "nghttp2" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_BUILD_OPTIONS BUILD_SHARED_LIBS ENABLE_SHARED_LIB)
     project_third_party_append_build_static_lib_var(
-      "nghttp2" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_BUILD_OPTIONS ENABLE_STATIC_LIB)
+      "nghttp2" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_BUILD_OPTIONS BUILD_STATIC_LIBS)
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_PATCH_FILE
        AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_PATCH_FILE}")
@@ -139,7 +143,8 @@ if(NOT TARGET Libnghttp2::libnghttp2)
       GIT_BRANCH
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_VERSION}"
       GIT_URL
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_GIT_URL}")
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP2_GIT_URL}"
+      GIT_ENABLE_SUBMODULE)
 
     if(TARGET Libnghttp2::libnghttp2)
       project_third_party_nghttp2_import()

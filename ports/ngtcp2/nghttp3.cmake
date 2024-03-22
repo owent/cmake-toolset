@@ -51,7 +51,7 @@ if(NOT TARGET Libnghttp3::libnghttp3)
     project_third_party_port_declare(
       Libnghttp3
       VERSION
-      "v1.1.0"
+      "v1.2.0"
       GIT_URL
       "https://github.com/ngtcp2/nghttp3.git"
       BUILD_OPTIONS
@@ -92,7 +92,8 @@ if(NOT TARGET Libnghttp3::libnghttp3)
       GIT_BRANCH
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_VERSION}"
       GIT_URL
-      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_GIT_URL}")
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_GIT_URL}"
+      GIT_ENABLE_SUBMODULE)
 
     if(TARGET Libnghttp3::libnghttp3)
       project_third_party_nghttp3_import()

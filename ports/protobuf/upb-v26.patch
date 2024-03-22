@@ -1,48 +1,39 @@
 diff --git a/lua/def.c b/lua/def.c
-index 9affe52c1..b7692079f 100644
+index 1f9ee12..194800e 100644
 --- a/lua/def.c
 +++ b/lua/def.c
-@@ -620,7 +620,11 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
+@@ -597,7 +597,7 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
  
  static int lupb_FileDef_Dependency(lua_State* L) {
    const upb_FileDef* f = lupb_FileDef_check(L, 1);
-+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
-+  int index = luaL_checkinteger(L, 2);
-+#else
-   int index = luaL_checkint(L, 2);
-+#endif
+-  int index = luaL_checkint(L, 2);
++  int index = lupb_checkint32(L, 2);
    const upb_FileDef* dep = upb_FileDef_Dependency(f, index);
    lupb_wrapper_pushwrapper(L, 1, dep, LUPB_FILEDEF);
    return 1;
-@@ -634,7 +638,11 @@ static int lupb_FileDef_DependencyCount(lua_State* L) {
+@@ -611,7 +611,7 @@ static int lupb_FileDef_DependencyCount(lua_State* L) {
  
  static int lupb_FileDef_enum(lua_State* L) {
    const upb_FileDef* f = lupb_FileDef_check(L, 1);
-+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
-+  int index = luaL_checkinteger(L, 2);
-+#else
-   int index = luaL_checkint(L, 2);
-+#endif
+-  int index = luaL_checkint(L, 2);
++  int index = lupb_checkint32(L, 2);
    const upb_EnumDef* e = upb_FileDef_TopLevelEnum(f, index);
    lupb_wrapper_pushwrapper(L, 1, e, LUPB_ENUMDEF);
    return 1;
-@@ -648,7 +656,11 @@ static int lupb_FileDef_enumcount(lua_State* L) {
+@@ -625,7 +625,7 @@ static int lupb_FileDef_enumcount(lua_State* L) {
  
  static int lupb_FileDef_msg(lua_State* L) {
    const upb_FileDef* f = lupb_FileDef_check(L, 1);
-+#if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
-+  int index = luaL_checkinteger(L, 2);
-+#else
-   int index = luaL_checkint(L, 2);
-+#endif
+-  int index = luaL_checkint(L, 2);
++  int index = lupb_checkint32(L, 2);
    const upb_MessageDef* m = upb_FileDef_TopLevelMessage(f, index);
    lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
    return 1;
 diff --git a/lua/upb.c b/lua/upb.c
-index 4500fb4e7..ad2ca3101 100644
+index e1e4061..6a0eec4 100644
 --- a/lua/upb.c
 +++ b/lua/upb.c
-@@ -64,11 +64,13 @@
+@@ -41,11 +41,13 @@
  /* Lua compatibility code *****************************************************/
  
  /* Shims for upcoming Lua 5.3 functionality. */
@@ -57,20 +48,47 @@ index 4500fb4e7..ad2ca3101 100644
  /* Utility functions **********************************************************/
  
 diff --git a/lua/upbc.cc b/lua/upbc.cc
-index 4a274f22a..27dba82f9 100644
+index bce4b7d..e9dff10 100644
 --- a/lua/upbc.cc
 +++ b/lua/upbc.cc
-@@ -84,7 +84,7 @@ static void PrintString(int max_cols, absl::string_view* str,
+@@ -5,13 +5,13 @@
+ // license that can be found in the LICENSE file or at
+ // https://developers.google.com/open-source/licenses/bsd
+ 
+-#include "google/protobuf/descriptor.pb.h"
+ #include "absl/strings/str_replace.h"
+ #include "absl/strings/string_view.h"
+ #include "absl/strings/substitute.h"
+ #include "google/protobuf/compiler/code_generator.h"
+ #include "google/protobuf/compiler/plugin.h"
+ #include "google/protobuf/descriptor.h"
++#include "google/protobuf/descriptor.pb.h"
+ #include "google/protobuf/io/printer.h"
+ 
+ namespace protoc = ::google::protobuf::compiler;
+@@ -50,6 +50,11 @@ static void PrintHexDigit(char digit, protobuf::io::Printer* printer) {
+   printer->WriteRaw(&text, 1);
+ }
+ 
++static bool IsPrint(int ch) {
++  // isprint(ch) with negative values is UB.
++  return ch < 0 ? false : isprint(ch);
++}
++
+ static void PrintString(int max_cols, absl::string_view* str,
+                         protobuf::io::Printer* printer) {
+   printer->Print("\'");
+@@ -61,7 +66,7 @@ static void PrintString(int max_cols, absl::string_view* str,
      } else if (ch == '\'') {
        printer->PrintRaw("\\'");
        max_cols--;
 -    } else if (isprint(ch)) {
-+    } else if (isprint(static_cast<int>(static_cast<unsigned char>(ch)))) {
++    } else if (IsPrint(ch)) {
        printer->WriteRaw(&ch, 1);
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index d1a6bb2ee..17d15f826 100755
+index bd95917..d9bb005 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,60 @@ from __future__ import print_function
@@ -137,31 +155,31 @@ index d1a6bb2ee..17d15f826 100755
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -56,24 +107,63 @@ add_library(%(name)s %(type)s
+@@ -56,24 +107,64 @@ add_library(%(name)s %(type)s
      %(sources)s
  )
  target_include_directories(%(name)s %(keyword)s
 -    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 -    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
-     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +    $<INSTALL_INTERFACE:include>
- )
++)
 +if(NOT UPB_ENABLE_CODEGEN)
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
 +endif()
- """
- 
++"""
++
 +ADD_EXECUTABLE_FORMAT = """
 +add_executable(%(name)s
 +    %(sources)s
 +)
 +target_include_directories(%(name)s %(keyword)s
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
-+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
-+)
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
+ )
 +if(NOT UPB_ENABLE_CODEGEN)
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
@@ -172,7 +190,8 @@ index d1a6bb2ee..17d15f826 100755
 +
 +ADD_ALIAS_FORMAT = """
 +add_library(%(name)s ALIAS %(actual)s)
-+"""
+ """
+ 
  
  class BuildFileFunctions(object):
 -  def __init__(self, converter):
@@ -207,7 +226,7 @@ index d1a6bb2ee..17d15f826 100755
      )
  
    def load(self, *args):
-@@ -82,9 +172,7 @@ class BuildFileFunctions(object):
+@@ -82,9 +173,7 @@ class BuildFileFunctions(object):
    def cc_library(self, **kwargs):
      if kwargs["name"].endswith("amalgamation"):
        return
@@ -218,7 +237,7 @@ index d1a6bb2ee..17d15f826 100755
        return
      if "testonly" in kwargs:
        return
-@@ -95,33 +183,89 @@ class BuildFileFunctions(object):
+@@ -95,33 +184,89 @@ class BuildFileFunctions(object):
      ]
      for file in files:
        if os.path.basename(file) in pregenerated_files:
@@ -314,12 +333,23 @@ index d1a6bb2ee..17d15f826 100755
  
    def cc_test(self, **kwargs):
      # Disable this until we properly support upb_proto_library().
-@@ -229,24 +373,332 @@ class BuildFileFunctions(object):
+@@ -229,24 +374,341 @@ class BuildFileFunctions(object):
    def bool_flag(self, **kwargs):
      pass
  
 -  def bootstrap_upb_proto_library(self, **kwargs):
 +  def proto_lang_toolchain(self, **kwargs):
+     pass
+ 
+-  def bootstrap_cc_library(self, **kwargs):
++  def upb_c_proto_library(self, **kwargs):
+     pass
+ 
+-  def alias(self, **kwargs):
++  def compile_edition_defaults(self, **kwargs):
++    pass
++
++  def embed_edition_defaults(self, **kwargs):
      pass
  
 +  def bootstrap_upb_proto_library(self, **kwargs):
@@ -434,7 +464,7 @@ index d1a6bb2ee..17d15f826 100755
 +    self.converter.toplevel += "set(UPB_STAGE2_GENERATED_FILES\n  "
 +    self.converter.toplevel += "\n  ".join(["{0}/{1}.upbdefs.h\n  {0}/{1}.upbdefs.c".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
 +    self.converter.toplevel += ")\n"
-+    self.converter.toplevel += "if (TARGET lua::liblua)\n  "
++    self.converter.toplevel += "if (TARGET lua::liblua)\n"
 +    self.converter.toplevel += "  list(APPEND UPB_STAGE2_GENERATED_FILES\n  {0})\n".format(
 +      "\n  ".join(["{0}/{1}_pb.lua".format(stage2_generated_dir, x) for x in oss_src_files_prefix])
 +    )
@@ -519,8 +549,7 @@ index d1a6bb2ee..17d15f826 100755
 +
 +    self.converter.toplevel += "endif()\n"
 +
-   def bootstrap_cc_library(self, **kwargs):
--    pass
++  def bootstrap_cc_library(self, **kwargs):
 +    if kwargs["name"] in _block_targets:
 +      return
 +    files = kwargs.get("srcs", []) + kwargs.get("hdrs", [])
@@ -608,9 +637,8 @@ index d1a6bb2ee..17d15f826 100755
 +      self._add_bootstrap_deps(kwargs, " PRIVATE", stage)
 +    self.converter.export_codegen_targets.append(self.target_prefix + kwargs["name"])
 +    self.converter.toplevel += "endif()\n"
- 
-   def alias(self, **kwargs):
--    pass
++
++  def alias(self, **kwargs):
 +    actual = kwargs["actual"]
 +    if actual.startswith("//"):
 +      actual = actual[2:]
@@ -631,7 +659,7 @@ index d1a6bb2ee..17d15f826 100755
 +      }
 +      if self.enable_condition:
 +        self.converter.toplevel += "endif()\n"
- 
++
  
  class Converter(object):
    def __init__(self):
@@ -650,10 +678,11 @@ index d1a6bb2ee..17d15f826 100755
      }
  
    template = textwrap.dedent("""\
-@@ -257,6 +709,23 @@ class Converter(object):
+@@ -256,6 +718,23 @@ class Converter(object):
+ 
      project(upb)
      set(CMAKE_C_STANDARD 99)
- 
++                             
 +    set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 +    if(CMAKE_SOURCE_DIR STREQUAL upb_SOURCE_DIR)
 +      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
@@ -670,15 +699,15 @@ index d1a6bb2ee..17d15f826 100755
 +    else()
 +      option(UPB_ENABLE_CODEGEN "Build codegens plugins of upb" ON)
 +    endif()
-+
+ 
      # Prevent CMake from setting -rdynamic on Linux (!!).
      SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-     SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-@@ -291,7 +760,15 @@ class Converter(object):
+@@ -291,10 +770,18 @@ class Converter(object):
        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
      endif()
  
 -    if(NOT TARGET utf8_range)
+-      if(EXISTS ../../third_party/utf8_range)
 +    find_package(utf8_range QUIET)
 +    if(NOT TARGET utf8_range AND TARGET utf8_range::utf8_range)
 +      add_library(utf8_range ALIAS utf8_range::utf8_range)
@@ -688,10 +717,14 @@ index d1a6bb2ee..17d15f826 100755
 +        include_directories("${utf8_range_DIR}/../../../include/")
 +      endif()
 +    elseif(NOT TARGET utf8_range)
-       if(EXISTS ../../external/utf8_range)
++      if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../third_party/utf8_range")
          # utf8_range is already installed
-         include_directories(../external/utf8_range)
-@@ -318,10 +795,130 @@ class Converter(object):
+-        include_directories(../../third_party/utf8_range)
++        include_directories("${CMAKE_CURRENT_LIST_DIR}/../../third_party/utf8_range")
+       else()
+         include(FetchContent)
+         FetchContent_Declare(
+@@ -316,10 +803,128 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -738,7 +771,6 @@ index d1a6bb2ee..17d15f826 100755
 +      set(PROTOC_GEN_UPB_MINITABLE_PROGRAM "\\$<TARGET_FILE:upb_generator_protoc-gen-upb_minitable>")
 +      set(PROTOC_GEN_UPBDEFS_PROGRAM "\\$<TARGET_FILE:upb_generator_protoc-gen-upbdefs>")
 +      set(PROTOC_GEN_UPBLUA_PROGRAM "\\$<TARGET_FILE:lua_protoc-gen-lua>")
-+
 +      unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_LUAS)
 +      unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_HEADERS)
 +      unset(UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES)
@@ -786,7 +818,6 @@ index d1a6bb2ee..17d15f826 100755
 +      set_target_properties(upb_well_known_types PROPERTIES EXPORT_NAME "well_known_types")
 +      target_link_libraries(upb_well_known_types PUBLIC upb_upb upb_descriptor_upb_proto)
 +    endif()
-+
 +    include(GNUInstallDirs)
 +    install(
 +      DIRECTORY ../../upb
@@ -822,7 +853,7 @@ index d1a6bb2ee..17d15f826 100755
    """)
  
  data = {}
-@@ -340,7 +937,13 @@ globs = GetDict(converter)
+@@ -338,7 +943,13 @@ globs = GetDict(converter)
  
  # We take the BUILD path as a command-line argument to ensure that we can find
  # it regardless of how exactly Bazel was invoked.
@@ -838,15 +869,15 @@ index d1a6bb2ee..17d15f826 100755
  with open(sys.argv[2], "w") as f:
    f.write(converter.convert())
 diff --git a/upb/text/encode.c b/upb/text/encode.c
-index 6d26faca0..aa6c3f104 100644
+index e13d9f2..908f233 100644
 --- a/upb/text/encode.c
 +++ b/upb/text/encode.c
-@@ -288,7 +288,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+@@ -378,7 +378,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
  #define CHK(x)      \
    do {              \
      if (!(x)) {     \
 -      return false; \
-+      return NULL; \
++      return NULL;  \
      }               \
    } while (0)
  

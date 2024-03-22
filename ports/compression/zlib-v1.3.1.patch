@@ -1,0 +1,90 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 15ceebe..8bc012d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -149,10 +149,28 @@ if(MINGW)
+     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
+ endif(MINGW)
+ 
+-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+-target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+-target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
++if(DEFINED BUILD_SHARED_LIBS OR DEFINED CACHE{BUILD_SHARED_LIBS})
++    if(BUILD_SHARED_LIBS)
++        add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
++        target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
++        set(ZLIB_DEFAULT_LINK_NAME zlib)
++        set(ZLIB_ALL_LINK_NAME zlib)
++    else()
++        add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
++        target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
++        set(ZLIB_DEFAULT_LINK_NAME zlibstatic)
++        set(ZLIB_ALL_LINK_NAME zlibstatic)
++    endif()
++else()
++  add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
++  target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
++  add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
++  target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
++  set(ZLIB_DEFAULT_LINK_NAME zlib)
++  set(ZLIB_ALL_LINK_NAME zlib zlibstatic)
++endif()
++
++if(TARGET zlib)
+ set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+ set_target_properties(zlib PROPERTIES SOVERSION 1)
+ 
+@@ -169,7 +187,7 @@ endif()
+ 
+ if(UNIX)
+     # On unix-like platforms the library is almost always called libz
+-   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
++   set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
+    if(NOT APPLE AND NOT(CMAKE_SYSTEM_NAME STREQUAL AIX))
+      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
+    endif()
+@@ -177,9 +195,17 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
+     # Creates zlib1.dll when building shared library version
+     set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
+ endif()
++endif()
++
++if(TARGET zlibstatic)
++  if(UNIX)
++    # On unix-like platforms the library is almost always called libz
++    set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME z)
++  endif()
++endif()
+ 
+ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+-    install(TARGETS zlib zlibstatic
++    install(TARGETS ${ZLIB_ALL_LINK_NAME}
+         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+@@ -199,20 +225,20 @@ endif()
+ #============================================================================
+ if(ZLIB_BUILD_EXAMPLES)
+     add_executable(example test/example.c)
+-    target_link_libraries(example zlib)
++    target_link_libraries(example ${ZLIB_DEFAULT_LINK_NAME})
+     add_test(example example)
+ 
+     add_executable(minigzip test/minigzip.c)
+-    target_link_libraries(minigzip zlib)
++    target_link_libraries(minigzip ${ZLIB_DEFAULT_LINK_NAME})
+ 
+     if(HAVE_OFF64_T)
+         add_executable(example64 test/example.c)
+-        target_link_libraries(example64 zlib)
++        target_link_libraries(example64 ${ZLIB_DEFAULT_LINK_NAME})
+         set_target_properties(example64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+         add_test(example64 example64)
+ 
+         add_executable(minigzip64 test/minigzip.c)
+-        target_link_libraries(minigzip64 zlib)
++        target_link_libraries(minigzip64 ${ZLIB_DEFAULT_LINK_NAME})
+         set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+     endif()
+ endif()
