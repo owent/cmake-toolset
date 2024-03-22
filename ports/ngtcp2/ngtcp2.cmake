@@ -41,7 +41,7 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
       message(
         STATUS "Dependency(${PROJECT_NAME}): ngtcp2_crypto_boringssl using target Libngtcp2::libngtcp2_crypto_boringssl"
       )
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_BORINGSSL_LINK_NAME
           Libngtcp2::libngtcp2_crypto_boringssl)
       if(TARGET Libnghttp3::libnghttp3)
         project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_boringssl ADD_LIBRARIES
@@ -53,7 +53,8 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
       include(CMakePushCheckState)
       include(CheckCXXSymbolExists)
       cmake_push_check_state()
-      set(CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME})
+      set(CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_QUICTLS_LINK_NAME}
+                                   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGTCP2_CRYPTO_BORINGSSL_LINK_NAME})
       if(MSVC)
         set(CMAKE_REQUIRED_FLAGS "/utf-8")
       endif()
