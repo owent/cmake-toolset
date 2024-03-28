@@ -1,0 +1,20 @@
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 9c8baa0..f29b905 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -59,8 +59,13 @@ if(LIBEV_FOUND AND HAVE_OPENSSL AND LIBNGHTTP3_FOUND)
+     ${LIBNGHTTP3_INCLUDE_DIRS}
+   )
+ 
+-  set(qtls_LIBS
+-    ngtcp2_crypto_quictls
++  if(TARGET ngtcp2_crypto_quictls)
++    set(qtls_LIBS ngtcp2_crypto_quictls)
++  else()
++    set(qtls_LIBS ngtcp2_crypto_quictls_static)
++  endif()
++
++  list(APPEND qtls_LIBS
+     ngtcp2
+     ${JEMALLOC_LIBRARIES}
+     ${OPENSSL_LIBRARIES}
