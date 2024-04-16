@@ -30,7 +30,8 @@ if(NOT TARGET jemalloc)
       BUILD_OPTIONS
       "--enable-static=no"
       "--enable-prof"
-      "--enable-lazy-lock"
+      # "--enable-lazy-lock" # This option may trigger https://github.com/jemalloc/jemalloc/issues/514 even with
+      # --enable-tls, just ignore it
       "--enable-xmalloc"
       "--enable-utrace")
 
