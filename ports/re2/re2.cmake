@@ -20,7 +20,7 @@ if(NOT TARGET re2::re2)
     project_third_party_port_declare(
       re2
       VERSION
-      "2024-03-01"
+      "2024-04-01"
       GIT_URL
       "https://github.com/google/re2.git"
       BUILD_OPTIONS
