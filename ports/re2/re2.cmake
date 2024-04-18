@@ -31,6 +31,8 @@ if(NOT TARGET re2::re2)
                                                     BUILD_SHARED_LIBS)
     project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS)
 
+    # Patch for the BUG of cmake
+    set(PACKAGE_PREFIX_DIR "${PROJECT_THIRD_PARTY_INSTALL_DIR}")
     find_configure_package(
       PACKAGE
       re2
@@ -52,6 +54,7 @@ if(NOT TARGET re2::re2)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_VERSION}"
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_GIT_URL}")
+    unset(PACKAGE_PREFIX_DIR)
 
     if(TARGET re2::re2)
       project_third_party_re2_import()
