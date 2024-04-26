@@ -242,8 +242,6 @@ jobs:
         uses: actions/checkout@v3
       - name: CI Job
         shell: bash
-        env:
-          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM: "TRUE"
         run: |
           bash ci/do_ci.sh clang.test ;
   android_arm64_test:

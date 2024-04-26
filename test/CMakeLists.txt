@@ -170,7 +170,11 @@ project_third_party_include_port("test/benchmark.cmake")
 
 project_third_party_include_port("flatbuffers/flatbuffers.cmake")
 project_third_party_include_port("ssl/port.cmake")
-project_third_party_include_port("libevent/libevent.cmake")
+# nghttp2 do not work with libevent without openssl component
+if(NOT (ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL
+        OR ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_LIBRESSL))
+  project_third_party_include_port("libevent/libevent.cmake")
+endif()
 project_third_party_include_port("redis/hiredis.cmake")
 project_third_party_include_port("cares/c-ares.cmake")
 project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")

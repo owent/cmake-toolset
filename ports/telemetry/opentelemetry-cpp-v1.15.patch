@@ -14,6 +14,39 @@ index cc085b1..a9705bf 100644
  
  function(install_windows_deps)
    # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
+diff --git a/api/CMakeLists.txt b/api/CMakeLists.txt
+index 0f63a49..352794a 100644
+--- a/api/CMakeLists.txt
++++ b/api/CMakeLists.txt
+@@ -131,6 +131,10 @@ if(WITH_OTLP_HTTP_COMPRESSION)
+                              INTERFACE ENABLE_OTLP_COMPRESSION_PREVIEW)
+ endif()
+ 
++if(APPLE)
++  target_link_options(opentelemetry_api INTERFACE "-framework CoreFoundation")
++endif()
++
+ include(${PROJECT_SOURCE_DIR}/cmake/pkgconfig.cmake)
+ 
+ if(OPENTELEMETRY_INSTALL)
+diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
+index 6a69c7d..c23d11a 100644
+--- a/ext/src/http/client/curl/CMakeLists.txt
++++ b/ext/src/http/client/curl/CMakeLists.txt
+@@ -40,6 +40,13 @@ if(WITH_OTLP_HTTP_COMPRESSION)
+   endif()
+ endif()
+ 
++if(APPLE)
++  find_library(OPENTELEMETRY_FIND_RESOLV NAMES resolv)
++  if(OPENTELEMETRY_FIND_RESOLV)
++    target_link_libraries(opentelemetry_http_client_curl PUBLIC resolv)
++  endif()
++endif()
++
+ if(OPENTELEMETRY_INSTALL)
+   install(
+     TARGETS opentelemetry_http_client_curl
 diff --git a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h b/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
 index 4f7c906..1bf0fac 100644
 --- a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
