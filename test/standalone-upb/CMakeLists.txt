@@ -105,6 +105,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
   file(REMOVE "${CMAKE_BINARY_DIR}/ignore-configure-error.txt")
 endif()
 
+set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ENABLE_STANDALONE_UPB ON)
+
 project_third_party_include_port("compression/zlib.cmake")
 project_third_party_include_port("lua/lua.cmake")
 project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")

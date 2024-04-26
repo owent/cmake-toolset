@@ -409,6 +409,8 @@ project_third_party_include_port("flatbuffers/flatbuffers.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ALLOW_SHARED_LIBS OFF CACHE BOOL
 #   "Allow build protobuf as dynamic(May cause duplicate symbol in global data base.[File already exists in database])"
 # )
+# # Some versions of protoc-upb in protobuf will crash, we use old version for standalone mode
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ENABLE_STANDALONE_UPB ON)
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VISIBILITY_HIDDEN TRUE) # add -fvisibility=hidden
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS
 #   "-Dprotobuf_BUILD_TESTS=OFF"
