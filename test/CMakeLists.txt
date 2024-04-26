@@ -170,6 +170,7 @@ project_third_party_include_port("test/benchmark.cmake")
 
 project_third_party_include_port("flatbuffers/flatbuffers.cmake")
 project_third_party_include_port("ssl/port.cmake")
+project_third_party_include_port("libevent/libevent.cmake")
 project_third_party_include_port("redis/hiredis.cmake")
 project_third_party_include_port("cares/c-ares.cmake")
 project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")

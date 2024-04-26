@@ -1,0 +1,115 @@
+include_guard(DIRECTORY)
+
+macro(PROJECT_THIRD_PARTY_LIBEVENT_IMPORT)
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES)
+  if(TARGET libevent::openssl)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES libevent::openssl)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARY_OPENSSL libevent::openssl)
+  endif()
+  if(TARGET libevent::pthreads)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES libevent::pthreads)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARY_PTHREAD libevent::pthreads)
+  endif()
+  if(TARGET libevent::extra)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES libevent::extra)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARY_EXTRA libevent::extra)
+  endif()
+  if(TARGET libevent::core)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES libevent::core)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARY_CORE libevent::core)
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES)
+    message(
+      STATUS
+        "Dependency(${PROJECT_NAME}): libevent using target: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES}"
+    )
+    project_build_tools_get_imported_location()
+    project_build_tools_patch_imported_link_interface_libraries(
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES})
+  else()
+    message(STATUS "Dependency(${PROJECT_NAME}): libevent support disabled")
+  endif()
+endmacro()
+
+# =========== third party libevent ==================
+if(TARGET libevent::core)
+  find_package(Libevent QUIET)
+
+  if(TARGET libevent::core)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_DEFAULT_VERSION "2.1.12")
+    project_third_party_port_declare(
+      Libevent
+      VERSION
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_DEFAULT_VERSION}"
+      GIT_URL
+      "https://github.com/libevent/libevent.git"
+      BUILD_OPTIONS
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+      "-DEVENT__DISABLE_BENCHMARK=OFF"
+      "-DEVENT__DISABLE_TESTS=ON"
+      "-DEVENT__DISABLE_REGRESS=ON"
+      "-DEVENT__DISABLE_SAMPLES=ON"
+      "-DEVENT__DISABLE_MBEDTLS=ON")
+
+    project_build_tools_auto_append_postfix(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS)
+    project_third_party_check_build_shared_lib("Libevent" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_USE_SHARED)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_USE_SHARED)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=ON"
+           "-DEVENT__LIBRARY_TYPE=SHARED")
+    else()
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS "-DBUILD_SHARED_LIBS=OFF"
+           "-DEVENT__LIBRARY_TYPE=STATIC")
+    endif()
+    if(VCPKG_HOST_CRT_LINKAGE STREQUAL "static" OR VCPKG_CRT_LINKAGE STREQUAL "static")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS "-DEVENT__MSVC_STATIC_RUNTIME=ON")
+    else()
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS "-DEVENT__MSVC_STATIC_RUNTIME=OFF")
+    endif()
+
+    project_third_party_try_patch_file(
+      ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "libevent"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_VERSION}")
+
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_PATCH_FILE
+       AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_PATCH_FILE}")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS GIT_PATCH_FILES
+           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_PATCH_FILE})
+    endif()
+
+    find_configure_package(
+      PACKAGE
+      Libevent
+      BUILD_WITH_CMAKE
+      CMAKE_INHERIT_BUILD_ENV
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
+      CMAKE_FLAGS
+      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_OPTIONS}
+      WORKING_DIRECTORY
+      "${PROJECT_THIRD_PARTY_PACKAGE_DIR}"
+      BUILD_DIRECTORY
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_DIR}"
+      PREFIX_DIRECTORY
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+      SRC_DIRECTORY_NAME
+      "libevent-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_VERSION}"
+      GIT_BRANCH
+      "release-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_VERSION}-stable"
+      GIT_URL
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_GIT_URL}")
+
+    if(NOT Libevent_FOUND)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+        project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_BUILD_DIR}")
+      endif()
+      echowithcolor(
+        COLOR
+        RED
+        "-- Dependency(${PROJECT_NAME}): Libevent is required, we can not find prebuilt for libevent and can not find git to clone the sources"
+      )
+      message(FATAL_ERROR "Libevent not found")
+    endif()
+  endif()
+  project_third_party_libevent_import()
+else()
+  project_third_party_libevent_import()
+endif()
