@@ -23,7 +23,6 @@ macro(PROJECT_THIRD_PARTY_LIBEVENT_IMPORT)
       STATUS
         "Dependency(${PROJECT_NAME}): libevent using target: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES}"
     )
-    project_build_tools_get_imported_location()
     project_build_tools_patch_imported_link_interface_libraries(
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES})
   else()
