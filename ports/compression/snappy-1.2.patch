@@ -1,0 +1,43 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 85afe58..5f4b77f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -67,11 +67,11 @@ else(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+   endif(NOT CMAKE_CXX_FLAGS MATCHES "-Wextra")
+ 
+   # Use -Werror for clang only.
+-  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+-    if(NOT CMAKE_CXX_FLAGS MATCHES "-Werror")
+-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+-    endif(NOT CMAKE_CXX_FLAGS MATCHES "-Werror")
+-  endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
++  # if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
++  #   if(NOT CMAKE_CXX_FLAGS MATCHES "-Werror")
++  #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
++  #   endif(NOT CMAKE_CXX_FLAGS MATCHES "-Werror")
++  # endif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+ 
+   # Disable sign comparison warnings. Matches upcoming Bazel setup.
+   if(NOT CMAKE_CXX_FLAGS MATCHES "-Wno-sign-compare")
+diff --git a/snappy.cc b/snappy.cc
+index 08c2a98..2e33dca 100644
+--- a/snappy.cc
++++ b/snappy.cc
+@@ -1275,7 +1275,7 @@ void DeferMemCopy(const void** deferred_src, size_t* deferred_length,
+   *deferred_length = length;
+ }
+ 
+-SNAPPY_ATTRIBUTE_ALWAYS_INLINE
++// SNAPPY_ATTRIBUTE_ALWAYS_INLINE
+ inline size_t AdvanceToNextTagARMOptimized(const uint8_t** ip_p, size_t* tag) {
+   const uint8_t*& ip = *ip_p;
+   // This section is crucial for the throughput of the decompression loop.
+@@ -1298,7 +1298,7 @@ inline size_t AdvanceToNextTagARMOptimized(const uint8_t** ip_p, size_t* tag) {
+   return tag_type;
+ }
+ 
+-SNAPPY_ATTRIBUTE_ALWAYS_INLINE
++// SNAPPY_ATTRIBUTE_ALWAYS_INLINE
+ inline size_t AdvanceToNextTagX86Optimized(const uint8_t** ip_p, size_t* tag) {
+   const uint8_t*& ip = *ip_p;
+   // This section is crucial for the throughput of the decompression loop.

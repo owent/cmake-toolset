@@ -42,7 +42,7 @@ if(NOT TARGET c-ares::cares
     project_third_party_port_declare(
       cares
       VERSION
-      "1.27.0"
+      "1.28.1"
       GIT_URL
       "https://github.com/c-ares/c-ares.git"
       BUILD_OPTIONS
