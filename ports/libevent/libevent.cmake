@@ -32,10 +32,10 @@ macro(PROJECT_THIRD_PARTY_LIBEVENT_IMPORT)
 endmacro()
 
 # =========== third party libevent ==================
-if(TARGET libevent::core)
+if(NOT TARGET libevent::core)
   find_package(Libevent QUIET)
 
-  if(TARGET libevent::core)
+  if(NOT TARGET libevent::core)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_DEFAULT_VERSION "2.1.12")
     project_third_party_port_declare(
       Libevent

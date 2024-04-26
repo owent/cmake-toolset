@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cc085b1..a9705bf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -297,6 +297,11 @@ if(WITH_EXAMPLES_HTTP AND NOT WITH_EXAMPLES)
+ endif()
+ 
+ find_package(Threads)
++find_package(zstd QUIET)
++find_package(c-ares QUIET)
++find_package(Libnghttp3 QUIET)
++find_package(Libngtcp2 QUIET)
++find_package(Libnghttp2 QUIET)
+ 
+ function(install_windows_deps)
+   # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
+diff --git a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h b/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
+index 4f7c906..1bf0fac 100644
+--- a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
++++ b/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
+@@ -8,6 +8,7 @@
+ 
+ #include "opentelemetry/common/key_value_iterable_view.h"
+ #include "opentelemetry/nostd/string_view.h"
++#include "opentelemetry/nostd/type_traits.h"
+ #include "opentelemetry/nostd/unique_ptr.h"
+ #include "opentelemetry/nostd/variant.h"
+ #include "opentelemetry/sdk/common/attribute_utils.h"
+@@ -73,7 +74,7 @@ class InstrumentationScope
+    */
+   template <
+       class ArgumentType,
+-      std::enable_if_t<opentelemetry::common::detail::is_key_value_iterable<ArgumentType>::value>
++      nostd::enable_if_t<opentelemetry::common::detail::is_key_value_iterable<ArgumentType>::value>
+           * = nullptr>
+   static nostd::unique_ptr<InstrumentationScope> Create(nostd::string_view name,
+                                                         nostd::string_view version,
