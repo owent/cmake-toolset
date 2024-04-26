@@ -15,7 +15,7 @@ index cc085b1..a9705bf 100644
  function(install_windows_deps)
    # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
 diff --git a/api/CMakeLists.txt b/api/CMakeLists.txt
-index 0f63a49..352794a 100644
+index 0f63a49..78e97ad 100644
 --- a/api/CMakeLists.txt
 +++ b/api/CMakeLists.txt
 @@ -131,6 +131,10 @@ if(WITH_OTLP_HTTP_COMPRESSION)
@@ -23,7 +23,7 @@ index 0f63a49..352794a 100644
  endif()
  
 +if(APPLE)
-+  target_link_options(opentelemetry_api INTERFACE "-framework CoreFoundation")
++  target_link_libraries(opentelemetry_api INTERFACE "-framework CoreFoundation")
 +endif()
 +
  include(${PROJECT_SOURCE_DIR}/cmake/pkgconfig.cmake)
