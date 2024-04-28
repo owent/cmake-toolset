@@ -1,0 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 676727f1..c83afaea 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1453,7 +1453,7 @@ endif()
+ #
+ 
+ set(EVENT_INSTALL_CMAKE_DIR
+-    "${CMAKE_INSTALL_PREFIX}/lib/cmake/libevent")
++    "lib/cmake/libevent")
+ 
+ export(PACKAGE libevent)
+ 
+diff --git a/cmake/AddEventLibrary.cmake b/cmake/AddEventLibrary.cmake
+index 04f5837e..95d98087 100644
+--- a/cmake/AddEventLibrary.cmake
++++ b/cmake/AddEventLibrary.cmake
+@@ -42,7 +42,7 @@ macro(export_install_target TYPE LIB_NAME OUTER_INCLUDES)
+         install(TARGETS "${LIB_NAME}_${TYPE}"
+             LIBRARY DESTINATION "lib" COMPONENT lib
+             ARCHIVE DESTINATION "lib" COMPONENT lib
+-            RUNTIME DESTINATION "lib" COMPONENT lib
++            RUNTIME DESTINATION "bin" COMPONENT bin
+             COMPONENT dev
+         )
+     else()
+@@ -69,7 +69,7 @@ macro(export_install_target TYPE LIB_NAME OUTER_INCLUDES)
+             EXPORT LibeventTargets-${TYPE}
+             LIBRARY DESTINATION "lib" COMPONENT lib
+             ARCHIVE DESTINATION "lib" COMPONENT lib
+-            RUNTIME DESTINATION "lib" COMPONENT lib
++            RUNTIME DESTINATION "bin" COMPONENT bin
+             COMPONENT dev
+         )
+     endif()

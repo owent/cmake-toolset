@@ -34,6 +34,7 @@
 #   PREFIX_DIRECTORY <prefix directory>
 #   SRC_DIRECTORY_NAME <source directory name>
 #   MSVC_CONFIGURE <Debug/Release/RelWithDebInfo/MinSizeRel>
+#   CMAKE_INSTALL_CONFIGURE <Debug/Release/RelWithDebInfo/MinSizeRel>
 #   AUTOGEN_CONFIGURE [autogen command and args...]
 #   INSTALL_TARGET [install targets...]
 #   INSTALL_COMPONENT [install components...]
@@ -254,6 +255,7 @@ macro(FindConfigurePackage)
       SRC_DIRECTORY_NAME
       PROJECT_DIRECTORY
       MSVC_CONFIGURE
+      CMAKE_INSTALL_CONFIGURE
       LIST_SEPARATOR
       ZIP_URL
       TAR_URL
@@ -713,7 +715,11 @@ macro(FindConfigurePackage)
               endif()
             endif()
           else()
-            project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
+            if(FindConfigurePackage_CMAKE_INSTALL_CONFIGURE)
+              set(FindConfigurePackageFinalBuildType "${FindConfigurePackage_CMAKE_INSTALL_CONFIGURE}")
+            else()
+              project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
+            endif()
             if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE AND NOT FindConfigurePackageFinalBuildType STREQUAL
                                                                      "Debug")
               execute_process(
@@ -830,7 +836,11 @@ macro(FindConfigurePackage)
             endif()
           endif()
         else()
-          project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageConfigBuildType)
+          if(FindConfigurePackage_CMAKE_INSTALL_CONFIGURE)
+            set(FindConfigurePackageFinalBuildType "${FindConfigurePackage_CMAKE_INSTALL_CONFIGURE}")
+          else()
+            project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
+          endif()
           # We can not set --config when do not build specific target, or some cmake versions have BUG and will not
           # install exported target files.
           if(FindConfigurePackageConfigBuildType AND FindConfigurePackage_INSTALL_TARGET)
