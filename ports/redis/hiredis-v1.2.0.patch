@@ -1,10 +1,21 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b7d6ee8..c76c2da 100644
+index b7d6ee8..020e599 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -152,6 +152,7 @@ IF(ENABLE_SSL)
-         ENDIF()
-     ENDIF()
+@@ -146,12 +146,13 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/hiredis-config.cmake
+ 
+ 
+ IF(ENABLE_SSL)
+-    IF (NOT OPENSSL_ROOT_DIR)
+-        IF (APPLE)
+-            SET(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
+-        ENDIF()
+-    ENDIF()
++    # IF (NOT OPENSSL_ROOT_DIR)
++    #     IF (APPLE)
++    #         SET(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
++    #     ENDIF()
++    # ENDIF()
      FIND_PACKAGE(OpenSSL REQUIRED)
 +    FIND_PACKAGE(Threads)
      SET(hiredis_ssl_sources

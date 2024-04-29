@@ -34,6 +34,7 @@
 #   PREFIX_DIRECTORY <prefix directory>
 #   SRC_DIRECTORY_NAME <source directory name>
 #   MSVC_CONFIGURE <Debug/Release/RelWithDebInfo/MinSizeRel>
+#   CMAKE_INSTALL_CONFIGURE <Debug/Release/RelWithDebInfo/MinSizeRel>
 #   AUTOGEN_CONFIGURE [autogen command and args...]
 #   INSTALL_TARGET [install targets...]
 #   INSTALL_COMPONENT [install components...]
@@ -254,6 +255,7 @@ macro(FindConfigurePackage)
       SRC_DIRECTORY_NAME
       PROJECT_DIRECTORY
       MSVC_CONFIGURE
+      CMAKE_INSTALL_CONFIGURE
       LIST_SEPARATOR
       ZIP_URL
       TAR_URL
@@ -693,24 +695,31 @@ macro(FindConfigurePackage)
                                   ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
                 RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
             endif()
-            if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
-              foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+            if(RUN_CMAKE_BUILD_RESULT EQUAL 0)
+              if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
+                foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+                  execute_process(
+                    COMMAND
+                      "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config
+                      ${FindConfigurePackage_MSVC_CONFIGURE} --component
+                      "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}"
+                    WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+                endforeach()
+              else()
                 execute_process(
-                  COMMAND
-                    "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config
-                    ${FindConfigurePackage_MSVC_CONFIGURE} --component "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}"
+                  COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config
+                          ${FindConfigurePackage_MSVC_CONFIGURE}
                   WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                     ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-              endforeach()
-            else()
-              execute_process(
-                COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config
-                        ${FindConfigurePackage_MSVC_CONFIGURE}
-                WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                                  ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+              endif()
             endif()
           else()
-            project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
+            if(FindConfigurePackage_CMAKE_INSTALL_CONFIGURE)
+              set(FindConfigurePackageFinalBuildType "${FindConfigurePackage_CMAKE_INSTALL_CONFIGURE}")
+            else()
+              project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
+            endif()
             if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE AND NOT FindConfigurePackageFinalBuildType STREQUAL
                                                                      "Debug")
               execute_process(
@@ -732,19 +741,21 @@ macro(FindConfigurePackage)
                                     ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
                   RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
               endif()
-              if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
-                foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+              if(RUN_CMAKE_BUILD_RESULT EQUAL 0)
+                if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
+                  foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+                    execute_process(
+                      COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Debug
+                              --component "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}"
+                      WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+                  endforeach()
+                else()
                   execute_process(
-                    COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Debug --component
-                            "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}"
+                    COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Debug
                     WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                       ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-                endforeach()
-              else()
-                execute_process(
-                  COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Debug
-                  WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                                    ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+                endif()
               endif()
             endif()
             if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE AND NOT FindConfigurePackageFinalBuildType STREQUAL
@@ -768,19 +779,21 @@ macro(FindConfigurePackage)
                                     ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
                   RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
               endif()
-              if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
-                foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+              if(RUN_CMAKE_BUILD_RESULT EQUAL 0)
+                if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
+                  foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+                    execute_process(
+                      COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Release
+                              --component "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}"
+                      WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
+                                        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+                  endforeach()
+                else()
                   execute_process(
                     COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Release
-                            --component "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}"
                     WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                       ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-                endforeach()
-              else()
-                execute_process(
-                  COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config Release
-                  WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                                    ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+                endif()
               endif()
             endif()
 
@@ -804,24 +817,30 @@ macro(FindConfigurePackage)
                                   ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
                 RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
             endif()
-            if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
-              foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+            if(RUN_CMAKE_BUILD_RESULT EQUAL 0)
+              if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
+                foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+                  execute_process(
+                    COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config --component
+                            "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}" ${FindConfigurePackageFinalBuildType}
+                    WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
+                                      ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+                endforeach()
+              else()
                 execute_process(
-                  COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config --component
-                          "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}" ${FindConfigurePackageFinalBuildType}
+                  COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config
+                          ${FindConfigurePackageFinalBuildType}
                   WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                     ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-              endforeach()
-            else()
-              execute_process(
-                COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --config
-                        ${FindConfigurePackageFinalBuildType}
-                WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                                  ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+              endif()
             endif()
           endif()
         else()
-          project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageConfigBuildType)
+          if(FindConfigurePackage_CMAKE_INSTALL_CONFIGURE)
+            set(FindConfigurePackageFinalBuildType "${FindConfigurePackage_CMAKE_INSTALL_CONFIGURE}")
+          else()
+            project_build_tools_get_cmake_build_type_for_lib(FindConfigurePackageFinalBuildType)
+          endif()
           # We can not set --config when do not build specific target, or some cmake versions have BUG and will not
           # install exported target files.
           if(FindConfigurePackageConfigBuildType AND FindConfigurePackage_INSTALL_TARGET)
@@ -850,20 +869,22 @@ macro(FindConfigurePackage)
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
               RESULT_VARIABLE RUN_CMAKE_BUILD_RESULT)
           endif()
-          if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
-            foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+          if(RUN_CMAKE_BUILD_RESULT EQUAL 0)
+            if(NOT FindConfigurePackage_INSTALL_TARGET AND FindConfigurePackage_INSTALL_COMPONENT)
+              foreach(_FindConfigurePackage_INSTALL_COMPONENT_ITEM ${FindConfigurePackage_INSTALL_COMPONENT})
+                execute_process(
+                  COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --component
+                          "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}" ${FindConfigurePackageConfigBuildType}
+                  WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
+                                    ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+              endforeach()
+            else()
               execute_process(
-                COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS} --component
-                        "${_FindConfigurePackage_INSTALL_COMPONENT_ITEM}" ${FindConfigurePackageConfigBuildType}
+                COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS}
+                        ${FindConfigurePackageConfigBuildType}
                 WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                                   ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-            endforeach()
-          else()
-            execute_process(
-              COMMAND "${CMAKE_COMMAND}" ${FindConfigurePackage_CMAKE_INSTALL_OPTIONS}
-                      ${FindConfigurePackageConfigBuildType}
-              WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
-                                ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+            endif()
           endif()
         endif()
         unset(_FindConfigurePackage_INSTALL_COMPONENT_ITEM)

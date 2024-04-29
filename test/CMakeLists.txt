@@ -170,6 +170,11 @@ project_third_party_include_port("test/benchmark.cmake")
 
 project_third_party_include_port("flatbuffers/flatbuffers.cmake")
 project_third_party_include_port("ssl/port.cmake")
+# nghttp2 do not work with libevent without openssl component
+if(NOT (ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL
+        OR ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_LIBRESSL))
+  project_third_party_include_port("libevent/libevent.cmake")
+endif()
 project_third_party_include_port("redis/hiredis.cmake")
 project_third_party_include_port("cares/c-ares.cmake")
 project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")
@@ -193,7 +198,9 @@ if(VCPKG_TOOLCHAIN
 else()
   project_third_party_include_port("protobuf/protobuf.cmake")
   project_third_party_include_port("grpc/import.cmake")
-  project_third_party_include_port("grpc/upb.cmake")
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ENABLE_STANDALONE_UPB)
+    project_third_party_include_port("grpc/upb.cmake")
+  endif()
 
   if(COMPILER_OPTIONS_TEST_EXCEPTION)
     project_third_party_include_port("telemetry/prometheus-cpp.cmake")

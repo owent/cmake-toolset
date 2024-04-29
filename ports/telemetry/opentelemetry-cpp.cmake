@@ -37,7 +37,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
 
   if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_INCLUDE_DIRECTORIES)
-    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.14.2" GIT_URL
+    project_third_party_port_declare(opentelemetry_cpp VERSION "v1.15.0" GIT_URL
                                      "https://github.com/open-telemetry/opentelemetry-cpp.git")
 
     project_third_party_try_patch_file(
@@ -382,6 +382,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
       CONFIG
       CMAKE_INHERIT_BUILD_ENV
       CMAKE_INHERIT_FIND_ROOT_PATH
+      CMAKE_INHERIT_SYSTEM_LINKS
       CMAKE_FLAGS
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_BUILD_OPTIONS}
       WORKING_DIRECTORY

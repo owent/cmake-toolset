@@ -106,3 +106,16 @@ index 6d26fac..26dca2d 100644
      }               \
    } while (0)
  
+diff --git a/third_party/upb/upb/wire/internal/decode.h b/third_party/upb/upb/wire/internal/decode.h
+index a058ecb..770c8a2 100644
+--- a/third_party/upb/upb/wire/internal/decode.h
++++ b/third_party/upb/upb/wire/internal/decode.h
+@@ -17,7 +17,7 @@
+ #include "upb/message/internal/message.h"
+ #include "upb/wire/decode.h"
+ #include "upb/wire/eps_copy_input_stream.h"
+-#include "utf8_range.h"
++#include "../utf8_range/utf8_range.h"
+ 
+ // Must be last.
+ #include "upb/port/def.inc"

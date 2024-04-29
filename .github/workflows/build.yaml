@@ -243,8 +243,15 @@ jobs:
       - name: CI Job
         shell: bash
         env:
-          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM: "TRUE"
+          CMAKE_FIND_ROOT_PATH_MODE_PROGRAM: NEVER
+          CMAKE_FIND_ROOT_PATH_MODE_LIBRARY: ONLY
+          CMAKE_FIND_ROOT_PATH_MODE_INCLUDE: ONLY
+          CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
         run: |
+          # The OpenSSL config package in apple ci job is break
+          if [ -e /opt/homebrew/lib/cmake/OpenSSL ]; then
+            rm -rf /opt/homebrew/lib/cmake/OpenSSL || true
+          fi
           bash ci/do_ci.sh clang.test ;
   android_arm64_test:
     name: "android.arm64.test"

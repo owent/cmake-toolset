@@ -87,7 +87,7 @@ if(NOT TARGET hiredis::hiredis_ssl_static
       endif()
     elseif(OPENSSL_ROOT_DIR)
       list_append_unescape(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_DEFAULT_BUILD_OPTIONS
-                           "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}")
+                           "-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}" "-DOpenSSL_ROOT=${OPENSSL_ROOT_DIR}")
     endif()
   else()
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_DEFAULT_BUILD_OPTIONS "-DENABLE_SSL=OFF")
