@@ -13,8 +13,12 @@
 #
 # ::
 #
-# Libevent_INCLUDE_DIRS   - where to find event2/event.h, etc. Libevent_LIBRARIES      - List of libraries when using libevent.
+# Libevent_INCLUDE_DIRS   - where to find event2/event.h, etc.
+# Libevent_LIBRARIES      - List of libraries when using libevent.
+# LIBEVENT_INCLUDE_DIRS   - where to find event2/event.h, etc.
+# LIBEVENT_LIBRARIES      - List of libraries when using libevent.
 # Libevent_FOUND          - True if libevent found.
+# LIBEVENT_FOUND          - True if libevent found.
 #
 # ::
 #
@@ -23,7 +27,7 @@
 # A user may set ``LIBEVENT_ROOT`` to a libevent installation root to tell this module where to look.
 
 # =============================================================================
-# Copyright 2021 atframework.
+# Copyright 2024 atframework.
 #
 # Distributed under the Apache License Version 2.0 (the "License"); see accompanying file LICENSE for details.
 
@@ -75,6 +79,8 @@ find_package_handle_standard_args(
 
 if(Libevent_FOUND)
   set(LIBEVENT_FOUND ${Libevent_FOUND})
+  set(LIBEVENT_INCLUDE_DIRS "${Libevent_INCLUDE_DIRS}")
+  set(LIBEVENT_LIBRARIES "${Libevent_LIBRARIES}")
   if(Libevent_LIBRARIES_CORE AND NOT TARGET libevent::core)
     add_library(libevent::core UNKNOWN IMPORTED)
     set_target_properties(libevent::core PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Libevent_INCLUDE_DIRS}")

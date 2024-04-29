@@ -33,3 +33,17 @@ index 04f5837e..95d98087 100644
              COMPONENT dev
          )
      endif()
+diff --git a/cmake/LibeventConfig.cmake.in b/cmake/LibeventConfig.cmake.in
+index 7b808c32..8f462c71 100644
+--- a/cmake/LibeventConfig.cmake.in
++++ b/cmake/LibeventConfig.cmake.in
+@@ -130,8 +130,7 @@ if(CONFIG_FOR_INSTALL_TREE)
+         unset(_event_lib CACHE)
+         find_library(_event_lib
+                     NAMES "event_${_comp}"
+-                    PATHS "${_INSTALL_PREFIX}/lib"
+-                    NO_DEFAULT_PATH)
++                    PATHS "${_INSTALL_PREFIX}/lib")
+         if(_event_lib)
+             list(APPEND LIBEVENT_LIBRARIES "libevent::${_comp}")
+             set_case_insensitive_found(${_comp})
