@@ -248,6 +248,7 @@ jobs:
           CMAKE_FIND_ROOT_PATH_MODE_INCLUDE: ONLY
           CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
         run: |
+          unset OPENSSL_ROOT_DIR
           bash ci/do_ci.sh clang.test ;
   android_arm64_test:
     name: "android.arm64.test"
