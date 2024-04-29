@@ -31,24 +31,6 @@ index 0f63a49..78e97ad 100644
  include(${PROJECT_SOURCE_DIR}/cmake/pkgconfig.cmake)
  
  if(OPENTELEMETRY_INSTALL)
-diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
-index 6a69c7d..c23d11a 100644
---- a/ext/src/http/client/curl/CMakeLists.txt
-+++ b/ext/src/http/client/curl/CMakeLists.txt
-@@ -40,6 +40,13 @@ if(WITH_OTLP_HTTP_COMPRESSION)
-   endif()
- endif()
- 
-+if(APPLE)
-+  find_library(OPENTELEMETRY_FIND_RESOLV NAMES resolv)
-+  if(OPENTELEMETRY_FIND_RESOLV)
-+    target_link_libraries(opentelemetry_http_client_curl PUBLIC resolv)
-+  endif()
-+endif()
-+
- if(OPENTELEMETRY_INSTALL)
-   install(
-     TARGETS opentelemetry_http_client_curl
 diff --git a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h b/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
 index 4f7c906..1bf0fac 100644
 --- a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
