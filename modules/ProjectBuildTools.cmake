@@ -1037,6 +1037,7 @@ if(NOT PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS_SET)
         /wd4267
         /wd4309
         /wd4668
+        /wd4702
         /wd4715
         /wd4800
         /wd4946
