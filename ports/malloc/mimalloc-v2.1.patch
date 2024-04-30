@@ -1,8 +1,8 @@
 diff --git a/include/mimalloc/atomic.h b/include/mimalloc/atomic.h
-index fe79fbc..9ab88cb 100644
+index 807c4da..211fefb 100644
 --- a/include/mimalloc/atomic.h
 +++ b/include/mimalloc/atomic.h
-@@ -28,6 +28,9 @@ terms of the MIT license. A copy of the license can be found in the file
+@@ -30,6 +30,9 @@ terms of the MIT license. A copy of the license can be found in the file
  #else
   #define MI_ATOMIC_VAR_INIT(x)  ATOMIC_VAR_INIT(x)
  #endif
@@ -12,11 +12,29 @@ index fe79fbc..9ab88cb 100644
  #elif defined(_MSC_VER)
  // Use MSVC C wrapper for C11 atomics
  #define  _Atomic(tp)            tp
+diff --git a/src/alloc-override.c b/src/alloc-override.c
+index 75afc20..e13b7b4 100644
+--- a/src/alloc-override.c
++++ b/src/alloc-override.c
+@@ -136,9 +136,13 @@ typedef void* mi_nothrow_t;
+   mi_decl_export void* realloc(void* p, size_t newsize) MI_FORWARD2(mi_realloc, p, newsize)
+   mi_decl_export void  free(void* p)                    MI_FORWARD0(mi_free, p)  
+   // In principle we do not need to forward `strdup`/`strndup` but on some systems these do not use `malloc` internally (but a more primitive call)
++  #if !defined(strdup)
+   mi_decl_export char* strdup(const char* str)             MI_FORWARD1(mi_strdup, str)
++  #endif
+   #if !defined(__APPLE__) || (defined(MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7)
++    #if !defined(strndup)
+   mi_decl_export char* strndup(const char* str, size_t n)  MI_FORWARD2(mi_strndup, str, n)   
++    #endif
+   #endif
+ #endif
+ 
 diff --git a/src/alloc.c b/src/alloc.c
-index 147e110..60103b7 100644
+index 2a2aeb8..990db97 100644
 --- a/src/alloc.c
 +++ b/src/alloc.c
-@@ -882,10 +882,10 @@ but we call `exit` instead (i.e. not returning).
+@@ -433,10 +433,10 @@ but we call `exit` instead (i.e. not returning).
  #ifdef __cplusplus
  #include <new>
  static bool mi_try_new_handler(bool nothrow) {
@@ -30,10 +48,10 @@ index 147e110..60103b7 100644
    #endif
    if (h==NULL) {
 diff --git a/src/prim/unix/prim.c b/src/prim/unix/prim.c
-index 011ffa7..229b30b 100644
+index 8d40536..de94009 100644
 --- a/src/prim/unix/prim.c
 +++ b/src/prim/unix/prim.c
-@@ -653,7 +653,12 @@ void _mi_prim_out_stderr( const char* msg ) {
+@@ -701,7 +701,12 @@ void _mi_prim_out_stderr( const char* msg ) {
  #if !defined(MI_USE_ENVIRON) || (MI_USE_ENVIRON!=0)
  // On Posix systemsr use `environ` to access environment variables
  // even before the C runtime is initialized.
