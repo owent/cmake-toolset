@@ -1,11 +1,12 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index cc085b1..4906225 100644
+index cc085b1..958a4c2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -297,6 +297,13 @@ if(WITH_EXAMPLES_HTTP AND NOT WITH_EXAMPLES)
+@@ -297,6 +297,14 @@ if(WITH_EXAMPLES_HTTP AND NOT WITH_EXAMPLES)
  endif()
  
  find_package(Threads)
++find_package(ZLIB QUIET)
 +find_package(zstd QUIET)
 +find_package(c-ares QUIET)
 +find_package(OpenSSL QUIET)

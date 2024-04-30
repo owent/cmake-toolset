@@ -4,6 +4,7 @@ include_guard(GLOBAL)
 # ######################################################################################################################
 if(NOT DEFINED __COMPILER_OPTION_LOADED)
   include("${CMAKE_CURRENT_LIST_DIR}/modules/ProjectBuildTools.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/RecommendStdVersion.cmake")
 
   include(CheckCCompilerFlag)
   include(CheckCXXSourceCompiles)
@@ -619,7 +620,11 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
 
     # See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "15.0")
+      # Current cmake (3.21.0) do not support cxx23 for AppleClang now
+      set_compiler_option_max_cxx_standard(23)
+      set_compiler_option_max_c_standard(23)
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0")
       # Current cmake (3.21.0) do not support cxx23 for AppleClang now
       set_compiler_option_max_cxx_standard(20)
       set_compiler_option_max_c_standard(11)
