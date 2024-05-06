@@ -73,8 +73,6 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
   endif()
   set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS
-      "--enable-shared=no"
-      "--enable-static=yes"
       "--enable-coredump"
       "--enable-ptrace"
       "--enable-debug-frame"
@@ -85,6 +83,14 @@ if(NOT TARGET Libunwind::libunwind AND NOT Libunwind_FOUND)
       "--disable-minidebuginfo" # This will use liblzma(7-Zip) on system and may cause linking error. We can enable this
                                 # after add liblzma into compression ports
   )
+  project_third_party_check_build_shared_lib("Libunwind" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_USE_SHARED)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_USE_SHARED)
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS "--enable-shared=yes"
+         "--enable-static=no")
+  else()
+    list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS "--enable-shared=no"
+         "--enable-static=yes")
+  endif()
   if(NOT TARGET ZLIB::ZLIB)
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_CONFIGURE_OPTIONS "--disable-zlibdebuginfo")
   endif()
