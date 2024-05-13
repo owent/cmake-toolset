@@ -1516,7 +1516,7 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     set(RPATH_STRING_VALUE)
     set(RPATH_LINK_VALUE)
     foreach(RPATH_ITEM IN LISTS CMAKE_INSTALL_RPATH)
-      string(REPLACE "$" "`$" RPATH_ITEM_AS_VARIABLE "${RPATH_ITEM}")
+      string(REPLACE "$" "\\$" RPATH_ITEM_AS_VARIABLE "${RPATH_ITEM}")
       if(RPATH_STRING_VALUE)
         set(RPATH_STRING_VALUE
             "${RPATH_STRING_VALUE}${ATFRAMEWORK_CMAKE_TOOLSET_HOST_PATH_SEPARATOR}${RPATH_ITEM_AS_VARIABLE}")
@@ -1536,7 +1536,7 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     file(APPEND "${OUTPUT_FILE}" "export RPATH=\"${RPATH_STRING_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     if(RPATH_LINK_VALUE)
       file(APPEND "${OUTPUT_FILE}"
-           "export LDFLAGS=\"\$LDFLAGS -Wl,-rpath-link,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+           "export LDFLAGS=\"\$LDFLAGS -Wl,-rpath,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
   endif()
 
@@ -1696,9 +1696,8 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     endforeach()
     file(APPEND "${OUTPUT_FILE}" "$ENV:RPATH=\"${RPATH_STRING_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     if(RPATH_LINK_VALUE)
-      file(
-        APPEND "${OUTPUT_FILE}"
-        "$ENV:LDFLAGS=\"\$ENV:LDFLAGS -Wl,-rpath-link,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      file(APPEND "${OUTPUT_FILE}"
+           "$ENV:LDFLAGS=\"\$ENV:LDFLAGS -Wl,-rpath,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
   endif()
   if(CMAKE_CROSSCOMPILING AND CMAKE_OSX_SYSROOT)
