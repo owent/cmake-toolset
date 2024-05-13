@@ -88,13 +88,15 @@ function(project_build_tools_sanitizer_try_get_static_link OUTPUT_VAR)
   foreach(TRY_STATIC_LIB ${SANITIZER_TRY_STATIC_LIB})
     set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_BACKUP} ${TRY_STATIC_LIB}")
 
-    unset(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_STATIC_LINK_${SANITIZER_NAME_UPPER} CACHE)
-    check_cxx_source_compiles("int main() { return 0; }"
-                              ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_STATIC_LINK_${SANITIZER_NAME_UPPER})
-    if(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_STATIC_LINK_${SANITIZER_NAME_UPPER})
+    check_cxx_source_compiles("int main() { return 0; }" SANITIZER_TEST_STATIC_LINK_${SANITIZER_NAME_UPPER})
+    if(SANITIZER_TEST_STATIC_LINK_${SANITIZER_NAME_UPPER})
+      unset(SANITIZER_TEST_STATIC_LINK_${SANITIZER_NAME_UPPER} CACHE)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_STATIC_LINK_${SANITIZER_NAME_UPPER}
+          "${TRY_STATIC_LIB}"
+          CACHE INTERNAL "Sanitizer static link flag for ${SANITIZER_NAME}")
       break()
     endif()
-
+    unset(SANITIZER_TEST_STATIC_LINK_${SANITIZER_NAME_UPPER} CACHE)
   endforeach()
 
   cmake_pop_check_state()
