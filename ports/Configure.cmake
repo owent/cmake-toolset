@@ -89,16 +89,45 @@ project_build_tools_sanitizer_get_name(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANIT
                                        ${CMAKE_C_FLAGS})
 if(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER STREQUAL "address")
   set(PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX "-asan")
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    set(ENV{ASAN_OPTIONS}
+        "detect_leaks=0:detect_deadlocks=false:report_globals=0:detect_container_overflow=false:log_path=/dev/null")
+  else()
+    set(ENV{ASAN_OPTIONS} "detect_leaks=0:detect_deadlocks=false:report_globals=0:detect_container_overflow=false")
+  endif()
 elseif(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER STREQUAL "memory")
   set(PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX "-msan")
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    set(ENV{ASAN_OPTIONS}
+        "detect_leaks=0:detect_deadlocks=false:report_globals=0:detect_container_overflow=false:log_path=/dev/null")
+  else()
+    set(ENV{ASAN_OPTIONS} "detect_leaks=0:detect_deadlocks=false:report_globals=0:detect_container_overflow=false")
+  endif()
 elseif(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER STREQUAL "undefined")
   set(PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX "-ubsan")
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    set(ENV{UBSAN_OPTIONS} "log_path=/dev/null")
+  endif()
 elseif(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER STREQUAL "thread")
   set(PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX "-tsan")
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    set(ENV{TSAN_OPTIONS} "report_bugs=0:log_path=/dev/null")
+  else()
+    set(ENV{TSAN_OPTIONS} "report_bugs=0")
+  endif()
 elseif(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER STREQUAL "hwaddress")
   set(PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX "-hwasan")
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    set(ENV{ASAN_OPTIONS}
+        "detect_leaks=0:detect_deadlocks=false:report_globals=0:detect_container_overflow=false:log_path=/dev/null")
+  else()
+    set(ENV{ASAN_OPTIONS} "detect_leaks=0:detect_deadlocks=false:report_globals=0:detect_container_overflow=false")
+  endif()
 elseif(PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER STREQUAL "dataflow")
   set(PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX "-dfsan")
+  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+    set(ENV{DFSAN_OPTIONS} "log_path=/dev/null")
+  endif()
 endif()
 
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK AND PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER)
@@ -106,6 +135,10 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK AND PROJECT_COMPILER_O
                                                     ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS})
   if(PROJECT_COMPILER_OPTIONS_TARGET_SANITIZER_USE_STATIC_LINK)
     add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS
+                                             "${PROJECT_COMPILER_OPTIONS_TARGET_SANITIZER_USE_STATIC_LINK}")
+    add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS
+                                             "${PROJECT_COMPILER_OPTIONS_TARGET_SANITIZER_USE_STATIC_LINK}")
+    add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS
                                              "${PROJECT_COMPILER_OPTIONS_TARGET_SANITIZER_USE_STATIC_LINK}")
   endif()
 endif()
@@ -133,6 +166,10 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK AND PROJECT_COMPILER_O
   if(PROJECT_COMPILER_OPTIONS_HOST_SANITIZER_USE_STATIC_LINK)
     add_compiler_flags_to_inherit_var_unique(COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
                                              "${PROJECT_COMPILER_OPTIONS_HOST_SANITIZER_USE_STATIC_LINK}")
+    add_compiler_flags_to_inherit_var_unique(COMPILER_OPTION_INHERIT_CMAKE_MODULE_LINKER_FLAGS
+                                             "${PROJECT_COMPILER_OPTIONS_TARGET_SANITIZER_USE_STATIC_LINK}")
+    add_compiler_flags_to_inherit_var_unique(COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
+                                             "${PROJECT_COMPILER_OPTIONS_TARGET_SANITIZER_USE_STATIC_LINK}")
   endif()
 endif()
 
