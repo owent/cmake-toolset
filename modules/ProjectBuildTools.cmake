@@ -1571,6 +1571,7 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     if(RPATH_LINK_VALUE)
       file(APPEND "${OUTPUT_FILE}"
            "export LDFLAGS=\"\$LDFLAGS -Wl,-rpath,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      file(APPEND "${OUTPUT_FILE}" "export ORIGIN='\$ORIGIN'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
   endif()
 
@@ -1735,6 +1736,7 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     if(RPATH_LINK_VALUE)
       file(APPEND "${OUTPUT_FILE}"
            "$ENV:LDFLAGS=\"\$ENV:LDFLAGS -Wl,-rpath,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      file(APPEND "${OUTPUT_FILE}" "$ENV:ORIGIN='\$ORIGIN'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
   endif()
   if(CMAKE_CROSSCOMPILING AND CMAKE_OSX_SYSROOT)
