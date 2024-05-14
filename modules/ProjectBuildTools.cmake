@@ -1452,6 +1452,54 @@ function(project_build_tools_patch_default_imported_config)
   endforeach()
 endfunction()
 
+function(project_build_tools_sanitizer_use_static OUTPUT_VARNAME)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_SHARED_LINK)
+    set(${OUTPUT_VARNAME}
+        FALSE
+        PARENT_SCOPE)
+  elseif(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_STATIC_LINK)
+    set(${OUTPUT_VARNAME}
+        TRUE
+        PARENT_SCOPE)
+  else()
+    # GCC DSO implementation do not load sanitizer shared library automatically, so we use static link to support run
+    # executable when building some packages. @see https://github.com/google/sanitizers/wiki/AddressSanitizerAsDso
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      set(${OUTPUT_VARNAME}
+          TRUE
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          FALSE
+          PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
+function(project_build_tools_sanitizer_use_shared OUTPUT_VARNAME)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_SHARED_LINK)
+    set(${OUTPUT_VARNAME}
+        TRUE
+        PARENT_SCOPE)
+  elseif(ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_STATIC_LINK)
+    set(${OUTPUT_VARNAME}
+        FALSE
+        PARENT_SCOPE)
+  else()
+    # GCC DSO implementation do not load sanitizer shared library automatically, so we use static link to support run
+    # executable when building some packages. @see https://github.com/google/sanitizers/wiki/AddressSanitizerAsDso
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      set(${OUTPUT_VARNAME}
+          FALSE
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VARNAME}
+          TRUE
+          PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
 function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
   file(WRITE "${OUTPUT_FILE}" "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   project_make_executable("${OUTPUT_FILE}")
@@ -1524,20 +1572,26 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     )
   endif()
 
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK
-     AND (COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
-          OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
-          OR COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS))
+  if(COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+     OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
+     OR COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS)
 
-    project_build_tools_sanitizer_try_get_static_link(
-      CHECK_SANITIZER_STATIC_LINK ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
-      ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+    project_build_tools_sanitizer_use_static(SANITIZER_USE_STATIC_LINK)
+    if(SANITIZER_USE_STATIC_LINK)
+      project_build_tools_sanitizer_try_get_static_link(
+        CHECK_SANITIZER_LINK_TYPE ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
+        ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+    else()
+      project_build_tools_sanitizer_try_get_shared_link(
+        CHECK_SANITIZER_LINK_TYPE ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
+        ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+    endif()
 
     unset(INHERIT_LDFLAGS_VALUE)
     project_build_tools_combine_space_flags_unique(
       INHERIT_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
       COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS
-      CHECK_SANITIZER_STATIC_LINK)
+      CHECK_SANITIZER_LINK_TYPE)
 
     file(APPEND "${OUTPUT_FILE}"
          "export LDFLAGS=\"\$LDFLAGS ${INHERIT_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
@@ -1690,20 +1744,26 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     )
   endif()
 
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK
-     AND (CMAKE_EXE_LINKER_FLAGS
-          OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
-          OR CMAKE_STATIC_LINKER_FLAGS))
+  if(COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+     OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
+     OR COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS)
 
-    project_build_tools_sanitizer_try_get_static_link(
-      CHECK_SANITIZER_STATIC_LINK ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
-      ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+    project_build_tools_sanitizer_use_static(SANITIZER_USE_STATIC_LINK)
+    if(SANITIZER_USE_STATIC_LINK)
+      project_build_tools_sanitizer_try_get_static_link(
+        CHECK_SANITIZER_LINK_TYPE ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
+        ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+    else()
+      project_build_tools_sanitizer_try_get_shared_link(
+        CHECK_SANITIZER_LINK_TYPE ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
+        ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+    endif()
 
     unset(INHERIT_LDFLAGS_VALUE)
     project_build_tools_combine_space_flags_unique(
       INHERIT_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
       COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS
-      CHECK_SANITIZER_STATIC_LINK)
+      CHECK_SANITIZER_LINK_TYPE)
 
     file(APPEND "${OUTPUT_FILE}"
          "$ENV:LDFLAGS=\"\$ENV:LDFLAGS ${INHERIT_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")

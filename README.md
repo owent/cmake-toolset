@@ -150,7 +150,8 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 34. Variable `COMPILER_OPTIONS_TEST_RTTI` : `TRUE` when toolchain enable runtime type information.
 35. Variable `COMPILER_STRICT_CFLAGS` : flags of all but compatible warnings and turn warning to error.
 36. Variable `COMPILER_STRICT_EXTRA_CFLAGS` : flags of all extra warnings.
-37. Variablle `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK`: Whether try to use static library of sanitizer when builidng third party packages.
+37. Variablle `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_STATIC_LINK`: Whether try to use static library of sanitizer when builidng third party packages.
+38. Variablle `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_SHARED_LINK`: Whether try to use shared library of sanitizer when builidng third party packages.
 
 ### `TargetOption.cmake`
 
