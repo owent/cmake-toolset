@@ -23,55 +23,71 @@ if(NOT PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
   set(PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES 3)
 endif()
 
-macro(project_build_tools_append_space_one_flag_to_var VARNAME)
+function(project_build_tools_append_space_one_flag_to_var VARNAME)
   if(${VARNAME})
-    set(${VARNAME} "${${VARNAME}} ${ARGN}")
+    set(${VARNAME}
+        "${${VARNAME}} ${ARGN}"
+        PARENT_SCOPE)
   else()
-    set(${VARNAME} "${ARGN}")
+    set(${VARNAME}
+        "${ARGN}"
+        PARENT_SCOPE)
   endif()
-endmacro()
+endfunction()
 
-macro(project_build_tools_append_space_one_flag_to_var_unique VARNAME)
+function(project_build_tools_append_space_one_flag_to_var_unique VARNAME)
   if(${VARNAME})
     if(NOT "${${VARNAME}}" STREQUAL "${ARGN}")
       string(FIND "${${VARNAME}}" "${ARGN} " add_compiler_flags_to_var_unique_FIND_POSL)
       string(FIND "${${VARNAME}}" " ${ARGN}" add_compiler_flags_to_var_unique_FIND_POSR)
       if(add_compiler_flags_to_var_unique_FIND_POSL LESS 0 AND add_compiler_flags_to_var_unique_FIND_POSR LESS 0)
-        set(${VARNAME} "${${VARNAME}} ${ARGN}")
+        set(${VARNAME}
+            "${${VARNAME}} ${ARGN}"
+            PARENT_SCOPE)
       endif()
     endif()
   else()
-    set(${VARNAME} "${ARGN}")
+    set(${VARNAME}
+        "${ARGN}"
+        PARENT_SCOPE)
   endif()
-endmacro()
+endfunction()
 
-macro(project_build_tools_append_space_flags_to_var VARNAME)
+function(project_build_tools_append_space_flags_to_var VARNAME)
+  set(FINAL_VALUE "${${VARNAME}}")
   foreach(def ${ARGN})
-    if(${VARNAME})
-      set(${VARNAME} "${${VARNAME}} ${def}")
+    if(FINAL_VALUE)
+      set(FINAL_VALUE "${FINAL_VALUE} ${def}")
     else()
-      set(${VARNAME} ${def})
+      set(FINAL_VALUE "${def}")
     endif()
   endforeach()
-endmacro()
+  set(${VARNAME}
+      "${FINAL_VALUE}"
+      PARENT_SCOPE)
+endfunction()
 
-macro(project_build_tools_append_space_flags_to_var_unique VARNAME)
+function(project_build_tools_append_space_flags_to_var_unique VARNAME)
+  set(FINAL_VALUE "${${VARNAME}}")
   foreach(def ${ARGN})
-    if(${VARNAME})
-      if("${${VARNAME}}" STREQUAL "${def}")
+    if(FINAL_VALUE)
+      if(FINAL_VALUE STREQUAL "${def}")
         break()
       else()
-        string(FIND "${${VARNAME}}" "${def} " add_compiler_flags_to_var_unique_FIND_POSL)
-        string(FIND "${${VARNAME}}" " ${def}" add_compiler_flags_to_var_unique_FIND_POSR)
+        string(FIND "${FINAL_VALUE}" "${def} " add_compiler_flags_to_var_unique_FIND_POSL)
+        string(FIND "${FINAL_VALUE}" " ${def}" add_compiler_flags_to_var_unique_FIND_POSR)
         if(add_compiler_flags_to_var_unique_FIND_POSL LESS 0 AND add_compiler_flags_to_var_unique_FIND_POSR LESS 0)
-          set(${VARNAME} "${${VARNAME}} ${def}")
+          set(FINAL_VALUE "${FINAL_VALUE} ${def}")
         endif()
       endif()
     else()
-      set(${VARNAME} "${def}")
+      set(FINAL_VALUE "${def}")
     endif()
   endforeach()
-endmacro()
+  set(${VARNAME}
+      "${FINAL_VALUE}"
+      PARENT_SCOPE)
+endfunction()
 
 macro(project_build_tools_append_cmake_inherit_policy OUTVAR)
   # Policy
@@ -196,6 +212,21 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_FIND_ROOT_FLAGS)
   unset(project_build_tools_append_cmake_inherit_options_VARS)
 endmacro()
+
+function(project_build_tools_combine_space_flags_unique OUTPUT_VARNAME)
+  unset(FINAL_VALUE)
+  foreach(SOURCE_VARNAME ${ARGN})
+    if(${SOURCE_VARNAME})
+      set(FINAL_VALUE "${FINAL_VALUE} ${${SOURCE_VARNAME}}")
+    endif()
+  endforeach()
+  separate_arguments(FINAL_VALUE)
+  list(REMOVE_DUPLICATES FINAL_VALUE)
+  string(REPLACE ";" " " FINAL_VALUE "${FINAL_VALUE}")
+  set(${OUTPUT_VARNAME}
+      "${FINAL_VALUE}"
+      PARENT_SCOPE)
+endfunction()
 
 macro(project_build_tools_append_cmake_host_options OUTVAR)
   cmake_parse_arguments(
@@ -1493,21 +1524,23 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
     )
   endif()
 
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK AND (COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
-                                                                 OR COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS))
-    file(
-      APPEND "${OUTPUT_FILE}"
-      "export LDFLAGS=\"\$LDFLAGS ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK
+     AND (COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+          OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
+          OR COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS))
 
     project_build_tools_sanitizer_try_get_static_link(
       CHECK_SANITIZER_STATIC_LINK ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
-      ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+      ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
 
-    if(CHECK_SANITIZER_STATIC_LINK)
-      file(APPEND "${OUTPUT_FILE}"
-           "export LDFLAGS=\"\$LDFLAGS ${CHECK_SANITIZER_STATIC_LINK}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-    endif()
+    unset(INHERIT_LDFLAGS_VALUE)
+    project_build_tools_combine_space_flags_unique(
+      INHERIT_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+      COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS
+      CHECK_SANITIZER_STATIC_LINK)
+
+    file(APPEND "${OUTPUT_FILE}"
+         "export LDFLAGS=\"\$LDFLAGS ${INHERIT_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_RANLIB)
@@ -1656,20 +1689,23 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     )
   endif()
 
-  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK AND (CMAKE_EXE_LINKER_FLAGS OR CMAKE_STATIC_LINKER_FLAGS))
-    file(
-      APPEND "${OUTPUT_FILE}"
-      "$ENV:LDFLAGS=\"\$ENV:LDFLAGS ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_STATIC_LINKER_FLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}"
-    )
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_NO_STATIC_LINK
+     AND (CMAKE_EXE_LINKER_FLAGS
+          OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
+          OR CMAKE_STATIC_LINKER_FLAGS))
 
     project_build_tools_sanitizer_try_get_static_link(
       CHECK_SANITIZER_STATIC_LINK ${COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS}
-      ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
+      ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
 
-    if(CHECK_SANITIZER_STATIC_LINK)
-      file(APPEND "${OUTPUT_FILE}"
-           "$ENV:LDFLAGS=\"\$ENV:LDFLAGS ${CHECK_SANITIZER_STATIC_LINK}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-    endif()
+    unset(INHERIT_LDFLAGS_VALUE)
+    project_build_tools_combine_space_flags_unique(
+      INHERIT_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+      COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS
+      CHECK_SANITIZER_STATIC_LINK)
+
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:LDFLAGS=\"\$ENV:LDFLAGS ${INHERIT_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_RANLIB)
