@@ -111,7 +111,9 @@ if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
   if(COMPILER_OPTIONS_TEST_EXCEPTION)
     project_third_party_include_port("jemalloc/jemalloc.cmake")
   endif()
-  if(NOT WIN32 AND NOT MINGW)
+  if(NOT WIN32
+     AND NOT MINGW
+     AND NOT PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER)
     #[[
     # There is a BUG in gcc 4.6-4.8 and finxed in gcc 4.9
     #   @see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58016

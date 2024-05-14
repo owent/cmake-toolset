@@ -559,7 +559,7 @@ macro(FindConfigurePackage)
         execute_process(
           COMMAND
             "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" ${FindConfigurePackage_MAKE_FLAGS}
+            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" "O=\$\$O" ${FindConfigurePackage_MAKE_FLAGS}
             ${FindConfigurePackage_INSTALL_TARGET} ${FindConfigurePackageCMakeBuildParallelFlags}
           WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
@@ -568,7 +568,7 @@ macro(FindConfigurePackage)
           execute_process(
             COMMAND
               "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
-              "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" ${FindConfigurePackage_MAKE_FLAGS}
+              "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" "O=\$\$O" ${FindConfigurePackage_MAKE_FLAGS}
               ${FindConfigurePackage_INSTALL_TARGET}
             WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
                               ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS}
