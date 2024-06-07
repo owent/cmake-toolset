@@ -1209,4 +1209,15 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
     endif()
   endforeach()
   ]]
+
+  # Apply compiler and system options
+  foreach(COMPILER_OPTION_TRY_APPLY_TOOLCHAIN_OPTION
+          "compiler/${CMAKE_CXX_COMPILER_ID}" "platform/${CMAKE_SYSTEM_NAME}"
+          "platform/${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+    string(TOLOWER "${CMAKE_CURRENT_LIST_DIR}/modules/toolchain/${COMPILER_OPTION_TRY_APPLY_TOOLCHAIN_OPTION}.cmake"
+                   COMPILER_OPTION_TRY_APPLY_TOOLCHAIN_OPTION_FILE)
+    if(EXISTS "${COMPILER_OPTION_TRY_APPLY_TOOLCHAIN_OPTION_FILE}")
+      include("${COMPILER_OPTION_TRY_APPLY_TOOLCHAIN_OPTION_FILE}")
+    endif()
+  endforeach()
 endif()
