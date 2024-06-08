@@ -224,7 +224,7 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
   Write-Output $args
   New-Item -Path "test/build_jobs_dir" -ItemType "directory" -Force
   Set-Location "test/build_jobs_dir"
-  & cmake ../standalone-upb -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
+  & cmake ../upb -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
     "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON"  `
     "-DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY" "-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY" `
     "-DVS_GLOBAL_VcpkgEnabled=OFF" $ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS

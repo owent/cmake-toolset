@@ -192,7 +192,7 @@ elif [[ "$1" == "gcc.standalone-upb.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
-  cmake ../standalone-upb -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
+  cmake ../upb -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
   if [[ $CMAKE_CONFIGURE_EXIT_CODE -ne 0 ]]; then
     if [[ -e "CMakeFiles/CMakeConfigureLog.yaml" ]]; then
