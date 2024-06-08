@@ -326,7 +326,7 @@ elif [[ "$1" == "msvc.static.test" ]]; then
   cd test/build_jobs_dir
   echo "<Project>
    <PropertyGroup>
-      <UseStructuredOutput>false</OutDir>
+      <UseStructuredOutput>false</UseStructuredOutput>
    </PropertyGroup>
 </Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
@@ -355,7 +355,7 @@ elif [[ "$1" == "msvc.shared.test" ]]; then
   cd test/build_jobs_dir
   echo "<Project>
    <PropertyGroup>
-      <UseStructuredOutput>false</OutDir>
+      <UseStructuredOutput>false</UseStructuredOutput>
    </PropertyGroup>
 </Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
@@ -386,7 +386,7 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   mkdir -p test/build_jobs_dir
   echo "<Project>
    <PropertyGroup>
-      <UseStructuredOutput>false</OutDir>
+      <UseStructuredOutput>false</UseStructuredOutput>
    </PropertyGroup>
 </Project>" > Directory.Build.props
   cd test/build_jobs_dir

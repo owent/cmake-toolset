@@ -95,7 +95,7 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   Set-Location "test/build_jobs_dir"
   Write-Output "<Project>
   <PropertyGroup>
-     <UseStructuredOutput>false</OutDir>
+     <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
@@ -131,7 +131,7 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
   Set-Location "test/build_jobs_dir"
   Write-Output "<Project>
   <PropertyGroup>
-     <UseStructuredOutput>false</OutDir>
+     <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
@@ -168,7 +168,7 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
   Set-Location "test/build_jobs_dir"
   Write-Output "<Project>
   <PropertyGroup>
-     <UseStructuredOutput>false</OutDir>
+     <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON" "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
@@ -204,7 +204,7 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   Set-Location "test/build_jobs_dir"
   Write-Output "<Project>
   <PropertyGroup>
-     <UseStructuredOutput>false</OutDir>
+     <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DBUILD_SHARED_LIBS=ON" "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE"  `
@@ -246,7 +246,7 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
   Set-Location "test/build_jobs_dir"
   Write-Output "<Project>
   <PropertyGroup>
-     <UseStructuredOutput>false</OutDir>
+     <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
   & cmake ../upb -G "$Env:CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" `
@@ -276,7 +276,7 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
   Set-Location -Verbose "test/build_jobs_dir"
   Write-Output "<Project>
   <PropertyGroup>
-     <UseStructuredOutput>false</OutDir>
+     <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
