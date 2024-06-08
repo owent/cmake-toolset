@@ -88,10 +88,10 @@ index bce4b7d..e9dff10 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index bd95917..d9bb005 100755
+index bd95917..985a845 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
-@@ -43,9 +43,60 @@ from __future__ import print_function
+@@ -43,9 +43,66 @@ from __future__ import print_function
  import sys
  import textwrap
  import os
@@ -105,7 +105,7 @@ index bd95917..d9bb005 100755
 +_block_targets = ["libupb.so", "libupb_generator.so", "conformance_upb", "conformance_upb_dynamic_minitable", "upbdev", "protoc-gen-upbdev"]
 +_special_targets_mapping = {
 +  "//:protobuf" : ["protobuf::libprotobuf"],
-+  "//src/google/protobuf/compiler:code_generator" : ["protobuf::libprotoc", "protobuf::libprotobuf"],
++  "//src/google/protobuf" : ["protobuf::libprotobuf"],
 +  "@utf8_range": ["utf8_range"],
 +  "//third_party/utf8_range": ["utf8_range"],
 +  "@lua//:liblua": ["lua::liblua"],
@@ -124,6 +124,12 @@ index bd95917..d9bb005 100755
 +    return
 +  if dep in _special_targets_mapping:
 +    output += _special_targets_mapping[dep]
++    return
++  if dep.startswith("//src/google/protobuf/compiler/") or dep.startswith("//src/google/protobuf/compiler:"):
++    output += ["protobuf::libprotoc", "protobuf::libprotobuf"]
++    return
++  if dep.startswith("//src/google/protobuf/") or dep.startswith("//src/google/protobuf:"):
++    output += ["protobuf::libprotobuf"]
 +    return
 +  if dep.startswith("@com_google_absl//"):
 +    p = dep.rfind(":")
@@ -155,7 +161,7 @@ index bd95917..d9bb005 100755
  
  def IsSourceFile(name):
    return name.endswith(".c") or name.endswith(".cc")
-@@ -56,24 +107,64 @@ add_library(%(name)s %(type)s
+@@ -56,24 +113,64 @@ add_library(%(name)s %(type)s
      %(sources)s
  )
  target_include_directories(%(name)s %(keyword)s
@@ -226,7 +232,7 @@ index bd95917..d9bb005 100755
      )
  
    def load(self, *args):
-@@ -82,9 +173,7 @@ class BuildFileFunctions(object):
+@@ -82,9 +179,7 @@ class BuildFileFunctions(object):
    def cc_library(self, **kwargs):
      if kwargs["name"].endswith("amalgamation"):
        return
@@ -237,7 +243,7 @@ index bd95917..d9bb005 100755
        return
      if "testonly" in kwargs:
        return
-@@ -95,33 +184,89 @@ class BuildFileFunctions(object):
+@@ -95,33 +190,89 @@ class BuildFileFunctions(object):
      ]
      for file in files:
        if os.path.basename(file) in pregenerated_files:
@@ -333,7 +339,7 @@ index bd95917..d9bb005 100755
  
    def cc_test(self, **kwargs):
      # Disable this until we properly support upb_proto_library().
-@@ -229,24 +374,341 @@ class BuildFileFunctions(object):
+@@ -229,24 +380,341 @@ class BuildFileFunctions(object):
    def bool_flag(self, **kwargs):
      pass
  
@@ -678,11 +684,10 @@ index bd95917..d9bb005 100755
      }
  
    template = textwrap.dedent("""\
-@@ -256,6 +718,23 @@ class Converter(object):
- 
+@@ -257,6 +725,23 @@ class Converter(object):
      project(upb)
      set(CMAKE_C_STANDARD 99)
-+                             
+ 
 +    set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 +    if(CMAKE_SOURCE_DIR STREQUAL upb_SOURCE_DIR)
 +      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
@@ -699,10 +704,11 @@ index bd95917..d9bb005 100755
 +    else()
 +      option(UPB_ENABLE_CODEGEN "Build codegens plugins of upb" ON)
 +    endif()
- 
++
      # Prevent CMake from setting -rdynamic on Linux (!!).
      SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-@@ -291,10 +770,18 @@ class Converter(object):
+     SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+@@ -291,10 +776,18 @@ class Converter(object):
        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
      endif()
  
@@ -724,7 +730,7 @@ index bd95917..d9bb005 100755
        else()
          include(FetchContent)
          FetchContent_Declare(
-@@ -316,10 +803,128 @@ class Converter(object):
+@@ -316,10 +809,128 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -853,7 +859,7 @@ index bd95917..d9bb005 100755
    """)
  
  data = {}
-@@ -338,7 +943,13 @@ globs = GetDict(converter)
+@@ -338,7 +949,13 @@ globs = GetDict(converter)
  
  # We take the BUILD path as a command-line argument to ensure that we can find
  # it regardless of how exactly Bazel was invoked.
