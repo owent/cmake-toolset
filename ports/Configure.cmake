@@ -630,6 +630,44 @@ if(NOT project_third_party_get_build_dir_SELECT_BASE STREQUAL project_third_part
   project_third_party_cleanup_old_build_tree("${project_third_party_get_build_dir_SELECT_BASE}")
 endif()
 
+if(MSVC AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR
+     AND NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}/Directory.Build.props")
+    file(
+      WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}/Directory.Build.props"
+      "<Project>
+  <PropertyGroup>
+     <UseStructuredOutput>false</OutDir>
+  </PropertyGroup>
+</Project>")
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR
+     AND NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/Directory.Build.props")
+    file(
+      WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/Directory.Build.props"
+      "<Project>
+<PropertyGroup>
+  <UseStructuredOutput>false</OutDir>
+</PropertyGroup>
+</Project>")
+  endif()
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR
+     AND NOT
+         EXISTS
+         "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/Directory.Build.props"
+  )
+    file(
+      WRITE
+      "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/Directory.Build.props"
+      "<Project>
+<PropertyGroup>
+<UseStructuredOutput>false</OutDir>
+</PropertyGroup>
+</Project>")
+  endif()
+endif()
+
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)
   if(CMAKE_HOST_WIN32 OR CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     if(NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")

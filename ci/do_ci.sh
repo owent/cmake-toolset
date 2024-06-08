@@ -324,6 +324,11 @@ elif [[ "$1" == "msvc.static.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
+  echo "<Project>
+   <PropertyGroup>
+      <UseStructuredOutput>false</OutDir>
+   </PropertyGroup>
+</Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"
   fi
@@ -348,6 +353,11 @@ elif [[ "$1" == "msvc.shared.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
+  echo "<Project>
+   <PropertyGroup>
+      <UseStructuredOutput>false</OutDir>
+   </PropertyGroup>
+</Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"
   fi
@@ -374,6 +384,11 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   # benchmark 1.7.0 has linking problems
   vcpkg install --triplet=x64-windows-static-md fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest civetweb prometheus-cpp mimalloc
   mkdir -p test/build_jobs_dir
+  echo "<Project>
+   <PropertyGroup>
+      <UseStructuredOutput>false</OutDir>
+   </PropertyGroup>
+</Project>" > Directory.Build.props
   cd test/build_jobs_dir
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"
