@@ -30,7 +30,7 @@ if(NOT project_third_party_get_build_dir_HASH)
   endif()
   string(SHA256 project_third_party_get_build_dir_HASH_PROJECT "${PROJECT_SOURCE_DIR}")
 
-  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 8
+  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 7
                    project_third_party_get_build_dir_HASH_TOOLSET)
   string(SUBSTRING "${project_third_party_get_build_dir_HASH_PROJECT}" 0 5
                    project_third_party_get_build_dir_HASH_PROJECT)
