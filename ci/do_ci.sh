@@ -6,6 +6,7 @@ set -ex
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
 
 if [[ "x$CI_BUILD_CONFIGURE_TYPE" == "x" ]]; then
   export CI_BUILD_CONFIGURE_TYPE="Release"
