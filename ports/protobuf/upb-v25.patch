@@ -1,5 +1,5 @@
 diff --git a/lua/def.c b/lua/def.c
-index 9affe52c1..b7692079f 100644
+index 9affe52..b769207 100644
 --- a/lua/def.c
 +++ b/lua/def.c
 @@ -620,7 +620,11 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
@@ -39,7 +39,7 @@ index 9affe52c1..b7692079f 100644
    lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
    return 1;
 diff --git a/lua/upb.c b/lua/upb.c
-index 4500fb4e7..ad2ca3101 100644
+index 4500fb4..ad2ca31 100644
 --- a/lua/upb.c
 +++ b/lua/upb.c
 @@ -64,11 +64,13 @@
@@ -57,7 +57,7 @@ index 4500fb4e7..ad2ca3101 100644
  /* Utility functions **********************************************************/
  
 diff --git a/lua/upbc.cc b/lua/upbc.cc
-index 4a274f22a..27dba82f9 100644
+index 4a274f2..27dba82 100644
 --- a/lua/upbc.cc
 +++ b/lua/upbc.cc
 @@ -84,7 +84,7 @@ static void PrintString(int max_cols, absl::string_view* str,
@@ -70,7 +70,7 @@ index 4a274f22a..27dba82f9 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index d1a6bb2ee..17d15f826 100755
+index d1a6bb2..b42153f 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,60 @@ from __future__ import print_function
@@ -148,7 +148,7 @@ index d1a6bb2ee..17d15f826 100755
 +    $<INSTALL_INTERFACE:include>
  )
 +if(NOT UPB_ENABLE_CODEGEN)
-+  target_include_directories(%(name)s %(keyword)s
++  target_include_directories(%(name)s BEFORE %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
 +endif()
@@ -163,7 +163,7 @@ index d1a6bb2ee..17d15f826 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +)
 +if(NOT UPB_ENABLE_CODEGEN)
-+  target_include_directories(%(name)s %(keyword)s
++  target_include_directories(%(name)s BEFORE %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
 +endif()
@@ -352,8 +352,8 @@ index d1a6bb2ee..17d15f826 100755
 +    self.converter.toplevel += "target_include_directories({0}\n".format(self.target_prefix + kwargs["name"] + _stages[0])
 +    self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../" + "{0}/stage0>\")\n".format(base_dir)
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[0])
-+    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
-+    self.converter.toplevel += "  upb_mini_table)\n".format(self.target_prefix + kwargs["name"] + _stages[0])
++    self.converter.toplevel += "  upb_mini_table\n"
++    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me)\n"
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[0], "deps")
 +
 +    # Stage1
@@ -402,8 +402,8 @@ index d1a6bb2ee..17d15f826 100755
 +    self.converter.toplevel += "target_include_directories({0}\n".format(self.target_prefix + kwargs["name"] + _stages[1])
 +    self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:{0}>\")\n".format(stage1_generated_dir)
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[1])
-+    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
 +    self.converter.toplevel += "  " + self.target_prefix + kwargs["name"] + "_minitable" + _stages[1] + "\n"
++    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
 +    self.converter.toplevel += ")\n".format(self.target_prefix + kwargs["name"] + _stages[1])
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[1], "deps")
 +
@@ -674,7 +674,7 @@ index d1a6bb2ee..17d15f826 100755
      # Prevent CMake from setting -rdynamic on Linux (!!).
      SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
      SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-@@ -291,7 +760,15 @@ class Converter(object):
+@@ -291,12 +760,20 @@ class Converter(object):
        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
      endif()
  
@@ -683,14 +683,30 @@ index d1a6bb2ee..17d15f826 100755
 +    if(NOT TARGET utf8_range AND TARGET utf8_range::utf8_range)
 +      add_library(utf8_range ALIAS utf8_range::utf8_range)
 +      if(EXISTS "${utf8_range_DIR}/../../include/utf8_range.h")
-+        include_directories("${utf8_range_DIR}/../../include/")
++        include_directories(AFTER SYSTEM "${utf8_range_DIR}/../../include/")
 +      elseif(EXISTS "${utf8_range_DIR}/../../../include/utf8_range.h")
-+        include_directories("${utf8_range_DIR}/../../../include/")
++        include_directories(AFTER SYSTEM "${utf8_range_DIR}/../../../include/")
 +      endif()
 +    elseif(NOT TARGET utf8_range)
        if(EXISTS ../../external/utf8_range)
          # utf8_range is already installed
-         include_directories(../external/utf8_range)
+-        include_directories(../external/utf8_range)
++        include_directories(AFTER SYSTEM ../external/utf8_range)
+       elseif(EXISTS ../../utf8_range)
+-        include_directories(../../utf8_range)
++        include_directories(AFTER SYSTEM ../../utf8_range)
+       else()
+         include(FetchContent)
+         FetchContent_Declare(
+@@ -307,7 +784,7 @@ class Converter(object):
+         FetchContent_GetProperties(utf8_range)
+         if(NOT utf8_range_POPULATED)
+           FetchContent_Populate(utf8_range)
+-          include_directories(${utf8_range_SOURCE_DIR})
++          include_directories(AFTER SYSTEM ${utf8_range_SOURCE_DIR})
+         endif()
+       endif()
+     endif()
 @@ -318,10 +795,130 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
@@ -838,7 +854,7 @@ index d1a6bb2ee..17d15f826 100755
  with open(sys.argv[2], "w") as f:
    f.write(converter.convert())
 diff --git a/upb/text/encode.c b/upb/text/encode.c
-index 6d26faca0..aa6c3f104 100644
+index 6d26fac..aa6c3f1 100644
 --- a/upb/text/encode.c
 +++ b/upb/text/encode.c
 @@ -288,7 +288,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {

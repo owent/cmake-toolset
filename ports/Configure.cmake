@@ -30,7 +30,7 @@ if(NOT project_third_party_get_build_dir_HASH)
   endif()
   string(SHA256 project_third_party_get_build_dir_HASH_PROJECT "${PROJECT_SOURCE_DIR}")
 
-  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 8
+  string(SUBSTRING "${project_third_party_get_build_dir_HASH_TOOLSET}" 0 7
                    project_third_party_get_build_dir_HASH_TOOLSET)
   string(SUBSTRING "${project_third_party_get_build_dir_HASH_PROJECT}" 0 5
                    project_third_party_get_build_dir_HASH_PROJECT)
@@ -69,18 +69,18 @@ message(STATUS "cmake-toolset: ATFRAMEWORK_CMAKE_TOOLSET_GIT_COMMIT_HASH=${ATFRA
 if(NOT PROJECT_THIRD_PARTY_PACKAGE_DIR AND PROJECT_3RD_PARTY_PACKAGE_DIR)
   set(PROJECT_THIRD_PARTY_PACKAGE_DIR
       "${PROJECT_3RD_PARTY_PACKAGE_DIR}"
-      CACHE PATH "Where to store packages for third party packages")
+      CACHE PATH "Where to store packages for third party ports")
 elseif(NOT PROJECT_THIRD_PARTY_PACKAGE_DIR)
   if(WIN32
      AND NOT MINGW
      AND NOT CYGWIN)
     set(PROJECT_THIRD_PARTY_PACKAGE_DIR
-        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/packages"
-        CACHE PATH "Where to store packages for third party packages")
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/p"
+        CACHE PATH "Where to store packages for third party ports")
   else()
     set(PROJECT_THIRD_PARTY_PACKAGE_DIR
         "${PROJECT_SOURCE_DIR}/third_party/packages"
-        CACHE PATH "Where to store packages for third party packages")
+        CACHE PATH "Where to store packages for third party ports")
   endif()
 endif()
 
@@ -201,11 +201,11 @@ endif()
 if(NOT PROJECT_THIRD_PARTY_INSTALL_DIR AND PROJECT_3RD_PARTY_INSTALL_DIR)
   set(PROJECT_THIRD_PARTY_INSTALL_DIR
       "${PROJECT_3RD_PARTY_INSTALL_DIR}"
-      CACHE PATH "Where to install packages for third party packages")
+      CACHE PATH "Where to install packages for third party ports")
 elseif(NOT PROJECT_THIRD_PARTY_INSTALL_DIR)
   set(PROJECT_THIRD_PARTY_INSTALL_DIR
       "${PROJECT_SOURCE_DIR}/third_party/install/${PROJECT_PREBUILT_PLATFORM_NAME}${PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX}"
-      CACHE PATH "Where to install packages for third party packages")
+      CACHE PATH "Where to install packages for third party ports")
 endif()
 if(NOT PROJECT_THIRD_PARTY_HOST_INSTALL_DIR)
   set(PROJECT_THIRD_PARTY_HOST_INSTALL_DIR
@@ -556,8 +556,9 @@ function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION
     WIN32
     AND NOT MINGW
     AND NOT CYGWIN)
+    string(TOLOWER "win-${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}" USE_SHORT_PREBUILT_NAME)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/build/${PORT_NAME}/${PROJECT_PREBUILT_PLATFORM_NAME}${PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX}"
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/b/${PORT_NAME}/${USE_SHORT_PREBUILT_NAME}"
         PARENT_SCOPE)
   else()
     set(${OUTPUT_VARNAME}
@@ -586,8 +587,9 @@ function(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VE
     WIN32
     AND NOT MINGW
     AND NOT CYGWIN)
+    string(TOLOWER "win-${CMAKE_HOST_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}" USE_SHORT_PREBUILT_NAME)
     set(${OUTPUT_VARNAME}
-        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/build/${PORT_NAME}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}${PROJECT_THIRD_PARTY_HOST_INSTALL_DEFAULT_SUFFIX}"
+        "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/b/${PORT_NAME}/${USE_SHORT_PREBUILT_NAME}"
         PARENT_SCOPE)
   else()
     get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_BASE_DIR "${CMAKE_BINARY_DIR}" DIRECTORY)
@@ -628,6 +630,44 @@ endfunction()
 project_third_party_cleanup_old_build_tree("${project_third_party_get_build_dir_USER_BASE}")
 if(NOT project_third_party_get_build_dir_SELECT_BASE STREQUAL project_third_party_get_build_dir_USER_BASE)
   project_third_party_cleanup_old_build_tree("${project_third_party_get_build_dir_SELECT_BASE}")
+endif()
+
+if(MSVC AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR
+     AND NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}/Directory.Build.props")
+    file(
+      WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR}/Directory.Build.props"
+      "<Project>
+  <PropertyGroup>
+     <UseStructuredOutput>false</UseStructuredOutput>
+  </PropertyGroup>
+</Project>")
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR
+     AND NOT EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/Directory.Build.props")
+    file(
+      WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/Directory.Build.props"
+      "<Project>
+<PropertyGroup>
+  <UseStructuredOutput>false</UseStructuredOutput>
+</PropertyGroup>
+</Project>")
+  endif()
+
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR
+     AND NOT
+         EXISTS
+         "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/Directory.Build.props"
+  )
+    file(
+      WRITE
+      "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/Directory.Build.props"
+      "<Project>
+<PropertyGroup>
+<UseStructuredOutput>false</UseStructuredOutput>
+</PropertyGroup>
+</Project>")
+  endif()
 endif()
 
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_BASH)

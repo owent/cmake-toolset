@@ -6,6 +6,7 @@ set -ex
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
 
 if [[ "x$CI_BUILD_CONFIGURE_TYPE" == "x" ]]; then
   export CI_BUILD_CONFIGURE_TYPE="Release"
@@ -192,7 +193,7 @@ elif [[ "$1" == "gcc.standalone-upb.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
-  cmake ../standalone-upb -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
+  cmake ../upb -DBUILD_SHARED_LIBS=OFF -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
   if [[ $CMAKE_CONFIGURE_EXIT_CODE -ne 0 ]]; then
     if [[ -e "CMakeFiles/CMakeConfigureLog.yaml" ]]; then
@@ -324,6 +325,11 @@ elif [[ "$1" == "msvc.static.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
+  echo "<Project>
+   <PropertyGroup>
+      <UseStructuredOutput>false</UseStructuredOutput>
+   </PropertyGroup>
+</Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"
   fi
@@ -348,6 +354,11 @@ elif [[ "$1" == "msvc.shared.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
+  echo "<Project>
+   <PropertyGroup>
+      <UseStructuredOutput>false</UseStructuredOutput>
+   </PropertyGroup>
+</Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"
   fi
@@ -374,6 +385,11 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   # benchmark 1.7.0 has linking problems
   vcpkg install --triplet=x64-windows-static-md fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest civetweb prometheus-cpp mimalloc
   mkdir -p test/build_jobs_dir
+  echo "<Project>
+   <PropertyGroup>
+      <UseStructuredOutput>false</UseStructuredOutput>
+   </PropertyGroup>
+</Project>" > Directory.Build.props
   cd test/build_jobs_dir
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"

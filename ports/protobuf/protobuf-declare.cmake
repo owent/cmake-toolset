@@ -10,7 +10,7 @@ endif()
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION)
     if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
-      # upb generator in protobuf v26.0 will crash, and so we do not use it
+      # upb generator in protobuf v26 will crash, and so we do not use it
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ENABLE_STANDALONE_UPB)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v25.2")
       else()
