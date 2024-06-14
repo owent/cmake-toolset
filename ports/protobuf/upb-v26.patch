@@ -88,7 +88,7 @@ index bce4b7d..e9dff10 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index bd95917..985a845 100755
+index bd95917..4e1f4a5 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,66 @@ from __future__ import print_function
@@ -171,7 +171,7 @@ index bd95917..985a845 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +    $<INSTALL_INTERFACE:include>
 +)
-+if(NOT UPB_ENABLE_CODEGEN)
++if("%(name)s" MATCHES "_stage0$")
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
@@ -186,7 +186,7 @@ index bd95917..985a845 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
  )
-+if(NOT UPB_ENABLE_CODEGEN)
++if("%(name)s" MATCHES "_stage0$")
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )

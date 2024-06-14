@@ -1,5 +1,5 @@
 diff --git a/lua/def.c b/lua/def.c
-index 9affe52c1..b7692079f 100644
+index 9affe52..b769207 100644
 --- a/lua/def.c
 +++ b/lua/def.c
 @@ -620,7 +620,11 @@ const upb_FileDef* lupb_FileDef_check(lua_State* L, int narg) {
@@ -39,7 +39,7 @@ index 9affe52c1..b7692079f 100644
    lupb_wrapper_pushwrapper(L, 1, m, LUPB_MSGDEF);
    return 1;
 diff --git a/lua/upb.c b/lua/upb.c
-index 4500fb4e7..ad2ca3101 100644
+index 4500fb4..ad2ca31 100644
 --- a/lua/upb.c
 +++ b/lua/upb.c
 @@ -64,11 +64,13 @@
@@ -57,7 +57,7 @@ index 4500fb4e7..ad2ca3101 100644
  /* Utility functions **********************************************************/
  
 diff --git a/lua/upbc.cc b/lua/upbc.cc
-index 4a274f22a..27dba82f9 100644
+index 4a274f2..27dba82 100644
 --- a/lua/upbc.cc
 +++ b/lua/upbc.cc
 @@ -84,7 +84,7 @@ static void PrintString(int max_cols, absl::string_view* str,
@@ -70,7 +70,7 @@ index 4a274f22a..27dba82f9 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index d1a6bb2ee..17d15f826 100755
+index d1a6bb2..5d1f6aa 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,60 @@ from __future__ import print_function
@@ -147,7 +147,7 @@ index d1a6bb2ee..17d15f826 100755
      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +    $<INSTALL_INTERFACE:include>
  )
-+if(NOT UPB_ENABLE_CODEGEN)
++if("%(name)s" MATCHES "_stage0$")
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
@@ -162,7 +162,7 @@ index d1a6bb2ee..17d15f826 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +)
-+if(NOT UPB_ENABLE_CODEGEN)
++if("%(name)s" MATCHES "_stage0$")
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
@@ -838,7 +838,7 @@ index d1a6bb2ee..17d15f826 100755
  with open(sys.argv[2], "w") as f:
    f.write(converter.convert())
 diff --git a/upb/text/encode.c b/upb/text/encode.c
-index 6d26faca0..aa6c3f104 100644
+index 6d26fac..aa6c3f1 100644
 --- a/upb/text/encode.c
 +++ b/upb/text/encode.c
 @@ -288,7 +288,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
