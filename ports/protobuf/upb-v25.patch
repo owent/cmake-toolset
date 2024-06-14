@@ -147,7 +147,7 @@ index d1a6bb2..5d1f6aa 100755
      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +    $<INSTALL_INTERFACE:include>
  )
-+if("%(name)s" MATCHES "_stage0$")
++if(NOT UPB_ENABLE_CODEGEN OR "%(name)s" MATCHES "_stage0$")
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
@@ -162,7 +162,7 @@ index d1a6bb2..5d1f6aa 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +)
-+if("%(name)s" MATCHES "_stage0$")
++if(NOT UPB_ENABLE_CODEGEN OR "%(name)s" MATCHES "_stage0$")
 +  target_include_directories(%(name)s %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
