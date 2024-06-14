@@ -88,7 +88,7 @@ index bce4b7d..e9dff10 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index bd95917..4e1f4a5 100755
+index bd95917..b1931f2 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,66 @@ from __future__ import print_function
@@ -171,8 +171,8 @@ index bd95917..4e1f4a5 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +    $<INSTALL_INTERFACE:include>
 +)
-+if(NOT UPB_ENABLE_CODEGEN OR "%(name)s" MATCHES "_stage0$")
-+  target_include_directories(%(name)s %(keyword)s
++if(NOT UPB_ENABLE_CODEGEN)
++  target_include_directories(%(name)s BEFORE %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
 +endif()
@@ -186,8 +186,8 @@ index bd95917..4e1f4a5 100755
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
      $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
  )
-+if(NOT UPB_ENABLE_CODEGEN OR "%(name)s" MATCHES "_stage0$")
-+  target_include_directories(%(name)s %(keyword)s
++if(NOT UPB_ENABLE_CODEGEN)
++  target_include_directories(%(name)s BEFORE %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +  )
 +endif()
@@ -388,8 +388,8 @@ index bd95917..4e1f4a5 100755
 +    self.converter.toplevel += "target_include_directories({0}\n".format(self.target_prefix + kwargs["name"] + _stages[0])
 +    self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../" + "{0}/stage0>\")\n".format(base_dir)
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[0])
-+    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
-+    self.converter.toplevel += "  upb_mini_table)\n".format(self.target_prefix + kwargs["name"] + _stages[0])
++    self.converter.toplevel += "  upb_mini_table\n"
++    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me)\n"
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[0], "deps")
 +
 +    # Stage1
@@ -438,8 +438,8 @@ index bd95917..4e1f4a5 100755
 +    self.converter.toplevel += "target_include_directories({0}\n".format(self.target_prefix + kwargs["name"] + _stages[1])
 +    self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:{0}>\")\n".format(stage1_generated_dir)
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[1])
-+    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
 +    self.converter.toplevel += "  " + self.target_prefix + kwargs["name"] + "_minitable" + _stages[1] + "\n"
++    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me\n"
 +    self.converter.toplevel += ")\n".format(self.target_prefix + kwargs["name"] + _stages[1])
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[1], "deps")
 +
@@ -718,18 +718,27 @@ index bd95917..4e1f4a5 100755
 +    if(NOT TARGET utf8_range AND TARGET utf8_range::utf8_range)
 +      add_library(utf8_range ALIAS utf8_range::utf8_range)
 +      if(EXISTS "${utf8_range_DIR}/../../include/utf8_range.h")
-+        include_directories("${utf8_range_DIR}/../../include/")
++        include_directories(AFTER SYSTEM "${utf8_range_DIR}/../../include/")
 +      elseif(EXISTS "${utf8_range_DIR}/../../../include/utf8_range.h")
-+        include_directories("${utf8_range_DIR}/../../../include/")
++        include_directories(AFTER SYSTEM "${utf8_range_DIR}/../../../include/")
 +      endif()
 +    elseif(NOT TARGET utf8_range)
 +      if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../third_party/utf8_range")
          # utf8_range is already installed
 -        include_directories(../../third_party/utf8_range)
-+        include_directories("${CMAKE_CURRENT_LIST_DIR}/../../third_party/utf8_range")
++        include_directories(AFTER SYSTEM "${CMAKE_CURRENT_LIST_DIR}/../../third_party/utf8_range")
        else()
          include(FetchContent)
          FetchContent_Declare(
+@@ -305,7 +798,7 @@ class Converter(object):
+         FetchContent_GetProperties(utf8_range)
+         if(NOT utf8_range_POPULATED)
+           FetchContent_Populate(utf8_range)
+-          include_directories(${utf8_range_SOURCE_DIR})
++          include_directories(AFTER SYSTEM ${utf8_range_SOURCE_DIR})
+         endif()
+       endif()
+     endif()
 @@ -316,10 +809,128 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
