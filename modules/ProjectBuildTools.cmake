@@ -891,15 +891,17 @@ function(project_git_clone_repository)
                         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
     if(project_git_clone_repository_SPARSE_CHECKOUT)
-      execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout init --cone
-        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-                          ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-      execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout set
-                "${project_git_clone_repository_SPARSE_CHECKOUT}"
-        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-                          ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.25.0")
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout init --cone
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout set
+                  "${project_git_clone_repository_SPARSE_CHECKOUT}"
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      endif()
     endif()
 
     if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
@@ -943,6 +945,10 @@ function(project_git_clone_repository)
       if(project_git_clone_repository_FETCH_FILTER)
         list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER}")
       endif()
+      if(project_git_clone_repository_SPARSE_CHECKOUT AND GIT_VERSION_STRING VERSION_LESS "2.25.0")
+        list(APPEND project_git_fetch_repository_args
+             "--filter=sparse:path=${project_git_clone_repository_SPARSE_CHECKOUT}")
+      endif()
       list(APPEND project_git_fetch_repository_args "-n" # No tags
            "origin" "${project_git_clone_repository_GIT_BRANCH}")
       set(project_git_fetch_repository_RETRY_TIMES 0)
@@ -974,6 +980,10 @@ function(project_git_clone_repository)
       set(project_git_fetch_repository_args ${git_global_options} fetch)
       if(project_git_clone_repository_FETCH_FILTER)
         list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER}")
+      endif()
+      if(project_git_clone_repository_SPARSE_CHECKOUT AND GIT_VERSION_STRING VERSION_LESS "2.25.0")
+        list(APPEND project_git_fetch_repository_args
+             "--filter=sparse:path=${project_git_clone_repository_SPARSE_CHECKOUT}")
       endif()
       set(project_git_fetch_repository_RETRY_TIMES 0)
       while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
