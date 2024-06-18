@@ -45,6 +45,8 @@
 #   GIT_BRANCH <git branch>
 #   GIT_COMMIT <git commit sha>
 #   GIT_PATCH_FILES [git patch files...]
+#   GIT_FETCH_FILTER <filter>
+#   GIT_SPARSE_CHECKOUT <path>
 # )
 #
 # ::
@@ -263,7 +265,9 @@ macro(FindConfigurePackage)
       GIT_URL
       GIT_BRANCH
       GIT_COMMIT
-      GIT_FETCH_DEPTH)
+      GIT_FETCH_DEPTH
+      GIT_FETCH_FILTER
+      GIT_SPARSE_CHECKOUT)
   set(multiValueArgs
       AUTOGEN_CONFIGURE
       CONFIGURE_CMD
@@ -414,6 +418,12 @@ macro(FindConfigurePackage)
         endif()
         if(FindConfigurePackage_GIT_PATCH_FILES)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS PATCH_FILES "${FindConfigurePackage_GIT_PATCH_FILES}")
+        endif()
+        if(NOT FindConfigurePackage_GIT_FETCH_FILTER)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS FETCH_FILTER "${FindConfigurePackage_GIT_FETCH_FILTER}")
+        endif()
+        if(NOT FindConfigurePackage_GIT_SPARSE_CHECKOUT)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS SPARSE_CHECKOUT "${FindConfigurePackage_GIT_SPARSE_CHECKOUT}")
         endif()
 
         project_git_clone_repository(${FindConfigurePackage_GIT_CLONE_ARGS})

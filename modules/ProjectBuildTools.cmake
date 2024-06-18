@@ -706,6 +706,8 @@ function(project_git_clone_repository)
       DEPTH
       BRANCH
       COMMIT
+      FETCH_FILTER
+      SPARSE_CHECKOUT
       TAG
       CHECK_PATH
       LOCK_TIMEOUT
@@ -888,6 +890,18 @@ function(project_git_clone_repository)
       WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                         ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
+    if(project_git_clone_repository_SPARSE_CHECKOUT)
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout init --cone
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                          ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout set
+                "${project_git_clone_repository_SPARSE_CHECKOUT}"
+        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                          ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+    endif()
+
     if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
       unset(project_git_clone_repository_GIT_CHECK_REPO)
       execute_process(
@@ -926,6 +940,9 @@ function(project_git_clone_repository)
       if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "1.8.4")
         list(APPEND project_git_fetch_repository_args "--depth=${project_git_clone_repository_DEPTH}")
       endif()
+      if(project_git_clone_repository_FETCH_FILTER)
+        list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER}")
+      endif()
       list(APPEND project_git_fetch_repository_args "-n" # No tags
            "origin" "${project_git_clone_repository_GIT_BRANCH}")
       set(project_git_fetch_repository_RETRY_TIMES 0)
@@ -954,6 +971,10 @@ function(project_git_clone_repository)
         )
       endif()
     else()
+      set(project_git_fetch_repository_args ${git_global_options} fetch)
+      if(project_git_clone_repository_FETCH_FILTER)
+        list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER}")
+      endif()
       set(project_git_fetch_repository_RETRY_TIMES 0)
       while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
         if(project_git_fetch_repository_RETRY_TIMES GREATER 0)
@@ -965,8 +986,8 @@ function(project_git_clone_repository)
         math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
              OUTPUT_FORMAT DECIMAL)
         execute_process(
-          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "--depth=${project_git_clone_repository_DEPTH}" "-n"
-                  origin ${project_git_clone_repository_COMMIT}
+          COMMAND "${GIT_EXECUTABLE}" ${project_git_fetch_repository_args}
+                  "--depth=${project_git_clone_repository_DEPTH}" "-n" origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -974,7 +995,8 @@ function(project_git_clone_repository)
         if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
           message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
           execute_process(
-            COMMAND "${GIT_EXECUTABLE}" ${git_global_options} fetch "-n" origin ${project_git_clone_repository_COMMIT}
+            COMMAND "${GIT_EXECUTABLE}" ${project_git_fetch_repository_args} "-n" origin
+                    ${project_git_clone_repository_COMMIT}
             RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
             WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                               ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
