@@ -266,7 +266,6 @@ macro(FindConfigurePackage)
       GIT_BRANCH
       GIT_COMMIT
       GIT_FETCH_DEPTH
-      GIT_FETCH_FILTER
       GIT_SPARSE_CHECKOUT)
   set(multiValueArgs
       AUTOGEN_CONFIGURE
@@ -284,7 +283,8 @@ macro(FindConfigurePackage)
       INSTALL_COMPONENT
       GIT_PATCH_FILES
       GIT_SUBMODULE_PATHS
-      GIT_RESET_SUBMODULE_URLS)
+      GIT_RESET_SUBMODULE_URLS
+      GIT_FETCH_FILTER)
   foreach(RESTORE_VAR IN LISTS optionArgs oneValueArgs multiValueArgs)
     unset(FindConfigurePackage_${RESTORE_VAR})
   endforeach()

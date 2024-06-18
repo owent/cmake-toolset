@@ -706,13 +706,12 @@ function(project_git_clone_repository)
       DEPTH
       BRANCH
       COMMIT
-      FETCH_FILTER
       SPARSE_CHECKOUT
       TAG
       CHECK_PATH
       LOCK_TIMEOUT
       LOCK_FILE)
-  set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG)
+  set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG FETCH_FILTER)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
@@ -901,8 +900,28 @@ function(project_git_clone_repository)
                   "${project_git_clone_repository_SPARSE_CHECKOUT}"
           WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      else()
+        list(APPEND project_git_clone_repository_FETCH_FILTER
+             "sparse:path=${project_git_clone_repository_SPARSE_CHECKOUT}")
       endif()
     endif()
+
+    set(project_git_clone_repository_FETCH_FILTER_CONTENT)
+    set(project_git_clone_repository_FETCH_FILTER_COMBINE FALSE)
+    foreach(FILTER ${project_git_clone_repository_FETCH_FILTER})
+      if(project_git_clone_repository_FETCH_FILTER_CONTENT)
+        if(project_git_clone_repository_FETCH_FILTER_COMBINE)
+          set(project_git_clone_repository_FETCH_FILTER_CONTENT
+              "${project_git_clone_repository_FETCH_FILTER_CONTENT}+${FILTER}")
+        else()
+          set(project_git_clone_repository_FETCH_FILTER_CONTENT
+              "combine:${project_git_clone_repository_FETCH_FILTER_CONTENT}+${FILTER}")
+          set(project_git_clone_repository_FETCH_FILTER_COMBINE TRUE)
+        endif()
+      else()
+        set(project_git_clone_repository_FETCH_FILTER_CONTENT "${FILTER}")
+      endif()
+    endforeach()
 
     if(NOT project_git_clone_repository_GIT_BRANCH AND NOT project_git_clone_repository_COMMIT)
       unset(project_git_clone_repository_GIT_CHECK_REPO)
@@ -942,12 +961,8 @@ function(project_git_clone_repository)
       if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "1.8.4")
         list(APPEND project_git_fetch_repository_args "--depth=${project_git_clone_repository_DEPTH}")
       endif()
-      if(project_git_clone_repository_FETCH_FILTER)
-        list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER}")
-      endif()
-      if(project_git_clone_repository_SPARSE_CHECKOUT AND GIT_VERSION_STRING VERSION_LESS "2.25.0")
-        list(APPEND project_git_fetch_repository_args
-             "--filter=sparse:path=${project_git_clone_repository_SPARSE_CHECKOUT}")
+      if(project_git_clone_repository_FETCH_FILTER_CONTENT)
+        list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER_CONTENT}")
       endif()
       list(APPEND project_git_fetch_repository_args "-n" # No tags
            "origin" "${project_git_clone_repository_GIT_BRANCH}")
@@ -978,12 +993,8 @@ function(project_git_clone_repository)
       endif()
     else()
       set(project_git_fetch_repository_args ${git_global_options} fetch)
-      if(project_git_clone_repository_FETCH_FILTER)
-        list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER}")
-      endif()
-      if(project_git_clone_repository_SPARSE_CHECKOUT AND GIT_VERSION_STRING VERSION_LESS "2.25.0")
-        list(APPEND project_git_fetch_repository_args
-             "--filter=sparse:path=${project_git_clone_repository_SPARSE_CHECKOUT}")
+      if(project_git_clone_repository_FETCH_FILTER_CONTENT)
+        list(APPEND project_git_fetch_repository_args "--filter=${project_git_clone_repository_FETCH_FILTER_CONTENT}")
       endif()
       set(project_git_fetch_repository_RETRY_TIMES 0)
       while(project_git_fetch_repository_RETRY_TIMES LESS_EQUAL PROJECT_BUILD_TOOLS_DOWNLOAD_RETRY_TIMES)
