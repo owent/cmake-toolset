@@ -698,7 +698,7 @@ function(project_git_get_ambiguous_name OUTPUT_VAR_NAME GIT_WORKSPACE)
 endfunction()
 
 function(project_git_clone_repository)
-  set(optionArgs ENABLE_SUBMODULE SUBMODULE_RECURSIVE REQUIRED FORCE_RESET)
+  set(optionArgs ENABLE_SUBMODULE SUBMODULE_RECURSIVE REQUIRED FORCE_RESET ALWAYS_UPDATE_REMOTE)
   set(oneValueArgs
       URL
       WORKING_DIRECTORY
@@ -706,12 +706,11 @@ function(project_git_clone_repository)
       DEPTH
       BRANCH
       COMMIT
-      SPARSE_CHECKOUT
       TAG
       CHECK_PATH
       LOCK_TIMEOUT
       LOCK_FILE)
-  set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG FETCH_FILTER)
+  set(multiValueArgs PATCH_FILES SUBMODULE_PATH RESET_SUBMODULE_URLS GIT_CONFIG FETCH_FILTER SPARSE_CHECKOUT)
   cmake_parse_arguments(project_git_clone_repository "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
@@ -868,26 +867,29 @@ function(project_git_clone_repository)
     endif()
   endif()
 
-  if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}")
+  if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/${project_git_clone_repository_CHECK_PATH}"
+     OR (project_git_clone_repository_ALWAYS_UPDATE_REMOTE AND project_git_clone_repository_GIT_BRANCH))
     if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}")
       file(MAKE_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}")
     endif()
 
-    if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.28.0")
+    if(NOT EXISTS "${project_git_clone_repository_REPO_DIRECTORY}/.git")
+      if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.28.0")
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} init -b main
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      else()
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} init
+          WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
+                            ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
+      endif()
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} init -b main
-        WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-                          ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
-    else()
-      execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} init
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} remote add origin "${project_git_clone_repository_URL}"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
-    execute_process(
-      COMMAND "${GIT_EXECUTABLE}" ${git_global_options} remote add origin "${project_git_clone_repository_URL}"
-      WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
-                        ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
     if(project_git_clone_repository_SPARSE_CHECKOUT)
       if(GIT_VERSION_STRING VERSION_GREATER_EQUAL "2.25.0")
@@ -897,7 +899,7 @@ function(project_git_clone_repository)
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" ${git_global_options} sparse-checkout set
-                  "${project_git_clone_repository_SPARSE_CHECKOUT}"
+                  ${project_git_clone_repository_SPARSE_CHECKOUT}
           WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
       else()

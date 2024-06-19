@@ -247,7 +247,9 @@ macro(FindConfigurePackage)
       CMAKE_INHERIT_FIND_ROOT_PATH
       CMAKE_INHERIT_SYSTEM_LINKS
       GIT_ENABLE_SUBMODULE
-      GIT_SUBMODULE_RECURSIVE)
+      GIT_SUBMODULE_RECURSIVE
+      GIT_FORCE_RESET
+      GIT_ALWAYS_UPDATE_REMOTE)
   set(oneValueArgs
       PACKAGE
       PORT_PREFIX
@@ -415,6 +417,12 @@ macro(FindConfigurePackage)
         if(FindConfigurePackage_GIT_RESET_SUBMODULE_URLS)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS RESET_SUBMODULE_URLS
                "${FindConfigurePackage_GIT_RESET_SUBMODULE_URLS}")
+        endif()
+        if(FindConfigurePackage_GIT_FORCE_RESET)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS FORCE_RESET)
+        endif()
+        if(FindConfigurePackage_GIT_ALWAYS_UPDATE_REMOTE)
+          list(APPEND FindConfigurePackage_GIT_CLONE_ARGS ALWAYS_UPDATE_REMOTE)
         endif()
         if(FindConfigurePackage_GIT_PATCH_FILES)
           list(APPEND FindConfigurePackage_GIT_CLONE_ARGS PATCH_FILES "${FindConfigurePackage_GIT_PATCH_FILES}")
