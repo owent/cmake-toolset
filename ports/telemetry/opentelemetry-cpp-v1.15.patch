@@ -32,6 +32,45 @@ index 0f63a49..78e97ad 100644
  include(${PROJECT_SOURCE_DIR}/cmake/pkgconfig.cmake)
  
  if(OPENTELEMETRY_INSTALL)
+diff --git a/api/include/opentelemetry/common/macros.h b/api/include/opentelemetry/common/macros.h
+index db1ca54..62f5af8 100644
+--- a/api/include/opentelemetry/common/macros.h
++++ b/api/include/opentelemetry/common/macros.h
+@@ -319,3 +319,34 @@ point.
+ #  define OPENTELEMETRY_EXPORT
+ 
+ #endif
++
++// OPENTELEMETRY_HAVE_EXCEPTIONS
++//
++// Checks whether the compiler both supports and enables exceptions. Many
++// compilers support a "no exceptions" mode that disables exceptions.
++//
++// Generally, when OPENTELEMETRY_HAVE_EXCEPTIONS is not defined:
++//
++// * Code using `throw` and `try` may not compile.
++// * The `noexcept` specifier will still compile and behave as normal.
++// * The `noexcept` operator may still return `false`.
++//
++// For further details, consult the compiler's documentation.
++#ifndef OPENTELEMETRY_HAVE_EXCEPTIONS
++#  if defined(__clang__) && ((__clang_major__ * 100) + __clang_minor__) < 306
++// Clang < 3.6
++// http://releases.llvm.org/3.6.0/tools/clang/docs/ReleaseNotes.html#the-exceptions-macro
++#    if defined(__EXCEPTIONS) && OPENTELEMETRY_HAVE_FEATURE(cxx_exceptions)
++#      define OPENTELEMETRY_HAVE_EXCEPTIONS 1
++#    endif  // defined(__EXCEPTIONS) && OPENTELEMETRY_HAVE_FEATURE(cxx_exceptions)
++#  elif OPENTELEMETRY_HAVE_FEATURE(cxx_exceptions)
++#    define OPENTELEMETRY_HAVE_EXCEPTIONS 1
++// Handle remaining special cases and default to exceptions being supported.
++#  elif !(defined(__GNUC__) && !defined(__EXCEPTIONS) && !defined(__cpp_exceptions)) && \
++      !(defined(_MSC_VER) && !defined(_CPPUNWIND))
++#    define OPENTELEMETRY_HAVE_EXCEPTIONS 1
++#  endif
++#endif
++#ifndef OPENTELEMETRY_HAVE_EXCEPTIONS
++#  define OPENTELEMETRY_HAVE_EXCEPTIONS 0
++#endif
 diff --git a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h b/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
 index 4f7c906..1bf0fac 100644
 --- a/sdk/include/opentelemetry/sdk/instrumentationscope/instrumentation_scope.h
@@ -53,24 +92,30 @@ index 4f7c906..1bf0fac 100644
            * = nullptr>
    static nostd::unique_ptr<InstrumentationScope> Create(nostd::string_view name,
                                                          nostd::string_view version,
-diff --git a/sdk/include/opentelemetry/sdk/metrics/metric_reader.h b/sdk/include/opentelemetry/sdk/metrics/metric_reader.h
-index 2124943..f7d344c 100644
---- a/sdk/include/opentelemetry/sdk/metrics/metric_reader.h
-+++ b/sdk/include/opentelemetry/sdk/metrics/metric_reader.h
-@@ -23,7 +23,7 @@ struct ResourceMetrics;
- /**
-  * MetricReader defines the interface to collect metrics from SDK
-  */
--class MetricReader
-+class MetricReader : public std::enable_shared_from_this<MetricReader>
- {
- public:
-   MetricReader();
 diff --git a/sdk/src/metrics/export/periodic_exporting_metric_reader.cc b/sdk/src/metrics/export/periodic_exporting_metric_reader.cc
-index 91f6041..70cfa95 100644
+index 91f6041..1cd399c 100644
 --- a/sdk/src/metrics/export/periodic_exporting_metric_reader.cc
 +++ b/sdk/src/metrics/export/periodic_exporting_metric_reader.cc
-@@ -73,19 +73,26 @@ void PeriodicExportingMetricReader::DoBackgroundWork()
+@@ -1,6 +1,7 @@
+ // Copyright The OpenTelemetry Authors
+ // SPDX-License-Identifier: Apache-2.0
+ 
++#include "opentelemetry/common/macros.h"
+ #include "opentelemetry/sdk/metrics/export/periodic_exporting_metric_reader.h"
+ #include "opentelemetry/sdk/common/global_log_handler.h"
+ #include "opentelemetry/sdk/metrics/push_metric_exporter.h"
+@@ -13,6 +14,10 @@
+ #  include <future>
+ #endif
+ 
++#if OPENTELEMETRY_HAVE_EXCEPTIONS
++#  include <exception>
++#endif
++
+ OPENTELEMETRY_BEGIN_NAMESPACE
+ namespace sdk
+ {
+@@ -73,31 +78,61 @@ void PeriodicExportingMetricReader::DoBackgroundWork()
  
  bool PeriodicExportingMetricReader::CollectAndExportOnce()
  {
@@ -78,47 +123,81 @@ index 91f6041..70cfa95 100644
 -  auto future_receive = std::async(std::launch::async, [this, &cancel_export_for_timeout] {
 -    Collect([this, &cancel_export_for_timeout](ResourceMetrics &metric_data) {
 -      if (cancel_export_for_timeout)
--      {
++    std::uint64_t notify_force_flush = force_flush_pending_sequence_.load(std::memory_order_acquire);
++  std::unique_ptr<std::thread> task_thread;
++
++#if OPENTELEMETRY_HAVE_EXCEPTIONS
++  try
++  {
++#endif
++    std::promise<void> sender;
++    auto receiver = sender.get_future();
++
++    task_thread.reset(new std::thread([this, &cancel_export_for_timeout] {
++      this->Collect([this, &cancel_export_for_timeout](ResourceMetrics &metric_data) {
++        if (cancel_export_for_timeout.load(std::memory_order_acquire))
++        {
++          OTEL_INTERNAL_LOG_ERROR(
++              "[Periodic Exporting Metric Reader] Collect took longer configured time: "
++              << this->export_timeout_millis_.count() << " ms, and timed out");
++          return false;
++        }
++        this->exporter_->Export(metric_data);
++        return true;
++      });
++    }));
++
++    std::future_status status;
++    do
++    {
++      status = receiver.wait_for(std::chrono::milliseconds(export_timeout_millis_));
++      if (status == std::future_status::timeout)
+       {
 -        OTEL_INTERNAL_LOG_ERROR(
 -            "[Periodic Exporting Metric Reader] Collect took longer configured time: "
 -            << export_timeout_millis_.count() << " ms, and timed out");
 -        return false;
--      }
++        cancel_export_for_timeout.store(true, std::memory_order_release);
++        break;
+       }
 -      this->exporter_->Export(metric_data);
 -      return true;
 -    });
-+  std::shared_ptr<std::atomic<bool>> cancel_export_for_timeout =
-+      std::make_shared<std::atomic<bool>>(false);
-+  auto keep_lifetime = shared_from_this();
-+
-+  auto future_receive = std::async(std::launch::async, [keep_lifetime, cancel_export_for_timeout] {
-+    static_cast<PeriodicExportingMetricReader *>(keep_lifetime.get())
-+        ->Collect([keep_lifetime, cancel_export_for_timeout](ResourceMetrics &metric_data) {
-+          if (*cancel_export_for_timeout)
-+          {
-+            OTEL_INTERNAL_LOG_ERROR(
-+                "[Periodic Exporting Metric Reader] Collect took longer configured time: "
-+                << static_cast<PeriodicExportingMetricReader *>(keep_lifetime.get())
-+                       ->export_timeout_millis_.count()
-+                << " ms, and timed out");
-+            return false;
-+          }
-+          static_cast<PeriodicExportingMetricReader *>(keep_lifetime.get())
-+              ->exporter_->Export(metric_data);
-+          return true;
-+        });
-   });
+-  });
++    } while (status != std::future_status::ready);
++#if OPENTELEMETRY_HAVE_EXCEPTIONS
++  }
++  catch (std::exception &e)
++  {
++    OTEL_INTERNAL_LOG_ERROR("[Periodic Exporting Metric Reader] Collect failed with exception "
++                            << e.what());
++    return false;
++  }
++  catch (...)
++  {
++    OTEL_INTERNAL_LOG_ERROR(
++        "[Periodic Exporting Metric Reader] Collect failed with unknown exception");
++    return false;
++  }
++#endif
  
-   std::future_status status;
-@@ -94,7 +101,7 @@ bool PeriodicExportingMetricReader::CollectAndExportOnce()
-     status = future_receive.wait_for(std::chrono::milliseconds(export_timeout_millis_));
-     if (status == std::future_status::timeout)
-     {
+-  std::future_status status;
+-  do
++  if (task_thread && task_thread->joinable())
+   {
+-    status = future_receive.wait_for(std::chrono::milliseconds(export_timeout_millis_));
+-    if (status == std::future_status::timeout)
+-    {
 -      cancel_export_for_timeout = true;
-+      *cancel_export_for_timeout = true;
-       break;
-     }
-   } while (status != std::future_status::ready);
+-      break;
+-    }
+-  } while (status != std::future_status::ready);
++    task_thread->join();
++  }
++  
+   bool notify_force_flush = is_force_flush_pending_.exchange(false, std::memory_order_acq_rel);
+   if (notify_force_flush)
+   {
 diff --git a/sdk/test/metrics/periodic_exporting_metric_reader_test.cc b/sdk/test/metrics/periodic_exporting_metric_reader_test.cc
 index e115f79..f65c10c 100644
 --- a/sdk/test/metrics/periodic_exporting_metric_reader_test.cc
