@@ -223,7 +223,7 @@ if(NOT LZ4_BUNDLED_MODE)
 
   set(LZ4_PKG_INSTALLDIR "${CMAKE_INSTALL_LIBDIR}/cmake/lz4")
   configure_package_config_file(
-    "${CMAKE_CURRENT_LIST_DIR}/lz4Config.cmake.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/lz4Config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/lz4Config.cmake"
     INSTALL_DESTINATION ${LZ4_PKG_INSTALLDIR})
   export(EXPORT lz4Targets
