@@ -20,6 +20,19 @@ index a4e30092..c43a7329 100644
  };
  
  }  // namespace grpc_core
+diff --git a/third_party/upb/upb/message/copy.c b/third_party/upb/upb/message/copy.c
+index 2643456d..d446e317 100644
+--- a/third_party/upb/upb/message/copy.c
++++ b/third_party/upb/upb/message/copy.c
+@@ -151,7 +151,7 @@ upb_Array* upb_Array_DeepClone(const upb_Array* array, upb_CType value_type,
+   for (size_t i = 0; i < size; ++i) {
+     upb_MessageValue val = upb_Array_Get(array, i);
+     if (!upb_Clone_MessageValue(&val, value_type, sub, arena)) {
+-      return false;
++      return NULL;
+     }
+     upb_Array_Set(cloned_array, i, val);
+   }
 diff --git a/third_party/upb/upb/text/encode.c b/third_party/upb/upb/text/encode.c
 index e13d9f29..908f2332 100644
 --- a/third_party/upb/upb/text/encode.c

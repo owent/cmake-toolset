@@ -1,8 +1,18 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 580cc4357..7e739d43b 100644
+index 580cc4357..1633f1ff0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -469,6 +469,7 @@ if(use_core_foundation_and_core_services)
+@@ -52,7 +52,8 @@ include(Macros)
+ include(CMakeDependentOption)
+ include(CheckCCompilerFlag)
+ 
+-project(CURL C)
++# boringssl requires C++
++project(CURL LANGUAGES C CXX)
+ 
+ file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS REGEX "#define LIBCURL_VERSION( |_NUM )")
+ string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
+@@ -469,6 +470,7 @@ if(use_core_foundation_and_core_services)
  endif()
  
  if(CURL_USE_OPENSSL)
@@ -10,7 +20,7 @@ index 580cc4357..7e739d43b 100644
    find_package(OpenSSL REQUIRED)
    set(SSL_ENABLED ON)
    set(USE_OPENSSL ON)
-@@ -502,9 +503,17 @@ if(CURL_USE_MBEDTLS)
+@@ -502,9 +504,17 @@ if(CURL_USE_MBEDTLS)
    find_package(MbedTLS REQUIRED)
    set(SSL_ENABLED ON)
    set(USE_MBEDTLS ON)
@@ -28,7 +38,7 @@ index 580cc4357..7e739d43b 100644
  
    if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
      set(valid_default_ssl_backend TRUE)
-@@ -608,9 +617,20 @@ if(CURL_ZSTD)
+@@ -608,9 +618,20 @@ if(CURL_ZSTD)
    find_package(Zstd REQUIRED)
    if(Zstd_FOUND AND NOT Zstd_VERSION VERSION_LESS "1.0.0")
      set(HAVE_ZSTD ON)
@@ -49,7 +59,7 @@ index 580cc4357..7e739d43b 100644
    else()
      message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
    endif()
-@@ -625,6 +645,12 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE EXTRA_LIBS)
+@@ -625,6 +646,12 @@ macro(openssl_check_symbol_exists SYMBOL FILES VARIABLE EXTRA_LIBS)
      if(HAVE_LIBZ)
        list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
      endif()
@@ -62,7 +72,7 @@ index 580cc4357..7e739d43b 100644
      if(WIN32)
        list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
        list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
-@@ -700,14 +726,6 @@ if(USE_ECH)
+@@ -700,14 +727,6 @@ if(USE_ECH)
    endif()
  endif()
  
@@ -77,7 +87,7 @@ index 580cc4357..7e739d43b 100644
  option(USE_NGTCP2 "Use ngtcp2 and nghttp3 libraries for HTTP/3 support" OFF)
  if(USE_NGTCP2)
    if(USE_OPENSSL OR USE_WOLFSSL)
-@@ -738,6 +756,61 @@ if(USE_NGTCP2)
+@@ -738,6 +757,61 @@ if(USE_NGTCP2)
    include_directories(${NGHTTP3_INCLUDE_DIRS})
    list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
@@ -139,7 +149,7 @@ index 580cc4357..7e739d43b 100644
  endif()
  
  option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
-@@ -819,7 +892,7 @@ if(NOT CURL_DISABLE_LDAP)
+@@ -819,7 +893,7 @@ if(NOT CURL_DISABLE_LDAP)
    # Now that we know, we're not using windows LDAP...
    if(NOT USE_WIN32_LDAP)
      # Check for LDAP
