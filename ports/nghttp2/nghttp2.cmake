@@ -100,7 +100,7 @@ if(NOT TARGET Libnghttp2::libnghttp2)
     endif()
 
     project_third_party_port_declare(
-      Libnghttp2
+      nghttp2
       VERSION
       "v1.62.1" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
       GIT_URL
