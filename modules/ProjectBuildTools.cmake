@@ -90,13 +90,32 @@ function(project_build_tools_append_space_flags_to_var_unique VARNAME)
 endfunction()
 
 macro(project_build_tools_append_cmake_inherit_policy OUTVAR)
-  # Policy
+  # Policy - CMP0057: Support new IN_LIST if() operator
+  unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+  cmake_policy(GET CMP0057 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+  if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    list(APPEND ${OUTVAR}
+         "-DCMAKE_POLICY_DEFAULT_CMP0057=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
+  endif()
+
+  # Policy - CMP0085: The OLD behavior of this policy is for $<IN_LIST:...> to always return 0 if the first argument is
+  # empty. The NEW behavior is to return 1 if the first argument is empty and the list contains an empty item.
+  unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+  cmake_policy(GET CMP0085 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+  if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    list(APPEND ${OUTVAR}
+         "-DCMAKE_POLICY_DEFAULT_CMP0085=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
+  endif()
+
+  # Policy - CMP0091: Add CMAKE_MSVC_RUNTIME_LIBRARY to replace CMAKE_MSVC_RUNTIME_LIBRARY
   unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
   cmake_policy(GET CMP0091 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
   if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
     list(APPEND ${OUTVAR}
          "-DCMAKE_POLICY_DEFAULT_CMP0091=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
   endif()
+
+  # Policy - CMP0117: New behavior for inheriting CMAKE_POLICY_DEFAULT_CMP<NNNN> values
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.20.0")
     unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
     cmake_policy(GET CMP0117 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
