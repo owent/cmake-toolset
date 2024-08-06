@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 580cc4357..50b0c27c5 100644
+index 580cc4357..62f327f01 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -469,6 +469,7 @@ if(use_core_foundation_and_core_services)
@@ -129,7 +129,26 @@ index 580cc4357..50b0c27c5 100644
  endif()
  
  option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
-@@ -819,7 +891,7 @@ if(NOT CURL_DISABLE_LDAP)
+@@ -786,6 +858,18 @@ if(USE_OPENSSL_QUIC)
+   include_directories(${NGHTTP3_INCLUDE_DIRS})
+   list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
+   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
++
++  cmake_push_check_state()
++  set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBS}")
++  check_symbol_exists(nghttp3_version "nghttp3/nghttp3.h" HAVE_NGHTTP3_DYNAMICLIB)
++  if(NOT HAVE_NGHTTP3_DYNAMICLIB)
++    set(CMAKE_REQUIRED_DEFINITIONS "-DNGHTTP3_STATICLIB=1")
++    check_symbol_exists(nghttp3_version "nghttp3/nghttp3.h" HAVE_NGHTTP3_STATICLIB)
++    if(HAVE_NGHTTP3_STATICLIB)
++      add_definitions(-DNGHTTP3_STATICLIB=1)
++    endif()
++  endif()
++  cmake_pop_check_state()
+ endif()
+ 
+ if(USE_MBEDTLS OR
+@@ -819,7 +903,7 @@ if(NOT CURL_DISABLE_LDAP)
    # Now that we know, we're not using windows LDAP...
    if(NOT USE_WIN32_LDAP)
      # Check for LDAP

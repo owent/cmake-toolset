@@ -296,8 +296,12 @@ if(NOT TARGET CURL::libcurl
     endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "7.71.0")
-      if(TARGET Libnghttp3::libnghttp3 AND (TARGET Libngtcp2::libngtcp2_crypto_openssl
-                                            OR TARGET Libngtcp2::libngtcp2_crypto_quictls))
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "8.9.0"
+         AND OPENSSL_VERSION VERSION_GREATER_EQUAL "3.3.0"
+         AND TARGET Libnghttp3::libnghttp3)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_OPENSSL_QUIC=ON")
+      elseif(TARGET Libnghttp3::libnghttp3 AND (TARGET Libngtcp2::libngtcp2_crypto_openssl
+                                                OR TARGET Libngtcp2::libngtcp2_crypto_quictls))
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGTCP2=ON")
       endif()
       # The link order of libcurl has some problems and will link error with nghttp2 when building static library.
@@ -317,6 +321,10 @@ if(NOT TARGET CURL::libcurl
     project_third_party_try_patch_file(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "libcurl"
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION}")
+
+    if(APPLE)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "--debug-find-pkg=NGHTTP3")
+    endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCH_FILE
        AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCH_FILE}")
