@@ -192,8 +192,8 @@ if(NOT TARGET CURL::libcurl
 
     set(CURL_ROOT ${LIBCURL_ROOT})
 
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DEFAULT_VERSION "8.7.1")
-    # curl 8,.6.0 use a feature start from cmake 3.27.0: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DEFAULT_VERSION "8.9.1")
+    # curl 8.6.0 use a feature start from cmake 3.27.0: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
     # https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#list-transformations
     if(CMAKE_VERSION VERSION_LESS "3.27.0")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DEFAULT_VERSION "8.5.0")
@@ -226,6 +226,9 @@ if(NOT TARGET CURL::libcurl
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DHAVE_POLL_FINE_EXITCODE=0"
              "-DHAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=0")
       endif()
+    endif()
+    if(APPLE)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_LIBIDN2=OFF" "-DUSE_APPLE_IDN=ON")
     endif()
 
     if(OPENSSL_FOUND)
@@ -293,8 +296,12 @@ if(NOT TARGET CURL::libcurl
     endif()
 
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "7.71.0")
-      if(TARGET Libnghttp3::libnghttp3 AND (TARGET Libngtcp2::libngtcp2_crypto_openssl
-                                            OR TARGET Libngtcp2::libngtcp2_crypto_quictls))
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "8.9.0"
+         AND OPENSSL_VERSION VERSION_GREATER_EQUAL "3.3.0"
+         AND TARGET Libnghttp3::libnghttp3)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_OPENSSL_QUIC=ON")
+      elseif(TARGET Libnghttp3::libnghttp3 AND (TARGET Libngtcp2::libngtcp2_crypto_openssl
+                                                OR TARGET Libngtcp2::libngtcp2_crypto_quictls))
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGTCP2=ON")
       endif()
       # The link order of libcurl has some problems and will link error with nghttp2 when building static library.

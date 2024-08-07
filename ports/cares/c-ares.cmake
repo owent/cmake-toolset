@@ -42,7 +42,7 @@ if(NOT TARGET c-ares::cares
     project_third_party_port_declare(
       cares
       VERSION
-      "1.28.1"
+      "1.33.0"
       GIT_URL
       "https://github.com/c-ares/c-ares.git"
       BUILD_OPTIONS
@@ -54,8 +54,13 @@ if(NOT TARGET c-ares::cares
     project_third_party_append_build_static_lib_var(
       "cares" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_BUILD_OPTIONS CARES_STATIC)
 
-    string(REPLACE "." "_" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_DEFAULT_VERSION
-                   "cares-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION}")
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION VERSION_GREATER_EQUAL "1.30.0")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_DEFAULT_VERSION
+          "v${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION}")
+    else()
+      string(REPLACE "." "_" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_DEFAULT_VERSION
+                     "cares-${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_VERSION}")
+    endif()
 
     find_configure_package(
       PACKAGE

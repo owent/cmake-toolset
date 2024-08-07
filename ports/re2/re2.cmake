@@ -17,10 +17,14 @@ if(NOT TARGET re2::re2)
   project_third_party_re2_import()
 
   if(NOT TARGET re2::re2)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_DEFAULT_VERSION "2024-07-02")
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION VERSION_LESS_EQUAL "20240116.2")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_DEFAULT_VERSION "2024-04-01")
+    endif()
     project_third_party_port_declare(
       re2
       VERSION
-      "2024-04-01"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_DEFAULT_VERSION}"
       GIT_URL
       "https://github.com/google/re2.git"
       BUILD_OPTIONS

@@ -1,8 +1,8 @@
 diff --git a/include/benchmark/benchmark.h b/include/benchmark/benchmark.h
-index e3857e7..c326cae 100644
+index 7dd72e2..56c5e3c 100644
 --- a/include/benchmark/benchmark.h
 +++ b/include/benchmark/benchmark.h
-@@ -544,6 +544,7 @@ inline BENCHMARK_ALWAYS_INLINE
+@@ -567,6 +567,7 @@ inline BENCHMARK_ALWAYS_INLINE
  // Fallback for GCC < 5. Can add some overhead because the compiler is forced
  // to use memory operations instead of operations with registers.
  // TODO: Remove if GCC < 5 will be unsupported.
@@ -10,7 +10,7 @@ index e3857e7..c326cae 100644
  template <class Tp>
  BENCHMARK_DEPRECATED_MSG(
      "The const-ref version of this method can permit "
-@@ -556,6 +557,7 @@ template <class Tp>
+@@ -579,6 +580,7 @@ template <class Tp>
  inline BENCHMARK_ALWAYS_INLINE void DoNotOptimize(Tp& value) {
    asm volatile("" : "+m"(value) : : "memory");
  }

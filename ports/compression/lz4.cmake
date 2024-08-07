@@ -101,7 +101,7 @@ if(NOT TARGET lz4::lz4_static
       PORT_PREFIX
       "COMPRESSION"
       VERSION
-      "v1.9.4"
+      "v1.10.0"
       GIT_URL
       "https://github.com/lz4/lz4.git")
 
