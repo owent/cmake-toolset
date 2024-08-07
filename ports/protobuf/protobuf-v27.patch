@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 807ef01..4863c1c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -211,7 +211,7 @@ else (protobuf_BUILD_SHARED_LIBS)
+     if (protobuf_MSVC_STATIC_RUNTIME)
+         set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>)
+     else()
+-        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>DLL)
++        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>")
+     endif()
+   else()
+     # In case we are building static libraries, link also the runtime library statically
+diff --git a/src/google/protobuf/compiler/objectivec/names.cc b/src/google/protobuf/compiler/objectivec/names.cc
+index 597e0ec..0844ea3 100644
+--- a/src/google/protobuf/compiler/objectivec/names.cc
++++ b/src/google/protobuf/compiler/objectivec/names.cc
+@@ -947,6 +947,7 @@ std::string FragmentName(const FieldDescriptor* field,
+   // Some compilers report reaching end of function even though all cases of
+   // the enum are handed in the switch.
+   ABSL_LOG(FATAL) << "Can't get here.";
++  return "";
+ }
+ 
+ std::string FieldObjCTypeInternal(const FieldDescriptor* field,
+@@ -1076,6 +1077,7 @@ std::string FieldObjCTypeInternal(const FieldDescriptor* field,
+   // Some compilers report reaching end of function even though all cases of
+   // the enum are handed in the switch.
+   ABSL_LOG(FATAL) << "Can't get here.";
++  return "";
+ }
+ 
+ }  // namespace
