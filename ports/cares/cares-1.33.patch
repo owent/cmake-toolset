@@ -30,3 +30,17 @@ index 2e360ef..72b656e 100644
  #  include <netinet/tcp.h>
  #endif
  #ifdef HAVE_NETDB_H
+diff --git a/src/lib/ares_config.h.cmake b/src/lib/ares_config.h.cmake
+index da73867..d3ba512 100644
+--- a/src/lib/ares_config.h.cmake
++++ b/src/lib/ares_config.h.cmake
+@@ -227,6 +227,9 @@
+ /* Define to 1 if you have the <netinet/tcp.h> header file. */
+ #cmakedefine HAVE_NETINET_TCP_H 1
+ 
++/* Define to 1 if you have the <linux/tcp.h> header file. */
++#cmakedefine HAVE_LINUX_TCP_H 1
++
+ /* Define to 1 if you have the <net/if.h> header file. */
+ #cmakedefine HAVE_NET_IF_H 1
+ 
