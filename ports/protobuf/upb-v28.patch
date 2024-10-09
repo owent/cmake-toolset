@@ -88,7 +88,7 @@ index bce4b7d..e9dff10 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index bd95917..687e70b 100755
+index bd95917..81e8b38 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,66 @@ from __future__ import print_function
@@ -875,7 +875,7 @@ index bd95917..687e70b 100755
 +        endif()
 +      endforeach()
 +    endif()
-+    install(EXPORT upb-config NAMESPACE protobuf:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
++    install(EXPORT upb-config NAMESPACE upb:: DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/upb")
    """)
  
  data = {}

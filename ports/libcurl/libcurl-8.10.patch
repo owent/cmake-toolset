@@ -157,7 +157,7 @@ index aee20fe..d59fa61 100644
 +        add_definitions(-DNGHTTP3_STATICLIB=1)
 +      endif()
 +    endif()
-+  
++
 +    check_symbol_exists(ngtcp2_version "ngtcp2/ngtcp2.h" HAVE_NGTCP2_DYNAMICLIB)
 +    if(NOT HAVE_NGTCP2_DYNAMICLIB)
 +      set(CMAKE_REQUIRED_DEFINITIONS "-DNGTCP2_STATICLIB=1")
