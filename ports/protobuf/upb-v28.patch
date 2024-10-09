@@ -88,7 +88,7 @@ index bce4b7d..e9dff10 100644
        max_cols--;
      } else {
 diff --git a/upb/cmake/make_cmakelists.py b/upb/cmake/make_cmakelists.py
-index bd95917..c4e1274 100755
+index bd95917..687e70b 100755
 --- a/upb/cmake/make_cmakelists.py
 +++ b/upb/cmake/make_cmakelists.py
 @@ -43,9 +43,66 @@ from __future__ import print_function
@@ -168,9 +168,9 @@ index bd95917..c4e1274 100755
 -    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 -    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
-+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
 +    $<INSTALL_INTERFACE:include>
-+)
+ )
 +if(NOT UPB_ENABLE_CODEGEN)
 +  target_include_directories(%(name)s BEFORE %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
@@ -184,8 +184,8 @@ index bd95917..c4e1274 100755
 +)
 +target_include_directories(%(name)s %(keyword)s
 +    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>
-     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
- )
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINRARY_DIR}>
++)
 +if(NOT UPB_ENABLE_CODEGEN)
 +  target_include_directories(%(name)s BEFORE %(keyword)s
 +      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../cmake>
@@ -215,8 +215,7 @@ index bd95917..c4e1274 100755
      self.converter.toplevel += "target_link_libraries(%s%s\n  %s)\n" % (
 -        kwargs["name"],
 +        self.target_prefix + kwargs["name"] + stage,
-         keyword,
--        "\n  ".join(StripFirstChar(kwargs["deps"]))
++        keyword,
 +        "\n  ".join(MappingThirdPartyDeps(kwargs["deps"], self.target_prefix))
 +    )
 +
@@ -227,7 +226,8 @@ index bd95917..c4e1274 100755
 +      target_name = kwargs["name"]
 +    self.converter.toplevel += "target_link_libraries({0}{1}\n  {2})\n".format(
 +        self.target_prefix + target_name + stage,
-+        keyword,
+         keyword,
+-        "\n  ".join(StripFirstChar(kwargs["deps"]))
 +        "\n  ".join([dep + stage for dep in MappingThirdPartyDeps(kwargs[deps_key], self.target_prefix)])
      )
  
@@ -243,7 +243,7 @@ index bd95917..c4e1274 100755
        return
      if "testonly" in kwargs:
        return
-@@ -95,33 +190,89 @@ class BuildFileFunctions(object):
+@@ -95,33 +190,94 @@ class BuildFileFunctions(object):
      ]
      for file in files:
        if os.path.basename(file) in pregenerated_files:
@@ -322,6 +322,11 @@ index bd95917..c4e1274 100755
 +    found_files = []
 +    for file in files:
 +      found_files.append("../" + self.subdir + file)
++    if not found_files:
++      if not os.path.exists("cc_binary_fake_source.c"):
++        with open("cc_binary_fake_source.c", "w") as f:
++          f.write("\n")
++      found_files.append(os.getcwd() + "/cc_binary_fake_source.c")
 +
 +    if self.enable_condition:
 +      self.converter.toplevel += "if (UPB_ENABLE_CODEGEN AND {0})\n".format(self.enable_condition)
@@ -339,7 +344,7 @@ index bd95917..c4e1274 100755
  
    def cc_test(self, **kwargs):
      # Disable this until we properly support upb_proto_library().
-@@ -229,24 +380,341 @@ class BuildFileFunctions(object):
+@@ -229,24 +385,347 @@ class BuildFileFunctions(object):
    def bool_flag(self, **kwargs):
      pass
  
@@ -390,6 +395,8 @@ index bd95917..c4e1274 100755
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[0])
 +    self.converter.toplevel += "  upb_mini_table\n"
 +    self.converter.toplevel += "  upb_generated_code_support__only_for_generated_code_do_not_use__i_give_permission_to_break_me)\n"
++    self.converter.toplevel += "target_compile_definitions({0}\n".format(self.target_prefix + kwargs["name"] + _stages[0])
++    self.converter.toplevel += "  PUBLIC \"-DUPB_BOOTSTRAP_STAGE0\")\n"
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[0], "deps")
 +
 +    # Stage1
@@ -499,10 +506,8 @@ index bd95917..c4e1274 100755
 +    }
 +    self.converter.toplevel += "target_include_directories({0}\n".format(self.target_prefix + kwargs["name"] + "_minitable" + _stages[2])
 +    self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:{0}>\")\n".format(stage2_generated_dir)
-+    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + "_minitable" + _stages[2])
-+    self.converter.toplevel += "  upb_upb\n"
-+    self.converter.toplevel += ")\n".format(self.target_prefix + kwargs["name"] + "_minitable" + _stages[2])
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[2], "deps", kwargs["name"] + "_minitable")
++    self.converter.written_targets.add(self.target_prefix + kwargs["name"] + "_minitable" + _stages[2])
 +
 +    self.converter.toplevel += ADD_LIBRARY_FORMAT % {
 +        "name": self.target_prefix + kwargs["name"] + _stages[2],
@@ -513,10 +518,10 @@ index bd95917..c4e1274 100755
 +    self.converter.toplevel += "target_include_directories({0}\n".format(self.target_prefix + kwargs["name"] + _stages[2])
 +    self.converter.toplevel += "  BEFORE PUBLIC \"$<BUILD_INTERFACE:{0}>\")\n".format(stage2_generated_dir)
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[2])
-+    self.converter.toplevel += "  upb_upb\n"
 +    self.converter.toplevel += "  " + self.target_prefix + kwargs["name"] + "_minitable" + _stages[2] + "\n"
 +    self.converter.toplevel += ")\n".format(self.target_prefix + kwargs["name"] + _stages[2])
 +    self._add_bootstrap_deps(kwargs, " PUBLIC", _stages[2], "deps")
++    self.converter.written_targets.add(self.target_prefix + kwargs["name"] + _stages[2])
 +
 +    self.converter.toplevel += ADD_LIBRARY_FORMAT % {
 +        "name": self.target_prefix + kwargs["name"] + _stages[2] + "_defs",
@@ -529,6 +534,7 @@ index bd95917..c4e1274 100755
 +    self.converter.toplevel += "target_link_libraries({0} PUBLIC\n".format(self.target_prefix + kwargs["name"] + _stages[2] + "_defs")
 +    self.converter.toplevel += "  {0}\n".format(self.target_prefix + kwargs["name"] + _stages[2])
 +    self.converter.toplevel += ")\n".format(self.target_prefix + kwargs["name"] + _stages[2])
++    self.converter.written_targets.add(self.target_prefix + kwargs["name"] + _stages[2] + "_defs")
 +
 +    self.converter.toplevel += "install(\n"
 +    self.converter.toplevel += "  FILES\n    {0}\n".format(
@@ -625,6 +631,11 @@ index bd95917..c4e1274 100755
 +    found_files = []
 +    for file in files:
 +      found_files.append("../" + self.subdir + file)
++    if not found_files:
++      if not os.path.exists("bootstrap_cc_binary_fake_source.c"):
++        with open("bootstrap_cc_binary_fake_source.c", "w") as f:
++          f.write("\n")
++      found_files.append(os.getcwd() + "/bootstrap_cc_binary_fake_source.c")
 +
 +    # Has sources, make this a normal library.
 +    if self.enable_condition:
@@ -684,7 +695,7 @@ index bd95917..c4e1274 100755
      }
  
    template = textwrap.dedent("""\
-@@ -257,6 +725,23 @@ class Converter(object):
+@@ -257,6 +736,23 @@ class Converter(object):
      project(upb)
      set(CMAKE_C_STANDARD 99)
  
@@ -708,7 +719,7 @@ index bd95917..c4e1274 100755
      # Prevent CMake from setting -rdynamic on Linux (!!).
      SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
      SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-@@ -291,10 +776,18 @@ class Converter(object):
+@@ -291,10 +787,18 @@ class Converter(object):
        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
      endif()
  
@@ -730,7 +741,7 @@ index bd95917..c4e1274 100755
        else()
          include(FetchContent)
          FetchContent_Declare(
-@@ -305,7 +798,7 @@ class Converter(object):
+@@ -305,7 +809,7 @@ class Converter(object):
          FetchContent_GetProperties(utf8_range)
          if(NOT utf8_range_POPULATED)
            FetchContent_Populate(utf8_range)
@@ -739,7 +750,7 @@ index bd95917..c4e1274 100755
          endif()
        endif()
      endif()
-@@ -316,10 +809,128 @@ class Converter(object):
+@@ -316,10 +820,128 @@ class Converter(object):
        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id")
      endif()
  
@@ -831,7 +842,7 @@ index bd95917..c4e1274 100755
 +        ${UPB_DESCRIPTOR_UPB_WELL_KNOWN_TYPES_SOURCES})
 +      target_include_directories(upb_well_known_types PUBLIC "\\$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/stage2/upb_well_known_types>")
 +      set_target_properties(upb_well_known_types PROPERTIES EXPORT_NAME "well_known_types")
-+      target_link_libraries(upb_well_known_types PUBLIC upb_upb upb_descriptor_upb_proto)
++      target_link_libraries(upb_well_known_types PUBLIC upb_descriptor_upb_proto)
 +    endif()
 +    include(GNUInstallDirs)
 +    install(
@@ -868,7 +879,7 @@ index bd95917..c4e1274 100755
    """)
  
  data = {}
-@@ -338,7 +949,13 @@ globs = GetDict(converter)
+@@ -338,7 +960,13 @@ globs = GetDict(converter)
  
  # We take the BUILD path as a command-line argument to ensure that we can find
  # it regardless of how exactly Bazel was invoked.
