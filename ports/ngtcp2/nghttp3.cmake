@@ -35,7 +35,7 @@ if(NOT TARGET nghttp3::nghttp3 AND NOT TARGET nghttp3::nghttp3_static)
     project_third_party_port_declare(
       nghttp3
       VERSION
-      "v1.4.0"
+      "v1.6.0"
       GIT_URL
       "https://github.com/ngtcp2/nghttp3.git"
       BUILD_OPTIONS
