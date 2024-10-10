@@ -9,13 +9,29 @@ include_guard(DIRECTORY)
 # The version is the same as in gRPC e4635f223e7d36dfbea3b722a4ca4807a7e882e2
 
 macro(PROJECT_THIRD_PARTY_UPB_IMPORT)
-  if(TARGET upb::upb OR TARGET protobuf::upb)
-    if(TARGET protobuf::upb)
-      message(STATUS "Dependency(${PROJECT_NAME}): upb using target protobuf::upb")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME protobuf::upb)
-    else()
+  if(TARGET upb::upb
+     OR TARGET protobuf::upb
+     OR TARGET protobuf::libupb
+     OR TARGET upb::upb_message
+     OR TARGET protobuf::upb_message)
+    if(TARGET upb::upb)
       message(STATUS "Dependency(${PROJECT_NAME}): upb using target upb::upb")
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME upb::upb)
+    elseif(TARGET upb::upb_message)
+      message(STATUS "Dependency(${PROJECT_NAME}): upb using target upb::upb_message")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME upb::upb_message)
+    elseif(TARGET protobuf::upb)
+      message(STATUS "Dependency(${PROJECT_NAME}): upb using target protobuf::upb")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME protobuf::upb)
+      add_library(upb::upb ALIAS protobuf::upb)
+    elseif(TARGET protobuf::libupb)
+      message(STATUS "Dependency(${PROJECT_NAME}): upb using target protobuf::libupb")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME protobuf::libupb)
+      add_library(upb::upb ALIAS protobuf::libupb)
+    else()
+      message(STATUS "Dependency(${PROJECT_NAME}): upb using target protobuf::upb_message")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME protobuf::upb_message)
+      add_library(upb::upb_message ALIAS protobuf::upb_message)
     endif()
 
     if(CMAKE_CROSSCOMPILING)
@@ -72,11 +88,18 @@ macro(PROJECT_THIRD_PARTY_UPB_IMPORT)
   endif()
 endmacro()
 
-if((NOT TARGET upb::upb AND NOT TARGET protobuf::upb) OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
+if((NOT TARGET upb::upb AND NOT TARGET upb::upb_message) OR NOT
+                                                            ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
   find_package(upb QUIET)
   project_third_party_upb_import()
 
-  if((NOT TARGET upb::upb AND NOT TARGET protobuf::upb) OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
+  if((NOT TARGET upb::upb
+      AND NOT TARGET protobuf::upb
+      AND NOT TARGET protobuf::libupb
+      AND NOT TARGET upb::upb_message
+      AND NOT TARGET protobuf::upb_message
+     )
+     OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
     find_package(PythonInterp)
     if(PYTHONINTERP_FOUND AND NOT Python_EXECUTABLE)
       set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
@@ -389,7 +412,11 @@ if((NOT TARGET upb::upb AND NOT TARGET protobuf::upb) OR NOT ATFRAMEWORK_CMAKE_T
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GIT_URL}")
 
-    if(TARGET upb::upb OR TARGET protobuf::upb)
+    if(TARGET upb::upb
+       OR TARGET protobuf::upb
+       OR TARGET protobuf::libupb
+       OR TARGET upb::upb_message
+       OR TARGET protobuf::upb_message)
       project_third_party_upb_import()
     endif()
   endif()
@@ -397,7 +424,11 @@ else()
   project_third_party_upb_import()
 endif()
 
-if(NOT TARGET upb::upb AND NOT TARGET protobuf::upb)
+if(NOT TARGET upb::upb
+   AND NOT TARGET protobuf::upb
+   AND NOT TARGET protobuf::libupb
+   AND NOT TARGET upb::upb_message
+   AND NOT TARGET protobuf::upb_message)
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE)
     project_build_tools_print_configure_log("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_BUILD_DIR}")
   endif()
