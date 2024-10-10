@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b7d6ee8..020e599 100644
+index b7d6ee8..a9cf559 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -146,12 +146,13 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/hiredis-config.cmake
@@ -26,7 +26,7 @@ index b7d6ee8..020e599 100644
      TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE OpenSSL::SSL)
      IF(WIN32)
 -        TARGET_LINK_LIBRARIES(hiredis_ssl PRIVATE hiredis)
-+        TARGET_LINK_LIBRARIES(hiredis_ssl PUBLIC hiredis)
++        TARGET_LINK_LIBRARIES(hiredis_ssl PUBLIC hiredis Bcrypt ws2_32 gdi32 advapi32 crypt32 user32)
      ENDIF()
      CONFIGURE_FILE(hiredis_ssl.pc.in hiredis_ssl.pc @ONLY)
  

@@ -130,6 +130,8 @@ jobs:
       - name: CI Job
         shell: bash
         run: |
+          # Patch for Imported target "gRPC::grpc" includes non-existent path
+          mkdir -p /usr/local/share/vcpkg/include
           bash ci/do_ci.sh gcc.vcpkg.test ;
       - name: Cache packages
         uses: actions/cache@v2
