@@ -88,17 +88,12 @@ macro(PROJECT_THIRD_PARTY_UPB_IMPORT)
   endif()
 endmacro()
 
-if((NOT TARGET upb::upb AND NOT TARGET upb::upb_message) OR NOT
-                                                            ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
+if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAMEOR NOT
+   ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
   find_package(upb QUIET)
   project_third_party_upb_import()
 
-  if((NOT TARGET upb::upb
-      AND NOT TARGET protobuf::upb
-      AND NOT TARGET protobuf::libupb
-      AND NOT TARGET upb::upb_message
-      AND NOT TARGET protobuf::upb_message
-     )
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME
      OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
     find_package(PythonInterp)
     if(PYTHONINTERP_FOUND AND NOT Python_EXECUTABLE)

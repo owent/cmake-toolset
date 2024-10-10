@@ -139,11 +139,14 @@ if(NOT TARGET gRPC::grpc++_alts
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
         if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
           # gRPC v1.60 do not support libressl now(missing X509_STORE_set_get_crl, X509_STORE_set_check_crl)
+          #[[
           if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_LIBRESSL)
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.67.0")
           else()
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.58.1")
           endif()
+          ]]
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.67.0")
         else()
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.2")
         endif()
