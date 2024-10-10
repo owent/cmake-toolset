@@ -326,7 +326,7 @@ index bd95917..81e8b38 100755
 +      if not os.path.exists("cc_binary_fake_source.c"):
 +        with open("cc_binary_fake_source.c", "w") as f:
 +          f.write("\n")
-+      found_files.append(os.getcwd() + "/cc_binary_fake_source.c")
++      found_files.append(os.getcwd().replace("\\", "/") + "/cc_binary_fake_source.c")
 +
 +    if self.enable_condition:
 +      self.converter.toplevel += "if (UPB_ENABLE_CODEGEN AND {0})\n".format(self.enable_condition)
@@ -635,7 +635,7 @@ index bd95917..81e8b38 100755
 +      if not os.path.exists("bootstrap_cc_binary_fake_source.c"):
 +        with open("bootstrap_cc_binary_fake_source.c", "w") as f:
 +          f.write("\n")
-+      found_files.append(os.getcwd() + "/bootstrap_cc_binary_fake_source.c")
++      found_files.append(os.getcwd().replace("\\", "/") + "/bootstrap_cc_binary_fake_source.c")
 +
 +    # Has sources, make this a normal library.
 +    if self.enable_condition:

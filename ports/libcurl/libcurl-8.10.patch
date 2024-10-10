@@ -12,7 +12,7 @@ index d268667..54d5cf1 100644
        ${CMAKE_BINARY_DIR}
        "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index aee20fe..17f664a 100644
+index aee20fe..1872f76 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -578,6 +578,7 @@ if(_use_core_foundation_and_core_services)
@@ -80,7 +80,7 @@ index aee20fe..17f664a 100644
      list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
      list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp2")
 +    if(WIN32)
-+      set(CMAKE_REQUIRED_LIBRARIES_CURL_BACKUP "${CMAKE_REQUIRED_LIBRARIES}")
++      cmake_push_check_state()
 +      set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBS}")
 +      check_type_size(ssize_t SIZEOF_SSIZE_T)
 +      if(NOT HAVE_SIZEOF_SSIZE_T)
@@ -102,7 +102,7 @@ index aee20fe..17f664a 100644
 +          add_definitions(-DNGHTTP2_STATICLIB=1)
 +        endif()
 +      endif()
-+      set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES_CURL_BACKUP}")
++      cmake_pop_check_state()
 +    endif()
    else()
      set(USE_NGHTTP2 OFF)
@@ -122,7 +122,7 @@ index aee20fe..17f664a 100644
    list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
 +  
-+    set(CMAKE_REQUIRED_LIBRARIES_CURL_BACKUP "${CMAKE_REQUIRED_LIBRARIES}")
++    cmake_push_check_state()
 +    set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBS}")
 +    check_symbol_exists(nghttp3_version "nghttp3/nghttp3.h" HAVE_NGHTTP3_DYNAMICLIB)
 +    if(NOT HAVE_NGHTTP3_DYNAMICLIB)
@@ -140,12 +140,12 @@ index aee20fe..17f664a 100644
 +        add_definitions(-DNGTCP2_STATICLIB=1)
 +      endif()
 +    endif()
-+    set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES_CURL_BACKUP}")
++    cmake_pop_check_state()
 +  endif()
  endif()
  
  option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
-@@ -913,9 +992,39 @@ if(USE_OPENSSL_QUIC)
+@@ -913,9 +992,38 @@ if(USE_OPENSSL_QUIC)
  
    find_package(NGHTTP3 REQUIRED)
    set(USE_NGHTTP3 ON)
@@ -161,7 +161,6 @@ index aee20fe..17f664a 100644
    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
 +
 +    cmake_push_check_state()
-+    set(CMAKE_REQUIRED_LIBRARIES_CURL_BACKUP "${CMAKE_REQUIRED_LIBRARIES}")
 +    set(CMAKE_REQUIRED_LIBRARIES "${CURL_LIBS}")
 +    check_symbol_exists(nghttp3_version "nghttp3/nghttp3.h" HAVE_NGHTTP3_DYNAMICLIB)
 +    if(NOT HAVE_NGHTTP3_DYNAMICLIB)
@@ -180,17 +179,27 @@ index aee20fe..17f664a 100644
 +        add_definitions(-DNGTCP2_STATICLIB=1)
 +      endif()
 +    endif()
-+    set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES_CURL_BACKUP}")
++    cmake_pop_check_state()
 +  endif()
  endif()
  
  if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
-@@ -943,7 +1052,7 @@ if(NOT CURL_DISABLE_LDAP)
+@@ -942,8 +1050,9 @@ if(NOT CURL_DISABLE_LDAP)
+ 
    # Now that we know, we are not using Windows LDAP...
    if(NOT USE_WIN32_LDAP)
++    cmake_push_check_state()
      # Check for LDAP
 -    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
 +    set(CMAKE_REQUIRED_LIBRARIES "${OPENSSL_LIBRARIES}")
      check_library_exists("${CMAKE_LDAP_LIB}" "ldap_init" "" HAVE_LIBLDAP)
      if(HAVE_LIBLDAP)
        check_library_exists("${CMAKE_LDAP_LIB};${CMAKE_LBER_LIB}" "ber_init" "" HAVE_LIBLBER)
+@@ -1024,6 +1133,7 @@ if(NOT CURL_DISABLE_LDAP)
+         set(HAVE_LDAP_SSL ON)
+       endif()
+     endif()
++    cmake_pop_check_state()
+   endif()
+ endif()
+ 
