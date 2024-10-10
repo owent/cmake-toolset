@@ -91,7 +91,9 @@ endmacro()
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME OR NOT
                                                               ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
   find_package(upb QUIET)
-  project_third_party_upb_import()
+  if(upb_FOUND)
+    project_third_party_upb_import()
+  endif()
 
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME
      OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)

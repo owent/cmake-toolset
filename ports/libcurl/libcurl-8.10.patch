@@ -1,16 +1,16 @@
 diff --git a/CMake/Macros.cmake b/CMake/Macros.cmake
-index d268667..b76fb8c 100644
+index d268667..54d5cf1 100644
 --- a/CMake/Macros.cmake
 +++ b/CMake/Macros.cmake
-@@ -59,7 +59,7 @@ macro(curl_internal_test _curl_test)
-       message(STATUS "Performing Test ${_curl_test} - Success")
-     else()
-       set(${_curl_test} "" CACHE INTERNAL "Curl test")
--      message(STATUS "Performing Test ${_curl_test} - Failed")
-+      message(STATUS "Performing Test ${_curl_test} - Failed : ${_curl_test_add_libraries}")
+@@ -46,7 +46,7 @@ macro(curl_internal_test _curl_test)
+         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
      endif()
-   endif()
- endmacro()
+ 
+-    message(STATUS "Performing Test ${_curl_test}")
++    message(STATUS "Performing Test ${_curl_test} : ${_curl_test_add_libraries}")
+     try_compile(${_curl_test}
+       ${CMAKE_BINARY_DIR}
+       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index aee20fe..17f664a 100644
 --- a/CMakeLists.txt
