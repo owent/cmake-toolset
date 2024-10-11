@@ -72,9 +72,11 @@ if(NOT TARGET Libnghttp2::libnghttp2)
         "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
         "-DENABLE_WERROR=OFF"
         "-DENABLE_DEBUG=OFF"
-        "-DENABLE_EXAMPLES=OFF"
         "-DENABLE_FAILMALLOC=OFF"
-        "-DENABLE_LIB_ONLY=ON"
+        "-DENABLE_APP=OFF"
+        "-DENABLE_HPACK_TOOLS=OFF"
+        "-DENABLE_EXAMPLES=OFF"
+        "-DBUILD_TESTING=OFF"
         "-DENABLE_ASIO_LIB=OFF")
 
     if(VCPKG_CRT_LINKAGE AND VCPKG_CRT_LINKAGE STREQUAL "static")
@@ -102,7 +104,7 @@ if(NOT TARGET Libnghttp2::libnghttp2)
     project_third_party_port_declare(
       nghttp2
       VERSION
-      "v1.62.1" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
+      "v1.63.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
       GIT_URL
       "https://github.com/nghttp2/nghttp2.git"
       BUILD_OPTIONS

@@ -894,11 +894,11 @@ index bd95917..81e8b38 100755
  
  with open(sys.argv[2], "w") as f:
    f.write(converter.convert())
-diff --git a/upb/text/encode.c b/upb/text/encode.c
-index 055d005..ca84083 100644
---- a/upb/text/encode.c
-+++ b/upb/text/encode.c
-@@ -385,7 +385,7 @@ static void txtenc_map(txtenc* e, const upb_Map* map, const upb_FieldDef* f) {
+diff --git a/upb/text/internal/encode.c b/upb/text/internal/encode.c
+index fc9cc6f..c58c2de 100644
+--- a/upb/text/internal/encode.c
++++ b/upb/text/internal/encode.c
+@@ -25,7 +25,7 @@
  #define CHK(x)      \
    do {              \
      if (!(x)) {     \

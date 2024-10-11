@@ -170,12 +170,20 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_WITH_LEGACY_BINDING_DIR)
 endif()
 
 target_include_directories(lupb PUBLIC "$<BUILD_INTERFACE:${UPB_BINDING_LUA_SRC_DIR}>" "$<INSTALL_INTERFACE:share/upb>")
-if(TARGET upb::upb)
-  target_link_libraries(lupb PUBLIC upb::json upb::reflection upb::upb ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
+if(TARGET upb::upb OR TARGET upb::upb_base)
+  set(UPB_BINDING_LUA_TEST_DEP_TARGETS upb::upb upb::json upb::upb_json upb::reflection upb::upb_reflection
+                                       upb::upb_text)
 else()
-  target_link_libraries(lupb PUBLIC protobuf::upb_json protobuf::upb_reflection protobuf::upb_text protobuf::upb
-                                    ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
+  set(UPB_BINDING_LUA_TEST_DEP_TARGETS protobuf::libupb protobuf::upb_json protobuf::upb_reflection protobuf::upb_text)
 endif()
+
+foreach(DEP_TARGET ${UPB_BINDING_LUA_TEST_DEP_TARGETS})
+  if(TARGET ${DEP_TARGET})
+    list(APPEND UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME ${DEP_TARGET})
+  endif()
+endforeach()
+
+target_link_libraries(lupb PUBLIC ${UPB_BINDING_LUA_THIRD_PARTY_LUA_LINK_NAME})
 
 add_library(upb::lupb ALIAS lupb)
 add_library(protobuf::lupb ALIAS lupb)

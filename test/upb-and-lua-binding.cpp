@@ -8,7 +8,7 @@
 // #include "upb/def.hpp"
 // #include "upb/json_decode.h"
 // #include "upb/json_encode.h"
-#include "upb/upb.hpp"
+#include "upb/mem/arena.hpp"
 
 #include "test_pb.upb.h"
 #include "test_pb.upbdefs.h"

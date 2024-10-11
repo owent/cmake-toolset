@@ -1,0 +1,131 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0a128bf..a0aa19a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -581,3 +581,10 @@ if(WIN32)
+   target_link_libraries(crypto ws2_32)
+ endif()
+ 
++include(GNUInstallDirs)
++install(TARGETS bssl crypto ssl
++  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
++
++install(DIRECTORY src/include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ce60e8d..889922e 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -105,7 +105,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
+ if(CMAKE_COMPILER_IS_GNUCXX OR CLANG)
+   # Note clang-cl is odd and sets both CLANG and MSVC. We base our configuration
+   # primarily on our normal Clang one.
+-  set(C_CXX_FLAGS "-Werror -Wformat=2 -Wsign-compare -Wwrite-strings -Wvla -Wshadow -Wtype-limits -Wmissing-field-initializers")
++  set(C_CXX_FLAGS "-Wformat=2 -Wsign-compare -Wwrite-strings -Wvla -Wshadow -Wtype-limits -Wmissing-field-initializers")
+   if(MSVC)
+     # clang-cl sets different default warnings than clang. It also treats -Wall
+     # as -Weverything, to match MSVC. Instead -W3 is the alias for -Wall.
+@@ -192,12 +192,12 @@ elseif(MSVC)
+       )
+   string(REPLACE "C" " -wd" MSVC_DISABLED_WARNINGS_STR
+                             ${MSVC_DISABLED_WARNINGS_LIST})
+-  set(CMAKE_C_FLAGS   "-utf-8 -W4 -WX ${MSVC_DISABLED_WARNINGS_STR}")
++  set(CMAKE_C_FLAGS   "-utf-8 -W4 ${MSVC_DISABLED_WARNINGS_STR}")
+   # Without /Zc:__cplusplus, MSVC does not define the right value for
+   # __cplusplus. See https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
+   # If this becomes too problematic for downstream code, we can look at
+   # _MSVC_LANG.
+-  set(CMAKE_CXX_FLAGS "-utf-8 -W4 -WX ${MSVC_DISABLED_WARNINGS_STR} -Zc:__cplusplus")
++  set(CMAKE_CXX_FLAGS "-utf-8 -W4 ${MSVC_DISABLED_WARNINGS_STR} -Zc:__cplusplus")
+ endif()
+ 
+ if(WIN32)
+@@ -463,7 +463,7 @@ endif()
+ # Add minimal googletest targets. The provided one has many side-effects, and
+ # googletest has a very straightforward build.
+ add_library(
+-  boringssl_gtest
++  boringssl_gtest STATIC
+   third_party/googletest/googlemock/src/gmock-all.cc
+   third_party/googletest/googletest/src/gtest-all.cc
+ )
+diff --git a/src/cmake/OpenSSLConfig.cmake b/src/cmake/OpenSSLConfig.cmake
+index 3ebaf19..b65bdf6 100644
+--- a/src/cmake/OpenSSLConfig.cmake
++++ b/src/cmake/OpenSSLConfig.cmake
+@@ -2,29 +2,67 @@ include(${CMAKE_CURRENT_LIST_DIR}/OpenSSLTargets.cmake)
+ 
+ # Recursively collect dependency locations for the imported targets.
+ macro(_openssl_config_libraries libraries target)
++  get_target_property(_IS_IMPORTED_TARGET ${target} IMPORTED)
++  if(_IS_IMPORTED_TARGET)
++    get_property(
++      _LOC
++      TARGET ${target}
++      PROPERTY IMPORTED_LOCATION)
++    if(NOT _LOC)
++      get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
++      get_property(
++        _LOC
++        TARGET ${target}
++        PROPERTY IMPORTED_LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
++    endif()
++  else()
++    get_property(
++      _LOC
++      TARGET ${target}
++      PROPERTY LOCATION)
++    if(NOT _LOC)
++      get_target_property(_LOC_IMPORTED_CONFIGURATIONS ${target} IMPORTED_CONFIGURATIONS)
++      get_property(
++        _LOC
++        TARGET ${target}
++        PROPERTY LOCATION_${_LOC_IMPORTED_CONFIGURATIONS})
++    endif()
++  endif()
++  if(_LOC)
++    list(APPEND ${libraries} ${_LOC})
++  endif()
+   get_property(_DEPS TARGET ${target} PROPERTY INTERFACE_LINK_LIBRARIES)
+   foreach(_DEP ${_DEPS})
+     if(TARGET ${_DEP})
+       _openssl_config_libraries(${libraries} ${_DEP})
+-    else()
++      elseif(_DEP)
+       list(APPEND ${libraries} ${_DEP})
+     endif()
+   endforeach()
+-  get_property(_LOC TARGET ${target} PROPERTY LOCATION)
+-  list(APPEND ${libraries} ${_LOC})
+ endmacro()
+ 
+ set(OPENSSL_FOUND YES)
+-get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::SSL PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+-get_property(OPENSSL_CRYPTO_LIBRARY TARGET OpenSSL::Crypto PROPERTY LOCATION)
++get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::Crypto PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
++if(NOT OPENSSL_INCLUDE_DIR)
++  get_property(OPENSSL_INCLUDE_DIR TARGET OpenSSL::SSL PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
++endif()
++get_property(OPENSSL_CRYPTO_LIBRARY TARGET OpenSSL::Crypto PROPERTY IMPORTED_LOCATION)
++if(NOT OPENSSL_CRYPTO_LIBRARY)
++  get_target_property(OPENSSL_CRYPTO_IMPORTED_CONFIGURATIONS OpenSSL::Crypto IMPORTED_CONFIGURATIONS)
++  get_property(OPENSSL_CRYPTO_LIBRARY TARGET OpenSSL::Crypto PROPERTY IMPORTED_LOCATION_${OPENSSL_CRYPTO_IMPORTED_CONFIGURATIONS})
++endif()
+ _openssl_config_libraries(OPENSSL_CRYPTO_LIBRARIES OpenSSL::Crypto)
+ list(REMOVE_DUPLICATES OPENSSL_CRYPTO_LIBRARIES)
+ 
+-get_property(OPENSSL_SSL_LIBRARY TARGET OpenSSL::Crypto PROPERTY LOCATION)
++get_property(OPENSSL_SSL_LIBRARY TARGET OpenSSL::SSL PROPERTY IMPORTED_LOCATION)
++if(NOT OPENSSL_SSL_LIBRARY)
++  get_target_property(OPENSSL_SSL_IMPORTED_CONFIGURATIONS OpenSSL::SSL IMPORTED_CONFIGURATIONS)
++  get_property(OPENSSL_SSL_LIBRARY TARGET OpenSSL::SSL PROPERTY IMPORTED_LOCATION_${OPENSSL_SSL_IMPORTED_CONFIGURATIONS})
++endif()
+ _openssl_config_libraries(OPENSSL_SSL_LIBRARIES OpenSSL::SSL)
+ list(REMOVE_DUPLICATES OPENSSL_SSL_LIBRARIES)
+ 
+-set(OPENSSL_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
++set(OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARIES})
+ list(REMOVE_DUPLICATES OPENSSL_LIBRARIES)
+ 
+ set(_DEP)
