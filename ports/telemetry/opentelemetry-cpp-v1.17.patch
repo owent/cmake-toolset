@@ -54,46 +54,62 @@ index 4b25b7c..0c2f1b1 100644
  }  // namespace nostd
  OPENTELEMETRY_END_NAMESPACE
 diff --git a/exporters/memory/src/in_memory_metric_exporter_factory.cc b/exporters/memory/src/in_memory_metric_exporter_factory.cc
-index f2577c4..40d96ca 100644
+index f2577c4..aca2cce 100644
 --- a/exporters/memory/src/in_memory_metric_exporter_factory.cc
 +++ b/exporters/memory/src/in_memory_metric_exporter_factory.cc
-@@ -49,7 +49,7 @@ class InMemoryMetricExporter final : public sdk::metrics::PushMetricExporter
+@@ -3,6 +3,7 @@
+ 
+ #include "opentelemetry/exporters/memory/in_memory_metric_exporter_factory.h"
+ #include "opentelemetry/exporters/memory/in_memory_metric_data.h"
++#include "opentelemetry/nostd/unique_ptr.h"
+ #include "opentelemetry/sdk/common/global_log_handler.h"
+ #include "opentelemetry/sdk/metrics/export/metric_producer.h"
+ #include "opentelemetry/sdk/metrics/push_metric_exporter.h"
+@@ -49,7 +50,7 @@ class InMemoryMetricExporter final : public sdk::metrics::PushMetricExporter
        OTEL_INTERNAL_LOG_ERROR("[In Memory Metric Exporter] Exporting failed, exporter is shutdown");
        return ExportResult::kFailure;
      }
 -    data_->Add(std::make_unique<ResourceMetrics>(data));
-+    data_->Add(nostd::make_unique<ResourceMetrics>(data));
++    data_->Add(opentelemetry::nostd::make_unique<ResourceMetrics>(data));
      return ExportResult::kSuccess;
    }
  
-@@ -85,7 +85,7 @@ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
+@@ -85,7 +86,7 @@ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
      const std::shared_ptr<InMemoryMetricData> &data,
      const AggregationTemporalitySelector &temporality)
  {
 -  return std::make_unique<InMemoryMetricExporter>(data, temporality);
-+  return nostd::make_unique<InMemoryMetricExporter>(data, temporality);
++  return opentelemetry::nostd::make_unique<InMemoryMetricExporter>(data, temporality);
  }
  
  }  // namespace memory
 diff --git a/exporters/memory/test/in_memory_metric_data_test.cc b/exporters/memory/test/in_memory_metric_data_test.cc
-index ffaba2c..fabc240 100644
+index ffaba2c..c2df832 100644
 --- a/exporters/memory/test/in_memory_metric_data_test.cc
 +++ b/exporters/memory/test/in_memory_metric_data_test.cc
-@@ -23,7 +23,7 @@ TEST(InMemoryMetricDataTest, CircularBuffer)
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: Apache-2.0
+ 
+ #include "opentelemetry/exporters/memory/in_memory_metric_data.h"
++#include "opentelemetry/nostd/unique_ptr.h"
+ #include "opentelemetry/sdk/instrumentationscope/instrumentation_scope.h"
+ #include "opentelemetry/sdk/metrics/export/metric_producer.h"
+ #include "opentelemetry/sdk/resource/resource.h"
+@@ -23,7 +24,7 @@ TEST(InMemoryMetricDataTest, CircularBuffer)
  {
    CircularBufferInMemoryMetricData buf(10);
    Resource resource = Resource::GetEmpty();
 -  buf.Add(std::make_unique<ResourceMetrics>(
-+  buf.Add(nostd::make_unique<ResourceMetrics>(
++  buf.Add(opentelemetry::nostd::make_unique<ResourceMetrics>(
        &resource, std::vector<ScopeMetrics>{{nullptr, std::vector<MetricData>{}}}));
    EXPECT_EQ((*buf.Get().begin())->resource_, &resource);
  }
-@@ -45,7 +45,7 @@ TEST(InMemoryMetricDataTest, SimpleAggregate)
+@@ -45,7 +46,7 @@ TEST(InMemoryMetricDataTest, SimpleAggregate)
    md.instrument_descriptor.name_ = "my-metric";
    md.point_data_attr_.push_back(pda);
  
 -  agg.Add(std::make_unique<ResourceMetrics>(
-+  agg.Add(nostd::make_unique<ResourceMetrics>(
++  agg.Add(opentelemetry::nostd::make_unique<ResourceMetrics>(
        &resource, std::vector<ScopeMetrics>{{scope.get(), std::vector<MetricData>{md}}}));
    auto it = agg.Get("my-scope", "my-metric").begin();
  
