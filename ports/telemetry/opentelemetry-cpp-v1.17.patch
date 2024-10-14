@@ -54,7 +54,7 @@ index 4b25b7c..0c2f1b1 100644
  }  // namespace nostd
  OPENTELEMETRY_END_NAMESPACE
 diff --git a/exporters/memory/src/in_memory_metric_exporter_factory.cc b/exporters/memory/src/in_memory_metric_exporter_factory.cc
-index f2577c4..5f1f716 100644
+index f2577c4..9d36047 100644
 --- a/exporters/memory/src/in_memory_metric_exporter_factory.cc
 +++ b/exporters/memory/src/in_memory_metric_exporter_factory.cc
 @@ -3,6 +3,7 @@
@@ -74,7 +74,15 @@ index f2577c4..5f1f716 100644
      return ExportResult::kSuccess;
    }
  
-@@ -85,7 +86,7 @@ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
+@@ -78,14 +79,14 @@ class InMemoryMetricExporter final : public sdk::metrics::PushMetricExporter
+ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
+     const std::shared_ptr<InMemoryMetricData> &data)
+ {
+-  return Create(data, [](auto) { return AggregationTemporality::kCumulative; });
++  return Create(data, [](sdk::metrics::InstrumentType) { return AggregationTemporality::kCumulative; });
+ }
+ 
+ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
      const std::shared_ptr<InMemoryMetricData> &data,
      const AggregationTemporalitySelector &temporality)
  {
