@@ -88,7 +88,7 @@ static void OpentelemetryInitTracer() {
   auto provider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor));
   // Set the global trace provider.
   opentelemetry::trace::Provider::SetTracerProvider(
-      opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer>{provider.release()});
+      opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>{provider.release()});
 }
 
 opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer> GetTracer() {
