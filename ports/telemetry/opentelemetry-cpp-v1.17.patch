@@ -17,3 +17,133 @@ index fd41fa7..9edd3a0 100644
  
  function(install_windows_deps)
    # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
+diff --git a/api/include/opentelemetry/nostd/unique_ptr.h b/api/include/opentelemetry/nostd/unique_ptr.h
+index b3f5e61..0b5bd55 100644
+--- a/api/include/opentelemetry/nostd/unique_ptr.h
++++ b/api/include/opentelemetry/nostd/unique_ptr.h
+@@ -175,6 +175,12 @@ bool operator!=(std::nullptr_t, const unique_ptr<T> &rhs) noexcept
+ {
+   return nullptr != rhs.get();
+ }
++
++template <class T, class... Args>
++unique_ptr<T> make_unique(Args &&...args) {
++  return unique_ptr<T>(new T(std::forward<Args>(args)...));
++}
++
+ }  // namespace nostd
+ OPENTELEMETRY_END_NAMESPACE
+ #endif /* OPENTELEMETRY_HAVE_STD_UNIQUE_PTR */
+diff --git a/api/include/opentelemetry/std/unique_ptr.h b/api/include/opentelemetry/std/unique_ptr.h
+index 4b25b7c..0c2f1b1 100644
+--- a/api/include/opentelemetry/std/unique_ptr.h
++++ b/api/include/opentelemetry/std/unique_ptr.h
+@@ -18,5 +18,14 @@ namespace nostd
+ template <class... _Types>
+ using unique_ptr = std::unique_ptr<_Types...>;
+ 
++#  if (defined(__cplusplus) && __cplusplus >= 201402L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L)
++using std::make_unique;
++#  else
++template <class T, class... Args>
++unique_ptr<T> make_unique(Args &&...args) {
++  return unique_ptr<T>(new T(std::forward<Args>(args)...));
++}
++#  endif
++
+ }  // namespace nostd
+ OPENTELEMETRY_END_NAMESPACE
+diff --git a/exporters/memory/src/in_memory_metric_data.cc b/exporters/memory/src/in_memory_metric_data.cc
+index 2a77e0b..87015cc 100644
+--- a/exporters/memory/src/in_memory_metric_data.cc
++++ b/exporters/memory/src/in_memory_metric_data.cc
+@@ -31,7 +31,7 @@ void SimpleAggregateInMemoryMetricData::Add(std::unique_ptr<ResourceMetrics> res
+       const auto &metric = m.instrument_descriptor.name_;
+       for (const auto &pda : m.point_data_attr_)
+       {
+-        data_[{scope, metric}].insert({pda.attributes, pda.point_data});
++        data_[std::tuple<std::string, std::string>{scope, metric}].insert({pda.attributes, pda.point_data});
+       }
+     }
+   }
+@@ -41,7 +41,7 @@ const SimpleAggregateInMemoryMetricData::AttributeToPoint &SimpleAggregateInMemo
+     const std::string &scope,
+     const std::string &metric)
+ {
+-  return data_[{scope, metric}];
++  return data_[std::tuple<std::string, std::string>{scope, metric}];
+ }
+ 
+ void SimpleAggregateInMemoryMetricData::Clear()
+diff --git a/exporters/memory/src/in_memory_metric_exporter_factory.cc b/exporters/memory/src/in_memory_metric_exporter_factory.cc
+index f2577c4..9d36047 100644
+--- a/exporters/memory/src/in_memory_metric_exporter_factory.cc
++++ b/exporters/memory/src/in_memory_metric_exporter_factory.cc
+@@ -3,6 +3,7 @@
+ 
+ #include "opentelemetry/exporters/memory/in_memory_metric_exporter_factory.h"
+ #include "opentelemetry/exporters/memory/in_memory_metric_data.h"
++#include "opentelemetry/nostd/unique_ptr.h"
+ #include "opentelemetry/sdk/common/global_log_handler.h"
+ #include "opentelemetry/sdk/metrics/export/metric_producer.h"
+ #include "opentelemetry/sdk/metrics/push_metric_exporter.h"
+@@ -49,7 +50,7 @@ class InMemoryMetricExporter final : public sdk::metrics::PushMetricExporter
+       OTEL_INTERNAL_LOG_ERROR("[In Memory Metric Exporter] Exporting failed, exporter is shutdown");
+       return ExportResult::kFailure;
+     }
+-    data_->Add(std::make_unique<ResourceMetrics>(data));
++    data_->Add(std::unique_ptr<ResourceMetrics>(new ResourceMetrics{data}));
+     return ExportResult::kSuccess;
+   }
+ 
+@@ -78,14 +79,14 @@ class InMemoryMetricExporter final : public sdk::metrics::PushMetricExporter
+ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
+     const std::shared_ptr<InMemoryMetricData> &data)
+ {
+-  return Create(data, [](auto) { return AggregationTemporality::kCumulative; });
++  return Create(data, [](sdk::metrics::InstrumentType) { return AggregationTemporality::kCumulative; });
+ }
+ 
+ std::unique_ptr<PushMetricExporter> InMemoryMetricExporterFactory::Create(
+     const std::shared_ptr<InMemoryMetricData> &data,
+     const AggregationTemporalitySelector &temporality)
+ {
+-  return std::make_unique<InMemoryMetricExporter>(data, temporality);
++  return std::unique_ptr<InMemoryMetricExporter>(new InMemoryMetricExporter{data, temporality});
+ }
+ 
+ }  // namespace memory
+diff --git a/exporters/memory/test/in_memory_metric_data_test.cc b/exporters/memory/test/in_memory_metric_data_test.cc
+index ffaba2c..342c201 100644
+--- a/exporters/memory/test/in_memory_metric_data_test.cc
++++ b/exporters/memory/test/in_memory_metric_data_test.cc
+@@ -2,6 +2,7 @@
+ // SPDX-License-Identifier: Apache-2.0
+ 
+ #include "opentelemetry/exporters/memory/in_memory_metric_data.h"
++#include "opentelemetry/nostd/unique_ptr.h"
+ #include "opentelemetry/sdk/instrumentationscope/instrumentation_scope.h"
+ #include "opentelemetry/sdk/metrics/export/metric_producer.h"
+ #include "opentelemetry/sdk/resource/resource.h"
+@@ -23,8 +24,8 @@ TEST(InMemoryMetricDataTest, CircularBuffer)
+ {
+   CircularBufferInMemoryMetricData buf(10);
+   Resource resource = Resource::GetEmpty();
+-  buf.Add(std::make_unique<ResourceMetrics>(
+-      &resource, std::vector<ScopeMetrics>{{nullptr, std::vector<MetricData>{}}}));
++  buf.Add(std::unique_ptr<ResourceMetrics>(new ResourceMetrics{
++      &resource, std::vector<ScopeMetrics>{{nullptr, std::vector<MetricData>{}}}}));
+   EXPECT_EQ((*buf.Get().begin())->resource_, &resource);
+ }
+ 
+@@ -45,8 +46,8 @@ TEST(InMemoryMetricDataTest, SimpleAggregate)
+   md.instrument_descriptor.name_ = "my-metric";
+   md.point_data_attr_.push_back(pda);
+ 
+-  agg.Add(std::make_unique<ResourceMetrics>(
+-      &resource, std::vector<ScopeMetrics>{{scope.get(), std::vector<MetricData>{md}}}));
++  agg.Add(std::unique_ptr<ResourceMetrics>(new ResourceMetrics{
++      &resource, std::vector<ScopeMetrics>{{scope.get(), std::vector<MetricData>{md}}}}));
+   auto it = agg.Get("my-scope", "my-metric").begin();
+ 
+   auto saved_point = opentelemetry::nostd::get<SumPointData>(it->second);
