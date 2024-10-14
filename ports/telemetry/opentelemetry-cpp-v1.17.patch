@@ -53,6 +53,28 @@ index 4b25b7c..0c2f1b1 100644
 +
  }  // namespace nostd
  OPENTELEMETRY_END_NAMESPACE
+diff --git a/exporters/memory/src/in_memory_metric_data.cc b/exporters/memory/src/in_memory_metric_data.cc
+index 2a77e0b..87015cc 100644
+--- a/exporters/memory/src/in_memory_metric_data.cc
++++ b/exporters/memory/src/in_memory_metric_data.cc
+@@ -31,7 +31,7 @@ void SimpleAggregateInMemoryMetricData::Add(std::unique_ptr<ResourceMetrics> res
+       const auto &metric = m.instrument_descriptor.name_;
+       for (const auto &pda : m.point_data_attr_)
+       {
+-        data_[{scope, metric}].insert({pda.attributes, pda.point_data});
++        data_[std::tuple<std::string, std::string>{scope, metric}].insert({pda.attributes, pda.point_data});
+       }
+     }
+   }
+@@ -41,7 +41,7 @@ const SimpleAggregateInMemoryMetricData::AttributeToPoint &SimpleAggregateInMemo
+     const std::string &scope,
+     const std::string &metric)
+ {
+-  return data_[{scope, metric}];
++  return data_[std::tuple<std::string, std::string>{scope, metric}];
+ }
+ 
+ void SimpleAggregateInMemoryMetricData::Clear()
 diff --git a/exporters/memory/src/in_memory_metric_exporter_factory.cc b/exporters/memory/src/in_memory_metric_exporter_factory.cc
 index f2577c4..9d36047 100644
 --- a/exporters/memory/src/in_memory_metric_exporter_factory.cc
