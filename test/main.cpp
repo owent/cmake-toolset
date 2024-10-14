@@ -5,12 +5,13 @@
 
 #if defined(HAVE_OPENTELEMETRY_CPP) && HAVE_OPENTELEMETRY_CPP
 #  include "opentelemetry/exporters/ostream/span_exporter_factory.h"
+#  include "opentelemetry/sdk/trace/batch_span_processor.h"
 #  include "opentelemetry/sdk/trace/batch_span_processor_factory.h"
 #  include "opentelemetry/sdk/trace/batch_span_processor_options.h"
-#  include "opentelemetry/sdk/trace/tracer_provider_factory.h"
-#  include "opentelemetry/sdk/trace/batch_span_processor.h"
 #  include "opentelemetry/sdk/trace/exporter.h"
+#  include "opentelemetry/sdk/trace/tracer_provider_factory.h"
 #  include "opentelemetry/trace/provider.h"
+
 #endif
 
 #if defined(HAVE_PROTOBUF) && HAVE_PROTOBUF
@@ -86,7 +87,8 @@ static void OpentelemetryInitTracer() {
 
   auto provider = opentelemetry::sdk::trace::TracerProviderFactory::Create(std::move(processor));
   // Set the global trace provider.
-  opentelemetry::trace::Provider::SetTracerProvider(std::move(provider));
+  opentelemetry::trace::Provider::SetTracerProvider(
+      opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer>{provider.release()});
 }
 
 opentelemetry::nostd::shared_ptr<opentelemetry::trace::Tracer> GetTracer() {
