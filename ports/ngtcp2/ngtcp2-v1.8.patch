@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5abc457..9ced5ec 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -335,7 +335,7 @@ if(APPLE)
+   add_definitions(-D__APPLE_USE_RFC_3542)
+ endif()
+ 
+-if(ENABLE_SHARED_LIB AND ENABLE_STATIC_LIB AND MSVC AND NOT STATIC_LIB_SUFFIX)
++if(ENABLE_SHARED_LIB AND ENABLE_STATIC_LIB AND NOT STATIC_LIB_SUFFIX)
+   set(STATIC_LIB_SUFFIX "_static")
+ endif()
+ 
+@@ -353,7 +353,7 @@ if(BUILD_TESTING)
+ endif()
+ add_subdirectory(crypto)
+ add_subdirectory(third-party)
+-add_subdirectory(examples)
++# add_subdirectory(examples)
+ 
+ 
+ string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
