@@ -17,3 +17,16 @@ index 177296d..9df246b 100644
  
  function(install_windows_deps)
    # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
+diff --git a/exporters/elasticsearch/src/es_log_recordable.cc b/exporters/elasticsearch/src/es_log_recordable.cc
+index 3412a8c..bfa5518 100644
+--- a/exporters/elasticsearch/src/es_log_recordable.cc
++++ b/exporters/elasticsearch/src/es_log_recordable.cc
+@@ -177,7 +177,7 @@ void ElasticSearchRecordable::SetTimestamp(
+ 
+   // If built with with at least cpp 20 then use std::format
+   // Otherwise use the old style to format the timestamp in UTC
+-#if __cplusplus >= 202002L
++#if __cplusplus >= 202002L && false
+   const std::string dateStr = std::format("{:%FT%T%Ez}", timePoint);
+ #else
+   const static int dateToSecondsSize = 19;
