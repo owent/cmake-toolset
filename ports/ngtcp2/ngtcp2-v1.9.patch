@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 53a4255..a1abb6f 100644
+index 53a4255..af9fa4c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -149,7 +149,7 @@ if(OPENSSL_FOUND)
+     set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+     set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+     if(WIN32)
+-      set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}" "ws2_32" "bcrypt")
++      set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}" "ws2_32" "bcrypt" "Crypt32")
+     endif()
+     check_symbol_exists(SSL_provide_quic_data "openssl/ssl.h" HAVE_SSL_PROVIDE_QUIC_DATA)
+     if(NOT HAVE_SSL_PROVIDE_QUIC_DATA)
 @@ -337,7 +337,7 @@ if(APPLE)
    add_definitions(-D__APPLE_USE_RFC_3542)
  endif()
