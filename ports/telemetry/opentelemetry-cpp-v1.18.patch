@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 177296d..9df246b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -306,6 +306,14 @@ if(WITH_EXAMPLES_HTTP AND NOT WITH_EXAMPLES)
+ endif()
+ 
+ find_package(Threads)
++find_package(ZLIB QUIET)
++find_package(zstd QUIET)
++find_package(c-ares QUIET)
++find_package(OpenSSL QUIET)
++find_package(MbedTLS QUIET)
++find_package(Libnghttp3 QUIET)
++find_package(Libngtcp2 QUIET)
++find_package(Libnghttp2 QUIET)
+ 
+ function(install_windows_deps)
+   # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing

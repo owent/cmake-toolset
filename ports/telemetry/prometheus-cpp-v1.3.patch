@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 949c146..1d85bae 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -127,6 +127,20 @@ endif()
+ add_subdirectory(core)
+ add_subdirectory(util)
+ 
++if(ENABLE_PULL OR ENABLE_PUSH)
++  find_package(Threads)
++  find_package(ZLIB QUIET)
++  find_package(zstd QUIET)
++  find_package(c-ares QUIET)
++  find_package(Libnghttp3 QUIET)
++  find_package(Libngtcp2 QUIET)
++  find_package(Libnghttp2 QUIET)
++  if(THIRDPARTY_CIVETWEB_WITH_SSL)
++    find_package(OpenSSL QUIET)
++    find_package(MbedTLS QUIET)
++  endif()
++endif()
++
+ if(ENABLE_PULL)
+   add_subdirectory(pull)
+ endif()
+diff --git a/push/CMakeLists.txt b/push/CMakeLists.txt
+index f6110b1..380fb0f 100644
+--- a/push/CMakeLists.txt
++++ b/push/CMakeLists.txt
+@@ -1,4 +1,9 @@
+ 
++find_package(zstd QUIET)
++find_package(c-ares QUIET)
++find_package(Libnghttp3 QUIET)
++find_package(Libngtcp2 QUIET)
++find_package(Libnghttp2 QUIET)
+ find_package(CURL REQUIRED)
+ 
+ add_library(push
