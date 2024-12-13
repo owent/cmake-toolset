@@ -6,6 +6,12 @@ on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#web
   pull_request:
     branches: [main]
 
+env:
+  CMAKE_FIND_ROOT_PATH_MODE_PROGRAM: NEVER
+  CMAKE_FIND_ROOT_PATH_MODE_LIBRARY: ONLY
+  CMAKE_FIND_ROOT_PATH_MODE_INCLUDE: ONLY
+  CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
+
 jobs:
   format:
     name: Format
@@ -244,11 +250,6 @@ jobs:
         uses: actions/checkout@v4
       - name: CI Job
         shell: bash
-        env:
-          CMAKE_FIND_ROOT_PATH_MODE_PROGRAM: NEVER
-          CMAKE_FIND_ROOT_PATH_MODE_LIBRARY: ONLY
-          CMAKE_FIND_ROOT_PATH_MODE_INCLUDE: ONLY
-          CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
         run: |
           # The OpenSSL config package in apple ci job is break
           if [ -e /opt/homebrew/lib/cmake/OpenSSL ]; then
