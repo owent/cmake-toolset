@@ -102,11 +102,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
             "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS} -fvisibility=hidden")
         set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS
             "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_CXX_FLAGS} -fvisibility=hidden")
+      elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+        # Compile upb as c++ codes
+        project_build_tools_push_patch_inherit_compile_flags_state()
+        set(PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS
+            "${PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_CMAKE_C_FLAGS} /TP")
       endif()
     endif()
     project_build_tools_append_cmake_options_for_lib(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_FLAG_OPTIONS)
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VISIBILITY_HIDDEN)
       if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang|Clang|GNU")
+        project_build_tools_pop_patch_compile_flags_state()
+      elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         project_build_tools_pop_patch_compile_flags_state()
       endif()
     endif()
