@@ -280,6 +280,12 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
      <UseStructuredOutput>false</UseStructuredOutput>
   </PropertyGroup>
 </Project>" > Directory.Build.props
+  if(Test-Path "$ENV:VCPKG_INSTALLATION_ROOT/buildtrees") {
+    Remove-Item -Recurse -Force "$ENV:VCPKG_INSTALLATION_ROOT/buildtrees"
+  }
+  if(Test-Path "$ENV:VCPKG_INSTALLATION_ROOT/packages") {
+    Remove-Item -Recurse -Force "$ENV:VCPKG_INSTALLATION_ROOT/packages"
+  }
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
     -DVCPKG_TARGET_TRIPLET=x64-windows-static-md "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" `
     "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON" $ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS
