@@ -94,8 +94,8 @@ if(NOT TARGET Libnghttp2::libnghttp2)
            ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME})
       include(CheckSymbolExists)
       check_symbol_exists(SSL_provide_quic_data "openssl/ssl.h"
-                          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_HAVE_SSL_IS_QUIC)
-      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_HAVE_SSL_IS_QUIC)
+                          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_HAVE_SSL_PROVIDE_QUIC_DATA)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_HAVE_SSL_PROVIDE_QUIC_DATA)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_DEFAULT_BUILD_OPTIONS "-DENABLE_HTTP3=ON")
       endif()
       cmake_pop_check_state()
@@ -104,7 +104,7 @@ if(NOT TARGET Libnghttp2::libnghttp2)
     project_third_party_port_declare(
       nghttp2
       VERSION
-      "v1.63.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
+      "v1.64.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
       GIT_URL
       "https://github.com/nghttp2/nghttp2.git"
       BUILD_OPTIONS

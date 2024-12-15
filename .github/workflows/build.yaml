@@ -5,6 +5,8 @@ on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#web
     branches: [main]
   pull_request:
     branches: [main]
+env:
+  CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
 
 jobs:
   format:
@@ -134,7 +136,7 @@ jobs:
           mkdir -p /usr/local/share/vcpkg/include
           bash ci/do_ci.sh gcc.vcpkg.test ;
       - name: Cache packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             /usr/local/share/vcpkg/installed
@@ -151,7 +153,7 @@ jobs:
   #       run: |
   #         C:/msys64/msys2_shell.cmd -mingw64 -defterm -no-start -here -lc "ci/do_ci.sh msys2.mingw.static.test"
   #     - name: Cache packages
-  #       uses: actions/cache@v2
+  #       uses: actions/cache@v4
   #       with:
   #         path: |
   #           third_party/test/packages
@@ -219,7 +221,7 @@ jobs:
         run: |
           pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
       - name: Cache packages
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             C:/vcpkg/installed

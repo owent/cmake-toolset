@@ -1,0 +1,46 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f6560d5..cb7a215 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -242,6 +242,12 @@ ELSE ()
+   CHECK_INCLUDE_FILES (netinet/tcp.h                       HAVE_NETINET_TCP_H)
+ ENDIF ()
+ 
++IF (HAVE_SYS_TYPES_H)
++  CHECK_INCLUDE_FILES ("sys/types.h;linux/tcp.h"         HAVE_LINUX_TCP_H)
++ELSE ()
++  CHECK_INCLUDE_FILES (linux/tcp.h                       HAVE_LINUX_TCP_H)
++ENDIF ()
++
+ # Include order matters for these windows files.
+ # As cygwin environment has both socket.h and winsock2.h
+ # headers check WIN32 not to include the later one here
+diff --git a/src/lib/ares_config.h.cmake b/src/lib/ares_config.h.cmake
+index 051b97f..510f545 100644
+--- a/src/lib/ares_config.h.cmake
++++ b/src/lib/ares_config.h.cmake
+@@ -230,6 +230,9 @@
+ /* Define to 1 if you have the <netinet/tcp.h> header file. */
+ #cmakedefine HAVE_NETINET_TCP_H 1
+ 
++/* Define to 1 if you have the <linux/tcp.h> header file. */
++#cmakedefine HAVE_LINUX_TCP_H 1
++
+ /* Define to 1 if you have the <net/if.h> header file. */
+ #cmakedefine HAVE_NET_IF_H 1
+ 
+diff --git a/src/lib/ares_socket.c b/src/lib/ares_socket.c
+index df02fd6..4b2359f 100644
+--- a/src/lib/ares_socket.c
++++ b/src/lib/ares_socket.c
+@@ -31,7 +31,9 @@
+ #ifdef HAVE_NETINET_IN_H
+ #  include <netinet/in.h>
+ #endif
+-#ifdef HAVE_NETINET_TCP_H
++#ifdef HAVE_LINUX_TCP_H
++#  include <linux/tcp.h>
++#elif defined(HAVE_NETINET_TCP_H)
+ #  include <netinet/tcp.h>
+ #endif
+ #ifdef HAVE_NETDB_H

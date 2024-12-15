@@ -149,7 +149,21 @@ if(NOT TARGET Libngtcp2::libngtcp2)
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_BORINGSSL_LIBRARIES}")
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_BORINGSSL_LIBRARIES)
     elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_OPENSSL=ON")
+      # Check if this version of openssl support quictls
+      cmake_push_check_state()
+      list(APPEND CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME}
+           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_DEPEND_NAME})
+      include(CheckSymbolExists)
+      check_symbol_exists(SSL_provide_quic_data "openssl/ssl.h"
+                          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_HAVE_SSL_PROVIDE_QUIC_DATA)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_HAVE_SSL_PROVIDE_QUIC_DATA)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_OPENSSL=ON")
+      else()
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_OPENSSL=OFF")
+      endif()
+      cmake_pop_check_state()
+    else()
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_DEFAULT_BUILD_OPTIONS "-DENABLE_OPENSSL=OFF")
     endif()
 
     #[[
@@ -160,7 +174,7 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     project_third_party_port_declare(
       ngtcp2
       VERSION
-      "v1.8.0" # Modern package ngtcp2::ngtcp2, ngtcp2::ngtcp2_static, ngtcp2::ngtcp2_crypto_quictls and so on will be
+      "v1.9.1" # Modern package ngtcp2::ngtcp2, ngtcp2::ngtcp2_static, ngtcp2::ngtcp2_crypto_quictls and so on will be
                # available in next release.
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"

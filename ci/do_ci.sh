@@ -251,6 +251,12 @@ elif [[ "$1" == "gcc.vcpkg.test" ]]; then
   echo "$1"
   [ ! -z "$VCPKG_INSTALLATION_ROOT" ]
   vcpkg install --triplet=x64-linux fmt zlib lz4 zstd libuv openssl curl libwebsockets yaml-cpp rapidjson flatbuffers protobuf grpc gtest benchmark civetweb prometheus-cpp mimalloc
+  if [ -e "$VCPKG_INSTALLATION_ROOT/buildtrees" ]; then
+    rm -rf "$VCPKG_INSTALLATION_ROOT/buildtrees"
+  fi
+  if [ -e "$VCPKG_INSTALLATION_ROOT/packages" ]; then
+    rm -rf "$VCPKG_INSTALLATION_ROOT/packages"
+  fi
   mkdir -p test/build_jobs_dir
   cd test/build_jobs_dir
   cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-linux -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
@@ -390,6 +396,12 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
       <UseStructuredOutput>false</UseStructuredOutput>
    </PropertyGroup>
 </Project>" > Directory.Build.props
+  if [ -e "$VCPKG_INSTALLATION_ROOT/buildtrees" ]; then
+    rm -rf "$VCPKG_INSTALLATION_ROOT/buildtrees"
+  fi
+  if [ -e "$VCPKG_INSTALLATION_ROOT/packages" ]; then
+    rm -rf "$VCPKG_INSTALLATION_ROOT/packages"
+  fi
   cd test/build_jobs_dir
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
     CMAKE_GENERATOR="Visual Studio 17 2022"

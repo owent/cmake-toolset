@@ -48,7 +48,7 @@ if(NOT TARGET prometheus-cpp::core)
              ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_APPEND_DEFAULT_BUILD_OPTIONS})
       endif()
     endif()
-    project_third_party_port_declare(prometheus_cpp VERSION "v1.2.4" GIT_URL
+    project_third_party_port_declare(prometheus_cpp VERSION "v1.3.0" GIT_URL
                                      "https://github.com/jupp0r/prometheus-cpp.git")
     project_third_party_try_patch_file(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "prometheus-cpp"

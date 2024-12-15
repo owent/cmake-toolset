@@ -52,7 +52,15 @@ if(NOT TARGET benchmark::benchmark AND NOT TARGET benchmark::benchmark_main)
       endif()
     endif()
 
-    project_third_party_port_declare(benchmark VERSION "v1.9.0" GIT_URL "https://github.com/google/benchmark.git")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_DEFAULT_VERSION "v1.9.1")
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "7.0")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_DEFAULT_VERSION "v1.9.0")
+      endif()
+    endif()
+    project_third_party_port_declare(
+      benchmark VERSION "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_DEFAULT_VERSION}" GIT_URL
+      "https://github.com/google/benchmark.git")
 
     project_third_party_try_patch_file(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BENCHMARK_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "benchmark"
