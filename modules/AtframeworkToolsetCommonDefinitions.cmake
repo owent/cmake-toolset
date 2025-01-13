@@ -1,6 +1,12 @@
 #[===[.md:
 # Just like https://github.com/microsoft/vcpkg/blob/master/scripts/cmake/vcpkg_common_definitions.cmake but add some additional system libraries.
 
+These variables will influence the behavior of the toolchain:
+
+```cmake
+ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES        list of additional system libraries that users can add to the toolchain
+```
+
 This file defines the following variables which are commonly needed or used in portfiles:
 
 ```cmake
@@ -149,6 +155,38 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES Ws2_32)
   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES wldap32)
   list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES crypt32)
+endif()
+
+# Custom additional system libraries
+if(ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES)
+  include(CheckCXXSourceCompiles)
+
+  # Check libraries
+  foreach(LIBNAME IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES)
+    if(LIBNAME IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
+      continue()
+    endif()
+    cmake_push_check_state()
+    if(CMAKE_REQUIRED_LIBRARIES)
+      set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${LIBNAME}")
+    else()
+      set(CMAKE_REQUIRED_LIBRARIES "${LIBNAME}")
+    endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES})
+    endif()
+    string(TOUPPER "${LIBNAME}" ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
+    set(ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME
+        "ATFRAMEWORK_CMAKE_TOOLSET_TEST_LINK_${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}")
+    check_cxx_source_compiles("#include <cstdio>
+    int main() { return 0; }" ${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
+    if(${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
+      list(PREPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES "${LIBNAME}")
+    endif()
+    cmake_pop_check_state()
+  endforeach()
+
+  unset(ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
 endif()
 
 if(MSVC)
