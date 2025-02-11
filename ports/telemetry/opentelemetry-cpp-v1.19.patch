@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 88709cf..06a0cc4 100644
+index 88709cf..480d0a0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -320,6 +320,14 @@ if(WITH_EXAMPLES_HTTP AND NOT WITH_EXAMPLES)
@@ -17,26 +17,6 @@ index 88709cf..06a0cc4 100644
  
  function(install_windows_deps)
    # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
-@@ -743,6 +751,9 @@ if(WITH_OPENTRACING)
-   add_subdirectory(opentracing-shim)
- endif()
- 
-+include(cmake/opentelemetry-build-external-component.cmake)
-+include(cmake/patch-imported-config.cmake)
-+
- if(NOT WITH_API_ONLY)
-   set(BUILD_TESTING ${BUILD_TESTING})
-   include_directories(sdk/include)
-@@ -764,9 +775,6 @@ if(NOT WITH_API_ONLY)
-   endif()
- endif()
- 
--include(cmake/opentelemetry-build-external-component.cmake)
--include(cmake/patch-imported-config.cmake)
--
- if(OPENTELEMETRY_INSTALL)
-   # Export cmake config and support find_packages(opentelemetry-cpp CONFIG)
-   # Write config file for find_packages(opentelemetry-cpp CONFIG)
 diff --git a/api/include/opentelemetry/nostd/type_traits.h b/api/include/opentelemetry/nostd/type_traits.h
 index 5a08707..3b4b584 100644
 --- a/api/include/opentelemetry/nostd/type_traits.h
@@ -93,6 +73,64 @@ index 074f796..ba14602 100644
 -
 -}  // namespace nostd
 -OPENTELEMETRY_END_NAMESPACE
+diff --git a/exporters/elasticsearch/src/es_log_recordable.cc b/exporters/elasticsearch/src/es_log_recordable.cc
+index 5c5f101..e873f26 100644
+--- a/exporters/elasticsearch/src/es_log_recordable.cc
++++ b/exporters/elasticsearch/src/es_log_recordable.cc
+@@ -23,12 +23,24 @@
+ 
+ namespace nlohmann
+ {
++
++template<class T>
++struct json_assign_visitor {
++  T* j_;
++  json_assign_visitor(T& j) : j_(&j) {}
++
++  template<class U>
++  void operator()(const U& u) {
++    *j_ = u;
++  }
++};
++
+ template <>
+ struct adl_serializer<opentelemetry::sdk::common::OwnedAttributeValue>
+ {
+   static void to_json(json &j, const opentelemetry::sdk::common::OwnedAttributeValue &v)
+   {
+-    opentelemetry::nostd::visit([&j](const auto &value) { j = value; }, v);
++    opentelemetry::nostd::visit(json_assign_visitor<json>(j), v);
+   }
+ };
+ 
+@@ -37,7 +49,7 @@ struct adl_serializer<opentelemetry::common::AttributeValue>
+ {
+   static void to_json(json &j, const opentelemetry::common::AttributeValue &v)
+   {
+-    opentelemetry::nostd::visit([&j](const auto &value) { j = value; }, v);
++    opentelemetry::nostd::visit(json_assign_visitor<json>(j), v);
+   }
+ };
+ }  // namespace nlohmann
+diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
+index c812fce..bfad4c3 100644
+--- a/ext/src/http/client/curl/CMakeLists.txt
++++ b/ext/src/http/client/curl/CMakeLists.txt
+@@ -15,6 +15,14 @@ if(TARGET CURL::libcurl)
+     opentelemetry_http_client_curl
+     PUBLIC opentelemetry_ext
+     PRIVATE CURL::libcurl)
++  # Some versions of libcurl do not export the link directories, which may cause
++  # link errors
++  project_build_tools_get_imported_location(CURL_LIB_FILE_PATH CURL::libcurl)
++  get_filename_component(CURL_LIB_DIR_PATH "${CURL_LIB_FILE_PATH}" DIRECTORY)
++  if(CURL_LIB_DIR_PATH)
++    target_include_directories(opentelemetry_http_client_curl
++                               PRIVATE "${CURL_LIB_DIR_PATH}")
++  endif()
+ else()
+   target_include_directories(opentelemetry_http_client_curl
+                              INTERFACE "${CURL_INCLUDE_DIRS}")
 diff --git a/ext/src/http/client/curl/http_client_curl.cc b/ext/src/http/client/curl/http_client_curl.cc
 index a65410d..add120c 100644
 --- a/ext/src/http/client/curl/http_client_curl.cc
