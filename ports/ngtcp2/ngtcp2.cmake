@@ -174,7 +174,7 @@ if(NOT TARGET Libngtcp2::libngtcp2)
     project_third_party_port_declare(
       ngtcp2
       VERSION
-      "v1.9.1" # Modern package ngtcp2::ngtcp2, ngtcp2::ngtcp2_static, ngtcp2::ngtcp2_crypto_quictls and so on will be
+      "v1.10.0" # Modern package ngtcp2::ngtcp2, ngtcp2::ngtcp2_static, ngtcp2::ngtcp2_crypto_quictls and so on will be
                # available in next release.
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"

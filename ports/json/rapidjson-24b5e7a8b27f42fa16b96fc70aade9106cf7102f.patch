@@ -1,0 +1,34 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index be860c9..10a9fc4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -238,11 +238,11 @@ FILE( RELATIVE_PATH REL_INCLUDE_DIR
+ SET( ${PROJECT_NAME}_INCLUDE_DIR "\${${PROJECT_NAME}_CMAKE_DIR}/${REL_INCLUDE_DIR}" )
+ SET( CONFIG_SOURCE_DIR )
+ SET( CONFIG_DIR )
+-CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
+-    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake @ONLY )
+-
+-INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+-        DESTINATION ${CMAKECONFIG_INSTALL_DIR} )
++# CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
++#     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake @ONLY )
++# 
++# INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
++#         DESTINATION ${CMAKECONFIG_INSTALL_DIR} )
+ 
+ # Install files
+ IF(CMAKE_INSTALL_DIR)
+diff --git a/RapidJSONConfig.cmake.in b/RapidJSONConfig.cmake.in
+index 0ee1d9d..4c273b7 100644
+--- a/RapidJSONConfig.cmake.in
++++ b/RapidJSONConfig.cmake.in
+@@ -8,7 +8,7 @@ set( RapidJSON_SOURCE_DIR "@CONFIG_SOURCE_DIR@")
+ 
+ ################################################################################
+ # RapidJSON build dir
+-set( RapidJSON_DIR "@CONFIG_DIR@")
++# set( RapidJSON_DIR "@CONFIG_DIR@")
+ 
+ ################################################################################
+ # Compute paths
