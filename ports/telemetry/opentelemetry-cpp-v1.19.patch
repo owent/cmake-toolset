@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 88709cf..480d0a0 100644
+index 88709cf..06a0cc4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -320,6 +320,14 @@ if(WITH_EXAMPLES_HTTP AND NOT WITH_EXAMPLES)
@@ -17,3 +17,23 @@ index 88709cf..480d0a0 100644
  
  function(install_windows_deps)
    # Bootstrap vcpkg from CMake and auto-install deps in case if we are missing
+@@ -743,6 +751,9 @@ if(WITH_OPENTRACING)
+   add_subdirectory(opentracing-shim)
+ endif()
+ 
++include(cmake/opentelemetry-build-external-component.cmake)
++include(cmake/patch-imported-config.cmake)
++
+ if(NOT WITH_API_ONLY)
+   set(BUILD_TESTING ${BUILD_TESTING})
+   include_directories(sdk/include)
+@@ -764,9 +775,6 @@ if(NOT WITH_API_ONLY)
+   endif()
+ endif()
+ 
+-include(cmake/opentelemetry-build-external-component.cmake)
+-include(cmake/patch-imported-config.cmake)
+-
+ if(OPENTELEMETRY_INSTALL)
+   # Export cmake config and support find_packages(opentelemetry-cpp CONFIG)
+   # Write config file for find_packages(opentelemetry-cpp CONFIG)
