@@ -98,10 +98,18 @@ if(NOT TARGET flatbuffers::flatbuffers)
       endif()
     endif()
 
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_DEFAULT_VERSION "v25.2.10")
+    # GCC before 4.9 requires a space in `operator"" _a` which is invalid in later compiler versions.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      if(CMAKE_C_COMPILER_VERSION VERSION_LESS "4.9.0")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_DEFAULT_VERSION "v24.12.23")
+      endif()
+    endif()
+
     project_third_party_port_declare(
       flatbuffers
       VERSION
-      "v25.2.10"
+      "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_DEFAULT_VERSION}"
       GIT_URL
       "https://github.com/google/flatbuffers.git"
       BUILD_OPTIONS

@@ -103,16 +103,17 @@ jobs:
           sudo apt-get update;
           sudo apt-get install --no-install-recommends --no-install-suggests -y g++-4.8 ;
           bash ci/do_ci.sh gcc.4.8.test ;
-  gcc_standalone_upb_test:
-    name: "gcc.standalone-upb.test"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: CI Job
-        shell: bash
-        run: |
-          bash ci/do_ci.sh gcc.standalone-upb.test ;
+  # UPB is a part of protobuf now, we do not need to build it separately.
+  # gcc_standalone_upb_test:
+  #   name: "gcc.standalone-upb.test"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: CI Job
+  #       shell: bash
+  #       run: |
+  #         bash ci/do_ci.sh gcc.standalone-upb.test ;
   clang_test:
     name: "clang.test"
     runs-on: ubuntu-latest
@@ -122,6 +123,7 @@ jobs:
       - name: CI Job
         shell: bash
         run: |
+          sudo apt install -y libc++1 libc++abi1 libc++-dev libc++abi-dev ;
           bash ci/do_ci.sh clang.test ;
   gcc_vcpkg_test:
     name: "gcc.vcpkg.test"
@@ -200,16 +202,17 @@ jobs:
         shell: pwsh
         run: |
           pwsh ci/do_ci.ps1 msvc.no-exceptions.test ;
-  msvc_standalone_upb_test:
-    name: "msvc.standalone-upb.test"
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: CI Job
-        shell: pwsh
-        run: |
-          pwsh ci/do_ci.ps1 msvc.standalone-upb.test ;
+  # UPB is a part of protobuf now, we do not need to build it separately.
+  # msvc_standalone_upb_test:
+  #   name: "msvc.standalone-upb.test"
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: CI Job
+  #       shell: pwsh
+  #       run: |
+  #         pwsh ci/do_ci.ps1 msvc.standalone-upb.test ;
   msvc_vcpkg_test:
     name: "msvc.vcpkg.test"
     runs-on: windows-latest

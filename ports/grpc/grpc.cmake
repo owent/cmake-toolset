@@ -132,6 +132,10 @@ if(NOT TARGET gRPC::grpc++_alts
         elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.43.2")
         endif()
+      elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+        if(MSVC_VERSION LESS 1930)
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.68.2")
+        endif()
       endif()
 
       # TODO MSVC can only use C++17 in find_configure_package() below, we should remove the CMAKE_CXX_STANDARD patch
