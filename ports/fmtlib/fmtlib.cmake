@@ -73,10 +73,17 @@ int main() {
        AND (NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ALTERNATIVE_STD
             OR ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_STD_BLACKLIST
             OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT))
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_DEFAULT_VERSION "11.1.3")
+      # GCC before 4.9 requires a space in `operator"" _a` which is invalid in later compiler versions.
+      if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        if(CMAKE_C_COMPILER_VERSION VERSION_LESS "4.9.0")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_DEFAULT_VERSION "11.0.2")
+        endif()
+      endif()
       project_third_party_port_declare(
         fmtlib
         VERSION
-        "11.1.3"
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_DEFAULT_VERSION}"
         GIT_URL
         "https://github.com/fmtlib/fmt.git"
         BUILD_OPTIONS

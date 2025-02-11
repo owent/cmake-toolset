@@ -317,6 +317,15 @@ if(NOT TARGET CURL::libcurl
       #]]
     endif()
 
+    # libpsl
+    find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h")
+    find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
+    if(LIBPSL_INCLUDE_DIR AND LIBPSL_LIBRARY)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBPSL=ON")
+    else()
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBPSL=OFF")
+    endif()
+
     # At last, patch file
     project_third_party_try_patch_file(
       ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "libcurl"

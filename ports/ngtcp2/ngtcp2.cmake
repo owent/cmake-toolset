@@ -175,7 +175,7 @@ if(NOT TARGET Libngtcp2::libngtcp2)
       ngtcp2
       VERSION
       "v1.10.0" # Modern package ngtcp2::ngtcp2, ngtcp2::ngtcp2_static, ngtcp2::ngtcp2_crypto_quictls and so on will be
-               # available in next release.
+      # available in next release.
       GIT_URL
       "https://github.com/ngtcp2/ngtcp2.git"
       BUILD_OPTIONS
