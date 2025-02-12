@@ -113,21 +113,38 @@ index 5c5f101..e873f26 100644
  };
  }  // namespace nlohmann
 diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
-index c812fce..3f58973 100644
+index c812fce..7259aea 100644
 --- a/ext/src/http/client/curl/CMakeLists.txt
 +++ b/ext/src/http/client/curl/CMakeLists.txt
-@@ -15,6 +15,14 @@ if(TARGET CURL::libcurl)
+@@ -10,11 +10,29 @@ set_target_properties(opentelemetry_http_client_curl
+ set_target_version(opentelemetry_http_client_curl)
+ target_link_libraries(opentelemetry_http_client_curl
+                       PUBLIC opentelemetry_common)
+-if(TARGET CURL::libcurl)
++
++unset(CURL_IMPORTED_TARGET_NAME)
++foreach(FIND_CURL_IMPORTED_TARGET CURL::libcurl CURL::libcurl_shared CURL::libcurl_static)
++  if(TARGET ${FIND_CURL_IMPORTED_TARGET})
++    set(CURL_IMPORTED_TARGET_NAME ${FIND_CURL_IMPORTED_TARGET})
++    break()
++  endif()
++endforeach()
++
++if(TARGET ${CURL_IMPORTED_TARGET_NAME})
+   target_link_libraries(
      opentelemetry_http_client_curl
      PUBLIC opentelemetry_ext
-     PRIVATE CURL::libcurl)
+-    PRIVATE CURL::libcurl)
++    PRIVATE ${CURL_IMPORTED_TARGET_NAME})
 +  # Some versions of libcurl do not export the link directories, which may cause
 +  # link errors
-+  project_build_tools_get_imported_location(CURL_LIB_FILE_PATH CURL::libcurl)
++  project_build_tools_get_imported_location(CURL_LIB_FILE_PATH ${CURL_IMPORTED_TARGET_NAME})
 +  get_filename_component(CURL_LIB_DIR_PATH "${CURL_LIB_FILE_PATH}" DIRECTORY)
 +  if(CURL_LIB_DIR_PATH)
 +    target_link_directories(opentelemetry_http_client_curl
 +                               PUBLIC "$<BUILD_INTERFACE:${CURL_LIB_DIR_PATH}>")
 +  endif()
++  message("Append link directory for ${CURL_IMPORTED_TARGET_NAME}(${CURL_LIB_FILE_PATH}): ${CURL_LIB_DIR_PATH}")
  else()
    target_include_directories(opentelemetry_http_client_curl
                               INTERFACE "${CURL_INCLUDE_DIRS}")
@@ -152,3 +169,27 @@ index a65410d..add120c 100644
        strm->zalloc(strm->opaque, strm->avail_in, 1));  // allocated buffer to hold input data
    if (hold == Z_NULL)
    {
+diff --git a/ext/test/http/CMakeLists.txt b/ext/test/http/CMakeLists.txt
+index 9f5514d..7fe3b64 100644
+--- a/ext/test/http/CMakeLists.txt
++++ b/ext/test/http/CMakeLists.txt
+@@ -8,9 +8,17 @@ if(WITH_HTTP_CLIENT_CURL)
+   target_link_libraries(${FILENAME} ${GMOCK_LIB} ${GTEST_BOTH_LIBRARIES}
+                         ${CMAKE_THREAD_LIBS_INIT})
+ 
+-  if(TARGET CURL::libcurl)
++  unset(CURL_IMPORTED_TARGET_NAME)
++  foreach(FIND_CURL_IMPORTED_TARGET CURL::libcurl CURL::libcurl_shared
++                                    CURL::libcurl_static)
++    if(TARGET ${FIND_CURL_IMPORTED_TARGET})
++      set(CURL_IMPORTED_TARGET_NAME ${FIND_CURL_IMPORTED_TARGET})
++      break()
++    endif()
++  endforeach()
++  if(TARGET ${CURL_IMPORTED_TARGET_NAME})
+     target_link_libraries(${FILENAME} opentelemetry_http_client_curl
+-                          opentelemetry_common CURL::libcurl)
++                          opentelemetry_common ${CURL_IMPORTED_TARGET_NAME})
+   else()
+     include_directories(${CURL_INCLUDE_DIRS})
+     target_link_libraries(${FILENAME} ${CURL_LIBRARIES}
