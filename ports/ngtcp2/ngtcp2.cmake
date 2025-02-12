@@ -13,6 +13,12 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
                                                                   Libnghttp3::libnghttp3)
     endif()
 
+    # Compatibility for some packages's build script
+    if(NOT TARGET ngtcp2)
+      add_library(ngtcp2 INTERFACE IMPORTED)
+      set_target_properties(ngtcp2 PROPERTIES INTERFACE_LINK_LIBRARIES "Libngtcp2::libngtcp2")
+    endif()
+
     # New name from v0.17.0
     find_package(Libngtcp2_crypto_quictls QUIET)
     if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
@@ -26,6 +32,14 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
         project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_quictls ADD_LIBRARIES
                                                                     Libngtcp2::libngtcp2)
       endif()
+
+      # Compatibility for some packages's build script
+      if(NOT TARGET ngtcp2_crypto_quictls)
+        add_library(ngtcp2_crypto_quictls INTERFACE IMPORTED)
+        set_target_properties(ngtcp2_crypto_quictls PROPERTIES INTERFACE_LINK_LIBRARIES
+                                                               "Libngtcp2::libngtcp2_crypto_quictls")
+      endif()
+
     endif()
     # Legacy name
     find_package(Libngtcp2_crypto_openssl QUIET)
@@ -42,6 +56,13 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
         project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_openssl ADD_LIBRARIES
                                                                     Libngtcp2::libngtcp2)
       endif()
+
+      # Compatibility for some packages's build script
+      if(NOT TARGET ngtcp2_crypto_openssl)
+        add_library(ngtcp2_crypto_openssl INTERFACE IMPORTED)
+        set_target_properties(ngtcp2_crypto_openssl PROPERTIES INTERFACE_LINK_LIBRARIES
+                                                               "Libngtcp2::libngtcp2_crypto_openssl")
+      endif()
     endif()
     # Boringssl
     find_package(Libngtcp2_crypto_boringssl QUIET)
@@ -56,6 +77,13 @@ macro(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
       if(TARGET Libnghttp3::libnghttp3)
         project_build_tools_patch_imported_link_interface_libraries(Libngtcp2::libngtcp2_crypto_boringssl ADD_LIBRARIES
                                                                     Libngtcp2::libngtcp2)
+      endif()
+
+      # Compatibility for some packages's build script
+      if(NOT TARGET ngtcp2_crypto_boringssl)
+        add_library(ngtcp2_crypto_boringssl INTERFACE IMPORTED)
+        set_target_properties(ngtcp2_crypto_boringssl PROPERTIES INTERFACE_LINK_LIBRARIES
+                                                                 "Libngtcp2::libngtcp2_crypto_boringssl")
       endif()
     endif()
 

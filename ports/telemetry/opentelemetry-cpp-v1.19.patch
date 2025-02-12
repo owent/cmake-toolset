@@ -113,7 +113,7 @@ index 5c5f101..e873f26 100644
  };
  }  // namespace nlohmann
 diff --git a/exporters/otlp/CMakeLists.txt b/exporters/otlp/CMakeLists.txt
-index bf0ae1f..f68cdf3 100644
+index bf0ae1f..98ff538 100644
 --- a/exporters/otlp/CMakeLists.txt
 +++ b/exporters/otlp/CMakeLists.txt
 @@ -118,8 +118,9 @@ if(WITH_OTLP_HTTP)
@@ -124,7 +124,7 @@ index bf0ae1f..f68cdf3 100644
 -    PRIVATE opentelemetry_proto opentelemetry_http_client_curl
 +    # Links flags of opentelemetry_http_client_curl should be public when building
 +    PUBLIC opentelemetry_sdk opentelemetry_ext "$<BUILD_INTERFACE:opentelemetry_http_client_curl>"
-+    PRIVATE opentelemetry_proto "$<INSTALL_INTERFACE:opentelemetry_http_client_curl"
++    PRIVATE opentelemetry_proto "$<INSTALL_INTERFACE:opentelemetry_http_client_curl>"
              nlohmann_json::nlohmann_json)
    if(TARGET absl::strings)
      target_link_libraries(opentelemetry_exporter_otlp_http_client

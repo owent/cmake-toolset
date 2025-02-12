@@ -13,6 +13,13 @@ macro(PROJECT_THIRD_PARTY_NGHTTP3_IMPORT)
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_LINK_NAME
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME})
     project_build_tools_patch_default_imported_config(nghttp3::nghttp3 nghttp3::nghttp3_static)
+
+    # Compatibility for some packages's build script
+    if(NOT TARGET nghttp3)
+      add_library(nghttp3 INTERFACE IMPORTED)
+      set_target_properties(nghttp3 PROPERTIES INTERFACE_LINK_LIBRARIES
+                                               "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME}")
+    endif()
   endif()
 endmacro()
 

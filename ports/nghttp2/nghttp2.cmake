@@ -60,6 +60,12 @@ macro(PROJECT_THIRD_PARTY_NGHTTP2_IMPORT)
                                                                  "NGHTTP2_STATICLIB=1")
       endif()
     endif()
+
+    # Compatibility for some packages's build script
+    if(NOT TARGET nghttp2)
+      add_library(nghttp2 INTERFACE IMPORTED)
+      set_target_properties(nghttp2 PROPERTIES INTERFACE_LINK_LIBRARIES "Libnghttp2::libnghttp2")
+    endif()
   endif()
 endmacro()
 
