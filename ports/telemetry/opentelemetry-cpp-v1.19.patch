@@ -113,19 +113,21 @@ index 5c5f101..e873f26 100644
  };
  }  // namespace nlohmann
 diff --git a/exporters/otlp/CMakeLists.txt b/exporters/otlp/CMakeLists.txt
-index bf0ae1f..198be77 100644
+index bf0ae1f..f68cdf3 100644
 --- a/exporters/otlp/CMakeLists.txt
 +++ b/exporters/otlp/CMakeLists.txt
-@@ -118,7 +118,8 @@ if(WITH_OTLP_HTTP)
+@@ -118,8 +118,9 @@ if(WITH_OTLP_HTTP)
  
    target_link_libraries(
      opentelemetry_exporter_otlp_http_client
 -    PUBLIC opentelemetry_sdk opentelemetry_ext
-+    # Links flags of opentelemetry_http_client_curl should be public
-+    PUBLIC opentelemetry_sdk opentelemetry_ext "$<LINK_ONLY:opentelemetry_http_client_curl>"
-     PRIVATE opentelemetry_proto opentelemetry_http_client_curl
+-    PRIVATE opentelemetry_proto opentelemetry_http_client_curl
++    # Links flags of opentelemetry_http_client_curl should be public when building
++    PUBLIC opentelemetry_sdk opentelemetry_ext "$<BUILD_INTERFACE:opentelemetry_http_client_curl>"
++    PRIVATE opentelemetry_proto "$<INSTALL_INTERFACE:opentelemetry_http_client_curl"
              nlohmann_json::nlohmann_json)
    if(TARGET absl::strings)
+     target_link_libraries(opentelemetry_exporter_otlp_http_client
 diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
 index c812fce..7259aea 100644
 --- a/ext/src/http/client/curl/CMakeLists.txt
