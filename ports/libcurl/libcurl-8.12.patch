@@ -258,3 +258,39 @@ index 30c0154..b90b49a 100644
      endif()
      find_package(LDAP)
      if(LDAP_FOUND)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index c1863b0..a7e8c7a 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -46,6 +46,7 @@ if(USE_ARES)
+   include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
+ endif()
+ 
++list(REMOVE_DUPLICATES CURL_LIBDIRS)
+ if(CURL_BUILD_TESTING)
+   add_library(
+     curlu  # special libcurlu library just for unittests
+@@ -111,6 +112,7 @@ if(SHARE_LIB_OBJECT)
+   target_include_directories(${LIB_OBJECT} INTERFACE
+     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
++  target_link_directories(${LIB_OBJECT} INTERFACE "$<INSTALL_INTERFACE:${CURL_LIBDIRS}>")
+ 
+   set(LIB_SOURCE $<TARGET_OBJECTS:${LIB_OBJECT}>)
+ else()
+@@ -142,6 +144,7 @@ if(BUILD_STATIC_LIBS)
+   target_include_directories(${LIB_STATIC} INTERFACE
+     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
++  target_link_directories(${LIB_STATIC} INTERFACE "$<INSTALL_INTERFACE:${CURL_LIBDIRS}>")
+ endif()
+ 
+ if(BUILD_SHARED_LIBS)
+@@ -179,6 +182,7 @@ if(BUILD_SHARED_LIBS)
+   target_include_directories(${LIB_SHARED} INTERFACE
+     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
++  target_link_directories(${LIB_SHARED} INTERFACE "$<INSTALL_INTERFACE:${CURL_LIBDIRS}>")
+ 
+   if(CMAKE_DLL_NAME_WITH_SOVERSION OR
+     CYGWIN OR

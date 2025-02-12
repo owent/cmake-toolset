@@ -44,3 +44,16 @@ index 67e1b5b..94f4105 100644
      }
      upb_Array_Set(cloned_array, i, val);
    }
+diff --git a/upb/port/def.inc b/upb/port/def.inc
+index 4c073b3..f57bac5 100644
+--- a/upb/port/def.inc
++++ b/upb/port/def.inc
+@@ -78,6 +78,8 @@ Error, UINTPTR_MAX is undefined
+ #define UPB_INLINE inline
+ #elif defined (__GNUC__) || defined(__clang__)
+ #define UPB_INLINE static __inline__
++#elif defined (_MSC_VER)
++#define UPB_INLINE static __inline
+ #else
+ #define UPB_INLINE static
+ #endif
