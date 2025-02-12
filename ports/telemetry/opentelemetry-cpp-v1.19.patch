@@ -113,7 +113,7 @@ index 5c5f101..e873f26 100644
  };
  }  // namespace nlohmann
 diff --git a/ext/src/http/client/curl/CMakeLists.txt b/ext/src/http/client/curl/CMakeLists.txt
-index c812fce..bfad4c3 100644
+index c812fce..15d4a40 100644
 --- a/ext/src/http/client/curl/CMakeLists.txt
 +++ b/ext/src/http/client/curl/CMakeLists.txt
 @@ -15,6 +15,14 @@ if(TARGET CURL::libcurl)
@@ -126,7 +126,7 @@ index c812fce..bfad4c3 100644
 +  get_filename_component(CURL_LIB_DIR_PATH "${CURL_LIB_FILE_PATH}" DIRECTORY)
 +  if(CURL_LIB_DIR_PATH)
 +    target_include_directories(opentelemetry_http_client_curl
-+                               PRIVATE "${CURL_LIB_DIR_PATH}")
++                               PUBLIC "$<BUILD_INTERFACE:${CURL_LIB_DIR_PATH}>")
 +  endif()
  else()
    target_include_directories(opentelemetry_http_client_curl
