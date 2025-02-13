@@ -33,6 +33,22 @@ index 67e1b5b..94f4105 100644
      }
      upb_Array_Set(cloned_array, i, val);
    }
+diff --git a/third_party/upb/upb/message/internal/message.c b/third_party/upb/upb/message/internal/message.c
+index 5f321c7..ad38924 100644
+--- a/third_party/upb/upb/message/internal/message.c
++++ b/third_party/upb/upb/message/internal/message.c
+@@ -19,7 +19,11 @@
+ 
+ const float kUpb_FltInfinity = (float)(1.0 / 0.0);
+ const double kUpb_Infinity = 1.0 / 0.0;
++#ifdef __clang__
++const double kUpb_NaN = NAN;
++#else
+ const double kUpb_NaN = 0.0 / 0.0;
++#endif
+ 
+ bool UPB_PRIVATE(_upb_Message_Realloc)(struct upb_Message* msg, size_t need,
+                                        upb_Arena* a) {
 diff --git a/third_party/upb/upb/text/internal/encode.c b/third_party/upb/upb/text/internal/encode.c
 index fc9cc6f..c58c2de 100644
 --- a/third_party/upb/upb/text/internal/encode.c
