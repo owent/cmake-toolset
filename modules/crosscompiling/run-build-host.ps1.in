@@ -40,7 +40,7 @@ if ($LOW_MEMORY_MODE) {
     & "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
 }
 else {
-    & "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" -j
+    & "@CMAKE_COMMAND@" --build . --config "@CMAKE_BUILD_TYPE@" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@"
 }
 
 if ( $LastExitCode -ne 0 ) {
@@ -48,7 +48,7 @@ if ( $LastExitCode -ne 0 ) {
         & "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
     }
     else {
-        & "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" -j
+        & "@CMAKE_COMMAND@" --build . --verbose --config "@CMAKE_BUILD_TYPE@" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@"
     }
     exit $LastExitCode
 }

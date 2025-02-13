@@ -237,6 +237,7 @@ For example, if we want to use the same python3 executable on target and host bu
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE` : Use lower concurrency to reduce memory cost.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS` : Jobs to use in low memory mode(default: 2).
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES` : Additional system libraries.
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS` : parallel build jobs.
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")
