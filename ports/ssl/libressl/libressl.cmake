@@ -206,7 +206,7 @@ if(NOT TARGET LibreSSL::Crypto)
         install
         --config
         Release
-        "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@")
+        "-j${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS}")
 
       # build & install
       execute_process(
@@ -251,7 +251,7 @@ if(NOT TARGET LibreSSL::Crypto)
         install
         --config
         Release
-        "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@")
+        "-j${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS}")
 
       # build & install
       execute_process(
