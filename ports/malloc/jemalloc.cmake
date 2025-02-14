@@ -65,7 +65,7 @@ if(NOT TARGET jemalloc)
       "install_include"
       "install_lib"
       MAKE_FLAGS
-      "-j4"
+      "-j${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS}"
       AUTOGEN_CONFIGURE
       bash
       "./autogen.sh"
