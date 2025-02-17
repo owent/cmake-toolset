@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index be860c9..10a9fc4 100644
+index be860c9..b2f18c8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -238,11 +238,11 @@ FILE( RELATIVE_PATH REL_INCLUDE_DIR
+@@ -238,18 +238,19 @@ FILE( RELATIVE_PATH REL_INCLUDE_DIR
  SET( ${PROJECT_NAME}_INCLUDE_DIR "\${${PROJECT_NAME}_CMAKE_DIR}/${REL_INCLUDE_DIR}" )
  SET( CONFIG_SOURCE_DIR )
  SET( CONFIG_DIR )
@@ -19,6 +19,15 @@ index be860c9..10a9fc4 100644
  
  # Install files
  IF(CMAKE_INSTALL_DIR)
++    include(GNUInstallDirs)
+     INSTALL(FILES
+         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+-        DESTINATION "${CMAKE_INSTALL_DIR}"
++        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
+         COMPONENT dev)
+ 
+     INSTALL(TARGETS RapidJSON EXPORT RapidJSON-targets)
 diff --git a/RapidJSONConfig.cmake.in b/RapidJSONConfig.cmake.in
 index 0ee1d9d..4c273b7 100644
 --- a/RapidJSONConfig.cmake.in
