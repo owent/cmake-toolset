@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 30c0154..285d539 100644
+index 30c0154..aceb72e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -344,7 +344,17 @@ set(LIBCURL_PC_REQUIRES_PRIVATE "")
@@ -258,14 +258,15 @@ index 30c0154..285d539 100644
      endif()
      find_package(LDAP)
      if(LDAP_FOUND)
-@@ -2323,6 +2462,10 @@ if(NOT CURL_DISABLE_INSTALL)
-     set(LIBCURL_PC_LDFLAGS_PRIVATE "")
+@@ -2316,6 +2455,11 @@ if(NOT CURL_DISABLE_INSTALL)
    endif()
-   set(LIBCURL_PC_CFLAGS_PRIVATE "-DCURL_STATICLIB")
-+  if(TARGET ${LIB_STATIC})
-+    target_link_options(${LIB_STATIC} INTERFACE ${LIBCURL_PC_LDFLAGS_PRIVATE})
-+    target_compile_options(${LIB_STATIC} INTERFACE ${LIBCURL_PC_CFLAGS_PRIVATE})
-+  endif()
- 
-   # Merge pkg-config private fields into public ones when static-only
-   if(BUILD_SHARED_LIBS)
+   if(_ldflags)
+     list(REMOVE_DUPLICATES _ldflags)
++    if(TARGET ${LIB_STATIC})
++      target_link_options(${LIB_STATIC} INTERFACE ${_ldflags})
++      target_compile_options(${LIB_STATIC} INTERFACE "-DCURL_STATICLIB")
++    endif()
++
+     string(REPLACE ";" " " _ldflags "${_ldflags}")
+     set(LIBCURL_PC_LDFLAGS_PRIVATE "${_ldflags}")
+     string(STRIP "${LIBCURL_PC_LDFLAGS_PRIVATE}" LIBCURL_PC_LDFLAGS_PRIVATE)
