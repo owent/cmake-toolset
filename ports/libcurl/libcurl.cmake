@@ -195,9 +195,6 @@ if(NOT TARGET CURL::libcurl
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DEFAULT_VERSION "8.12.0")
     # curl 8.6.0 use a feature start from cmake 3.27.0: $<LIST:TRANSFORM,list,ACTION[,SELECTOR]>
     # https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#list-transformations
-    if(CMAKE_VERSION VERSION_LESS "3.27.0")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_DEFAULT_VERSION "8.5.0")
-    endif()
     project_third_party_port_declare(
       libcurl
       VERSION
