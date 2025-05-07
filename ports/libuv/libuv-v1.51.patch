@@ -1,15 +1,5 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7f46682..3ef98e7 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -1,4 +1,4 @@
--cmake_minimum_required(VERSION 3.4)
-+cmake_minimum_required(VERSION 3.16)
- project(libuv LANGUAGES C)
- 
- cmake_policy(SET CMP0057 NEW) # Enable IN_LIST operator
 diff --git a/src/unix/process.c b/src/unix/process.c
-index f841536..65d6a4c 100644
+index 43e6b79..5156f4d 100644
 --- a/src/unix/process.c
 +++ b/src/unix/process.c
 @@ -42,6 +42,9 @@
@@ -22,7 +12,7 @@ index f841536..65d6a4c 100644
  # include <crt_externs.h>
  # include <xlocale.h>
  # define environ (*_NSGetEnviron())
-@@ -420,7 +423,7 @@ static void uv__spawn_init_can_use_setsid(void) {
+@@ -450,7 +453,7 @@ static void uv__spawn_init_can_use_setsid(void) {
      return;
  
    /* NULL specifies to use LC_C_LOCALE */
