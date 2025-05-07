@@ -1,3 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c5368c08..f508205b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,5 @@
+ # Use at least CMake 3.3
+-cmake_minimum_required (VERSION 3.3.0)
+-cmake_policy(VERSION 3.2.2)
+-cmake_policy(SET CMP0054 NEW)
+-cmake_policy(SET CMP0057 NEW)
++cmake_minimum_required (VERSION 3.16)
+ 
+ # Set up the project
+ project (civetweb)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 index 43f3a77e..15ff20d3 100644
 --- a/src/CMakeLists.txt
