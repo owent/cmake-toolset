@@ -9,3 +9,13 @@ index 46dc180..881acb3 100644
  
  # enable MSVC_RUNTIME_LIBRARY target property
  # see https://cmake.org/cmake/help/latest/policy/CMP0091.html
+diff --git a/src/emitterutils.cpp b/src/emitterutils.cpp
+index 6cdf6de..dbd2590 100644
+--- a/src/emitterutils.cpp
++++ b/src/emitterutils.cpp
+@@ -1,4 +1,5 @@
+ #include <algorithm>
++#include <cstdint>
+ #include <iomanip>
+ #include <sstream>
+ 
