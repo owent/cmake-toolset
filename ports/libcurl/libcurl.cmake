@@ -279,6 +279,7 @@ if(NOT TARGET CURL::libcurl
       endif()
     endif()
 
+    include(CheckTypeSize)
     check_type_size("size_t" SIZEOF_SIZE_T)
     check_type_size("ssize_t" SIZEOF_SSIZE_T)
     check_type_size("__int64" SIZEOF___INT64)
