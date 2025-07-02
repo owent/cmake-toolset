@@ -204,18 +204,6 @@ jobs:
           path: |
             C:/vcpkg/installed
           key: ${{ runner.os }}-${{ hashFiles('C:/vcpkg/installed/**') }}
-  msvc2019_test:
-    name: "msvc.2019.test"
-    runs-on: windows-2019
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: CI Job
-        shell: pwsh
-        env:
-          CMAKE_GENERATOR: "Visual Studio 16 2019"
-        run: |
-          pwsh ci/do_ci.ps1 msvc.shared.test ;
   macos_appleclang_test:
     name: "macos.appleclang.test"
     runs-on: macos-latest
