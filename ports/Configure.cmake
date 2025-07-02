@@ -1283,6 +1283,9 @@ function(project_third_party_merge_target_compile_options TARGET_NAME VAR_NAME)
     endforeach()
   endif()
 
+  if(NOT __all_flags)
+    unset(__all_flags)
+  endif()
   set(${VAR_NAME}
       "${__all_flags}"
       PARENT_SCOPE)
