@@ -53,7 +53,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
                         & "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
                     }
                     if ( $LastExitCode -ne 0 ) {
-                        exit 1
+                        exit $LastExitCode
                     }
                     & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
                 }
@@ -63,7 +63,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
                         & "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
                     }
                     if ( $LastExitCode -ne 0 ) {
-                        exit 1
+                        exit $LastExitCode
                     }
                     & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
                 }
@@ -78,7 +78,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
                         & "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
                     }
                     if ( $LastExitCode -ne 0 ) {
-                        exit 1
+                        exit $LastExitCode
                     }
                     & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Debug
                 }
@@ -91,7 +91,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
                         & "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
                     }
                     if ( $LastExitCode -ne 0 ) {
-                        exit 1
+                        exit $LastExitCode
                     }
                     & "@CMAKE_COMMAND@" --install . --prefix "@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_ROOT_DIR@" --config Release
                 }
@@ -110,7 +110,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
                 & "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
             }
             if ( $LastExitCode -ne 0 ) {
-                exit 1
+                exit $LastExitCode
             }
         }
         else {
@@ -122,7 +122,7 @@ if (("@CMAKE_CROSSCOMPILING@".ToLower() -eq "true") -or ("@CMAKE_CROSSCOMPILING@
                 & "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
             }
             if ( $LastExitCode -ne 0 ) {
-                exit 1
+                exit $LastExitCode
             }
         }
         if (("@MSVC@".ToLower() -ne "true") -or ("@MSVC@".ToLower() -ne "yes") -or ("@MSVC@".ToLower() -eq "1")) {
@@ -168,12 +168,18 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
             if ( $LastExitCode -ne 0 ) {
                 & "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
             }
+            if ( $LastExitCode -ne 0 ) {
+                exit $LastExitCode
+            }
             & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
         }
         if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Release")) {
             & "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
             if ( $LastExitCode -ne 0 ) {
                 & "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+            }
+            if ( $LastExitCode -ne 0 ) {
+                exit $LastExitCode
             }
             & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
         }
@@ -187,15 +193,21 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
             if ( $LastExitCode -ne 0 ) {
                 & "@CMAKE_COMMAND@" --build . --verbose --config Debug "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
             }
+            if ( $LastExitCode -ne 0 ) {
+                exit $LastExitCode
+            }
             & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Debug
         }
         if (!(Test-Path ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE) -and ("$FINAL_BUILD_TYPE" -ne "Release")) {
             & "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@"
             if ( $LastExitCode -ne 0 ) {
-                & "@CMAKE_COMMAND@" --build --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+                & "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
             }
             if ( $LastExitCode -ne 0 ) {
                 & "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+            }
+            if ( $LastExitCode -ne 0 ) {
+                exit $LastExitCode
             }
             & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config Release
         }
@@ -214,6 +226,9 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
         if ( $LastExitCode -ne 0 ) {
             & "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
         }
+        if ( $LastExitCode -ne 0 ) {
+            exit $LastExitCode
+        }
     }
     else {
         & "@CMAKE_COMMAND@" --build . --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@"
@@ -222,6 +237,9 @@ if (("@MSVC@".ToLower() -eq "true") -or ("@MSVC@".ToLower() -eq "yes") -or ("@MS
         }
         if ( $LastExitCode -ne 0 ) {
             & "@CMAKE_COMMAND@" --build . --verbose --config "$FINAL_BUILD_TYPE" "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+        }
+        if ( $LastExitCode -ne 0 ) {
+            exit $LastExitCode
         }
     }
     & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@" --config "$FINAL_BUILD_TYPE"
@@ -232,6 +250,9 @@ else {
         if ( $LastExitCode -ne 0 ) {
             & "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
         }
+        if ( $LastExitCode -ne 0 ) {
+            exit $LastExitCode
+        }
     }
     else {
         & "@CMAKE_COMMAND@" --build . --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS@"
@@ -240,6 +261,9 @@ else {
         }
         if ( $LastExitCode -ne 0 ) {
             & "@CMAKE_COMMAND@" --build . --verbose --config Release "-j@ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS@"
+        }
+        if ( $LastExitCode -ne 0 ) {
+            exit $LastExitCode
         }
     }
     & "@CMAKE_COMMAND@" --install . --prefix "@PROJECT_THIRD_PARTY_INSTALL_DIR@"

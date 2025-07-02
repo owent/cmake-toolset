@@ -1,3 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 40ff758..39ef422 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ # Require CMake 3.10. If available, use the policies up to CMake 3.22.
+-cmake_minimum_required (VERSION 3.10...3.22)
++cmake_minimum_required (VERSION 3.16)
+ 
+ project (benchmark VERSION 1.9.0 LANGUAGES CXX)
+ 
 diff --git a/include/benchmark/benchmark.h b/include/benchmark/benchmark.h
 index 4cdb451..5a38171 100644
 --- a/include/benchmark/benchmark.h

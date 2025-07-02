@@ -34,7 +34,7 @@ if(NOT TARGET gsl::gsl-lite)
     project_third_party_port_declare(
       gsl-lite
       VERSION
-      "v0.42.0"
+      "v1.0.1"
       GIT_URL
       "https://github.com/gsl-lite/gsl-lite.git"
       BUILD_OPTIONS

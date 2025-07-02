@@ -1,3 +1,42 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f11bbb5..f12d455 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ # Note: CMake support is community-based. The maintainers do not use CMake
+ # internally.
+ 
+-cmake_minimum_required(VERSION 2.8.8)
++cmake_minimum_required(VERSION 3.16)
+ 
+ if (POLICY CMP0048)
+   cmake_policy(SET CMP0048 NEW)
+diff --git a/googlemock/CMakeLists.txt b/googlemock/CMakeLists.txt
+index d32b70b..fa9c8b4 100644
+--- a/googlemock/CMakeLists.txt
++++ b/googlemock/CMakeLists.txt
+@@ -42,7 +42,7 @@ else()
+   cmake_policy(SET CMP0048 NEW)
+   project(gmock VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
+ endif()
+-cmake_minimum_required(VERSION 2.6.4)
++cmake_minimum_required(VERSION 3.16)
+ 
+ if (COMMAND set_up_hermetic_build)
+   set_up_hermetic_build()
+diff --git a/googletest/CMakeLists.txt b/googletest/CMakeLists.txt
+index db29294..43a7c6b 100644
+--- a/googletest/CMakeLists.txt
++++ b/googletest/CMakeLists.txt
+@@ -53,7 +53,7 @@ else()
+   cmake_policy(SET CMP0048 NEW)
+   project(gtest VERSION ${GOOGLETEST_VERSION} LANGUAGES CXX C)
+ endif()
+-cmake_minimum_required(VERSION 2.6.4)
++cmake_minimum_required(VERSION 3.16)
+ 
+ if (POLICY CMP0063) # Visibility
+   cmake_policy(SET CMP0063 NEW)
 diff --git a/googletest/cmake/internal_utils.cmake b/googletest/cmake/internal_utils.cmake
 index 2f70f0b..36cbecb 100644
 --- a/googletest/cmake/internal_utils.cmake

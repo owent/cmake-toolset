@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dd930c2..bfdfdbe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -359,7 +359,7 @@ if(APPLE)
+   add_definitions(-D__APPLE_USE_RFC_3542)
+ endif()
+ 
+-if(ENABLE_SHARED_LIB AND ENABLE_STATIC_LIB AND MSVC AND NOT STATIC_LIB_SUFFIX)
++if(ENABLE_SHARED_LIB AND ENABLE_STATIC_LIB AND NOT STATIC_LIB_SUFFIX)
+   set(STATIC_LIB_SUFFIX "_static")
+ endif()
+ 
+@@ -377,9 +377,9 @@ if(BUILD_TESTING)
+ endif()
+ add_subdirectory(crypto)
+ add_subdirectory(third-party)
+-if(NOT ENABLE_LIB_ONLY)
+-  add_subdirectory(examples)
+-endif()
++# if(NOT ENABLE_LIB_ONLY)
++#   add_subdirectory(examples)
++# endif()
+ 
+ string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
+ message(STATUS "summary of build options:

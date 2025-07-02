@@ -1202,4 +1202,90 @@ macro(project_third_party_include_port PATH)
   math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
 endmacro()
 
+function(project_third_party_mutable_package_targets PORT_NAME)
+  if(TARGET "cmake-toolset.port.${PORT_NAME}.package")
+    return()
+  endif()
+
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.build")
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.package" DEPENDS "cmake-toolset.port.${PORT_NAME}.build")
+
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.build" PROPERTY FOLDER "cmake-toolset/build/${PORT_NAME}")
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package" PROPERTY FOLDER "cmake-toolset/package/${PORT_NAME}")
+endfunction()
+
+macro(project_third_party_export_port_set PORT_NAME VAR_NAME)
+  project_third_party_mutable_package_targets(${PORT_NAME})
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}_${VAR_NAME}"
+                 __project_third_party_export_port_set_VAR_NAME)
+  set(${__project_third_party_export_port_set_VAR_NAME} "${ARGN}")
+  set(${__project_third_party_export_port_set_VAR_NAME}
+      "${${__project_third_party_export_port_set_VAR_NAME}}"
+      PARENT_SCOPE)
+
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package"
+               PROPERTY "${VAR_NAME}" "${${__project_third_party_export_port_set_VAR_NAME}}")
+  unset(__project_third_party_export_port_set_VAR_NAME)
+endmacro()
+
+macro(project_third_party_export_port_alias_var PORT_NAME VAR_NAME SRC_PORT SRC_VAR_NAME)
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}_${VAR_NAME}"
+                 __project_third_party_export_port_alias_dst_VAR_NAME)
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${SRC_PORT}_${SRC_VAR_NAME}"
+                 __project_third_party_export_port_alias_src_VAR_NAME)
+  set(${__project_third_party_export_port_alias_dst_VAR_NAME}
+      "${${__project_third_party_export_port_alias_src_VAR_NAME}}")
+  set(${__project_third_party_export_port_alias_dst_VAR_NAME}
+      "${${__project_third_party_export_port_alias_dst_VAR_NAME}}"
+      PARENT_SCOPE)
+  unset(__project_third_party_export_port_alias_dst_VAR_NAME)
+  unset(__project_third_party_export_port_alias_src_VAR_NAME)
+endmacro()
+
+macro(project_third_party_import_port_targets PORT_NAME)
+  # Reused cache if it's found before
+  if(NOT ${PORT_NAME}_FOUND)
+    cmake_parse_arguments(project_third_party_import_port_OPTIONS "" "FORCE" "TARGETS;FIND_OPTIONS" ${ARGN})
+    if(NOT DEFINED ${PORT_NAME}_FOUND OR project_third_party_import_port_OPTIONS_FORCE)
+      unset(__project_third_party_import_port_TARGET_NAME)
+      foreach(__project_third_party_import_port_TARGET_NAME ${project_third_party_import_port_OPTIONS_TARGETS})
+        if(TARGET "${__project_third_party_import_port_TARGET_NAME}")
+          if(NOT ${PORT_NAME}_FOUND)
+            set(${PORT_NAME}_FOUND TRUE)
+          endif()
+          break()
+        endif()
+      endforeach()
+
+      if(NOT ${PORT_NAME}_FOUND)
+        if(__project_third_party_import_port_FIND_OPTIONS)
+          find_package(${PORT_NAME} ${__project_third_party_import_port_FIND_OPTIONS} QUIET)
+        else()
+          find_package(${PORT_NAME} QUIET)
+        endif()
+      endif()
+      unset(__project_third_party_import_port_TARGET_NAME)
+    endif()
+  endif()
+endmacro()
+
+function(project_third_party_merge_target_compile_options TARGET_NAME VAR_NAME)
+  set(__all_flags)
+  get_target_property(__compile_defs ${TARGET_NAME} INTERFACE_COMPILE_DEFINITIONS)
+  get_target_property(__all_flags ${TARGET_NAME} INTERFACE_COMPILE_OPTIONS)
+  if(__compile_defs)
+    foreach(__def_flag ${__compile_defs})
+      if(__def_flag MATCHES "^\\-D")
+        list(APPEND __all_flags "${__def_flag}")
+      else()
+        list(APPEND __all_flags "-D${__def_flag}")
+      endif()
+    endforeach()
+  endif()
+
+  set(${VAR_NAME}
+      "${__all_flags}"
+      PARENT_SCOPE)
+endfunction()
+
 message(STATUS "cmake-toolset: Configure for third party ports done.")
