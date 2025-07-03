@@ -16,7 +16,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
   cmake_policy(SET CMP0144 NEW)
 endif()
 
-project(cmake-toolset-test)
+project(cmake-toolset-test LANGUAGES C CXX)
 
 enable_testing()
 

@@ -332,25 +332,20 @@ if(NOT EXISTS ${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR})
 endif()
 
 # Add implicit link directories to support -lxxx flags in some ports
-add_list_flags_to_inherit_var_unique(CMAKE_C_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
-add_list_flags_to_inherit_var_unique(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
-add_list_flags_to_inherit_var_unique(CMAKE_HOST_C_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
-add_list_flags_to_inherit_var_unique(CMAKE_HOST_CXX_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+foreach(__language CXX C CUDA OBJC OBJCXX ASM)
+  add_list_flags_to_inherit_var_unique(CMAKE_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                       "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  add_list_flags_to_inherit_var_unique(CMAKE_HOST_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                       "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+endforeach()
 
-link_directories("${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
 if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
-  add_list_flags_to_inherit_var_unique(CMAKE_C_IMPLICIT_LINK_DIRECTORIES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-  add_list_flags_to_inherit_var_unique(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-  add_list_flags_to_inherit_var_unique(CMAKE_HOST_C_IMPLICIT_LINK_DIRECTORIES
-                                       "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
-  add_list_flags_to_inherit_var_unique(CMAKE_HOST_CXX_IMPLICIT_LINK_DIRECTORIES
-                                       "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
-
-  link_directories("${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+  foreach(__language CXX C CUDA OBJC OBJCXX ASM)
+    add_list_flags_to_inherit_var_unique(CMAKE_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_list_flags_to_inherit_var_unique(CMAKE_HOST_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                         "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+  endforeach()
 endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
