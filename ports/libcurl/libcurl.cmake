@@ -84,19 +84,22 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
             ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCH_LINK_NAMES})
 
-        foreach(LIBCURL_DEP_LINK_NAME ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES})
-          if(IS_ABSOLUTE "${LIBCURL_DEP_LINK_NAME}")
-            if(LIBCURL_DEP_LINK_NAME MATCHES "cares|zstd|nghttp2|nghttp3|ngtcp2|libz\\.|zlib")
-              message("Libcurl: ignore ${LIBCURL_DEP_LINK_NAME}, we will use cmake targets to link.")
-            else()
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES)
+          foreach(LIBCURL_DEP_LINK_NAME
+                  ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_ORIGIN_INTERFACE_LINK_LIBRARIES})
+            if(IS_ABSOLUTE "${LIBCURL_DEP_LINK_NAME}")
+              if(LIBCURL_DEP_LINK_NAME MATCHES "cares|zstd|nghttp2|nghttp3|ngtcp2|libz\\.|zlib")
+                message("Libcurl: ignore ${LIBCURL_DEP_LINK_NAME}, we will use cmake targets to link.")
+              else()
+                list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
+                     "${LIBCURL_DEP_LINK_NAME}")
+              endif()
+            elseif(NOT LIBCURL_DEP_LINK_NAME MATCHES "^\\-l(cares|zstd|nghttp2|nghttp3|ngtcp2|z)|zlib")
               list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
                    "${LIBCURL_DEP_LINK_NAME}")
             endif()
-          elseif(NOT LIBCURL_DEP_LINK_NAME MATCHES "^\\-l(cares|zstd|nghttp2|nghttp3|ngtcp2|z)|zlib")
-            list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
-                 "${LIBCURL_DEP_LINK_NAME}")
-          endif()
-        endforeach()
+          endforeach()
+        endif()
 
         set_target_properties(
           ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME}

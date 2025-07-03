@@ -340,6 +340,8 @@ add_list_flags_to_inherit_var_unique(CMAKE_HOST_C_IMPLICIT_LINK_DIRECTORIES
                                      "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
 add_list_flags_to_inherit_var_unique(CMAKE_HOST_CXX_IMPLICIT_LINK_DIRECTORIES
                                      "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
+link_directories("${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
 if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
   add_list_flags_to_inherit_var_unique(CMAKE_C_IMPLICIT_LINK_DIRECTORIES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
   add_list_flags_to_inherit_var_unique(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
@@ -347,6 +349,8 @@ if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
                                        "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
   add_list_flags_to_inherit_var_unique(CMAKE_HOST_CXX_IMPLICIT_LINK_DIRECTORIES
                                        "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+
+  link_directories("${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
 endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
