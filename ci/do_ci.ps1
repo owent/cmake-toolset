@@ -114,6 +114,9 @@ if ( $RUN_MODE -eq "msvc.static.test" ) {
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
+  if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
@@ -149,6 +152,9 @@ elseif ( $RUN_MODE -eq "msvc.shared.test" ) {
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
+  if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -186,6 +192,9 @@ elseif ( $RUN_MODE -eq "msvc.no-rtti.test" ) {
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
+  if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -229,6 +238,9 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
+  if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
   $THIRD_PARTY_PREBUILT_PATH = $(Get-ChildItem ../third_party/install/).FullName
@@ -265,6 +277,9 @@ elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
   if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
+  if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
 }
@@ -287,7 +302,8 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
     Remove-Item -Recurse -Force "$ENV:VCPKG_INSTALLATION_ROOT/packages"
   }
   & cmake .. -G "$Env:CMAKE_GENERATOR" -A x64 "-DCMAKE_TOOLCHAIN_FILE=$ENV:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"   `
-    -DVCPKG_TARGET_TRIPLET=x64-windows-static-md "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" `
+    -DVCPKG_TARGET_TRIPLET=x64-windows "-DCMAKE_BUILD_TYPE=$Env:CI_BUILD_CONFIGURE_TYPE" "-DCMAKE_SYSTEM_VERSION=$selectWinSDKVersion" `
+    "-DATFRAMEWORK_USE_DYNAMIC_LIBRARY=ON" `
     "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON" $ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS
   if ( $LastExitCode -ne 0 ) {
     if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
@@ -299,6 +315,9 @@ elseif ( $RUN_MODE -eq "msvc.vcpkg.test" ) {
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
+  if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }
@@ -329,6 +348,9 @@ elseif ( $RUN_MODE -eq "msvc2017.test" ) {
     exit $LastExitCode
   }
   & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE"
+  if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --config "$Env:CI_BUILD_CONFIGURE_TYPE" --verbose
+  }
   if ( $LastExitCode -ne 0 ) {
     exit $LastExitCode
   }

@@ -21,15 +21,3 @@ index 43e6b79..5156f4d 100644
      return;
  
    posix_spawn_can_use_setsid = (major >= 19);  /* macOS Catalina */
-diff --git a/src/unix/tcp.c b/src/unix/tcp.c
-index 98970d7..e11747c 100644
---- a/src/unix/tcp.c
-+++ b/src/unix/tcp.c
-@@ -27,6 +27,7 @@
- #include <assert.h>
- #include <errno.h>
- 
-+#include <ifaddrs.h>
- #include <sys/types.h>
- #include <sys/socket.h>
- 

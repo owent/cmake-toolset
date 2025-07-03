@@ -59,7 +59,7 @@ elif [[ "$1" == "gcc.no-rtti.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -77,7 +77,7 @@ elif [[ "$1" == "gcc.no-exceptions.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -95,7 +95,7 @@ elif [[ "$1" == "gcc.static.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -113,7 +113,7 @@ elif [[ "$1" == "gcc.shared.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -131,7 +131,7 @@ elif [[ "$1" == "gcc.libressl.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -149,7 +149,7 @@ elif [[ "$1" == "gcc.boringssl.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -167,7 +167,7 @@ elif [[ "$1" == "gcc.mbedtls.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -185,7 +185,7 @@ elif [[ "$1" == "gcc.4.8.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -203,7 +203,7 @@ elif [[ "$1" == "gcc.standalone-upb.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/third_party/install/*)
 elif [[ "$1" == "clang.test" ]]; then
   echo "$1"
@@ -243,7 +243,7 @@ elif [[ "$1" == "clang.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -270,7 +270,7 @@ elif [[ "$1" == "gcc.vcpkg.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -295,7 +295,7 @@ elif [[ "$1" == "msys2.mingw.static.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
@@ -322,7 +322,7 @@ elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
@@ -464,7 +464,7 @@ elif [[ "$1" == "android.arm64.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "android.x86_64.test" ]]; then
   echo "$1"
   if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
@@ -484,7 +484,7 @@ elif [[ "$1" == "android.x86_64.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "ios.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
@@ -501,7 +501,7 @@ elif [[ "$1" == "ios.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "iphone_simulator.test" ]]; then
   echo "$1"
   mkdir -p test/build_jobs_dir
@@ -518,5 +518,5 @@ elif [[ "$1" == "iphone_simulator.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 fi
