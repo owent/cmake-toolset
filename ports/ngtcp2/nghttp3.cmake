@@ -88,9 +88,7 @@ else()
     GIT_ENABLE_SUBMODULE
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_SUB_MODULES})
 
-  if(TARGET nghttp3::nghttp3 OR TARGET nghttp3::nghttp3_static)
-    project_third_party_nghttp3_import()
-  endif()
+  project_third_party_nghttp3_import()
 endif()
 
 if(NOT TARGET nghttp3::nghttp3 AND NOT TARGET nghttp3::nghttp3_static)

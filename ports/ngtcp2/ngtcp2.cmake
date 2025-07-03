@@ -233,9 +233,7 @@ else()
     GIT_ENABLE_SUBMODULE
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_SUB_MODULES})
 
-  if(TARGET ngtcp2::ngtcp2_static OR TARGET ngtcp2::ngtcp2)
-    project_third_party_ngtcp2_import()
-  endif()
+  project_third_party_ngtcp2_import()
 endif()
 
 if(NOT TARGET ngtcp2::ngtcp2 AND NOT TARGET ngtcp2::ngtcp2_static)

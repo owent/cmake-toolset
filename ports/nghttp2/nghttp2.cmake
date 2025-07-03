@@ -133,9 +133,7 @@ else()
     GIT_ENABLE_SUBMODULE
     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_SUB_MODULES})
 
-  if(NOT TARGET nghttp2::nghttp2_static AND NOT TARGET nghttp2::nghttp2)
-    project_third_party_nghttp2_import()
-  endif()
+  project_third_party_nghttp2_import()
 endif()
 
 if(NOT TARGET nghttp2::nghttp2_static AND NOT TARGET nghttp2::nghttp2)

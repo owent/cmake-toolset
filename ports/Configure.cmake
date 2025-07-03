@@ -1273,6 +1273,9 @@ function(project_third_party_merge_target_compile_options TARGET_NAME VAR_NAME)
   set(__all_flags)
   get_target_property(__compile_defs ${TARGET_NAME} INTERFACE_COMPILE_DEFINITIONS)
   get_target_property(__all_flags ${TARGET_NAME} INTERFACE_COMPILE_OPTIONS)
+  if(NOT __all_flags)
+    unset(__all_flags)
+  endif()
   if(__compile_defs)
     foreach(__def_flag ${__compile_defs})
       if(__def_flag MATCHES "^\\-D")
@@ -1283,12 +1286,15 @@ function(project_third_party_merge_target_compile_options TARGET_NAME VAR_NAME)
     endforeach()
   endif()
 
-  if(NOT __all_flags)
-    unset(__all_flags)
+  if(__all_flags)
+    set(${VAR_NAME} "${__all_flags}")
+    set(${VAR_NAME}
+        "${__all_flags}"
+        PARENT_SCOPE)
+  else()
+    unset(${VAR_NAME})
+    unset(${VAR_NAME} PARENT_SCOPE)
   endif()
-  set(${VAR_NAME}
-      "${__all_flags}"
-      PARENT_SCOPE)
 endfunction()
 
 message(STATUS "cmake-toolset: Configure for third party ports done.")
