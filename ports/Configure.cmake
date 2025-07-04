@@ -337,6 +337,23 @@ foreach(__language CXX C CUDA OBJC OBJCXX ASM)
                                        "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
   add_list_flags_to_inherit_var_unique(CMAKE_HOST_${__language}_IMPLICIT_LINK_DIRECTORIES
                                        "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
+  # Some versions of CMake do not use CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES
+  if(APPLE)
+    add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
+    add_compiler_flags_to_var_unique(CMAKE_HOST_EXE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_MODULE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_SHARED_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  endif()
 endforeach()
 
 if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
@@ -346,6 +363,16 @@ if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
     add_list_flags_to_inherit_var_unique(CMAKE_HOST_${__language}_IMPLICIT_LINK_DIRECTORIES
                                          "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
   endforeach()
+  # Some versions of CMake do not use CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES
+  if(APPLE)
+    add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+
+    add_compiler_flags_to_var_unique(CMAKE_HOST_EXE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_MODULE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_SHARED_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+  endif()
 endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
@@ -392,7 +419,7 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 if(UNIX OR MINGW)
   set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
-  if($ENV{PKG_CONFIG_PATH})
+  if("$ENV{PKG_CONFIG_PATH}")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(ENV{PKG_CONFIG_PATH}
           "$ENV{PKG_CONFIG_PATH}:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/pkgconfig:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/pkgconfig"
@@ -448,7 +475,7 @@ function(project_third_party_print_find_information)
       message(STATUS "cmake-toolset: VCPKG_HOST_TRIPLET=${VCPKG_HOST_TRIPLET}")
     endif()
   endif()
-  if(ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE OR $ENV{ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE})
+  if(ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE OR "$ENV{ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE}")
     foreach(
       VAR_NAME IN
       LISTS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
@@ -477,6 +504,7 @@ function(project_third_party_print_find_information)
       foreach(VAR_NAME CMAKE_OSX_ARCHITECTURES)
         message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
       endforeach()
+      message(STATUS "cmake-toolset: $ENV{LIBRARY_PATH}=${$ENV{LIBRARY_PATH}}")
     endif()
   endif()
 endfunction()
