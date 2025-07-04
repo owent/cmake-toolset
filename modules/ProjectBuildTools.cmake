@@ -1294,7 +1294,7 @@ function(project_build_tools_resolve_alias_target __OUTPUT_VAR_NAME __TARGET_NAM
 
   get_target_property(IS_ALIAS_TARGET ${__TARGET_NAME} ALIASED_TARGET)
   if(IS_ALIAS_TARGET)
-    project_build_tools_resolve_alias(${__OUTPUT_VAR_NAME} ${IS_ALIAS_TARGET})
+    project_build_tools_resolve_alias_target(${__OUTPUT_VAR_NAME} ${IS_ALIAS_TARGET})
     set(${__OUTPUT_VAR_NAME}
         ${${__OUTPUT_VAR_NAME}}
         PARENT_SCOPE)

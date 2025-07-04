@@ -59,6 +59,87 @@ if(NOT Libngtcp2_VERSION
   unset(Libngtcp2_HEADER_CONTENTS)
 endif()
 
+function(__libngtcp2_resolve_alias_target __OUTPUT_VAR_NAME __TARGET_NAME)
+  if(NOT TARGET ${__TARGET_NAME})
+    set(${__OUTPUT_VAR_NAME}
+        ${__TARGET_NAME}
+        PARENT_SCOPE)
+  endif()
+
+  get_target_property(IS_ALIAS_TARGET ${__TARGET_NAME} ALIASED_TARGET)
+  if(IS_ALIAS_TARGET)
+    __libngtcp2_resolve_alias_target(${__OUTPUT_VAR_NAME} ${IS_ALIAS_TARGET})
+    set(${__OUTPUT_VAR_NAME}
+        ${${__OUTPUT_VAR_NAME}}
+        PARENT_SCOPE)
+  else()
+    set(${__OUTPUT_VAR_NAME}
+        ${__TARGET_NAME}
+        PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(__libngtcp2_patch_imported_interface_definitions TARGET_NAME)
+  set(optionArgs RESOLVE_ALIAS)
+  set(multiValueArgs ADD_DEFINITIONS REMOVE_DEFINITIONS)
+  cmake_parse_arguments(PATCH_OPTIONS "${RESOLVE_ALIAS}" "" "${multiValueArgs}" ${ARGN})
+
+  if(PATCH_OPTIONS_RESOLVE_ALIAS)
+    __libngtcp2_resolve_alias_target(TARGET_NAME ${TARGET_NAME})
+  else()
+    get_target_property(IS_ALIAS_TARGET ${TARGET_NAME} ALIASED_TARGET)
+    if(IS_ALIAS_TARGET)
+      return()
+    endif()
+  endif()
+  get_target_property(OLD_DEFINITIONS ${TARGET_NAME} INTERFACE_COMPILE_DEFINITIONS)
+  if(NOT OLD_DEFINITIONS)
+    set(OLD_DEFINITIONS "") # Reset NOTFOUND
+  endif()
+  unset(PATCH_INNER_DEFINITIONS)
+  if(OLD_DEFINITIONS AND PATCH_OPTIONS_REMOVE_DEFINITIONS)
+    foreach(DEP_PATH IN LISTS OLD_DEFINITIONS)
+      set(MATCH_ANY_RULES FALSE)
+      foreach(MATCH_RULE IN LISTS PATCH_OPTIONS_REMOVE_DEFINITIONS)
+        if(DEP_PATH MATCHES "${MATCH_RULE}")
+          set(MATCH_ANY_RULES TRUE)
+          break()
+        endif()
+      endforeach()
+
+      if(NOT MATCH_ANY_RULES)
+        list(APPEND PATCH_INNER_DEFINITIONS ${DEP_PATH})
+      endif()
+    endforeach()
+    if(PATCH_OPTIONS_ADD_DEFINITIONS)
+      list(APPEND PATCH_INNER_DEFINITIONS ${PATCH_OPTIONS_ADD_DEFINITIONS})
+    endif()
+  elseif(OLD_DEFINITIONS)
+    set(PATCH_INNER_DEFINITIONS ${OLD_DEFINITIONS})
+    if(PATCH_OPTIONS_ADD_DEFINITIONS)
+      list(APPEND PATCH_INNER_DEFINITIONS ${PATCH_OPTIONS_ADD_DEFINITIONS})
+    endif()
+  elseif(PATCH_OPTIONS_ADD_DEFINITIONS)
+    set(PATCH_INNER_DEFINITIONS ${PATCH_OPTIONS_ADD_DEFINITIONS})
+  else()
+    set(PATCH_INNER_DEFINITIONS "")
+  endif()
+
+  if(PATCH_INNER_DEFINITIONS)
+    list(REMOVE_DUPLICATES PATCH_INNER_DEFINITIONS)
+  endif()
+
+  if(NOT OLD_DEFINITIONS STREQUAL PATCH_INNER_DEFINITIONS)
+    set_target_properties(${TARGET_NAME} PROPERTIES INTERFACE_COMPILE_DEFINITIONS "${PATCH_INNER_DEFINITIONS}")
+    if(ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
+      message(
+        STATUS
+          "Patch: INTERFACE_COMPILE_DEFINITIONS of ${TARGET_NAME} from \"${OLD_DEFINITIONS}\" to \"${PATCH_INNER_DEFINITIONS}\""
+      )
+    endif()
+  endif()
+endfunction()
+
 if(Libngtcp2_FOUND)
   # Patch for libngtcp2.pc and FindLibngtcp2.cmake in other repositories(nghttp2 and etc.).
   if(EXISTS "${Libngtcp2_LIBRARY_DIRS}/libngtcp2_static.a" AND NOT EXISTS "${Libngtcp2_LIBRARY_DIRS}/libngtcp2.a")
@@ -133,38 +214,36 @@ if(Libngtcp2_FOUND)
       set(CMAKE_REQUIRED_DEFINITIONS "-DNGTCP2_STATICLIB=1")
       check_cxx_symbol_exists(ngtcp2_version "ngtcp2/ngtcp2.h" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_STATICLIB)
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_STATICLIB)
-        project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2 ADD_DEFINITIONS
-                                                                 "NGTCP2_STATICLIB=1")
+        __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2 ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
         if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
-          project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_quictls ADD_DEFINITIONS
-                                                                   "NGTCP2_STATICLIB=1")
+          __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_quictls ADD_DEFINITIONS
+                                                           "NGTCP2_STATICLIB=1")
         endif()
         if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
-          project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl ADD_DEFINITIONS
-                                                                   "NGTCP2_STATICLIB=1")
+          __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl ADD_DEFINITIONS
+                                                           "NGTCP2_STATICLIB=1")
         endif()
         if(TARGET Libngtcp2::libngtcp2_crypto_boringssl)
-          project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_boringssl
-                                                                   ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
+          __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_boringssl ADD_DEFINITIONS
+                                                           "NGTCP2_STATICLIB=1")
         endif()
       endif()
     endif()
     cmake_pop_check_state()
   else()
     if(Libngtcp2_LIBRARIES AND Libngtcp2_LIBRARIES MATCHES "\\.a$")
-      project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2 ADD_DEFINITIONS
-                                                               "NGTCP2_STATICLIB=1")
+      __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2 ADD_DEFINITIONS "NGTCP2_STATICLIB=1")
       if(TARGET Libngtcp2::libngtcp2_crypto_quictls)
-        project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_quictls ADD_DEFINITIONS
-                                                                 "NGTCP2_STATICLIB=1")
+        __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_quictls ADD_DEFINITIONS
+                                                         "NGTCP2_STATICLIB=1")
       endif()
       if(TARGET Libngtcp2::libngtcp2_crypto_openssl)
-        project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl ADD_DEFINITIONS
-                                                                 "NGTCP2_STATICLIB=1")
+        __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_openssl ADD_DEFINITIONS
+                                                         "NGTCP2_STATICLIB=1")
       endif()
       if(TARGET Libngtcp2::libngtcp2_crypto_boringssl)
-        project_build_tools_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_boringssl ADD_DEFINITIONS
-                                                                 "NGTCP2_STATICLIB=1")
+        __libngtcp2_patch_imported_interface_definitions(Libngtcp2::libngtcp2_crypto_boringssl ADD_DEFINITIONS
+                                                         "NGTCP2_STATICLIB=1")
       endif()
     endif()
   endif()
