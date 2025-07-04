@@ -339,7 +339,21 @@ foreach(__language CXX C CUDA OBJC OBJCXX ASM)
                                        "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
 
   # Some versions of CMake do not use CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES
-  if(APPLE)
+  if(MSVC)
+    add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
+    add_compiler_flags_to_var_unique(CMAKE_HOST_EXE_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_MODULE_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_SHARED_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  else()
     add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS
                                      "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
     add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS
@@ -364,7 +378,17 @@ if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
                                          "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
   endforeach()
   # Some versions of CMake do not use CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES
-  if(APPLE)
+  if(MSVC)
+    add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS "/LIBPATH:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS "/LIBPATH:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS "/LIBPATH:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+
+    add_compiler_flags_to_var_unique(CMAKE_HOST_EXE_LINKER_FLAGS "/LIBPATH:${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_MODULE_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_SHARED_LINKER_FLAGS
+                                     "/LIBPATH:${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+  else()
     add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
     add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
     add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")

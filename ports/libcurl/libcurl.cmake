@@ -94,7 +94,8 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
                 list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
                      "${LIBCURL_DEP_LINK_NAME}")
               endif()
-            elseif(NOT LIBCURL_DEP_LINK_NAME MATCHES "^\\-l(cares|zstd|nghttp2|nghttp3|ngtcp2|z)|zlib")
+            elseif(NOT LIBCURL_DEP_LINK_NAME MATCHES
+                   "^(\\-l|\\\$<LINK_ONLY:)(cares|zstd|nghttp2|nghttp3|ngtcp2|z)|zlib")
               list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES
                    "${LIBCURL_DEP_LINK_NAME}")
             endif()
