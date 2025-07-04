@@ -342,6 +342,7 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
 
       if(project_build_tools_append_cmake_host_options_APPEND_SYSTEM_LINKS
          AND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS
+         AND CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
         project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
                                                              "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
@@ -349,7 +350,8 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES project_build_tools_append_cmake_inherit_VAR_VALUE)
       endif()
-    elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS) # Add system links into standard libraries even not set
+    elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS AND CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME)
+      # Add system links into standard libraries even not set
       if(project_build_tools_append_cmake_host_options_APPEND_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
         project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
@@ -2524,6 +2526,7 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     set(OUTPUT_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
   else()
     set(OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    file(MAKE_DIRECTORY "${OUTPUT_DIR}")
   endif()
   if(add_archive_options_OUTPUT_NAME)
     set(OUTPUT_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}${add_archive_options_OUTPUT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")

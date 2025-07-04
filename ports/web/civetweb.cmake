@@ -153,6 +153,13 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
            ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_PATCH_FILE})
     endif()
 
+    if(WIN32)
+      cmake_toolset_check_library_exists("Comdlg32" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_TEST_LIB_COMDLG32)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_TEST_LIB_COMDLG32)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS "Comdlg32.lib")
+      endif()
+    endif()
+
     find_configure_package(
       PACKAGE
       civetweb
@@ -176,6 +183,13 @@ if(NOT TARGET civetweb::civetweb-cpp AND NOT TARGET civetweb::civetweb)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_VERSION}"
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_GIT_URL}")
+
+    if(WIN32)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_TEST_LIB_COMDLG32)
+        list(POP_BACK ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
+      endif()
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_TEST_LIB_COMDLG32)
+    endif()
 
     project_third_party_civetweb_import()
   endif()

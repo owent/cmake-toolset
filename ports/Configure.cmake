@@ -458,6 +458,24 @@ function(project_third_party_print_find_information)
         message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
       endif()
     endforeach()
+
+    foreach(
+      VAR_NAME
+      CMAKE_SYSTEM_NAME
+      CMAKE_SYSTEM_PROCESSOR
+      CMAKE_SYSTEM_VERSION
+      CMAKE_HOST_SYSTEM_NAME
+      CMAKE_HOST_SYSTEM_PROCESSOR
+      CMAKE_HOST_SYSTEM_VERSION
+      CMAKE_C_COMPILER_ID
+      CMAKE_CXX_COMPILER_ID
+      CMAKE_C_COMPILER_VERSION
+      CMAKE_CXX_COMPILER_VERSION
+      CMAKE_OSX_ARCHITECTURES)
+      if(${VAR_NAME})
+        message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
+      endif()
+    endforeach()
   endif()
 endfunction()
 project_third_party_print_find_information()

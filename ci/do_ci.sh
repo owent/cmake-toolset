@@ -451,8 +451,8 @@ elif [[ "$1" == "android.arm64.test" ]]; then
   if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
     export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
   fi
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_android
+  cd test/build_jobs_android
   bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -471,8 +471,8 @@ elif [[ "$1" == "android.x86_64.test" ]]; then
   if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
     export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
   fi
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_android
+  cd test/build_jobs_android
   bash ../../ci/cmake_android_wrapper.sh -r .. -a x86_64 -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -488,8 +488,8 @@ elif [[ "$1" == "android.x86_64.test" ]]; then
   cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "ios.test" ]]; then
   echo "$1"
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_ios
+  cd test/build_jobs_ios
   bash ../../ci/cmake_ios_wrapper.sh -r .. -a arm64 -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -505,8 +505,8 @@ elif [[ "$1" == "ios.test" ]]; then
   cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "iphone_simulator.test" ]]; then
   echo "$1"
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_iphone_simulator
+  cd test/build_jobs_iphone_simulator
   bash ../../ci/cmake_ios_wrapper.sh -r .. -a x86_64 -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?

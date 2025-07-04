@@ -158,6 +158,49 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
 endif()
 
 # Custom additional system libraries
+function(cmake_toolset_check_library_exists LIBNAME OUT_VAR_NAME)
+  if(LIBNAME IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
+    set(${OUT_VAR_NAME}
+        TRUE
+        PARENT_SCOPE)
+    return()
+  endif()
+
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_TEST_LINK_${LIBNAME}" ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
+  if(DEFINED CACHE{${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}})
+    set(${OUT_VAR_NAME}
+        ${${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}}
+        PARENT_SCOPE)
+    return()
+  endif()
+
+  unset(${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
+  include(CheckCXXSourceCompiles)
+
+  cmake_push_check_state()
+  if(CMAKE_REQUIRED_LIBRARIES)
+    set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${LIBNAME}")
+  else()
+    set(CMAKE_REQUIRED_LIBRARIES "${LIBNAME}")
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
+    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES})
+  endif()
+
+  check_cxx_source_compiles("#include <cstdio>
+  int main() { return 0; }" ${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
+
+  set(${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}
+      ${${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}}
+      CACHE BOOL "If the library ${LIBNAME} is available" FORCE)
+  mark_as_advanced(${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
+
+  set(${OUT_VAR_NAME}
+      ${${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}}
+      PARENT_SCOPE)
+  cmake_pop_check_state()
+endfunction()
+
 if(ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES)
   include(CheckCXXSourceCompiles)
 
@@ -166,27 +209,11 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES)
     if(LIBNAME IN_LIST ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS)
       continue()
     endif()
-    cmake_push_check_state()
-    if(CMAKE_REQUIRED_LIBRARIES)
-      set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${LIBNAME}")
-    else()
-      set(CMAKE_REQUIRED_LIBRARIES "${LIBNAME}")
-    endif()
-    if(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES ${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES})
-    endif()
-    string(TOUPPER "${LIBNAME}" ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME
-        "ATFRAMEWORK_CMAKE_TOOLSET_TEST_LINK_${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME}")
-    check_cxx_source_compiles("#include <cstdio>
-    int main() { return 0; }" ${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
-    if(${ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME})
+    cmake_toolset_check_library_exists("${LIBNAME}" __check_additional_system_library_exists)
+    if(__check_additional_system_library_exists)
       list(PREPEND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LIBRARIES "${LIBNAME}")
     endif()
-    cmake_pop_check_state()
   endforeach()
-
-  unset(ATFRAMEWORK_CMAKE_TOOLSET_TEST_NAME)
 endif()
 
 if(MSVC)
