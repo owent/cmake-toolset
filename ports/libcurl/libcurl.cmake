@@ -309,7 +309,7 @@ if(NOT TARGET CURL::libcurl
          AND OPENSSL_VERSION VERSION_GREATER_EQUAL "3.3.0"
          AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME)
         # OpenSSL 3.5.0+ support ngtcp2 with ngtcp2_crypto_ossl
-        if(OPENSSL_VERSION VERSION_GREATER_EQUAL "3.5.0" AND TARGET Libngtcp2::libngtcp2_crypto_ossl)
+        if(TARGET Libngtcp2::libngtcp2_crypto_ossl)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DUSE_NGTCP2=ON"
                "-DUSE_OPENSSL_QUIC=OFF")
         else()
