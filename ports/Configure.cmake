@@ -454,7 +454,7 @@ function(project_third_party_print_find_information)
       LISTS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
             PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
             PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON)
-      if(${VAR_NAME})
+      if(DEFINED ${VAR_NAME})
         message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
       endif()
     endforeach()
@@ -470,12 +470,14 @@ function(project_third_party_print_find_information)
       CMAKE_C_COMPILER_ID
       CMAKE_CXX_COMPILER_ID
       CMAKE_C_COMPILER_VERSION
-      CMAKE_CXX_COMPILER_VERSION
-      CMAKE_OSX_ARCHITECTURES)
-      if(${VAR_NAME})
-        message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
-      endif()
+      CMAKE_CXX_COMPILER_VERSION)
+      message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
     endforeach()
+    if(APPLE)
+      foreach(VAR_NAME CMAKE_OSX_ARCHITECTURES)
+        message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
+      endforeach()
+    endif()
   endif()
 endfunction()
 project_third_party_print_find_information()
