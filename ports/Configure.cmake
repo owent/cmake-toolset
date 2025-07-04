@@ -332,21 +332,47 @@ if(NOT EXISTS ${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR})
 endif()
 
 # Add implicit link directories to support -lxxx flags in some ports
-add_list_flags_to_inherit_var_unique(CMAKE_C_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
-add_list_flags_to_inherit_var_unique(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
-add_list_flags_to_inherit_var_unique(CMAKE_HOST_C_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
-add_list_flags_to_inherit_var_unique(CMAKE_HOST_CXX_IMPLICIT_LINK_DIRECTORIES
-                                     "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+foreach(__language CXX C CUDA OBJC OBJCXX ASM)
+  add_list_flags_to_inherit_var_unique(CMAKE_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                       "${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  add_list_flags_to_inherit_var_unique(CMAKE_HOST_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                       "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
+  # Some versions of CMake do not use CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES
+  if(APPLE)
+    add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+
+    add_compiler_flags_to_var_unique(CMAKE_HOST_EXE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_MODULE_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_SHARED_LINKER_FLAGS
+                                     "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}")
+  endif()
+endforeach()
+
 if(CMAKE_INSTALL_LIBDIR STREQUAL "lib64")
-  add_list_flags_to_inherit_var_unique(CMAKE_C_IMPLICIT_LINK_DIRECTORIES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-  add_list_flags_to_inherit_var_unique(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-  add_list_flags_to_inherit_var_unique(CMAKE_HOST_C_IMPLICIT_LINK_DIRECTORIES
-                                       "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
-  add_list_flags_to_inherit_var_unique(CMAKE_HOST_CXX_IMPLICIT_LINK_DIRECTORIES
-                                       "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+  foreach(__language CXX C CUDA OBJC OBJCXX ASM)
+    add_list_flags_to_inherit_var_unique(CMAKE_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                         "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_list_flags_to_inherit_var_unique(CMAKE_HOST_${__language}_IMPLICIT_LINK_DIRECTORIES
+                                         "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+  endforeach()
+  # Some versions of CMake do not use CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES
+  if(APPLE)
+    add_compiler_flags_to_var_unique(CMAKE_EXE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_MODULE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_SHARED_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
+
+    add_compiler_flags_to_var_unique(CMAKE_HOST_EXE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_MODULE_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+    add_compiler_flags_to_var_unique(CMAKE_HOST_SHARED_LINKER_FLAGS "-L${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/lib")
+  endif()
 endif()
 
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
@@ -393,7 +419,7 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 if(UNIX OR MINGW)
   set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
-  if(ENV{PKG_CONFIG_PATH})
+  if("$ENV{PKG_CONFIG_PATH}")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(ENV{PKG_CONFIG_PATH}
           "$ENV{PKG_CONFIG_PATH}:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64/pkgconfig:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib/pkgconfig"
@@ -423,7 +449,8 @@ function(project_third_party_print_find_information)
   message(STATUS "cmake-toolset: PROJECT_THIRD_PARTY_INSTALL_DIR=${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   message(STATUS "cmake-toolset: PROJECT_THIRD_PARTY_HOST_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
   message(STATUS "cmake-toolset: PROJECT_THIRD_PARTY_PACKAGE_DIR=${PROJECT_THIRD_PARTY_PACKAGE_DIR}")
-  foreach(VAR_NAME IN LISTS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS)
+  foreach(VAR_NAME IN LISTS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS
+                            PROJECT_BUILD_TOOLS_CMAKE_TOOLSET_MODULE_PACKAGE_VARS)
     if(${VAR_NAME})
       message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
     endif()
@@ -446,6 +473,38 @@ function(project_third_party_print_find_information)
     endif()
     if(VCPKG_HOST_TRIPLET)
       message(STATUS "cmake-toolset: VCPKG_HOST_TRIPLET=${VCPKG_HOST_TRIPLET}")
+    endif()
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE OR "$ENV{ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE}")
+    foreach(
+      VAR_NAME IN
+      LISTS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
+            PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
+            PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON)
+      if(DEFINED ${VAR_NAME})
+        message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
+      endif()
+    endforeach()
+
+    foreach(
+      VAR_NAME
+      CMAKE_SYSTEM_NAME
+      CMAKE_SYSTEM_PROCESSOR
+      CMAKE_SYSTEM_VERSION
+      CMAKE_HOST_SYSTEM_NAME
+      CMAKE_HOST_SYSTEM_PROCESSOR
+      CMAKE_HOST_SYSTEM_VERSION
+      CMAKE_C_COMPILER_ID
+      CMAKE_CXX_COMPILER_ID
+      CMAKE_C_COMPILER_VERSION
+      CMAKE_CXX_COMPILER_VERSION)
+      message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
+    endforeach()
+    if(APPLE)
+      foreach(VAR_NAME CMAKE_OSX_ARCHITECTURES)
+        message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
+      endforeach()
+      message(STATUS "cmake-toolset: ENV{LIBRARY_PATH}=${$ENV{LIBRARY_PATH}}")
     endif()
   endif()
 endfunction()
@@ -1201,5 +1260,100 @@ macro(project_third_party_include_port PATH)
 
   math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
 endmacro()
+
+function(project_third_party_mutable_package_targets PORT_NAME)
+  if(TARGET "cmake-toolset.port.${PORT_NAME}.package")
+    return()
+  endif()
+
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.build")
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.package" DEPENDS "cmake-toolset.port.${PORT_NAME}.build")
+
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.build" PROPERTY FOLDER "cmake-toolset/build/${PORT_NAME}")
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package" PROPERTY FOLDER "cmake-toolset/package/${PORT_NAME}")
+endfunction()
+
+macro(project_third_party_export_port_set PORT_NAME VAR_NAME)
+  project_third_party_mutable_package_targets(${PORT_NAME})
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}_${VAR_NAME}"
+                 __project_third_party_export_port_set_VAR_NAME)
+  set(${__project_third_party_export_port_set_VAR_NAME} "${ARGN}")
+  set(${__project_third_party_export_port_set_VAR_NAME}
+      "${${__project_third_party_export_port_set_VAR_NAME}}"
+      PARENT_SCOPE)
+
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package"
+               PROPERTY "${VAR_NAME}" "${${__project_third_party_export_port_set_VAR_NAME}}")
+  unset(__project_third_party_export_port_set_VAR_NAME)
+endmacro()
+
+macro(project_third_party_export_port_alias_var PORT_NAME VAR_NAME SRC_PORT SRC_VAR_NAME)
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}_${VAR_NAME}"
+                 __project_third_party_export_port_alias_dst_VAR_NAME)
+  string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${SRC_PORT}_${SRC_VAR_NAME}"
+                 __project_third_party_export_port_alias_src_VAR_NAME)
+  set(${__project_third_party_export_port_alias_dst_VAR_NAME}
+      "${${__project_third_party_export_port_alias_src_VAR_NAME}}")
+  set(${__project_third_party_export_port_alias_dst_VAR_NAME}
+      "${${__project_third_party_export_port_alias_dst_VAR_NAME}}"
+      PARENT_SCOPE)
+  unset(__project_third_party_export_port_alias_dst_VAR_NAME)
+  unset(__project_third_party_export_port_alias_src_VAR_NAME)
+endmacro()
+
+macro(project_third_party_import_port_targets PORT_NAME)
+  # Reused cache if it's found before
+  if(NOT ${PORT_NAME}_FOUND)
+    cmake_parse_arguments(project_third_party_import_port_OPTIONS "" "FORCE" "TARGETS;FIND_OPTIONS" ${ARGN})
+    if(NOT DEFINED ${PORT_NAME}_FOUND OR project_third_party_import_port_OPTIONS_FORCE)
+      unset(__project_third_party_import_port_TARGET_NAME)
+      foreach(__project_third_party_import_port_TARGET_NAME ${project_third_party_import_port_OPTIONS_TARGETS})
+        if(TARGET "${__project_third_party_import_port_TARGET_NAME}")
+          if(NOT ${PORT_NAME}_FOUND)
+            set(${PORT_NAME}_FOUND TRUE)
+          endif()
+          break()
+        endif()
+      endforeach()
+
+      if(NOT ${PORT_NAME}_FOUND)
+        if(__project_third_party_import_port_FIND_OPTIONS)
+          find_package(${PORT_NAME} ${__project_third_party_import_port_FIND_OPTIONS} QUIET)
+        else()
+          find_package(${PORT_NAME} QUIET)
+        endif()
+      endif()
+      unset(__project_third_party_import_port_TARGET_NAME)
+    endif()
+  endif()
+endmacro()
+
+function(project_third_party_merge_target_compile_options TARGET_NAME VAR_NAME)
+  set(__all_flags)
+  get_target_property(__compile_defs ${TARGET_NAME} INTERFACE_COMPILE_DEFINITIONS)
+  get_target_property(__all_flags ${TARGET_NAME} INTERFACE_COMPILE_OPTIONS)
+  if(NOT __all_flags)
+    unset(__all_flags)
+  endif()
+  if(__compile_defs)
+    foreach(__def_flag ${__compile_defs})
+      if(__def_flag MATCHES "^\\-D")
+        list(APPEND __all_flags "${__def_flag}")
+      else()
+        list(APPEND __all_flags "-D${__def_flag}")
+      endif()
+    endforeach()
+  endif()
+
+  if(__all_flags)
+    set(${VAR_NAME} "${__all_flags}")
+    set(${VAR_NAME}
+        "${__all_flags}"
+        PARENT_SCOPE)
+  else()
+    unset(${VAR_NAME})
+    unset(${VAR_NAME} PARENT_SCOPE)
+  endif()
+endfunction()
 
 message(STATUS "cmake-toolset: Configure for third party ports done.")

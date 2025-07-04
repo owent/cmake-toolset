@@ -14,9 +14,10 @@ fi
 
 if [[ ! -z "$CI" ]] || [[ ! -z "$CI_NAME" ]]; then
   export ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE="true"
+  export ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE="TRUE"
 fi
 
-ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS=()
+ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS=("-DATFRAMEWORK_CMAKE_TOOLSET_VERBOSE=TRUE")
 if [[ ! -z "$CMAKE_FIND_ROOT_PATH_MODE_PROGRAM" ]]; then
   ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS+=("-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=$CMAKE_FIND_ROOT_PATH_MODE_PROGRAM")
 fi
@@ -59,7 +60,7 @@ elif [[ "$1" == "gcc.no-rtti.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -77,7 +78,7 @@ elif [[ "$1" == "gcc.no-exceptions.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -95,7 +96,7 @@ elif [[ "$1" == "gcc.static.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -113,7 +114,7 @@ elif [[ "$1" == "gcc.shared.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -131,7 +132,7 @@ elif [[ "$1" == "gcc.libressl.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -149,7 +150,7 @@ elif [[ "$1" == "gcc.boringssl.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -167,7 +168,7 @@ elif [[ "$1" == "gcc.mbedtls.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -185,7 +186,7 @@ elif [[ "$1" == "gcc.4.8.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -203,7 +204,7 @@ elif [[ "$1" == "gcc.standalone-upb.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/third_party/install/*)
 elif [[ "$1" == "clang.test" ]]; then
   echo "$1"
@@ -243,7 +244,7 @@ elif [[ "$1" == "clang.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -270,7 +271,7 @@ elif [[ "$1" == "gcc.vcpkg.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   ctest . -V
@@ -295,7 +296,7 @@ elif [[ "$1" == "msys2.mingw.static.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
@@ -322,7 +323,7 @@ elif [[ "$1" == "msys2.mingw.shared.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
   THIRD_PARTY_PREBUILT_DIR=$(ls -d $PWD/../third_party/install/*)
   export LD_LIBRARY_PATH="$THIRD_PARTY_PREBUILT_DIR/lib64:$THIRD_PARTY_PREBUILT_DIR/lib"
   export PATH="$PATH:$THIRD_PARTY_PREBUILT_DIR/bin"
@@ -450,8 +451,8 @@ elif [[ "$1" == "android.arm64.test" ]]; then
   if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
     export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
   fi
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_android
+  cd test/build_jobs_android
   bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -464,14 +465,14 @@ elif [[ "$1" == "android.arm64.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "android.x86_64.test" ]]; then
   echo "$1"
   if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
     export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
   fi
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_android
+  cd test/build_jobs_android
   bash ../../ci/cmake_android_wrapper.sh -r .. -a x86_64 -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -484,11 +485,11 @@ elif [[ "$1" == "android.x86_64.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "ios.test" ]]; then
   echo "$1"
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_ios
+  cd test/build_jobs_ios
   bash ../../ci/cmake_ios_wrapper.sh -r .. -a arm64 -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -501,11 +502,11 @@ elif [[ "$1" == "ios.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "iphone_simulator.test" ]]; then
   echo "$1"
-  mkdir -p test/build_jobs_dir
-  cd test/build_jobs_dir
+  mkdir -p test/build_jobs_iphone_simulator
+  cd test/build_jobs_iphone_simulator
   bash ../../ci/cmake_ios_wrapper.sh -r .. -a x86_64 -- \
     -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     ${ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS[@]} || CMAKE_CONFIGURE_EXIT_CODE=$?
@@ -518,5 +519,5 @@ elif [[ "$1" == "iphone_simulator.test" ]]; then
     fi
     exit $CMAKE_CONFIGURE_EXIT_CODE
   fi
-  cmake --build . -j || cmake --build .
+  cmake --build . -j || cmake --build . || cmake --build . --verbose
 fi

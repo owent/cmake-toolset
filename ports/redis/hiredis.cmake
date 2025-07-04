@@ -107,7 +107,7 @@ if(NOT TARGET hiredis::hiredis_ssl_static
     list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_BUILD_OPTIONS
          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_APPEND_BUILD_OPTIONS}")
   endif()
-  project_third_party_port_declare(hiredis VERSION "v1.2.0" GIT_URL "https://github.com/redis/hiredis.git")
+  project_third_party_port_declare(hiredis VERSION "v1.3.0" GIT_URL "https://github.com/redis/hiredis.git")
 
   project_third_party_try_patch_file(
     ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_PATCH_FILE "${CMAKE_CURRENT_LIST_DIR}" "hiredis"

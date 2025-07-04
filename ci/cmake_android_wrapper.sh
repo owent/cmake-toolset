@@ -3,7 +3,9 @@
 ARCHS="arm64-v8a" # x86 x86_64 armeabi armeabi-v7a arm64-v8a
 ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT
 SOURCE_DIR="$PWD"
-CONF_ANDROID_NATIVE_API_LEVEL=21 # latest
+
+# https://source.android.com/docs/setup/reference/build-numbers?hl=zh-cn
+CONF_ANDROID_NATIVE_API_LEVEL=24 # latest
 ANDROID_TOOLCHAIN=clang
 ANDROID_STL=c++_shared #
 BUILD_TYPE="RelWithDebInfo"
@@ -139,11 +141,11 @@ for ARCH in ${ARCHS}; do
     fi
   fi
 
-  # 64 bits must at least using android-21
+  # 64 bits must at least using android-21, and libuv needs at least android-24(Android 7.0)
   # @see $ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake
   echo $ARCH | grep -E '64(-v8a)?$'
-  if [[ $? -eq 0 ]] && [[ $CONF_ANDROID_NATIVE_API_LEVEL -lt 21 ]]; then
-    ANDROID_NATIVE_API_LEVEL=21
+  if [[ $? -eq 0 ]] && [[ $CONF_ANDROID_NATIVE_API_LEVEL -lt 24 ]]; then
+    ANDROID_NATIVE_API_LEVEL=24
   else
     ANDROID_NATIVE_API_LEVEL=$CONF_ANDROID_NATIVE_API_LEVEL
   fi

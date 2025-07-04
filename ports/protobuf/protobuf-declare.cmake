@@ -11,7 +11,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION)
     if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
       # We must use the version of protobuf in gRPC, which used to keep the compatibility with upb
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v29.3")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v31.1")
     else()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v3.21.12")
     endif()
@@ -37,6 +37,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v3.5.1")
       elseif(MSVC_VERSION LESS 1930)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v28.3")
+      elseif(MSVC_VERSION LESS 1945)
+        # MSVC 1944 will cause 'google::protobuf::json_internal::UntypedMessage': an undefined class is not allowed as
+        # an argument to compiler intrinsic type trait '__is_constructible' in protobuf v31, we will see if it can be
+        # fixed in the future. Follow the settings of gRPC port.
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v29.5")
       endif()
     endif()
   endif()

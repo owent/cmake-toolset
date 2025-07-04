@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 676727f1..c83afaea 100644
+index 676727f1..85af1083 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@
+ #       start libevent.sln
+ #
+ 
+-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+ 
+ if (POLICY CMP0054)
+     cmake_policy(SET CMP0054 NEW)
 @@ -1453,7 +1453,7 @@ endif()
  #
  

@@ -1,0 +1,80 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e22e7ce..7c1b4f1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -198,7 +198,7 @@ if(NOT ENABLE_LIB_ONLY AND OPENSSL_FOUND)
+   set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+   set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+   if(WIN32)
+-    set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}" "ws2_32" "bcrypt")
++    set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}" "ws2_32" "bcrypt" "Crypt32")
+   endif()
+   if(ENABLE_HTTP3)
+     check_symbol_exists(SSL_provide_quic_data "openssl/ssl.h" HAVE_SSL_PROVIDE_QUIC_DATA)
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index fda8dcb..c7055fd 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -99,6 +99,31 @@ endif()
+ 
+ add_library(${PROJECT_NAME}::nghttp2 ALIAS ${LIB_SELECTED})
+ 
++include(CMakePackageConfigHelpers)
++include(GNUInstallDirs)
++set(INCLUDE_INSTALL_DIR include)
++set(NGHTTP2_LIB_SELECTED "${LIB_SELECTED}")
++file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
++configure_package_config_file(
++  "${CMAKE_CURRENT_LIST_DIR}/nghttp2-config.cmake.in"
++  "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/${PROJECT_NAME}-config.cmake"
++  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
++  PATH_VARS PROJECT_VERSION
++            INCLUDE_INSTALL_DIR
++            CMAKE_INSTALL_LIBDIR
++            EXPORT_SET
++            NGHTTP2_LIB_SELECTED
++  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
++
++write_basic_package_version_file(
++  "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/${PROJECT_NAME}-config-version.cmake"
++  VERSION ${PROJECT_VERSION}
++  COMPATIBILITY SameMajorVersion)
++
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/${PROJECT_NAME}-config.cmake"
++              "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/${PROJECT_NAME}-config-version.cmake"
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
++
+ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libnghttp2.pc"
+   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ 
+diff --git a/lib/nghttp2-config.cmake.in b/lib/nghttp2-config.cmake.in
+new file mode 100644
+index 0000000..e376974
+--- /dev/null
++++ b/lib/nghttp2-config.cmake.in
+@@ -0,0 +1,25 @@
++set(${CMAKE_FIND_PACKAGE_NAME}_VERSION "@PROJECT_VERSION@")
++
++@PACKAGE_INIT@
++
++set_and_check(${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
++set_and_check(${CMAKE_FIND_PACKAGE_NAME}_LIBRARY_DIRS "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
++
++include("${CMAKE_CURRENT_LIST_DIR}/@EXPORT_SET@.cmake")
++
++# check_required_components(${CMAKE_FIND_PACKAGE_NAME})
++
++string(TOUPPER "${CMAKE_FIND_PACKAGE_NAME}" CMAKE_FIND_PACKAGE_NAME_UPPER)
++
++set(${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES "$<TARGET_FILE_NAME:@NGHTTP2_LIB_SELECTED@>")
++mark_as_advanced(${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES)
++
++if(NOT CMAKE_FIND_PACKAGE_NAME_UPPER STREQUAL CMAKE_FIND_PACKAGE_NAME)
++    set(${CMAKE_FIND_PACKAGE_NAME_UPPER}_INCLUDE_DIRS "${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS}")
++    set(${CMAKE_FIND_PACKAGE_NAME_UPPER}_LIBRARY_DIRS "${${CMAKE_FIND_PACKAGE_NAME}_LIBRARY_DIRS}")
++    set(${CMAKE_FIND_PACKAGE_NAME_UPPER}_LIBRARIES "${${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES}")
++
++    mark_as_advanced(${CMAKE_FIND_PACKAGE_NAME_UPPER}_INCLUDE_DIRS
++        ${CMAKE_FIND_PACKAGE_NAME_UPPER}_LIBRARY_DIRS
++        ${CMAKE_FIND_PACKAGE_NAME_UPPER}_LIBRARIES)
++endif()

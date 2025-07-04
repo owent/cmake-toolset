@@ -90,29 +90,14 @@ function(project_build_tools_append_space_flags_to_var_unique VARNAME)
 endfunction()
 
 macro(project_build_tools_append_cmake_inherit_policy OUTVAR)
-  # Policy - CMP0057: Support new IN_LIST if() operator
-  unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-  cmake_policy(GET CMP0057 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-  if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-    list(APPEND ${OUTVAR}
-         "-DCMAKE_POLICY_DEFAULT_CMP0057=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
-  endif()
-
-  # Policy - CMP0085: The OLD behavior of this policy is for $<IN_LIST:...> to always return 0 if the first argument is
-  # empty. The NEW behavior is to return 1 if the first argument is empty and the list contains an empty item.
-  unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-  cmake_policy(GET CMP0085 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-  if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-    list(APPEND ${OUTVAR}
-         "-DCMAKE_POLICY_DEFAULT_CMP0085=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
-  endif()
-
-  # Policy - CMP0091: Add CMAKE_MSVC_RUNTIME_LIBRARY to replace CMAKE_MSVC_RUNTIME_LIBRARY
-  unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-  cmake_policy(GET CMP0091 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-  if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
-    list(APPEND ${OUTVAR}
-         "-DCMAKE_POLICY_DEFAULT_CMP0091=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.19.0")
+    # Policy - CMP0111: Add CMAKE_MSVC_RUNTIME_LIBRARY to replace CMAKE_MSVC_RUNTIME_LIBRARY
+    unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    cmake_policy(GET CMP0111 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+      list(APPEND ${OUTVAR}
+           "-DCMAKE_POLICY_DEFAULT_CMP111=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
+    endif()
   endif()
 
   # Policy - CMP0117: New behavior for inheriting CMAKE_POLICY_DEFAULT_CMP<NNNN> values
@@ -124,15 +109,36 @@ macro(project_build_tools_append_cmake_inherit_policy OUTVAR)
            "-DCMAKE_POLICY_DEFAULT_CMP0117=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
     endif()
   endif()
+
+  # Policy - CMP0128
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.22.0")
+    unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    cmake_policy(GET CMP0128 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+      list(APPEND ${OUTVAR}
+           "-DCMAKE_POLICY_DEFAULT_CMP0128=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
+    endif()
+  endif()
+
+  # Policy - CMP0144
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
+    unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    cmake_policy(GET CMP0144 project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+    if(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
+      list(APPEND ${OUTVAR}
+           "-DCMAKE_POLICY_DEFAULT_CMP0144=${project_build_tools_append_cmake_inherit_policy_POLICY_VALUE}")
+    endif()
+  endif()
+
   unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
 endmacro()
 
 macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   cmake_parse_arguments(
     project_build_tools_append_cmake_inherit_options
-    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;DISABLE_CMAKE_FIND_ROOT_FLAGS;APPEND_SYSTEM_LINKS"
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;DISABLE_CMAKE_FIND_ROOT_FLAGS;DISABLE_CMAKE_TOOLSET_MODULES;APPEND_SYSTEM_LINKS"
     ""
-    ""
+    "DISABLE_INHERIT_FLAGS"
     ${ARGN})
   list(APPEND ${OUTVAR} "-G" "${CMAKE_GENERATOR}")
   if(DEFINED CACHE{CMAKE_MAKE_PROGRAM})
@@ -142,7 +148,12 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   set(project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON)
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_FIND_ROOT_FLAGS)
     list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS)
+    if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_CMAKE_TOOLSET_MODULES)
+      list(APPEND project_build_tools_append_cmake_inherit_options_VARS
+           PROJECT_BUILD_TOOLS_CMAKE_TOOLSET_MODULE_PACKAGE_VARS)
+    endif()
   endif()
+
   if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_C_FLAGS)
     list(APPEND project_build_tools_append_cmake_inherit_options_VARS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C)
   endif()
@@ -157,8 +168,15 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
     list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
   endif()
 
+  if(NOT project_build_tools_append_cmake_inherit_options_DISABLE_INHERIT_FLAGS)
+    unset(project_build_tools_append_cmake_inherit_options_DISABLE_INHERIT_FLAGS)
+  endif()
+
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_inherit_options_VARS})
     unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
+    if(${VAR_NAME} IN_LIST project_build_tools_append_cmake_inherit_options_DISABLE_INHERIT_FLAGS)
+      continue()
+    endif()
     if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME}
        OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}
        OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE_${VAR_NAME})
@@ -201,23 +219,27 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
       # Patch for some version of cmake, the compiler testing will fail on some environments.
       if(MSVC AND VAR_NAME MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")
         list(APPEND ${OUTVAR} "-D${VAR_NAME}= ${project_build_tools_append_cmake_inherit_VAR_VALUE}")
-      else()
+      elseif(project_build_tools_append_cmake_inherit_VAR_VALUE)
         list(APPEND ${OUTVAR} "-D${VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}")
       endif()
     endif()
   endforeach()
   unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
 
-  if(CMAKE_GENERATOR_PLATFORM)
+  if(CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_GENERATOR_PLATFORM IN_LIST
+                                  project_build_tools_append_cmake_inherit_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-A" "${CMAKE_GENERATOR_PLATFORM}")
   endif()
 
-  if(CMAKE_GENERATOR_TOOLSET)
+  if(CMAKE_GENERATOR_TOOLSET AND NOT CMAKE_GENERATOR_TOOLSET IN_LIST
+                                 project_build_tools_append_cmake_inherit_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-T" "${CMAKE_GENERATOR_TOOLSET}")
   endif()
 
   # This toolset is not used to build app to RUN on GUI, so just set(CMAKE_MACOSX_BUNDLE OFF).
-  if(CMAKE_OSX_ARCHITECTURES AND CMAKE_CROSSCOMPILING)
+  if(CMAKE_OSX_ARCHITECTURES
+     AND CMAKE_CROSSCOMPILING
+     AND NOT CMAKE_MACOSX_BUNDLE IN_LIST project_build_tools_append_cmake_inherit_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-DCMAKE_MACOSX_BUNDLE=OFF")
   endif()
 
@@ -250,7 +272,10 @@ endfunction()
 macro(project_build_tools_append_cmake_host_options OUTVAR)
   cmake_parse_arguments(
     project_build_tools_append_cmake_host_options
-    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;APPEND_SYSTEM_LINKS" "" "" ${ARGN})
+    "DISABLE_C_FLAGS;DISABLE_CXX_FLAGS;DISABLE_ASM_FLAGS;DISABLE_TOOLCHAIN_FILE;DISABLE_CMAKE_TOOLSET_MODULES;APPEND_SYSTEM_LINKS"
+    ""
+    "DISABLE_INHERIT_FLAGS"
+    ${ARGN})
   if(CMAKE_HOST_GENERATOR)
     list(APPEND ${OUTVAR} "-G" "${CMAKE_HOST_GENERATOR}")
   elseif(MSVC)
@@ -280,7 +305,13 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
     list(APPEND project_build_tools_append_cmake_host_options_VARS PROJECT_BUILD_TOOLS_CMAKE_HOST_VARS_ASM)
   endif()
 
-  if(CMAKE_HOST_TOOLCHAIN_FILE AND NOT project_build_tools_append_cmake_host_options_DISABLE_TOOLCHAIN_FILE)
+  if(NOT project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
+    unset(project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
+  endif()
+
+  if(CMAKE_HOST_TOOLCHAIN_FILE
+     AND NOT project_build_tools_append_cmake_host_options_DISABLE_TOOLCHAIN_FILE
+     AND NOT CMAKE_TOOLCHAIN_FILE IN_LIST project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_HOST_TOOLCHAIN_FILE}")
   endif()
 
@@ -288,6 +319,9 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
   foreach(VAR_NAME IN LISTS ${project_build_tools_append_cmake_host_options_VARS})
     unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
+    if(${VAR_NAME} IN_LIST project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
+      continue()
+    endif()
     if(DEFINED COMPILER_OPTION_INHERIT_${VAR_NAME}
        OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_INHERIT_${VAR_NAME}
        OR DEFINED PROJECT_BUILD_TOOLS_CMAKE_PATCH_OVERWRITE_${VAR_NAME})
@@ -308,6 +342,7 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
 
       if(project_build_tools_append_cmake_host_options_APPEND_SYSTEM_LINKS
          AND ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS
+         AND CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
         project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
                                                              "${ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS}")
@@ -315,7 +350,8 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
       if(VAR_NAME MATCHES "_LIBRARIES|_INCLUDE_DIRECTORIES|_PATH$")
         list(REMOVE_DUPLICATES project_build_tools_append_cmake_inherit_VAR_VALUE)
       endif()
-    elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS) # Add system links into standard libraries even not set
+    elseif(ATFRAMEWORK_CMAKE_TOOLSET_SYSTEM_LINKS AND CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME)
+      # Add system links into standard libraries even not set
       if(project_build_tools_append_cmake_host_options_APPEND_SYSTEM_LINKS
          AND VAR_NAME MATCHES "^CMAKE_[A-Za-z0-9]+_STANDARD_LIBRARIES$")
         project_build_tools_append_space_flags_to_var_unique(project_build_tools_append_cmake_inherit_VAR_VALUE
@@ -365,25 +401,34 @@ macro(project_build_tools_append_cmake_host_options OUTVAR)
   unset(project_build_tools_append_cmake_inherit_VAR_NAME)
   unset(project_build_tools_append_cmake_inherit_VAR_VALUE)
 
-  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH)
+  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_FIND_ROOT_PATH
+     AND NOT CMAKE_FIND_ROOT_PATH IN_LIST project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-DCMAKE_FIND_ROOT_PATH=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
   endif()
-  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH)
+  if(NOT project_build_tools_append_cmake_inherit_HAS_CMAKE_PREFIX_PATH
+     AND NOT CMAKE_PREFIX_PATH IN_LIST project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-DCMAKE_PREFIX_PATH=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
   endif()
 
   # vcpkg
-  if(VCPKG_HOST_TRIPLET)
+  if(VCPKG_HOST_TRIPLET AND NOT VCPKG_TARGET_TRIPLET IN_LIST
+                            project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-DVCPKG_TARGET_TRIPLET=${VCPKG_HOST_TRIPLET}")
   endif()
 
-  if(CMAKE_HOST_GENERATOR_PLATFORM)
+  if(CMAKE_HOST_GENERATOR_PLATFORM AND NOT CMAKE_HOST_GENERATOR_PLATFORM IN_LIST
+                                       project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-A" "${CMAKE_HOST_GENERATOR_PLATFORM}")
-  elseif(MSVC AND CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE)
+  elseif(
+    MSVC
+    AND CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE
+    AND NOT CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE IN_LIST
+        project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-A" "${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}")
   endif()
 
-  if(CMAKE_HOST_GENERATOR_TOOLSET)
+  if(CMAKE_HOST_GENERATOR_TOOLSET AND NOT CMAKE_HOST_GENERATOR_TOOLSET IN_LIST
+                                      project_build_tools_append_cmake_host_options_DISABLE_INHERIT_FLAGS)
     list(APPEND ${OUTVAR} "-T" "${CMAKE_HOST_GENERATOR_TOOLSET}")
   endif()
 
@@ -1217,14 +1262,23 @@ function(project_build_tools_patch_protobuf_sources)
   if(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS)
     foreach(PROTO_SRC ${ARGN})
       unset(PROTO_SRC_OPTIONS)
+      set(PROTO_SRC_OPTIONS_CHANGED FALSE)
       get_source_file_property(PROTO_SRC_OPTIONS ${PROTO_SRC} COMPILE_OPTIONS)
       if(PROTO_SRC_OPTIONS)
-        list(APPEND PROTO_SRC_OPTIONS ${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS})
+        foreach(TEST_OPTION ${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS})
+          if(NOT "${TEST_OPTION}" IN_LIST PROTO_SRC_OPTIONS)
+            list(APPEND PROTO_SRC_OPTIONS "${TEST_OPTION}")
+            set(PROTO_SRC_OPTIONS_CHANGED TRUE)
+          endif()
+        endforeach()
       else()
         set(PROTO_SRC_OPTIONS ${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS})
+        set(PROTO_SRC_OPTIONS_CHANGED TRUE)
       endif()
 
-      set_source_files_properties(${PROTO_SRC} PROPERTIES COMPILE_OPTIONS "${PROTO_SRC_OPTIONS}")
+      if(PROTO_SRC_OPTIONS_CHANGED)
+        set_source_files_properties(${PROTO_SRC} PROPERTIES COMPILE_OPTIONS "${PROTO_SRC_OPTIONS}")
+      endif()
     endforeach()
     unset(PROTO_SRC)
     unset(PROTO_SRC_OPTIONS)
@@ -1240,7 +1294,7 @@ function(project_build_tools_resolve_alias_target __OUTPUT_VAR_NAME __TARGET_NAM
 
   get_target_property(IS_ALIAS_TARGET ${__TARGET_NAME} ALIASED_TARGET)
   if(IS_ALIAS_TARGET)
-    project_build_tools_resolve_alias(${__OUTPUT_VAR_NAME} ${IS_ALIAS_TARGET})
+    project_build_tools_resolve_alias_target(${__OUTPUT_VAR_NAME} ${IS_ALIAS_TARGET})
     set(${__OUTPUT_VAR_NAME}
         ${${__OUTPUT_VAR_NAME}}
         PARENT_SCOPE)
@@ -1304,7 +1358,7 @@ function(project_build_tools_patch_imported_link_interface_libraries TARGET_NAME
     foreach(DEP_PATH IN LISTS OLD_LINK_LIBRARIES)
       set(MATCH_ANY_RULES FALSE)
       foreach(MATCH_RULE IN LISTS PATCH_OPTIONS_REMOVE_LIBRARIES)
-        if(DEP_PATH MATCHES ${MATCH_RULE})
+        if(DEP_PATH MATCHES "${MATCH_RULE}")
           set(MATCH_ANY_RULES TRUE)
           break()
         endif()
@@ -1363,7 +1417,7 @@ function(project_build_tools_patch_imported_interface_definitions TARGET_NAME)
     foreach(DEP_PATH IN LISTS OLD_DEFINITIONS)
       set(MATCH_ANY_RULES FALSE)
       foreach(MATCH_RULE IN LISTS PATCH_OPTIONS_REMOVE_DEFINITIONS)
-        if(DEP_PATH MATCHES ${MATCH_RULE})
+        if(DEP_PATH MATCHES "${MATCH_RULE}")
           set(MATCH_ANY_RULES TRUE)
           break()
         endif()
@@ -2472,6 +2526,7 @@ function(project_build_tools_add_archive_library TARGET_NAME)
     set(OUTPUT_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
   else()
     set(OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}")
+    file(MAKE_DIRECTORY "${OUTPUT_DIR}")
   endif()
   if(add_archive_options_OUTPUT_NAME)
     set(OUTPUT_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}${add_archive_options_OUTPUT_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")

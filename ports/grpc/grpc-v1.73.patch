@@ -1,0 +1,22 @@
+diff --git a/src/core/util/per_cpu.h b/src/core/util/per_cpu.h
+index 69648aa..5094ccd 100644
+--- a/src/core/util/per_cpu.h
++++ b/src/core/util/per_cpu.h
+@@ -82,7 +82,7 @@ class PerCpu {
+  public:
+   // Options are not defaulted to try and force consideration of what the
+   // options specify.
+-  explicit PerCpu(PerCpuOptions options) : shards_(options.Shards()) {}
++  explicit PerCpu(PerCpuOptions options) : shards_(options.Shards()), data_{new T[options.Shards()]} {}
+ 
+   T& this_cpu() { return data_[sharding_helper_.GetShardingBits() % shards_]; }
+ 
+@@ -94,7 +94,7 @@ class PerCpu {
+  private:
+   PerCpuShardingHelper sharding_helper_;
+   const size_t shards_;
+-  std::unique_ptr<T[]> data_{new T[shards_]};
++  std::unique_ptr<T[]> data_;
+ };
+ 
+ }  // namespace grpc_core
