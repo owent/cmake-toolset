@@ -1,0 +1,45 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 825577e..f8ac305 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1010,6 +1010,12 @@ macro(curl_openssl_check_exists)
+     if(HAVE_LIBZ)
+       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
+     endif()
++    if(CMAKE_DL_LIBS)
++      list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_DL_LIBS})
++    endif()
++    if(TARGET Threads::Threads)
++      list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)
++    endif()
+     if(WIN32 AND NOT WINCE)
+       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
+     endif()
+@@ -1504,6 +1510,27 @@ if(CURL_USE_GSSAPI)
+   endif()
+ endif()
+ 
++# ====== Reorder SSL libraries ======
++if(CURL_USE_OPENSSL)
++  list(REMOVE_ITEM CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
++  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
++elseif(CURL_USE_MBEDTLS)
++  list(REMOVE_ITEM CURL_LIBS ${MBEDTLS_LIBRARIES})
++  list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
++elseif(CURL_USE_BEARSSL)
++  list(REMOVE_ITEM CURL_LIBS ${BEARSSL_LIBRARIES})
++  list(APPEND CURL_LIBS ${BEARSSL_LIBRARIES})
++elseif(CURL_USE_WOLFSSL)
++  list(REMOVE_ITEM CURL_LIBS ${WOLFSSL_LIBRARIES})
++  list(APPEND CURL_LIBS ${WOLFSSL_LIBRARIES})
++elseif(CURL_USE_GNUTLS)
++  list(REMOVE_ITEM CURL_LIBS ${GNUTLS_LIBRARIES} ${NETTLE_LIBRARIES})
++  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} ${NETTLE_LIBRARIES})
++elseif(CURL_USE_RUSTLS)
++  list(REMOVE_ITEM CURL_LIBS ${RUSTLS_LIBRARIES})
++  list(APPEND CURL_LIBS ${RUSTLS_LIBRARIES})
++endif()
++
+ # libuv
+ option(CURL_USE_LIBUV "Use libuv for event-based tests" OFF)
+ if(CURL_USE_LIBUV)
