@@ -8,6 +8,7 @@ $ENV:LANGUAGE = "en_US.UTF-8"
 
 if ( (Test-Path ENV:CI) -or (Test-Path ENV:CI_NAME) ) {
   $ENV:ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE = "true"
+  $ENV:ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE = "true"
 }
 
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Definition

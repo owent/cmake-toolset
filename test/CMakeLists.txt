@@ -257,6 +257,7 @@ endif()
 
 add_test(NAME cmake-toolset.main-test COMMAND cmake-toolset-test)
 
+target_link_directories(cmake-toolset-test PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 target_link_libraries(
   cmake-toolset-test
   PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES}
@@ -300,6 +301,7 @@ message(STATUS "CMAKE_TOOLSE_TEST_LINK_LIBRARIES=${CMAKE_TOOLSE_TEST_LINK_LIBRAR
 
 if(TARGET GTest::gtest_main)
   add_executable(cmake-toolset-gtest gtest.cpp)
+  target_link_directories(cmake-toolset-gtest PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
   target_link_libraries(cmake-toolset-gtest PRIVATE GTest::gtest_main)
   add_test(NAME cmake-toolset.gtest-test COMMAND cmake-toolset-test)
 else()
@@ -308,6 +310,7 @@ endif()
 
 if(TARGET benchmark::benchmark)
   add_executable(cmake-toolset-benchmark benchmark.cpp)
+  target_link_directories(cmake-toolset-benchmark PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
   target_link_libraries(cmake-toolset-benchmark PRIVATE benchmark::benchmark)
   add_test(NAME cmake-toolset.benchmark-test COMMAND cmake-toolset-test)
 else()
@@ -361,6 +364,7 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
 
   target_include_directories("cmake-toolset-upb-and-lua-binding-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
+  target_link_directories(cmake-toolset-upb-and-lua-binding-test PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
   target_link_libraries(
     "cmake-toolset-upb-and-lua-binding-test" PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} upb::lupb
                                                      ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})

@@ -219,7 +219,7 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
       # Patch for some version of cmake, the compiler testing will fail on some environments.
       if(MSVC AND VAR_NAME MATCHES "CMAKE_(C|CXX|ASM)_FLAGS")
         list(APPEND ${OUTVAR} "-D${VAR_NAME}= ${project_build_tools_append_cmake_inherit_VAR_VALUE}")
-      else()
+      elseif(project_build_tools_append_cmake_inherit_VAR_VALUE)
         list(APPEND ${OUTVAR} "-D${VAR_NAME}=${project_build_tools_append_cmake_inherit_VAR_VALUE}")
       endif()
     endif()

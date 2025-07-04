@@ -422,7 +422,8 @@ function(project_third_party_print_find_information)
   message(STATUS "cmake-toolset: PROJECT_THIRD_PARTY_INSTALL_DIR=${PROJECT_THIRD_PARTY_INSTALL_DIR}")
   message(STATUS "cmake-toolset: PROJECT_THIRD_PARTY_HOST_INSTALL_DIR=${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
   message(STATUS "cmake-toolset: PROJECT_THIRD_PARTY_PACKAGE_DIR=${PROJECT_THIRD_PARTY_PACKAGE_DIR}")
-  foreach(VAR_NAME IN LISTS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS)
+  foreach(VAR_NAME IN LISTS PROJECT_BUILD_TOOLS_CMAKE_FIND_ROOT_VARS
+                            PROJECT_BUILD_TOOLS_CMAKE_TOOLSET_MODULE_PACKAGE_VARS)
     if(${VAR_NAME})
       message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
     endif()
@@ -446,6 +447,17 @@ function(project_third_party_print_find_information)
     if(VCPKG_HOST_TRIPLET)
       message(STATUS "cmake-toolset: VCPKG_HOST_TRIPLET=${VCPKG_HOST_TRIPLET}")
     endif()
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE OR ENV{ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE})
+    foreach(
+      VAR_NAME IN
+      LISTS PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_C PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_CXX
+            PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_ASM PROJECT_BUILD_TOOLS_CMAKE_INHERIT_VARS_COMMON
+            PROJECT_BUILD_TOOLS_CMAKE_HOST_INHERIT_VARS_COMMON)
+      if(${VAR_NAME})
+        message(STATUS "cmake-toolset: ${VAR_NAME}=${${VAR_NAME}}")
+      endif()
+    endforeach()
   endif()
 endfunction()
 project_third_party_print_find_information()

@@ -147,6 +147,7 @@ add_executable(cmake-toolset-upb-and-lua-binding-test ${UPB_TEST_GENERATE_CXX_FI
 
 target_include_directories("cmake-toolset-upb-and-lua-binding-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
+target_link_directories(cmake-toolset-upb-and-lua-binding-test PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
 target_link_libraries(
   "cmake-toolset-upb-and-lua-binding-test" PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} upb::lupb
                                                    ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
