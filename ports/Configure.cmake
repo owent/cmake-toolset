@@ -876,6 +876,18 @@ function(project_third_party_generate_load_env_powershell)
   project_build_tool_generate_load_env_powershell(${ARGN})
 endfunction()
 
+function(project_third_party_mutable_package_targets PORT_NAME)
+  if(TARGET "cmake-toolset.port.${PORT_NAME}.package")
+    return()
+  endif()
+
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.build")
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.package" DEPENDS "cmake-toolset.port.${PORT_NAME}.build")
+
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.build" PROPERTY FOLDER "cmake-toolset/build/${PORT_NAME}")
+  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package" PROPERTY FOLDER "cmake-toolset/package/${PORT_NAME}")
+endfunction()
+
 function(project_third_party_port_declare PORT_NAME)
   set(optionArgs APPEND_BUILD_OPTIONS)
   set(oneValueArgs VERSION GIT_URL TAR_URL SRC_DIRECTORY_NAME BUILD_DIR PORT_PREFIX)
@@ -967,7 +979,55 @@ function(project_third_party_port_declare PORT_NAME)
     endif()
   endif()
 
-  unset(FULL_PORT_NAME)
+  project_third_party_mutable_package_targets("${PORT_NAME}")
+  set_target_properties(
+    "cmake-toolset.port.${PORT_NAME}.package"
+    PROPERTIES "GIT_URL" "${${FULL_PORT_NAME}_GIT_URL}"
+               "VERSION" "${${FULL_PORT_NAME}_VERSION}"
+               "BUILD_OPTIONS" "${${FULL_PORT_NAME}_BUILD_OPTIONS}"
+               "BUILD_DIR" "${${FULL_PORT_NAME}_BUILD_DIR}"
+               "SOURCE_DIR_NAME" "${${FULL_PORT_NAME}_SRC_DIRECTORY_NAME}")
+
+endfunction()
+
+function(project_third_party_port_add_build_options PORT_NAME)
+  if(NOT TARGET "cmake-toolset.port.${PORT_NAME}.package")
+    message(FATAL_ERROR "project_third_party_port_declare(${PORT_NAME} ...) should be called first")
+  endif()
+  set(optionArgs PREPEND_BUILD_OPTIONS)
+  set(oneValueArgs PORT_PREFIX)
+  set(multiValueArgs BUILD_OPTIONS)
+  cmake_parse_arguments(__port_opts "${optionArgs}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
+  if(NOT __port_opts_BUILD_OPTIONS)
+    return()
+  endif()
+  if(__port_opts_PORT_PREFIX)
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${__port_opts_PORT_PREFIX}_${PORT_NAME}" FULL_PORT_NAME)
+  else()
+    string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${PORT_NAME}" FULL_PORT_NAME)
+  endif()
+
+  if(${FULL_PORT_NAME}_BUILD_OPTIONS)
+    set(__merge_opts "${${FULL_PORT_NAME}_BUILD_OPTIONS}")
+    if(__port_opts_PREPEND_BUILD_OPTIONS)
+      list(PREPEND __merge_opts "${__port_opts_BUILD_OPTIONS}")
+    else()
+      list(APPEND __merge_opts "${__port_opts_BUILD_OPTIONS}")
+    endif()
+
+    set(${FULL_PORT_NAME}_BUILD_OPTIONS
+        "${__merge_opts}"
+        PARENT_SCOPE)
+
+    set_target_properties("cmake-toolset.port.${PORT_NAME}.package" PROPERTIES "BUILD_OPTIONS" "${__merge_opts}")
+  else()
+    set(${FULL_PORT_NAME}_BUILD_OPTIONS
+        "${__port_opts_BUILD_OPTIONS}"
+        PARENT_SCOPE)
+
+    set_target_properties("cmake-toolset.port.${PORT_NAME}.package" PROPERTIES "BUILD_OPTIONS"
+                                                                               "${__port_opts_BUILD_OPTIONS}")
+  endif()
 endfunction()
 
 function(project_third_party_try_patch_file_internal OUTPUT_VAR BASE_DIRECTORY PORT_PREFIX VERSION SUFFIX)
@@ -1284,18 +1344,6 @@ macro(project_third_party_include_port PATH)
 
   math(EXPR project_third_party_include_port_DEPTH "${project_third_party_include_port_DEPTH}-1" OUTPUT_FORMAT DECIMAL)
 endmacro()
-
-function(project_third_party_mutable_package_targets PORT_NAME)
-  if(TARGET "cmake-toolset.port.${PORT_NAME}.package")
-    return()
-  endif()
-
-  add_custom_target("cmake-toolset.port.${PORT_NAME}.build")
-  add_custom_target("cmake-toolset.port.${PORT_NAME}.package" DEPENDS "cmake-toolset.port.${PORT_NAME}.build")
-
-  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.build" PROPERTY FOLDER "cmake-toolset/build/${PORT_NAME}")
-  set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package" PROPERTY FOLDER "cmake-toolset/package/${PORT_NAME}")
-endfunction()
 
 macro(project_third_party_export_port_set PORT_NAME VAR_NAME)
   project_third_party_mutable_package_targets(${PORT_NAME})
