@@ -90,6 +90,19 @@ function(project_build_tools_append_space_flags_to_var_unique VARNAME)
 endfunction()
 
 macro(project_build_tools_append_cmake_inherit_policy OUTVAR)
+  # Some policy always should be NEW, we requires cmake 3.16+, but some project may use older cmake version.
+  list(
+    APPEND
+    ${OUTVAR}
+    "-DCMAKE_POLICY_DEFAULT_CMP0022=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0054=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0067=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0074=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0077=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0085=NEW"
+    "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW")
+
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.19.0")
     # Policy - CMP0111: Add CMAKE_MSVC_RUNTIME_LIBRARY to replace CMAKE_MSVC_RUNTIME_LIBRARY
     unset(project_build_tools_append_cmake_inherit_policy_POLICY_VALUE)
