@@ -152,7 +152,8 @@ if(NOT TARGET gRPC::grpc++_alts
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION)
         if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
           # MSVC 1944 con not compile src/core/resolver/xds/xds_config.h in 1.73.1(std::variant), so we use 1.70.2
-          if(MSVC_VERSION LESS 1945)
+          if((MSVC_VERSION LESS 1945) OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION
+                                                                                          VERSION_LESS "15"))
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.70.2")
           else()
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.73.1")
