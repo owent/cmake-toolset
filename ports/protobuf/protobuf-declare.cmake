@@ -31,14 +31,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v3.5.1")
       elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0") # With std::to_string
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v3.13.0")
+      elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "15")
+        # Old version of AppleClang will cause 'google::protobuf::json_internal::UntypedMessage': an undefined class is
+        # not allowed as an argument to compiler intrinsic type trait '__is_constructible' in protobuf v31, we will see
+        # if it can be fixed in the future. Follow the settings of gRPC port.
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v29.5")
       endif()
     elseif(MSVC)
       if(MSVC_VERSION LESS 1900)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v3.5.1")
       elseif(MSVC_VERSION LESS 1930)
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v28.3")
-      elseif((MSVC_VERSION LESS 1945) OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION
-                                                                                          VERSION_LESS "15"))
+      elseif(MSVC_VERSION LESS 1945)
         # MSVC 1944 will cause 'google::protobuf::json_internal::UntypedMessage': an undefined class is not allowed as
         # an argument to compiler intrinsic type trait '__is_constructible' in protobuf v31, we will see if it can be
         # fixed in the future. Follow the settings of gRPC port.
