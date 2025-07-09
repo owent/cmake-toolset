@@ -1,14 +1,15 @@
 diff --git a/api/include/opentelemetry/common/macros.h b/api/include/opentelemetry/common/macros.h
-index 71d12a5..9e58b36 100644
+index 71d12a5..6020c59 100644
 --- a/api/include/opentelemetry/common/macros.h
 +++ b/api/include/opentelemetry/common/macros.h
-@@ -521,3 +521,15 @@ point.
+@@ -521,3 +521,16 @@ point.
  #else
  #  define OPENTELEMETRY_SANITIZER_NO_ADDRESS
  #endif
 +
 +// ====== Patch for GCC 4.8 ======
 +#if !defined(__clang__) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 8)
++#include <memory>
 +namespace std
 +{
 +template <class T, class... ArgsT>
