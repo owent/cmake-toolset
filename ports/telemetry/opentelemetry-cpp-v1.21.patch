@@ -67,7 +67,7 @@ index 2c35651..8e65012 100644
  };
  }  // namespace curl
 diff --git a/ext/src/http/client/curl/http_operation_curl.cc b/ext/src/http/client/curl/http_operation_curl.cc
-index b1e5e4c..c4f5fb4 100644
+index b1e5e4c..3fd27c9 100644
 --- a/ext/src/http/client/curl/http_operation_curl.cc
 +++ b/ext/src/http/client/curl/http_operation_curl.cc
 @@ -47,6 +47,28 @@ namespace client
@@ -80,7 +80,7 @@ index b1e5e4c..c4f5fb4 100644
 +  OPENTELEMETRY_SANITIZER_NO_THREAD static std::thread::id GetThreadId(
 +      const HttpOperation::AsyncData &async_data)
 +  {
-+#if defined(OPENTELEMETRY_HAVE_THREAD_SANITIZER) && OPENTELEMETRY_HAVE_THREAD_SANITIZER
++#if !(defined(OPENTELEMETRY_HAVE_THREAD_SANITIZER) && OPENTELEMETRY_HAVE_THREAD_SANITIZER)
 +    std::atomic_thread_fence(std::memory_order_acquire);
 +#endif
 +    return async_data.callback_thread;
@@ -90,7 +90,7 @@ index b1e5e4c..c4f5fb4 100644
 +                                                            std::thread::id thread_id)
 +  {
 +    async_data.callback_thread = thread_id;
-+#if defined(OPENTELEMETRY_HAVE_THREAD_SANITIZER) && OPENTELEMETRY_HAVE_THREAD_SANITIZER
++#if !(defined(OPENTELEMETRY_HAVE_THREAD_SANITIZER) && OPENTELEMETRY_HAVE_THREAD_SANITIZER)
 +    std::atomic_thread_fence(std::memory_order_release);
 +#endif
 +  }
