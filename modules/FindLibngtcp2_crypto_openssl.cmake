@@ -125,7 +125,7 @@ if(Libngtcp2_crypto_openssl_FOUND)
                        "${Libngtcp2_crypto_openssl_LIBRARIES_LOCATION};${__openssl_link_names}")
         else()
           set_target_properties(Libngtcp2::libngtcp2_crypto_openssl PROPERTIES INTERFACE_LINK_LIBRARIES
-                                                                            "${__openssl_link_names}")
+                                                                               "${__openssl_link_names}")
         endif()
         unset(Libngtcp2_crypto_openssl_LIBRARIES_LOCATION)
         unset(Libngtcp2_crypto_openssl_LIBRARIES_LENGTH)
