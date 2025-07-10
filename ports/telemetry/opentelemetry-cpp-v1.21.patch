@@ -54,8 +54,21 @@ index dab2128..6f0e6af 100644
  
      fseek(of.get(), 0, SEEK_END);
      file_->written_size = static_cast<size_t>(ftell(of.get()));
+diff --git a/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h b/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h
+index 2c35651..8d30215 100644
+--- a/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h
++++ b/ext/include/opentelemetry/ext/http/client/curl/http_operation_curl.h
+@@ -338,7 +338,7 @@ class HttpOperation
+   {
+     Session *session;  // Owner Session
+ 
+-    std::thread::id callback_thread;
++    OPENTELEMETRY_SANITIZER_NO_THREAD std::thread::id callback_thread;
+     std::function<void(HttpOperation &)> callback;
+     std::atomic<bool> is_promise_running{false};
+     std::promise<CURLcode> result_promise;
 diff --git a/sdk/src/logs/multi_log_record_processor.cc b/sdk/src/logs/multi_log_record_processor.cc
-index 1841a75..e7d9332 100644
+index 1841a75..1960042 100644
 --- a/sdk/src/logs/multi_log_record_processor.cc
 +++ b/sdk/src/logs/multi_log_record_processor.cc
 @@ -73,39 +73,33 @@ void MultiLogRecordProcessor::OnEmit(std::unique_ptr<Recordable> &&record) noexc
@@ -73,7 +86,7 @@ index 1841a75..e7d9332 100644
    auto overflow_checker = std::chrono::system_clock::time_point::max();
    std::chrono::system_clock::time_point expire_time;
 -  if (overflow_checker - start_time <= timeout_ns)
-+  if (std::chrono::duration_cast<std::chrono::system_clock::duration>(overflow_checker - start_time) <= timeout)
++  if (std::chrono::duration_cast<std::chrono::microseconds>(overflow_checker - start_time) <= timeout)
    {
      expire_time = overflow_checker;
    }
@@ -118,7 +131,7 @@ index 1841a75..e7d9332 100644
    auto overflow_checker = std::chrono::system_clock::time_point::max();
    std::chrono::system_clock::time_point expire_time;
 -  if (overflow_checker - start_time <= timeout_ns)
-+  if (std::chrono::duration_cast<std::chrono::system_clock::duration>(overflow_checker - start_time) <= timeout)
++  if (std::chrono::duration_cast<std::chrono::microseconds>(overflow_checker - start_time) <= timeout)
    {
      expire_time = overflow_checker;
    }
