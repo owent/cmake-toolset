@@ -1070,6 +1070,9 @@ function(project_third_party_try_patch_file_internal OUTPUT_VAR BASE_DIRECTORY P
 endfunction()
 
 function(project_third_party_try_patch_file OUTPUT_VAR BASE_DIRECTORY PORT_PREFIX VERSION)
+  if(DEFINED ${OUTPUT_VAR})
+    return()
+  endif()
   if(CMAKE_CROSSCOMPILING)
     project_third_party_try_patch_file_internal(TRY_PATCH_FILE_PATH_CROSS "${BASE_DIRECTORY}" "${PORT_PREFIX}"
                                                 "${VERSION}" ".cross.patch")

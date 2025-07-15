@@ -1,3 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 303738d..7fcaa31 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,7 +22,7 @@
+ 
+ 
+ 
+-cmake_minimum_required(VERSION 3.5.1)
++cmake_minimum_required(VERSION 3.16)
+ 
+ set(PACKAGE_NAME          "grpc")
+ set(PACKAGE_VERSION       "1.43.2")
 diff --git a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc b/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
 index 4aa11fd..cefb69a 100644
 --- a/src/core/ext/filters/client_channel/lb_policy/xds/xds_cluster_resolver.cc
@@ -12,7 +25,7 @@ index 4aa11fd..cefb69a 100644
            parent_->config_->discovery_mechanisms()[index_].cluster_name,
            parent_->config_->discovery_mechanisms()[index_].eds_service_name};
 diff --git a/third_party/upb/cmake/make_cmakelists.py b/third_party/upb/cmake/make_cmakelists.py
-index dea4397..c4504dd 100755
+index dea4397..98f36de 100755
 --- a/third_party/upb/cmake/make_cmakelists.py
 +++ b/third_party/upb/cmake/make_cmakelists.py
 @@ -38,8 +38,13 @@ import sys

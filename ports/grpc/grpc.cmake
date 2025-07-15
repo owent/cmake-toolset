@@ -160,7 +160,7 @@ if(NOT TARGET gRPC::grpc++_alts
             set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.73.1")
           endif()
         else()
-          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.2")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_GRPC_VERSION "v1.54.3")
         endif()
       endif()
     endif()

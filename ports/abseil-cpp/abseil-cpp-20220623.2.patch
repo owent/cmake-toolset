@@ -1,0 +1,57 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 79869ff5..2f051885 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@
+ # version of CMake by first installing Extra Packages for Enterprise Linux
+ # (https://fedoraproject.org/wiki/EPEL#Extra_Packages_for_Enterprise_Linux_.28EPEL.29)
+ # and then issuing `yum install cmake3` on the command line.
+-cmake_minimum_required(VERSION 3.5)
++cmake_minimum_required(VERSION 3.16)
+ 
+ # Compiler id for Apple Clang is now AppleClang.
+ if (POLICY CMP0025)
+diff --git a/absl/base/config.h b/absl/base/config.h
+index d74e7427..473b2f03 100644
+--- a/absl/base/config.h
++++ b/absl/base/config.h
+@@ -572,7 +572,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
+ 
+ #ifdef __has_include
+ #if __has_include(<any>) && defined(__cplusplus) && __cplusplus >= 201703L && \
+-    !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
++    !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
+ #define ABSL_HAVE_STD_ANY 1
+ #endif
+ #endif
+@@ -586,7 +587,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
+ 
+ #ifdef __has_include
+ #if __has_include(<optional>) && defined(__cplusplus) && \
+-    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
++    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
+ #define ABSL_HAVE_STD_OPTIONAL 1
+ #endif
+ #endif
+@@ -600,7 +602,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
+ 
+ #ifdef __has_include
+ #if __has_include(<variant>) && defined(__cplusplus) && \
+-    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE
++    __cplusplus >= 201703L && !ABSL_INTERNAL_APPLE_CXX17_TYPES_UNAVAILABLE && \
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
+ #define ABSL_HAVE_STD_VARIANT 1
+ #endif
+ #endif
+@@ -614,7 +617,8 @@ static_assert(ABSL_INTERNAL_INLINE_NAMESPACE_STR[0] != 'h' ||
+ 
+ #ifdef __has_include
+ #if __has_include(<string_view>) && defined(__cplusplus) && \
+-    __cplusplus >= 201703L
++    __cplusplus >= 201703L && \
++    !(defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__) || defined(_WIN32) || defined(_WIN64))
+ #define ABSL_HAVE_STD_STRING_VIEW 1
+ #endif
+ #endif

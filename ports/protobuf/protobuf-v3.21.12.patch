@@ -1,7 +1,14 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 04cb330..2e93b19 100644
+index 04cb330..0930b4a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ # Minimum CMake required
+-cmake_minimum_required(VERSION 3.5)
++cmake_minimum_required(VERSION 3.16)
+ 
+ if(protobuf_VERBOSE)
+   message(STATUS "Protocol Buffers Configuring...")
 @@ -219,7 +219,7 @@ else (protobuf_BUILD_SHARED_LIBS)
      if (protobuf_MSVC_STATIC_RUNTIME)
          set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>)
@@ -11,6 +18,16 @@ index 04cb330..2e93b19 100644
      endif()
    else()
      # In case we are building static libraries, link also the runtime library statically
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 4e39573..6091ca5 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.5)
++cmake_minimum_required(VERSION 3.16)
+ 
+ message(WARNING "Calling of cmake with source directory set to \"cmake\" subdirectory of Protocol Buffers project is deprecated. Top-level directory of Protocol Buffers project should be used instead.")
+ 
 diff --git a/src/google/protobuf/compiler/cpp/file.cc b/src/google/protobuf/compiler/cpp/file.cc
 index 838e0ab..10f74c0 100644
 --- a/src/google/protobuf/compiler/cpp/file.cc

@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b67b7aa..ecb6b45 100644
+index 748666b..70ecbd4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -22,7 +22,7 @@
+ 
+ 
+ 
+-cmake_minimum_required(VERSION 3.8)
++cmake_minimum_required(VERSION 3.16)
+ 
+ set(PACKAGE_NAME          "grpc")
+ set(PACKAGE_VERSION       "1.54.3")
 @@ -374,22 +374,22 @@ if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/googleapis)
    )
  endif()

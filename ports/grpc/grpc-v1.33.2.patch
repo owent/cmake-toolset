@@ -1,5 +1,18 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0f0c47a..f973ffc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,7 +22,7 @@
+ 
+ 
+ 
+-cmake_minimum_required(VERSION 3.5.1)
++cmake_minimum_required(VERSION 3.16)
+ 
+ set(PACKAGE_NAME          "grpc")
+ set(PACKAGE_VERSION       "1.33.2")
 diff --git a/third_party/upb/CMakeLists.txt b/third_party/upb/CMakeLists.txt
-index 4dd6454..3e28d48 100644
+index 4dd6454..17fdc84 100644
 --- a/third_party/upb/CMakeLists.txt
 +++ b/third_party/upb/CMakeLists.txt
 @@ -26,6 +26,16 @@ if(NOT CMAKE_BUILD_TYPE)
