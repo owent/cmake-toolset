@@ -48,9 +48,9 @@ struct custom_object {
 
 // Some STL implement may have BUGs on some APIs, we need check it
 template <class CharT>
-struct std::formatter<custom_object, CharT> : std::formatter<CharT*, CharT> {
+struct std::formatter<custom_object, CharT> : std::formatter<std::basic_string_view<CharT>, CharT> {
   template <class FormatContext>
-  auto format(const custom_object &vec, FormatContext &ctx) {
+  auto format(const custom_object &vec, FormatContext &ctx) const {
     return std::vformat_to(ctx.out(), \"({},{})\", std::make_format_args(vec.x, vec.y));
   }
 };
