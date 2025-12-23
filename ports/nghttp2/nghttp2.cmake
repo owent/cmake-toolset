@@ -83,7 +83,7 @@ else()
   project_third_party_port_declare(
     nghttp2
     VERSION
-    "v1.66.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
+    "v1.68.0" # curl support ngtcp2 v0.17.0 from 8.2 and v1.55.0 need ngtcp2 v0.17.0 or upper
     GIT_URL
     "https://github.com/nghttp2/nghttp2.git"
     BUILD_OPTIONS

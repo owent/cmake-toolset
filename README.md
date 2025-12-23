@@ -10,7 +10,7 @@
 
 This is a cmake script set for atframework.It contains some utility functions and it can works with [vcpkg][1].
 
-It's recommanded to use [vcpkg][1] if you do not need cross-compiling and has GCC 6+/Visual Studio 2015 Update 3+ with the English language pack/macOS 10.15+.
+It's recommanded to use [vcpkg][1] if you do not need cross-compiling and has GCC 6+/Visual Studio 2022+/macOS 11+.
 But if you want a special version of some packages or just download packages from custom mirrors, you can use this toolset.
 
 > E.g.: If you want to use openssl 1.1.0k and use options `no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers`

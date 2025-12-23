@@ -38,7 +38,7 @@ else()
   project_third_party_port_declare(
     nghttp3
     VERSION
-    "v1.10.1"
+    "v1.13.1"
     GIT_URL
     "https://github.com/ngtcp2/nghttp3.git"
     BUILD_OPTIONS

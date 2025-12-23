@@ -126,7 +126,7 @@ if(NOT TARGET lua::liblua-static
   project_third_party_port_declare(
     lua
     VERSION
-    "v5.4.8"
+    "v5.5.0"
     GIT_URL
     "https://github.com/lua/lua.git"
     BUILD_OPTIONS
