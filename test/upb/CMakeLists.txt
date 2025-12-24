@@ -16,6 +16,8 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
   cmake_policy(SET CMP0144 NEW)
 endif()
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 project(cmake-toolset-test LANGUAGES C CXX)
 
 enable_testing()

@@ -2,24 +2,33 @@ include_guard(DIRECTORY)
 
 macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
   if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
-    if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
-      if(TARGET protobuf::libprotobuf)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf)
-        if(NOT COMPILER_OPTIONS_TEST_RTTI)
-          target_compile_definitions(protobuf::libprotobuf INTERFACE "GOOGLE_PROTOBUF_NO_RTTI")
-        endif()
-      else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf-lite)
+    if(TARGET protobuf::libprotobuf)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf)
+      if(NOT COMPILER_OPTIONS_TEST_RTTI)
+        target_compile_definitions(protobuf::libprotobuf INTERFACE "GOOGLE_PROTOBUF_NO_RTTI")
       endif()
+    else()
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME protobuf::libprotobuf-lite)
+    endif()
 
-      if(TARGET protobuf::libprotobuf-lite)
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf-lite)
-        if(NOT COMPILER_OPTIONS_TEST_RTTI)
-          target_compile_definitions(protobuf::libprotobuf-lite INTERFACE "GOOGLE_PROTOBUF_NO_RTTI")
-        endif()
-      else()
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf)
+    if(TARGET protobuf::libprotobuf-lite)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf-lite)
+      if(NOT COMPILER_OPTIONS_TEST_RTTI)
+        target_compile_definitions(protobuf::libprotobuf-lite INTERFACE "GOOGLE_PROTOBUF_NO_RTTI")
       endif()
+    else()
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf)
+    endif()
+
+    # Patch source options for generated protobuf files
+    get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_COMPILE_FEATURES
+                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME} INTERFACE_COMPILE_FEATURES)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_COMPILE_FEATURES MATCHES "(^|\\s)cxx_std_([0-9]+)(|$\\s)")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD ${CMAKE_MATCH_2})
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): protobuf detected compile features cxx_std_${CMAKE_MATCH_2}, set generated protobuf files to use the same C++ standard version."
+      )
     endif()
 
     # Protobuf_PROTOC_*/PROTOBUF_*/protobuf_generate_* may not set when set(protobuf_MODULE_COMPATIBLE FALSE)

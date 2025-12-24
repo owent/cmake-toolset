@@ -16,6 +16,8 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
   cmake_policy(SET CMP0144 NEW)
 endif()
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 project(cmake-toolset-test LANGUAGES C CXX)
 
 enable_testing()
@@ -249,6 +251,7 @@ add_executable(cmake-toolset-test ${MAIN_TEST_SRC_FILES})
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
   target_include_directories(cmake-toolset-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
   target_compile_definitions(cmake-toolset-test PRIVATE "HAVE_PROTOBUF=1")
+  project_build_tools_patch_protobuf_targets(cmake-toolset-test)
 endif()
 
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_OPENTELEMETRY_CPP_LINK_NAMES)

@@ -84,7 +84,7 @@ index f591f99..f5bedee 100644
          GeneratedClassName(input_type), input_type->file());
      if (method->client_streaming() && method->server_streaming()) {
 diff --git a/src/compiler/python_generator.cc b/src/compiler/python_generator.cc
-index 57f5d4d..d416747 100644
+index 5ca1733..7427718 100644
 --- a/src/compiler/python_generator.cc
 +++ b/src/compiler/python_generator.cc
 @@ -957,7 +957,7 @@ bool PythonGrpcGenerator::Generate(const FileDescriptor* file,
@@ -96,114 +96,25 @@ index 57f5d4d..d416747 100644
  
    ProtoBufFile pbfile(file);
    std::string grpc_version;
-diff --git a/src/core/transport/auth_context.cc b/src/core/transport/auth_context.cc
-index a9468e6..03362b9 100644
---- a/src/core/transport/auth_context.cc
-+++ b/src/core/transport/auth_context.cc
-@@ -153,7 +153,7 @@ void grpc_auth_context::add_property(const char* name, const char* value,
- }
+diff --git a/src/core/util/per_cpu.h b/src/core/util/per_cpu.h
+index 7d1fbd5..2872270 100644
+--- a/src/core/util/per_cpu.h
++++ b/src/core/util/per_cpu.h
+@@ -89,7 +89,7 @@ class PerCpu {
+  public:
+   // Options are not defaulted to try and force consideration of what the
+   // options specify.
+-  explicit PerCpu(PerCpuOptions options) : shards_(options.Shards()) {}
++  explicit PerCpu(PerCpuOptions options) : shards_(options.Shards()), data_{new T[options.Shards()]} {}
  
- void grpc_auth_context::set_protocol(absl::string_view protocol) {
--  protocol_ = protocol;
-+  protocol_ = std::string(protocol);
- }
+   T& this_cpu() { return data_[sharding_helper_.GetShardingBits() % shards_]; }
  
- void grpc_auth_context_add_property(grpc_auth_context* ctx, const char* name,
-diff --git a/third_party/abseil-cpp b/third_party/abseil-cpp
-index 76bb243..5d365d3 160000
---- a/third_party/abseil-cpp
-+++ b/third_party/abseil-cpp
-@@ -1 +1 @@
--Subproject commit 76bb24329e8bf5f39704eb10d21b9a80befa7c81
-+Subproject commit 5d365d332a68875f8534bdd0e4e9e721f9d54fd5-dirty
-diff --git a/third_party/benchmark b/third_party/benchmark
-index 12235e2..04ccbd8 160000
---- a/third_party/benchmark
-+++ b/third_party/benchmark
-@@ -1 +1 @@
--Subproject commit 12235e24652fc7f809373e7c11a5f73c5763fc4c
-+Subproject commit 04ccbd86038796c319ea19987457e651a24f6b44-dirty
-diff --git a/third_party/bloaty b/third_party/bloaty
-index 60209eb..d7976f1 160000
---- a/third_party/bloaty
-+++ b/third_party/bloaty
-@@ -1 +1 @@
--Subproject commit 60209eb1ccc34d5deefb002d1b7f37545204f7f2
-+Subproject commit d7976f1bcbce60f20b08e050c79dd322f05421ab-dirty
-diff --git a/third_party/boringssl-with-bazel b/third_party/boringssl-with-bazel
-index c63fadb..a5eafaa 160000
---- a/third_party/boringssl-with-bazel
-+++ b/third_party/boringssl-with-bazel
-@@ -1 +1 @@
--Subproject commit c63fadbde60a2224c22189d14c4001bbd2a3a629
-+Subproject commit a5eafaa42335cb9ad053a5df76d3bee022f40a8f-dirty
-diff --git a/third_party/cares/cares b/third_party/cares/cares
-index d3a507e..16c873c 160000
---- a/third_party/cares/cares
-+++ b/third_party/cares/cares
-@@ -1 +1 @@
--Subproject commit d3a507e920e7af18a5efb7f9f1d8044ed4750013
-+Subproject commit 16c873c2e58325a1872ff85881284357c15c9084-dirty
-diff --git a/third_party/envoy-api b/third_party/envoy-api
-index 4de3c74..c741076 160000
---- a/third_party/envoy-api
-+++ b/third_party/envoy-api
-@@ -1 +1 @@
--Subproject commit 4de3c74cf21a9958c1cf26d8993c55c6e0d28b49
-+Subproject commit c7410760e44d7b61fe09fbc6dd34dccd493f27dd-dirty
-diff --git a/third_party/googletest b/third_party/googletest
-index 52eb810..9156d4c 160000
---- a/third_party/googletest
-+++ b/third_party/googletest
-@@ -1 +1 @@
--Subproject commit 52eb8108c5bdec04579160ae17225d66034bd723
-+Subproject commit 9156d4caac880b513264ecbe0aa4746a3fead3d7-dirty
-diff --git a/third_party/opentelemetry b/third_party/opentelemetry
-index 60fa875..b805017 160000
---- a/third_party/opentelemetry
-+++ b/third_party/opentelemetry
-@@ -1 +1 @@
--Subproject commit 60fa8754d890b5c55949a8c68dcfd7ab5c2395df
-+Subproject commit b80501798339bf5cf4cb49c0027ee8d6bb03eae0-dirty
-diff --git a/third_party/opentelemetry-cpp b/third_party/opentelemetry-cpp
-index ced7986..47d0351 160000
---- a/third_party/opentelemetry-cpp
-+++ b/third_party/opentelemetry-cpp
-@@ -1 +1 @@
--Subproject commit ced79860f8c8a091a2eabfee6d47783f828a9b59
-+Subproject commit 47d0351d430b54d7ad365875acf97908f6490b12-dirty
-diff --git a/third_party/protobuf b/third_party/protobuf
-index 74211c0..e3699ac 160000
---- a/third_party/protobuf
-+++ b/third_party/protobuf
-@@ -1 +1 @@
--Subproject commit 74211c0dfc2777318ab53c2cd2c317a2ef9012de
-+Subproject commit e3699ac3d634579c258f2689baa296dede63e4ee-dirty
-diff --git a/third_party/protoc-gen-validate b/third_party/protoc-gen-validate
-index 7b06248..30a9172 160000
---- a/third_party/protoc-gen-validate
-+++ b/third_party/protoc-gen-validate
-@@ -1 +1 @@
--Subproject commit 7b06248484ceeaa947e93ca2747eccf336a88ecc
-+Subproject commit 30a917216358a22c5cf84ed509a79e3738f46e84-dirty
-diff --git a/third_party/re2 b/third_party/re2
-index 0c5616d..e7aec59 160000
---- a/third_party/re2
-+++ b/third_party/re2
-@@ -1 +1 @@
--Subproject commit 0c5616df9c0aaa44c9440d87422012423d91c7d1
-+Subproject commit e7aec5985072c1dbe735add802653ef4b36c231a-dirty
-diff --git a/third_party/xds b/third_party/xds
-index 3a472e5..ee656c7 160000
---- a/third_party/xds
-+++ b/third_party/xds
-@@ -1 +1 @@
--Subproject commit 3a472e524827f72d1ad621c4983dd5af54c46776
-+Subproject commit ee656c7534f5d7dc23d44dd611689568f72017a6-dirty
-diff --git a/third_party/zlib b/third_party/zlib
-index f1f503d..570720b 160000
---- a/third_party/zlib
-+++ b/third_party/zlib
-@@ -1 +1 @@
--Subproject commit f1f503da85d52e56aae11557b4d79a42bcaa2b86
-+Subproject commit 570720b0c24f9686c33f35a1b3165c1f568b96be
+@@ -101,7 +101,7 @@ class PerCpu {
+  private:
+   PerCpuShardingHelper sharding_helper_;
+   const size_t shards_;
+-  std::unique_ptr<T[]> data_{new T[shards_]};
++  std::unique_ptr<T[]> data_;
+ };
+ 
+ }  // namespace grpc_core
