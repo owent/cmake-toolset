@@ -83,12 +83,6 @@ if(NOT absl_FOUND)
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_INHERIT_OPTIONS
         CMAKE_INHERIT_BUILD_ENV CMAKE_INHERIT_FIND_ROOT_PATH CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS)
-    # Some versions of MSVC have problems with ABSL_HAVE_STD_ANY,ABSL_HAVE_STD_OPTIONAL,ABSL_HAVE_STD_VARIANT. We use
-    # the settings from upstream.
-    if(MSVC)
-      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_INHERIT_OPTIONS
-           CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS)
-    endif()
 
     # If protobuf or gRPC use a lower C++ standard, abseil-cpp should also use the same standard to avoid ABI
     # incompatibility.
