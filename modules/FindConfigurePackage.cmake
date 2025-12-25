@@ -255,6 +255,7 @@ macro(FindConfigurePackage)
   set(oneValueArgs
       PACKAGE
       PORT_PREFIX
+      PORT_NAME
       WORKING_DIRECTORY
       BUILD_DIRECTORY
       PREFIX_DIRECTORY
@@ -309,6 +310,49 @@ macro(FindConfigurePackage)
   else()
     string(TOUPPER "ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_${FindConfigurePackage_PACKAGE}"
                    FindConfigurePackage_FULL_PORT_NAME)
+  endif()
+
+  if(NOT FindConfigurePackage_PORT_NAME)
+    set(FindConfigurePackage_PORT_NAME "${FindConfigurePackage_PACKAGE}")
+  endif()
+  # Set options for cmake-toolset.port.${FindConfigurePackage_PORT_NAME}.build
+  if(TARGET "cmake-toolset.port.${FindConfigurePackage_PORT_NAME}.build")
+    set(__FindConfigurePackage_LANGS)
+    if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_C_FLAGS
+       OR FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD)
+      list(APPEND __FindConfigurePackage_LANGS C OBJC)
+    endif()
+    if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS
+       OR FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD)
+      list(APPEND __FindConfigurePackage_LANGS CXX OBJCXX)
+    endif()
+    if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS)
+      list(APPEND __FindConfigurePackage_LANGS ASM)
+    endif()
+
+    foreach(__lang_VAR IN LISTS __FindConfigurePackage_LANGS)
+      if(CMAKE_${__lang_VAR}_STANDARD)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD)
+          set_property(
+            TARGET "cmake-toolset.port.${FindConfigurePackage_PORT_NAME}.build"
+            PROPERTY "MAX_${__lang_VAR}_STANDARD"
+                     "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD}")
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD LESS
+             CMAKE_${__lang_VAR}_STANDARD)
+            set_property(
+              TARGET "cmake-toolset.port.${FindConfigurePackage_PORT_NAME}.build"
+              PROPERTY "${__lang_VAR}_STANDARD"
+                       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD}")
+          else()
+            set_property(TARGET "cmake-toolset.port.${FindConfigurePackage_PORT_NAME}.build"
+                         PROPERTY "${__lang_VAR}_STANDARD" "${CMAKE_${__lang_VAR}_STANDARD}")
+          endif()
+        else()
+          set_property(TARGET "cmake-toolset.port.${FindConfigurePackage_PORT_NAME}.build"
+                       PROPERTY "${__lang_VAR}_STANDARD" "${CMAKE_${__lang_VAR}_STANDARD}")
+        endif()
+      endif()
+    endforeach()
   endif()
 
   # step 1. find using standard method

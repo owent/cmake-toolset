@@ -89,9 +89,16 @@ if(NOT absl_FOUND)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_INHERIT_OPTIONS
            CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_FLAGS)
     endif()
+
+    # If protobuf or gRPC use a lower C++ standard, abseil-cpp should also use the same standard to avoid ABI
+    # incompatibility.
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_CXX_STANDARD 17)
+
     find_configure_package(
       PACKAGE
       absl
+      PORT_NAME
+      abseil
       BUILD_WITH_CMAKE
       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_INHERIT_OPTIONS}
       CMAKE_FLAGS
@@ -108,6 +115,7 @@ if(NOT absl_FOUND)
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION}"
       GIT_URL
       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_GIT_URL}")
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_CXX_STANDARD)
 
     if(absl_FOUND)
       project_third_party_abseil_import()

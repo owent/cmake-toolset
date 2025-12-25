@@ -504,40 +504,33 @@ macro(project_build_tools_append_cmake_cxx_standard_options)
       set(project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS TRUE)
     endif()
   endforeach()
+  set(project_build_tools_append_cmake_cxx_standard_options_VARS)
   if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
-    if(CMAKE_C_STANDARD)
-      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-           "-DCMAKE_C_STANDARD=${CMAKE_C_STANDARD}")
-    endif()
-    if(DEFINED CMAKE_C_STANDARD)
-      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-           "-DCMAKE_C_STANDARD=${CMAKE_C_STANDARD}")
-    endif()
-  endif()
-  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
-    if(CMAKE_OBJC_STANDARD)
-      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-           "-DCMAKE_OBJC_STANDARD=${CMAKE_OBJC_STANDARD}")
-    endif()
-    if(DEFINED CMAKE_OBJC_STANDARD)
-      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-           "-DCMAKE_OBJC_STANDARD=${CMAKE_OBJC_STANDARD}")
-    endif()
+    list(APPEND project_build_tools_append_cmake_cxx_standard_options_VARS C OBJC)
   endif()
   if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
-    if(CMAKE_CXX_STANDARD)
-      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-           "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
+    list(APPEND project_build_tools_append_cmake_cxx_standard_options_VARS CXX OBJCXX)
+  endif()
+  foreach(__lang_VAR IN LISTS project_build_tools_append_cmake_cxx_standard_options_VARS)
+    if(DEFINED CMAKE_${__lang_VAR}_STANDARD)
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD
+         AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD LESS
+             CMAKE_${__lang_VAR}_STANDARD)
+        list(
+          APPEND
+          ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+          "-DCMAKE_${__lang_VAR}_STANDARD=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_${__lang_VAR}_STANDARD}"
+        )
+      else()
+        list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
+             "-DCMAKE_${__lang_VAR}_STANDARD=${CMAKE_${__lang_VAR}_STANDARD}")
+      endif()
     endif()
+  endforeach()
+  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
     if(DEFINED CMAKE_CXX_EXTENSIONS)
       list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
            "-DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}")
-    endif()
-  endif()
-  if(NOT project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
-    if(CMAKE_OBJCXX_STANDARD)
-      list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
-           "-DCMAKE_OBJCXX_STANDARD=${CMAKE_OBJCXX_STANDARD}")
     endif()
     if(DEFINED CMAKE_OBJCXX_EXTENSIONS)
       list(APPEND ${project_build_tools_append_cmake_cxx_standard_options_OUTVAR}
@@ -545,6 +538,7 @@ macro(project_build_tools_append_cmake_cxx_standard_options)
     endif()
   endif()
 
+  unset(project_build_tools_append_cmake_cxx_standard_options_VARS)
   unset(project_build_tools_append_cmake_cxx_standard_options_OUTVAR)
   unset(project_build_tools_append_cmake_cxx_standard_options_DISABLE_C_FLAGS)
   unset(project_build_tools_append_cmake_cxx_standard_options_DISABLE_CXX_FLAGS)
@@ -1154,7 +1148,7 @@ function(project_git_clone_repository)
 
     if(project_git_clone_repository_PATCH_FILES)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply "--allow-empty"
                 ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -1273,12 +1267,9 @@ endif()
 
 function(project_build_tools_patch_protobuf_sources)
   if(MSVC)
-    set(__additional_options "/std:c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
+    set(__additional_cxx_standard "/std:c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
   else()
-    set(__additional_options "-std=c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
-  endif()
-  if(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS)
-    set(__additional_options "${__additional_options};${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS}")
+    set(__additional_cxx_standard "-std=c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
   endif()
 
   foreach(PROTO_SRC ${ARGN})
@@ -1286,22 +1277,30 @@ function(project_build_tools_patch_protobuf_sources)
     set(PROTO_SRC_OPTIONS_CHANGED FALSE)
     get_source_file_property(PROTO_SRC_OPTIONS ${PROTO_SRC} COMPILE_OPTIONS)
     if(PROTO_SRC_OPTIONS)
-      if(NOT PROTO_TARGET_OPTIONS MATCHES
+      set(__need_cxx_standard TRUE)
+      if(PROTO_TARGET_OPTIONS MATCHES
          "(/std:|-std=)c\\+\\+${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
+        set(__need_cxx_standard FALSE)
+      else()
         if(MSVC)
           string(REGEX REPLACE "/std:c\\+\\+[0-9]+" "" PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS}")
         endif()
         string(REGEX REPLACE "-std=c\\+\\+[0-9]+" "" PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS}")
+        set(__need_cxx_standard TRUE)
       endif()
 
-      foreach(TEST_OPTION ${__additional_options})
+      foreach(TEST_OPTION ${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS})
         if(NOT "${TEST_OPTION}" IN_LIST PROTO_SRC_OPTIONS)
           list(APPEND PROTO_SRC_OPTIONS "${TEST_OPTION}")
           set(PROTO_SRC_OPTIONS_CHANGED TRUE)
         endif()
       endforeach()
+      if(__need_cxx_standard)
+        list(APPEND PROTO_SRC_OPTIONS "${__additional_cxx_standard}")
+        set(PROTO_SRC_OPTIONS_CHANGED TRUE)
+      endif()
     else()
-      set(PROTO_SRC_OPTIONS ${__additional_options})
+      set(PROTO_SRC_OPTIONS "${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS};${__additional_cxx_standard}")
       set(PROTO_SRC_OPTIONS_CHANGED TRUE)
     endif()
 
@@ -1318,44 +1317,48 @@ endfunction()
 function(project_build_tools_patch_protobuf_targets)
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD)
     foreach(PROTO_TARGET ${ARGN})
-      get_target_property(PROTO_TARGET_COMPILE_FEATURES ${PROTO_TARGET} COMPILE_FEATURES)
-      if(PROTO_TARGET_COMPILE_FEATURES)
-        set(PROTO_TARGET_COMPILE_FEATURES
-            "${PROTO_TARGET_COMPILE_FEATURES};cxx_std_${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
-      else()
-        set(PROTO_TARGET_COMPILE_FEATURES "cxx_std_${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
-      endif()
-      set_target_properties(
-        ${PROTO_TARGET} PROPERTIES CXX_STANDARD ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}
-                                   COMPILE_FEATURES "${PROTO_TARGET_COMPILE_FEATURES}")
-
-      message(
-        STATUS
-          "Patch: CXX_STANDARD of ${PROTO_TARGET} to ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
+      set_target_properties(${PROTO_TARGET} PROPERTIES CXX_STANDARD
+                                                       ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD})
     endforeach()
-
   endif()
-
   if(MSVC)
-    set(__additional_options "/std:c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
+    set(__additional_cxx_standard "/std:c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
   else()
-    set(__additional_options "-std=c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
-  endif()
-  if(PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS)
-    set(__additional_options "${__additional_options};${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS}")
+    set(__additional_cxx_standard "-std=c++${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
   endif()
   foreach(PROTO_TARGET ${ARGN})
+    set(PROTO_TARGET_OPTIONS_CHANGED FALSE)
     get_target_property(PROTO_TARGET_OPTIONS ${PROTO_TARGET} COMPILE_OPTIONS)
     if(PROTO_TARGET_OPTIONS)
-      if(MSVC)
-        string(REGEX REPLACE "/std:c\\+\\+[0-9]+" "" PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS}")
+      set(__need_cxx_standard TRUE)
+      if(PROTO_TARGET_OPTIONS MATCHES
+         "(/std:|-std=)c\\+\\+${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD}")
+        set(__need_cxx_standard FALSE)
+      else()
+        if(MSVC)
+          string(REGEX REPLACE "/std:c\\+\\+[0-9]+" "" PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS}")
+        endif()
+        string(REGEX REPLACE "-std=c\\+\\+[0-9]+" "" PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS}")
+
       endif()
-      string(REGEX REPLACE "-std=c\\+\\+[0-9]+" "" PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS}")
-      set(PROTO_TARGET_OPTIONS "${PROTO_TARGET_OPTIONS};${__additional_options}")
+
+      foreach(TEST_OPTION ${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS})
+        if(NOT "${TEST_OPTION}" IN_LIST PROTO_TARGET_OPTIONS)
+          list(APPEND PROTO_TARGET_OPTIONS "${TEST_OPTION}")
+          set(PROTO_TARGET_OPTIONS_CHANGED TRUE)
+        endif()
+      endforeach()
+      if(__need_cxx_standard)
+        list(APPEND PROTO_TARGET_OPTIONS "${__additional_cxx_standard}")
+        set(PROTO_TARGET_OPTIONS_CHANGED TRUE)
+      endif()
     else()
-      set(PROTO_TARGET_OPTIONS "${__additional_options}")
+      set(PROTO_TARGET_OPTIONS "${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS};${__additional_cxx_standard}")
+      set(PROTO_TARGET_OPTIONS_CHANGED TRUE)
     endif()
-    set_target_properties(${PROTO_TARGET} PROPERTIES COMPILE_OPTIONS "${PROTO_TARGET_OPTIONS}")
+    if(PROTO_TARGET_OPTIONS_CHANGED)
+      set_target_properties(${PROTO_TARGET} PROPERTIES COMPILE_OPTIONS "${PROTO_TARGET_OPTIONS}")
+    endif()
   endforeach()
 endfunction()
 

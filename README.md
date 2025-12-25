@@ -219,7 +219,7 @@ For example, if we want to use the same python3 executable on target and host bu
 
 ## Package ports
 
-### Options and requirements
+### Global options and requirements
 
 + Option(Optional): `PROJECT_THIRD_PARTY_PACKAGE_DIR` : Where to place package sources.
 + Option(Optional): `PROJECT_THIRD_PARTY_INSTALL_DIR` : Where to place installed packages.
@@ -246,6 +246,12 @@ include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
 
 project_third_party_include_port("<package dir>[/package sub dir]/<which package you need>.cmake")
 ```
+
+### Port file options
+
+Port file options means these variable should ony be set in port file and be reset after built.
+
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_<LANG>_STANDARD` : Set the max standard when building a package.
 
 ### Package - jemalloc
 
