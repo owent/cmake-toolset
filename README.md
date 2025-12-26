@@ -237,6 +237,8 @@ For example, if we want to use the same python3 executable on target and host bu
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES` : Additional system libraries.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS` : parallel build jobs.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE` : Show more information of cmake-toolset
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE` : Cleanup build cache directory after a package is built successfully.
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR` : Cleanup souce cache directory after a package is built successfully.
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")

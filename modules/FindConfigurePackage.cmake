@@ -1151,6 +1151,11 @@ macro(FindConfigurePackage)
       unset(${FindConfigurePackage_PACKAGE}_FOUND CACHE)
       unset(${FindConfigurePackage_PACKAGE}_FOUND)
       find_package(${FindConfigurePackage_PACKAGE} ${FindConfigurePackage_FIND_PACKAGE_FLAGS})
+
+      if(${FindConfigurePackage_PACKAGE}_FOUND)
+        project_third_party_port_cleanup_cache_dir("${FindConfigurePackage_BUILD_DIRECTORY}"
+                                                   "${FindConfigurePackage_DOWNLOAD_SOURCE_DIR}")
+      endif()
     endif()
   endif()
 

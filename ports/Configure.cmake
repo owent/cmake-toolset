@@ -33,6 +33,16 @@ else()
   set_compiler_flags_to_inherit_var(CMAKE_EXPORT_PACKAGE_REGISTRY OFF) # cmake_policy(SET CMP0090 NEW)
 endif()
 
+if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE AND DEFINED
+                                                                 ENV{ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE})
+  set(ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE "$ENV{ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE}")
+endif()
+
+if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR
+   AND DEFINED ENV{ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR})
+  set(ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR "$ENV{ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR}")
+endif()
+
 # Patch for `FindGit.cmake` on windows
 find_program(GIT_EXECUTABLE NAMES git git.cmd)
 find_package(Git)
@@ -886,6 +896,21 @@ function(project_third_party_mutable_package_targets PORT_NAME)
 
   set_property(TARGET "cmake-toolset.port.${PORT_NAME}.build" PROPERTY FOLDER "cmake-toolset/build/${PORT_NAME}")
   set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package" PROPERTY FOLDER "cmake-toolset/package/${PORT_NAME}")
+endfunction()
+
+function(project_third_party_port_cleanup_cache_dir BUILD_CACHE_DIR PACKAGE_SOURCE_DIR)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE)
+    if(BUILD_CACHE_DIR AND EXISTS "${BUILD_CACHE_DIR}")
+      file(REMOVE_RECURSE "${BUILD_CACHE_DIR}")
+    endif()
+  endif()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR)
+    if(FindConfigurePackage_UNPACK_SOURCE
+       AND PACKAGE_SOURCE_DIR
+       AND EXISTS "${PACKAGE_SOURCE_DIR}")
+      file(REMOVE_RECURSE "${PACKAGE_SOURCE_DIR}")
+    endif()
+  endif()
 endfunction()
 
 function(project_third_party_port_declare PORT_NAME)

@@ -332,6 +332,10 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
       find_package(Protobuf CONFIG)
     endif()
     project_third_party_protobuf_import()
+    if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)
+      project_third_party_port_cleanup_cache_dir("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_DIR}"
+                                                 "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_REPOSITORY_DIR}")
+    endif()
   endif()
 
   if(TARGET protobuf::libprotobuf OR TARGET protobuf::libprotobuf-lite)

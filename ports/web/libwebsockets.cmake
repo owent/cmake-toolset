@@ -464,6 +464,11 @@ if(NOT Libwebsockets_FOUND
 
       find_package(Libwebsockets CONFIG)
       project_third_party_libwebsockets_import()
+      if(TARGET websockets OR TARGET websockets_shared)
+        project_third_party_port_cleanup_cache_dir(
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}"
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_REPOSITORY_DIR}")
+      endif()
     endif()
   endif()
 else()

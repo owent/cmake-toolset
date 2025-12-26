@@ -25,8 +25,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.no-rtti.test ;
   gcc_no_exceptions_test:
@@ -35,8 +44,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.no-exceptions.test ;
   gcc_static_test:
@@ -45,8 +63,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.static.test ;
   gcc_shared_test:
@@ -55,8 +82,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.shared.test ;
   gcc_libressl_test:
@@ -65,8 +101,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.libressl.test ;
   gcc_boringssl_test:
@@ -75,8 +120,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.boringssl.test ;
   gcc_mbedtls_test:
@@ -85,8 +139,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh gcc.mbedtls.test ;
   clang_test:
@@ -95,8 +158,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           sudo apt install -y libc++1 libc++abi1 libc++-dev libc++abi-dev ;
           bash ci/do_ci.sh clang.test ;
@@ -109,6 +181,9 @@ jobs:
   #       uses: actions/checkout@v6
   #     - name: CI Job
   #       shell: bash
+  #       env:
+  #         ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+  #         ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
   #       run: |
   #         # Patch for Imported target "gRPC::grpc" includes non-existent path
   #         mkdir -p /usr/local/share/vcpkg/include
@@ -127,6 +202,9 @@ jobs:
         uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           pwsh ci/do_ci.ps1 msvc.static.test ;
   msvc_shared_test:
@@ -137,6 +215,9 @@ jobs:
         uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           pwsh ci/do_ci.ps1 msvc.shared.test ;
   msvc_no_rtti_test:
@@ -147,6 +228,9 @@ jobs:
         uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           pwsh ci/do_ci.ps1 msvc.no-rtti.test ;
   msvc_no_exceptions_test:
@@ -157,6 +241,9 @@ jobs:
         uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           pwsh ci/do_ci.ps1 msvc.no-exceptions.test ;
   # VCPKG may have poor compatibility, disable it when it's unusable on github CI runner.
@@ -168,6 +255,9 @@ jobs:
   #       uses: actions/checkout@v6
   #     - name: CI Job
   #       shell: pwsh
+  #       env:
+  #         ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+  #         ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
   #       run: |
   #         pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
   #     - name: Cache packages
@@ -189,6 +279,8 @@ jobs:
           CMAKE_FIND_ROOT_PATH_MODE_LIBRARY: ONLY
           CMAKE_FIND_ROOT_PATH_MODE_INCLUDE: ONLY
           CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           # The OpenSSL config package in apple ci job is break
           if [ -e /opt/homebrew/lib/cmake/OpenSSL ]; then
@@ -201,8 +293,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh android.arm64.test ;
   android_x86_64_test:
@@ -211,6 +312,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Free Disk Space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
       - name: CI Job
         shell: bash
         run: |
@@ -224,6 +334,9 @@ jobs:
         uses: actions/checkout@v6
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh ios.test ;
   iphone_simulator_test:
@@ -234,5 +347,8 @@ jobs:
         uses: actions/checkout@v6
       - name: CI Job
         shell: bash
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
         run: |
           bash ci/do_ci.sh iphone_simulator.test ;
