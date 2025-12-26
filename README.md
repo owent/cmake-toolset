@@ -10,7 +10,7 @@
 
 This is a cmake script set for atframework.It contains some utility functions and it can works with [vcpkg][1].
 
-It's recommanded to use [vcpkg][1] if you do not need cross-compiling and has GCC 6+/Visual Studio 2022+/macOS 11+.
+It's recommended to use [vcpkg][1] if you do not need cross-compiling and has GCC 6+/Visual Studio 2022+/macOS 11+.
 But if you want a special version of some packages or just download packages from custom mirrors, you can use this toolset.
 
 > E.g.: If you want to use openssl 1.1.0k and use options `no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers`
@@ -99,8 +99,8 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 | msys2.mingw.shared.test | Windows         | GCC                    | Dynamic linking                                                                                                 |
 | msvc.static.test        | Windows         | MSVC                   | Static linking                                                                                                  |
 | msvc.shared.test        | Windows         | MSVC                   | Dynamic linking                                                                                                 |
-| msvc.no-rtti.test       | Linux           | MSVC Without RTTI      | With `/GR-` for C++                                                                                             |
-| msvc.no-exceptions.test | Linux           | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++                                                          |
+| msvc.no-rtti.test       | Windows         | MSVC Without RTTI      | With `/GR-` for C++                                                                                             |
+| msvc.no-exceptions.test | Windows         | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++                                                          |
 | ~msvc.vcpkg.test~       | Windows         | MSVC With vcpkg        | Some versions of vcpkg may have poor compatibility on github's CI runner, just disable it when it's unavailable |
 | macos.appleclang.test   | macOS           | Clang with libc++      | -                                                                                                               |
 | android.arm64.test      | Android         | Clang with libc++      | `-DANDROID_ABI=arm64-v8a`                                                                                       |
@@ -112,7 +112,7 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 
 ### `CompilerOption.cmake`
 
-1. Use lastest C++/C standard.
+1. Use latest C++/C standard.
 2. Try to use libc++ and libc++abi when using clang or apple clang
 3. Set `CMAKE_MSVC_RUNTIME_LIBRARY` into `MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<STREQUAL:${VCPKG_CRT_LINKAGE},static>>:DLL>` .
 4. Add `/Zc:__cplusplus` for MSVC to make `__cplusplus == _MSVC_LANG` .
@@ -136,8 +136,8 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 22. Function: `remove_target_properties(<TARGET> <PROPERTY_NAME> [VALUES...])`
 23. Function: `add_target_link_flags(<TARGET> [LDFLAGS...])`
 24. Function: `project_build_tools_auto_set_target_postfix(<TARGET> [TARGET...])` : Auto set postfix to targets
-25. Function: `project_build_tools_set_import_declaration(<VARNAME>)` : Set import delaration of current toolchain to variable
-26. Function: `project_build_tools_set_export_declaration(<VARNAME>)` : Set export delaration of current toolchain to variable
+25. Function: `project_build_tools_set_import_declaration(<VARNAME>)` : Set import declaration of current toolchain to variable
+26. Function: `project_build_tools_set_export_declaration(<VARNAME>)` : Set export declaration of current toolchain to variable
 27. Function: `project_build_tools_get_origin_rpath(<VARNAME> [path...])` : Get relative `RPATH/RUNPATH` paths
 28. Function: `project_build_tools_set_global_install_rpath_origin([path...])` : Set global `RPATH/RUNPATH` to relative paths for installed targets
 29. Function: `project_build_tools_set_global_build_rpath_origin([path...])` : Set global `RPATH/RUNPATH` to relative paths when building
@@ -148,8 +148,8 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 34. Variable `COMPILER_OPTIONS_TEST_RTTI` : `TRUE` when toolchain enable runtime type information.
 35. Variable `COMPILER_STRICT_CFLAGS` : flags of all but compatible warnings and turn warning to error.
 36. Variable `COMPILER_STRICT_EXTRA_CFLAGS` : flags of all extra warnings.
-37. Variablle `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_STATIC_LINK`: Whether try to use static library of sanitizer when builidng third party packages.
-38. Variablle `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_SHARED_LINK`: Whether try to use shared library of sanitizer when builidng third party packages.
+37. Variable `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_STATIC_LINK`: Whether try to use static library of sanitizer when building third party packages.
+38. Variable `ATFRAMEWORK_CMAKE_TOOLSET_SANITIZER_ENABLE_SHARED_LINK`: Whether try to use shared library of sanitizer when building third party packages.
 
 ### `TargetOption.cmake`
 
@@ -159,7 +159,7 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 4. Set the default value of `CMAKE_LIBRARY_OUTPUT_DIRECTORY` to `${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}` .
 5. Set the default value of `CMAKE_RUNTIME_OUTPUT_DIRECTORY` to `${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}` .
 
-## Crossing compiling
+## Cross compiling
 
 There are some example scripts to build android and iOS/iPhoneSimulator targets in [ci/cmake_android_wrapper.sh](ci/cmake_android_wrapper.sh) and [ci/cmake_ios_wrapper.sh](ci/cmake_ios_wrapper.sh). When in crossing mode(Set `CMAKE_SYSTEM_NAME` by commandline or toolchains), sometimes we need some packages built on host architecture first, and we can use `CMAKE_HOST_<VAR>` to configure the options only used when building with host architecture. The availables options are listed below:
 
