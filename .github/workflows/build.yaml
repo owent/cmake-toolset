@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -94,55 +94,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
           sudo apt install -y libc++1 libc++abi1 libc++-dev libc++abi-dev ;
           bash ci/do_ci.sh clang.test ;
-  gcc_vcpkg_test:
-    name: "gcc.vcpkg.test"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: CI Job
-        shell: bash
-        run: |
-          # Patch for Imported target "gRPC::grpc" includes non-existent path
-          mkdir -p /usr/local/share/vcpkg/include
-          bash ci/do_ci.sh gcc.vcpkg.test ;
-      - name: Cache packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/share/vcpkg/installed
-          key: ${{ runner.os }}-${{ hashFiles('/usr/local/share/vcpkg/installed/**') }}
-  # Disable mingw because some versions of gRPC will generate a PATH that is too long for Windows(260)
-  # msys2_mingw_static_test:
-  #   name: "msys2.mingw.static.test"
-  #   runs-on: windows-latest
+  # VCPKG may have poor compatibility, disable it when it's unusable on github CI runner.
+  # gcc_vcpkg_test:
+  #   name: "gcc.vcpkg.test"
+  #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v6
   #     - name: CI Job
   #       shell: bash
   #       run: |
-  #         C:/msys64/msys2_shell.cmd -mingw64 -defterm -no-start -here -lc "ci/do_ci.sh msys2.mingw.static.test"
+  #         # Patch for Imported target "gRPC::grpc" includes non-existent path
+  #         mkdir -p /usr/local/share/vcpkg/include
+  #         bash ci/do_ci.sh gcc.vcpkg.test ;
   #     - name: Cache packages
   #       uses: actions/cache@v4
   #       with:
   #         path: |
-  #           third_party/test/packages
-  #           C:/msys64/var/cache/pacman/pkg
-  #           C:/msys64/var/lib/pacman
-  #         key: ${{ runner.os }}-${ hashFiles('.github/workflows/build.yaml') } }}
+  #           /usr/local/share/vcpkg/installed
+  #         key: ${{ runner.os }}-${{ hashFiles('/usr/local/share/vcpkg/installed/**') }}
   msvc_static_test:
     name: "msvc.static.test"
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
         run: |
@@ -152,7 +134,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
         run: |
@@ -162,7 +144,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
         run: |
@@ -172,44 +154,34 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: pwsh
         run: |
           pwsh ci/do_ci.ps1 msvc.no-exceptions.test ;
-  # UPB is a part of protobuf now, we do not need to build it separately.
-  # msvc_standalone_upb_test:
-  #   name: "msvc.standalone-upb.test"
+  # VCPKG may have poor compatibility, disable it when it's unusable on github CI runner.
+  # msvc_vcpkg_test:
+  #   name: "msvc.vcpkg.test"
   #   runs-on: windows-latest
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v6
   #     - name: CI Job
   #       shell: pwsh
   #       run: |
-  #         pwsh ci/do_ci.ps1 msvc.standalone-upb.test ;
-  msvc_vcpkg_test:
-    name: "msvc.vcpkg.test"
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: CI Job
-        shell: pwsh
-        run: |
-          pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
-      - name: Cache packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            C:/vcpkg/installed
-          key: ${{ runner.os }}-${{ hashFiles('C:/vcpkg/installed/**') }}
+  #         pwsh ci/do_ci.ps1 msvc.vcpkg.test ;
+  #     - name: Cache packages
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           C:/vcpkg/installed
+  #         key: ${{ runner.os }}-${{ hashFiles('C:/vcpkg/installed/**') }}
   macos_appleclang_test:
     name: "macos.appleclang.test"
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         env:
@@ -228,7 +200,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -238,7 +210,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -249,7 +221,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
@@ -259,7 +231,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: CI Job
         shell: bash
         run: |
