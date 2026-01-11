@@ -21,14 +21,17 @@ macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
     endif()
 
     # Patch source options for generated protobuf files
-    get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_COMPILE_FEATURES
-                        ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LINK_NAME} INTERFACE_COMPILE_FEATURES)
-    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_COMPILE_FEATURES MATCHES "(^|\\s)cxx_std_([0-9]+)(|$\\s)")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD ${CMAKE_MATCH_2})
-      message(
-        STATUS
-          "Dependency(${PROJECT_NAME}): protobuf detected compile features cxx_std_${CMAKE_MATCH_2}, set generated protobuf files to use the same C++ standard version."
-      )
+    if(DEFINED CMAKE_CXX_STANDARD)
+      # Patch GlobalEmptyString for protobuf v31
+      if(MSVC
+         AND CMAKE_CXX_STANDARD GREATER_EQUAL 20
+         AND (Protobuf_VERSION_MAJOR EQUAL 31 OR Protobuf_VERSION MATCHES "31\\..*"))
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD 17)
+        message(
+          STATUS
+            "Dependency(${PROJECT_NAME}): protobuf ${Protobuf_VERSION_MAJOR} detected and we need set STD version to ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD} for generated protobuf files to fix GlobalEmptyString linking."
+        )
+      endif()
     endif()
 
     # Protobuf_PROTOC_*/PROTOBUF_*/protobuf_generate_* may not set when set(protobuf_MODULE_COMPATIBLE FALSE)
