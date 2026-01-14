@@ -891,8 +891,13 @@ function(project_third_party_mutable_package_targets PORT_NAME)
     return()
   endif()
 
-  add_custom_target("cmake-toolset.port.${PORT_NAME}.build")
-  add_custom_target("cmake-toolset.port.${PORT_NAME}.package" DEPENDS "cmake-toolset.port.${PORT_NAME}.build")
+  file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cmake-toolset")
+  add_custom_target("cmake-toolset.port.${PORT_NAME}.build"
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cmake-toolset")
+  add_custom_target(
+    "cmake-toolset.port.${PORT_NAME}.package"
+    DEPENDS "cmake-toolset.port.${PORT_NAME}.build"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/cmake-toolset.targets")
 
   set_property(TARGET "cmake-toolset.port.${PORT_NAME}.build" PROPERTY FOLDER "cmake-toolset/build/${PORT_NAME}")
   set_property(TARGET "cmake-toolset.port.${PORT_NAME}.package" PROPERTY FOLDER "cmake-toolset/package/${PORT_NAME}")
