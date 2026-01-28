@@ -62,6 +62,7 @@ int main() {
   char buffer[64] = {0};
   const auto result = std::format_to_n(buffer, sizeof(buffer), \"{} {}: {}\", \"Hello\", \"World!\", 42);
   std::cout << \"Buffer: \" << buffer << \",Untruncated output size = \" << result.size << std::endl;
+  std::cout<< std::format(std::format_string<int>{\"format_string: {}\"}, 42)<< std::endl;
   return 0;
 }"
         ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TEST_STD_FORMAT)
