@@ -20,20 +20,6 @@ macro(PROJECT_THIRD_PARTY_PROTOBUF_IMPORT)
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_LITE_LINK_NAME protobuf::libprotobuf)
     endif()
 
-    # Patch source options for generated protobuf files
-    if(DEFINED CMAKE_CXX_STANDARD)
-      # Patch GlobalEmptyString for protobuf v31
-      if(MSVC
-         AND CMAKE_CXX_STANDARD GREATER_EQUAL 20
-         AND (Protobuf_VERSION_MAJOR EQUAL 31 OR Protobuf_VERSION MATCHES "31\\..*"))
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD 17)
-        message(
-          STATUS
-            "Dependency(${PROJECT_NAME}): protobuf ${Protobuf_VERSION_MAJOR} detected and we need set STD version to ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_CXX_STANDARD} for generated protobuf files to fix GlobalEmptyString linking."
-        )
-      endif()
-    endif()
-
     # Protobuf_PROTOC_*/PROTOBUF_*/protobuf_generate_* may not set when set(protobuf_MODULE_COMPATIBLE FALSE)
     if(TARGET protobuf::protoc)
       project_build_tools_get_imported_location(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC

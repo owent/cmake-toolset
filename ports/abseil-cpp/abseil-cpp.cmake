@@ -86,7 +86,9 @@ if(NOT absl_FOUND)
 
     # If protobuf or gRPC use a lower C++ standard, abseil-cpp should also use the same standard to avoid ABI
     # incompatibility.
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_CXX_STANDARD 17)
+    if(MSVC)
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_CXX_STANDARD 17)
+    endif()
 
     find_configure_package(
       PACKAGE
