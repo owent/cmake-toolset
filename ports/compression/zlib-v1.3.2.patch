@@ -20,3 +20,28 @@ index e103c40..34bbffa 100644
  option(ZLIB_INSTALL "Enable installation of zlib" ON)
  option(ZLIB_PREFIX "prefix for all types and library functions, see zconf.h.in"
         OFF)
+diff --git a/zlibConfig.cmake.in b/zlibConfig.cmake.in
+index 8252ab3..85038b0 100644
+--- a/zlibConfig.cmake.in
++++ b/zlibConfig.cmake.in
+@@ -9,10 +9,18 @@ if(ZLIB_FIND_COMPONENTS)
+             set(ZLIB_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
+         endif(NOT _comp IN_LIST _ZLIB_supported_components)
+ 
+-        include("${CMAKE_CURRENT_LIST_DIR}/ZLIB-${_comp}.cmake")
++        include("${CMAKE_CURRENT_LIST_DIR}/ZLIB-${_comp}.cmake" OPTIONAL)
+     endforeach(_comp ${ZLIB_FIND_COMPONENTS})
+ else(ZLIB_FIND_COMPONENTS)
+     foreach(_component_config IN LISTS _ZLIB_supported_components)
+-        include("${CMAKE_CURRENT_LIST_DIR}/ZLIB-${_component_config}.cmake")
++        include("${CMAKE_CURRENT_LIST_DIR}/ZLIB-${_component_config}.cmake" OPTIONAL)
+     endforeach(_component_config IN LISTS _ZLIB_supported_components)
+ endif(ZLIB_FIND_COMPONENTS)
++
++# Provide ZLIB::ZLIB target for compatibility when only static library is built
++if(NOT TARGET ZLIB::ZLIB)
++    if(TARGET ZLIB::ZLIBSTATIC)
++        add_library(ZLIB::ZLIB INTERFACE IMPORTED)
++        set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_LINK_LIBRARIES ZLIB::ZLIBSTATIC)
++    endif()
++endif()

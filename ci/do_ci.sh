@@ -214,13 +214,13 @@ elif [[ "$1" == "clang.test" ]]; then
   int main() { std::cout<<"Hello"; }' >test-libc++.cpp
   SELECT_CLANG_VERSION=""
   SELECT_CLANG_HAS_LIBCXX=1
-  clang -x c++ -stdlib=libc++ test-libc++.cpp -lc++ -lc++abi || SELECT_CLANG_HAS_LIBCXX=0
+  clang -x c++ -stdlib=libc++ test-libc++.cpp -lc++ -lc++abi || clang -x c++ -stdlib=libc++ test-libc++.cpp -lc++ || SELECT_CLANG_HAS_LIBCXX=0
   if [[ $SELECT_CLANG_HAS_LIBCXX -eq 0 ]]; then
     CURRENT_CLANG_VERSION=$(clang -x c /dev/null -dM -E | grep __clang_major__ | awk '{print $NF}')
     for ((i = $CURRENT_CLANG_VERSION + 3; $i >= $CURRENT_CLANG_VERSION - 3; --i)); do
       SELECT_CLANG_HAS_LIBCXX=1
       SELECT_CLANG_VERSION="-$i"
-      clang$SELECT_CLANG_VERSION -x c++ -stdlib=libc++ test-libc++.cpp -lc++ -lc++abi || SELECT_CLANG_HAS_LIBCXX=0
+      clang$SELECT_CLANG_VERSION -x c++ -stdlib=libc++ test-libc++.cpp -lc++ -lc++abi || clang$SELECT_CLANG_VERSION -x c++ -stdlib=libc++ test-libc++.cpp -lc++ || SELECT_CLANG_HAS_LIBCXX=0
       if [[ $SELECT_CLANG_HAS_LIBCXX -eq 1 ]]; then
         break
       fi
