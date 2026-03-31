@@ -1,22 +1,5 @@
 # cmake-toolset
 
-See `AGENTS.md` for the full project rules.
-
-## Key Rules
-
-- Use `ports/Configure.cmake`, `test/CMakeLists.txt`,
-  workflow files, and the upstream target tag as the
-  main truth sources.
-- Standard ports follow the usual template; treat
-  `ssl/port.cmake`, `grpc/import.cmake`, and
-  `protobuf/protobuf.cmake` as special cases.
-- Patch matching is exact first, then same-minor
-  fallback to the highest version `<=` target.
-- `crosscompiling-host/` means host-side validation.
-- Historical dependency chains are hints only.
-
-## Workflow
-
-See `.github/skills/port-upgrade/` or
+See `AGENTS.md` for the full project rules and
 `.agents/skills/port-upgrade/` for the upgrade
 workflow.

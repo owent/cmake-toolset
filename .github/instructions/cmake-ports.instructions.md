@@ -101,6 +101,10 @@ endif()
   flags.
 - Use `project_third_party_append_build_shared_lib_var`
   for `BUILD_SHARED_LIBS`, not hardcoded values.
+- Use `project_third_party_port_add_build_options()`
+  to append extra flags after `port_declare`.
+- `find_configure_package()` is defined in
+  `modules/FindConfigurePackage.cmake`, not in `ports/`.
 
 ## Truth Sources
 

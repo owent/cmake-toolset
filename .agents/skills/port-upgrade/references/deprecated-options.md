@@ -34,21 +34,16 @@ grep -ri "deprecat\|obsolete\|removed\|no.longer" \
   CMakeLists.txt cmake/ --include="*.cmake"
 ```
 
-### Step 4: Common Deprecated Patterns
-
-| Library | Old Option | Replacement |
-| ------- | ---------- | ----------- |
-| protobuf | `protobuf_BUILD_TESTS` | Check name |
-| grpc | `gRPC_ZLIB_PROVIDER` | Check docs |
-| openssl | `no-<feature>` flags | See INSTALL |
-| zlib | `BUILD_SHARED_LIBS` | See note |
-| cmake | `cmake_minimum_required` range | Single ver |
+### Step 4: Known Deprecated Patterns
 
 **zlib >= 1.3.2**: Uses `ZLIB_BUILD_SHARED` and
 `ZLIB_BUILD_STATIC` instead of `BUILD_SHARED_LIBS`.
 
 **cmake range syntax**: `VERSION X...Y` needs
 cmake >= 3.12. Use single version for older cmake.
+
+For other libraries, always check the upstream
+changelog rather than relying on a static table.
 
 ### Step 5: Implement Version-Conditional Removal
 
