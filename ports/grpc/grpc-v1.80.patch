@@ -1,0 +1,111 @@
+diff --git a/src/compiler/node_generator.cc b/src/compiler/node_generator.cc
+index 795b3f3..23c3be7 100644
+--- a/src/compiler/node_generator.cc
++++ b/src/compiler/node_generator.cc
+@@ -162,8 +162,8 @@ void PrintMethod(const MethodDescriptor* method, Printer* out) {
+   const Descriptor* input_type = method->input_type();
+   const Descriptor* output_type = method->output_type();
+   map<std::string, std::string> vars;
+-  vars["service_name"] = method->service()->full_name();
+-  vars["name"] = method->name();
++  vars["service_name"] = std::string(method->service()->full_name());
++  vars["name"] = std::string(method->name());
+   vars["input_type"] = NodeObjectPath(input_type);
+   vars["input_type_id"] =
+       MessageIdentifierName(std::string(input_type->full_name()));
+@@ -191,7 +191,7 @@ void PrintMethod(const MethodDescriptor* method, Printer* out) {
+ void PrintService(const ServiceDescriptor* service, Printer* out) {
+   map<std::string, std::string> template_vars;
+   out->Print(GetNodeComments(service, true).c_str());
+-  template_vars["name"] = service->name();
++  template_vars["name"] = std::string(service->name());
+   out->Print(template_vars, "var $name$Service = exports.$name$Service = {\n");
+   out->Indent();
+   for (int i = 0; i < service->method_count(); i++) {
+diff --git a/src/compiler/objective_c_generator.cc b/src/compiler/objective_c_generator.cc
+index 06ab1fd..0eea24c 100644
+--- a/src/compiler/objective_c_generator.cc
++++ b/src/compiler/objective_c_generator.cc
+@@ -147,9 +147,9 @@ void PrintV2Signature(Printer* printer, const MethodDescriptor* method,
+ inline map< ::std::string, ::std::string> GetMethodVars(
+     const MethodDescriptor* method) {
+   map< ::std::string, ::std::string> res;
+-  res["method_name"] = method->name();
+-  res["request_type"] = method->input_type()->name();
+-  res["response_type"] = method->output_type()->name();
++  res["method_name"] = std::string(method->name());
++  res["request_type"] = std::string(method->input_type()->name());
++  res["response_type"] = std::string(method->output_type()->name());
+   res["request_class"] = ClassName(method->input_type());
+   res["response_class"] = ClassName(method->output_type());
+   return res;
+diff --git a/src/compiler/php_generator.cc b/src/compiler/php_generator.cc
+index f591f99..f5bedee 100644
+--- a/src/compiler/php_generator.cc
++++ b/src/compiler/php_generator.cc
+@@ -69,8 +69,8 @@ void PrintMethod(const MethodDescriptor* method, Printer* out) {
+   const Descriptor* input_type = method->input_type();
+   const Descriptor* output_type = method->output_type();
+   map<std::string, std::string> vars;
+-  vars["service_name"] = method->service()->full_name();
+-  vars["name"] = method->name();
++  vars["service_name"] = std::string(method->service()->full_name());
++  vars["name"] = std::string(method->name());
+   vars["input_type_id"] =
+       MessageIdentifierName(GeneratedClassName(input_type), input_type->file());
+   vars["output_type_id"] = MessageIdentifierName(
+@@ -140,8 +140,8 @@ void PrintServerMethod(const MethodDescriptor* method, Printer* out) {
+   map<std::string, std::string> vars;
+   const Descriptor* input_type = method->input_type();
+   const Descriptor* output_type = method->output_type();
+-  vars["service_name"] = method->service()->full_name();
+-  vars["method_name"] = method->name();
++  vars["service_name"] = std::string(method->service()->full_name());
++  vars["method_name"] = std::string(method->name());
+   vars["input_type_id"] =
+       MessageIdentifierName(GeneratedClassName(input_type), input_type->file());
+   vars["output_type_id"] = MessageIdentifierName(
+@@ -227,7 +227,7 @@ void PrintServerMethod(const MethodDescriptor* method, Printer* out) {
+ void PrintServerMethodDescriptors(const ServiceDescriptor* service,
+                                   Printer* out) {
+   map<std::string, std::string> vars;
+-  vars["service_name"] = service->full_name();
++  vars["service_name"] = std::string(service->full_name());
+ 
+   out->Print("/**\n");
+   if (service->options().deprecated()) {
+@@ -247,7 +247,7 @@ void PrintServerMethodDescriptors(const ServiceDescriptor* service,
+   for (int i = 0; i < service->method_count(); i++) {
+     auto method = service->method(i);
+     auto input_type = method->input_type();
+-    vars["method_name"] = method->name();
++    vars["method_name"] = std::string(method->name());
+     vars["input_type_id"] = MessageIdentifierName(
+         GeneratedClassName(input_type), input_type->file());
+     if (method->client_streaming() && method->server_streaming()) {
+diff --git a/src/compiler/python_generator.cc b/src/compiler/python_generator.cc
+index 57f5d4d..d416747 100644
+--- a/src/compiler/python_generator.cc
++++ b/src/compiler/python_generator.cc
+@@ -957,7 +957,7 @@ bool PythonGrpcGenerator::Generate(const FileDescriptor* file,
+     *error = "Invalid proto file name. Proto file must end with .proto";
+     return false;
+   }
+-  generator_file_name = file->name();
++  generator_file_name = std::string(file->name());
+ 
+   ProtoBufFile pbfile(file);
+   std::string grpc_version;
+diff --git a/src/core/transport/auth_context.cc b/src/core/transport/auth_context.cc
+index 026742f..8ee19c5 100644
+--- a/src/core/transport/auth_context.cc
++++ b/src/core/transport/auth_context.cc
+@@ -153,7 +153,7 @@ void grpc_auth_context::add_property(const char* name, const char* value,
+ }
+ 
+ void grpc_auth_context::set_protocol(absl::string_view protocol) {
+-  protocol_ = protocol;
++  protocol_ = std::string(protocol);
+ }
+ 
+ void grpc_auth_context_add_property(grpc_auth_context* ctx, const char* name,

@@ -103,7 +103,7 @@ function(maybe_populate_submodule VARNAME SUBMODULE_PATH LOCAL_PATH)
 
     if(maybe_poptlate_submodule_PATCH_FILES)
       execute_process(
-        COMMAND ${GIT_EXECUTABLE} ${git_global_options} -c "core.autocrlf=true" apply
+        COMMAND ${GIT_EXECUTABLE} ${git_global_options} -c "core.autocrlf=input" apply
                 ${maybe_poptlate_submodule_PATCH_FILES}
         WORKING_DIRECTORY "${${VARNAME}_REPO_DIR}" ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
