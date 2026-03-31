@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e103c40..34bbffa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,6 +22,17 @@ set(CPACK_RESOURCE_FILE_README ${zlib_SOURCE_DIR}/README)
+ option(ZLIB_BUILD_TESTING "Enable Zlib Examples as tests" ON)
+ option(ZLIB_BUILD_SHARED "Enable building zlib shared library" ON)
+ option(ZLIB_BUILD_STATIC "Enable building zlib static library" ON)
++
++# Respect BUILD_SHARED_LIBS
++if(DEFINED BUILD_SHARED_LIBS OR DEFINED CACHE{BUILD_SHARED_LIBS})
++  if(BUILD_SHARED_LIBS)
++    set(ZLIB_BUILD_SHARED ON)
++    set(ZLIB_BUILD_STATIC OFF)
++  else()
++    set(ZLIB_BUILD_SHARED OFF)
++    set(ZLIB_BUILD_STATIC ON)
++  endif()
++endif()
+ option(ZLIB_INSTALL "Enable installation of zlib" ON)
+ option(ZLIB_PREFIX "prefix for all types and library functions, see zconf.h.in"
+        OFF)

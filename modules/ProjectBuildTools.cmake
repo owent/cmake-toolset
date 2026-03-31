@@ -879,7 +879,7 @@ function(project_git_clone_repository)
       endif()
       if(project_git_clone_repository_PATCH_FILES)
         execute_process(
-          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply
+          COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=input" apply
                   ${project_git_clone_repository_PATCH_FILES}
           WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -909,7 +909,7 @@ function(project_git_clone_repository)
     # Check selected tag/branch/commit
     if(project_git_clone_repository_GIT_BRANCH)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local -z --get
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=input" config --local -z --get
                 "atframework.toolset.git-clone.current-version"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
         OUTPUT_VARIABLE LAST_GIT_CLONE_VERSION
@@ -923,7 +923,7 @@ function(project_git_clone_repository)
       endif()
     elseif(project_git_clone_repository_COMMIT)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local -z --get
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=input" config --local -z --get
                 "atframework.toolset.git-clone.current-version"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
         OUTPUT_VARIABLE LAST_GIT_CLONE_VERSION
@@ -1148,20 +1148,20 @@ function(project_git_clone_repository)
 
     if(project_git_clone_repository_PATCH_FILES)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" apply "--allow-empty"
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=input" apply "--allow-empty"
                 ${project_git_clone_repository_PATCH_FILES}
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
     endif()
     if(project_git_clone_repository_GIT_BRANCH)
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local --replace-all
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=input" config --local --replace-all
                 "atframework.toolset.git-clone.current-version" "${project_git_clone_repository_GIT_BRANCH}"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
     else()
       execute_process(
-        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=true" config --local --replace-all
+        COMMAND "${GIT_EXECUTABLE}" ${git_global_options} -c "core.autocrlf=input" config --local --replace-all
                 "atframework.toolset.git-clone.current-version" "${project_git_clone_repository_COMMIT}"
         WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                           ${project_git_clone_repository_EXECUTE_PROCESS_DEBUG_OPTIONS})
