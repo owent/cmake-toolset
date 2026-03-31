@@ -22,6 +22,10 @@ Parse the user's input with this form:
 - `mode=` `analyze` or `update` (default: `update`)
 - `validate=` `patch`, `build`, `ci`, or `full`
   (default: `patch`)
+  - `patch` = Phase 5 only
+  - `build` = Phase 4–6
+  - `ci` = Phase 7
+  - `full` = Phase 4–7
 - `notes=` optional extra constraints
 
 If a field is missing, infer safe defaults and ask only

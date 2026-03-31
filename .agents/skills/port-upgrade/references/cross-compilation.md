@@ -20,13 +20,17 @@ Use this reference when a port:
 - `test/CMakeLists.txt` and CI jobs for Android, iOS,
   and other cross-target coverage
 
-## Current High-Risk Examples
+## High-Risk Ports
 
-- `abseil-cpp` and `flatbuffers` currently contain
-  `crosscompiling-host/` assets
-- `protobuf`, `grpc`, and related plugins require
-  host-side tool discovery even when the target build is
-  cross-compiled
+### Ports with `crosscompiling-host/` assets
+
+- `abseil-cpp`
+- `flatbuffers`
+
+### Ports requiring host tools without `crosscompiling-host/`
+
+- `protobuf` — needs host `protoc`
+- `grpc` — needs host gRPC plugins
 
 ## Checklist
 

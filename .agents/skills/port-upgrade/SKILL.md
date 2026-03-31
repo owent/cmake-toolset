@@ -53,16 +53,19 @@ and repository-specific guards.
 
 ### Phase 3: Special-Case Analysis
 
+- Any `import.cmake` under `ports/` is an aggregator.
+  Known aggregators: `compression/`, `algorithm/`,
+  `grpc/`, `ngtcp2/`, `telemetry/`, `test/`, `web/`.
 - Treat aggregators and orchestrators as grouped logic,
-   not template-only edits.
+  not template-only edits.
 - Preserve compiler fallbacks, backend exclusions,
-   RTTI/visibility logic, and hosted-tool behavior unless
-   validated.
+  RTTI/visibility logic, and hosted-tool behavior unless
+  validated.
 - For `crosscompiling-host/`, hosted tools, or
-   `.cross.patch`, follow
-   [cross-compilation.md](./references/cross-compilation.md).
+  `.cross.patch`, follow
+  [cross-compilation.md](./references/cross-compilation.md).
 - Treat `ssl/port.cmake`, `grpc/import.cmake`, and
-   `protobuf/protobuf.cmake` as custom logic.
+  `protobuf/protobuf.cmake` as custom logic.
 
 ### Phase 4: Version Updates
 
@@ -108,10 +111,13 @@ and repository-specific guards.
 - **Ports with `crosscompiling-host/` assets or hosted
    tools require host-side validation.**
 - **Preserve repository-specific guards.** Existing
-   no-exception, no-rtti, compiler-version, and backend
-   exclusions are compatibility knowledge, not dead code.
-- **c-ares**: Known issue — some versions don't work
-  on Windows. Check CI notes before updating.
+  no-exception, no-rtti, compiler-version, and backend
+  exclusions are compatibility knowledge, not dead code.
 - **Cross-compilation patches** (`.cross.patch`) are
   separate from regular patches and must be tested
   independently.
+
+## Known Issues
+
+- **c-ares**: Some versions have Windows build
+  failures. Check CI notes before updating.
