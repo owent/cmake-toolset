@@ -65,6 +65,7 @@ if(NOT TARGET opentelemetry-cpp::api AND NOT TARGET opentelemetry-cpp::sdk)
           "-DBUILD_TESTING=OFF"
           "-DWITH_EXAMPLES=OFF"
           "-DWITH_EXAMPLES_HTTP=OFF"
+          "-DWITH_BENCHMARK=OFF"
           "-DWITH_FUNC_TESTS=OFF"
           "-DOPENTELEMETRY_INSTALL=ON")
 
