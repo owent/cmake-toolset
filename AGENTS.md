@@ -56,3 +56,20 @@ bash ci/format.sh
 - CMake style: 2-space indentation, lowercase function
   names, uppercase variables, `if(TARGET ...)`, and
   `echowithcolor()` for user-facing messages.
+- Shared/static library selection uses
+  `project_third_party_check_build_shared_lib()` with
+  this priority (first match wins):
+  1. `${FULL_PORT_NAME}_USE_SHARED` — per-port force
+     shared
+  2. `${FULL_PORT_NAME}_USE_STATIC` — per-port force
+     static
+  3. `BUILD_SHARED_LIBS` or
+     `ATFRAMEWORK_USE_DYNAMIC_LIBRARY` — global shared
+  4. Default — static
+  where `FULL_PORT_NAME` =
+  `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_{PREFIX}_{PORT}`
+  (uppercased). Environment variables with the same
+  names are also checked. See `ports/Configure.cmake`
+  for the full implementation. Ports must use the
+  helper macros, not hardcode `BUILD_SHARED_LIBS`
+  directly.

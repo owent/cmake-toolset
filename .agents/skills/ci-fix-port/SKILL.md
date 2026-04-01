@@ -114,6 +114,36 @@ https://github.com/{owner}/{repo}/actions/runs/{run_id}/job/{job_id}
 Note: This often returns "Sign in to view logs" for
 private repos or when unauthenticated.
 
+#### Efficient Log Reading
+
+CI logs are very large. The build pipeline outputs
+**all port build logs first**, then prints the
+failing port's `CMakeConfigureLog.yaml` at the end.
+Do not read the entire log sequentially — this
+wastes context and tokens. Instead:
+
+1. **Search for error locations first.** Use
+   `Select-String` (PowerShell) or `grep` to find
+   lines containing `error`, `FAILED`,
+   `fatal error`, `CMake Error`, or
+   `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE`
+   in the downloaded log file.
+2. **Read targeted sections** around the matched
+   error positions (e.g., 50–100 lines of context
+   before and after each error hit).
+3. **Check the tail first** — the last 200–500 lines
+   often contain the `CMakeConfigureLog.yaml` dump
+   and the final error summary, which are the most
+   diagnostic.
+4. **Skip successful port output.** If the error is
+   in port X, skip the build logs for ports A–W
+   that succeeded. Search for the port name to jump
+   directly to its section.
+5. When using `gh run view --log-failed`, the output
+   is already filtered to failed steps, but can
+   still be large. Apply the same search-first
+   strategy.
+
 ### Phase 3: Diagnose the Failure
 
 #### With logs available
@@ -152,7 +182,14 @@ When logs are inaccessible, use these strategies:
 3. **BUILD_SHARED_LIBS grouping** — if shared jobs
    fail but static passes (or vice versa), the issue
    involves library type handling (config packages,
-   DLL exports, etc.).
+   DLL exports, etc.). Note: the actual shared/static
+   decision per port is resolved by
+   `project_third_party_check_build_shared_lib()` in
+   `ports/Configure.cmake`:
+   `${FULL_PORT_NAME}_USE_SHARED` > `_USE_STATIC` >
+   `BUILD_SHARED_LIBS` / `ATFRAMEWORK_USE_DYNAMIC_LIBRARY`
+   > default static. A port may be static even when
+   `BUILD_SHARED_LIBS=ON` if its `_USE_STATIC` is set.
 
 4. **Diff analysis** — compare `main..dev` changes:
    - Which ports were upgraded?
