@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e103c40..34bbffa 100644
+index e103c40..40370dd 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -22,6 +22,17 @@ set(CPACK_RESOURCE_FILE_README ${zlib_SOURCE_DIR}/README)
@@ -20,6 +20,15 @@ index e103c40..34bbffa 100644
  option(ZLIB_INSTALL "Enable installation of zlib" ON)
  option(ZLIB_PREFIX "prefix for all types and library functions, see zconf.h.in"
         OFF)
+@@ -150,7 +161,7 @@ set(ZLIB_SRCS
+     zutil.c)
+ 
+ if(WIN32)
+-    set(zlib_static_suffix "s")
++    set(zlib_static_suffix "libstatic")
+     set(CMAKE_DEBUG_POSTFIX "d")
+ endif(WIN32)
+ 
 diff --git a/zlibConfig.cmake.in b/zlibConfig.cmake.in
 index 8252ab3..85038b0 100644
 --- a/zlibConfig.cmake.in
