@@ -189,6 +189,28 @@ endmacro()
 if(NOT TARGET CURL::libcurl
    OR TARGET CURL::libcurl_static
    OR TARGET CURL::libcurl_shared)
+  # curl 8.19+ CURLConfig.cmake calls find_dependency() for dependencies like Zstd, which use *_USE_STATIC_LIBS flags to
+  # locate static libraries. Set these in the parent scope before find_package so the first lookup succeeds.
+  if(NOT BUILD_SHARED_LIBS
+     AND NOT ATFRAMEWORK_USE_DYNAMIC_LIBRARY
+     AND NOT LIBCURL_USE_SHARED)
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_LINK_NAME)
+      set(NGHTTP2_USE_STATIC_LIBS ON)
+    endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME)
+      set(NGHTTP3_USE_STATIC_LIBS ON)
+    endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_LINK_NAME)
+      set(NGTCP2_USE_STATIC_LIBS ON)
+    endif()
+    if(TARGET c-ares::cares_static OR (CARES_FOUND AND NOT TARGET c-ares::cares_shared))
+      set(CARES_USE_STATIC_LIBS ON)
+    endif()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
+      set(ZSTD_USE_STATIC_LIBS ON)
+    endif()
+  endif()
+
   find_package(CURL QUIET)
   project_third_party_libcurl_import()
 
@@ -387,30 +409,27 @@ if(NOT TARGET CURL::libcurl
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBPSL=OFF")
     endif()
 
-    # curl 8.19+ uses *_USE_STATIC_LIBS flags in its Find modules to set static compile definitions. When building with
-    # static dependencies, we need to propagate this information. These flags must also be set in the parent scope
-    # because CURLConfig.cmake uses find_dependency() which invokes curl's bundled Find modules in the parent context.
+    # curl 8.19+ uses *_USE_STATIC_LIBS flags in its Find modules to set static compile definitions. Parent-scope
+    # variables are already set before the first find_package above; here we only pass them as BUILD_OPTIONS for the
+    # child cmake process that builds curl from source.
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_VERSION VERSION_GREATER_EQUAL "8.19.0")
-      if(NOT BUILD_SHARED_LIBS)
+      if(NOT BUILD_SHARED_LIBS
+         AND NOT ATFRAMEWORK_USE_DYNAMIC_LIBRARY
+         AND NOT LIBCURL_USE_SHARED)
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_LINK_NAME)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DNGHTTP2_USE_STATIC_LIBS=ON")
-          set(NGHTTP2_USE_STATIC_LIBS ON)
         endif()
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DNGHTTP3_USE_STATIC_LIBS=ON")
-          set(NGHTTP3_USE_STATIC_LIBS ON)
         endif()
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_LINK_NAME)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DNGTCP2_USE_STATIC_LIBS=ON")
-          set(NGTCP2_USE_STATIC_LIBS ON)
         endif()
         if(TARGET c-ares::cares_static OR (CARES_FOUND AND NOT TARGET c-ares::cares_shared))
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCARES_USE_STATIC_LIBS=ON")
-          set(CARES_USE_STATIC_LIBS ON)
         endif()
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DZSTD_USE_STATIC_LIBS=ON")
-          set(ZSTD_USE_STATIC_LIBS ON)
         endif()
       endif()
     endif()
