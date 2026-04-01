@@ -210,6 +210,10 @@ if(NOT TARGET CURL::libcurl
       set(ZSTD_USE_STATIC_LIBS ON)
     endif()
   endif()
+  # MSVC forces zstd to static; set ZSTD_USE_STATIC_LIBS even when BUILD_SHARED_LIBS=ON
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME AND NOT TARGET zstd::libzstd_shared)
+    set(ZSTD_USE_STATIC_LIBS ON)
+  endif()
 
   find_package(CURL QUIET)
   project_third_party_libcurl_import()
@@ -431,6 +435,10 @@ if(NOT TARGET CURL::libcurl
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DZSTD_USE_STATIC_LIBS=ON")
         endif()
+      endif()
+      # MSVC forces zstd to static; set ZSTD_USE_STATIC_LIBS even when BUILD_SHARED_LIBS=ON
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME AND NOT TARGET zstd::libzstd_shared)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DZSTD_USE_STATIC_LIBS=ON")
       endif()
     endif()
 
