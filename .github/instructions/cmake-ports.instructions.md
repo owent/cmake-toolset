@@ -101,6 +101,22 @@ endif()
   flags.
 - Use `project_third_party_append_build_shared_lib_var`
   for `BUILD_SHARED_LIBS`, not hardcoded values.
+  The underlying `project_third_party_check_build_shared_lib()`
+  resolves shared vs static with this priority
+  (first match wins):
+  1. `${FULL_PORT_NAME}_USE_SHARED` (cmake or env)
+     → build shared
+  2. `${FULL_PORT_NAME}_USE_STATIC` (cmake or env)
+     → build static
+  3. `BUILD_SHARED_LIBS` or
+     `ATFRAMEWORK_USE_DYNAMIC_LIBRARY` → build shared
+  4. Otherwise → build static
+  where `FULL_PORT_NAME` =
+  `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_{PREFIX}_{PORT}`
+  (uppercased). Never hardcode shared/static choices;
+  always go through the helper macros so per-port
+  overrides and `ATFRAMEWORK_USE_DYNAMIC_LIBRARY`
+  are respected.
 - Use `project_third_party_port_add_build_options()`
   to append extra flags after `port_declare`.
 - `find_configure_package()` is defined in
