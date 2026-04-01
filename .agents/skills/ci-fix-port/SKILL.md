@@ -18,20 +18,26 @@ GitHub Actions, diagnose the cause, and fix the
 affected port or patch.
 
 Repository: `atframework/cmake-toolset`
+(remote may be `owent/cmake-toolset`)
 
 ## Prerequisites
 
-The agent needs access to GitHub data. Use one of:
+The agent needs access to GitHub data. Try these
+sources **in order** and use the first that works:
 
-- **GitHub MCP tools** (`mcp_github_*`) if available
-- **`gh` CLI** via terminal if installed and
-  authenticated
-- **`fetch_webpage`** tool to read GitHub web pages
-- **`Invoke-RestMethod`** (PowerShell) or **`curl`**
-  for the GitHub REST API
+1. **GitHub MCP tools** (`mcp_github_*`) — search
+   for `mcp_github` with `tool_search_tool_regex`
+2. **`gh` CLI** — run `gh --version` to test
+3. **GitHub REST API (unauthenticated)** — works for
+   public repos, job metadata and annotations; log
+   download needs a token
+4. **`fetch_webpage`** — read job HTML pages or API
+   JSON directly
 
-Check tool availability in order and use the first
-that works.
+> **Fallback strategy:** When log download returns
+> 403 or "Sign in to view logs", switch to the
+> indirect diagnosis methods in Phase 3 instead of
+> retrying. Do not waste time on blocked endpoints.
 
 ## Workflow
 
@@ -45,44 +51,44 @@ Parse user input for:
 - `port=` — port name hint (optional)
 - `mode=` — `diagnose` (read-only) or `fix` (default)
 
-If the user gives a PR URL or number:
+If no input is given, auto-detect:
 
-1. Fetch PR checks/status to find failing runs.
-2. Fetch the failing job logs.
+1. Check the current branch and its remote tracking.
+2. Find the latest PR targeting `main` from that
+   branch, or the latest CI run on that branch.
+3. Use `fetch_webpage` with the GitHub API:
+   ```
+   https://api.github.com/repos/{owner}/{repo}/actions/runs?branch={branch}&per_page=5
+   ```
 
-If the user gives a run ID or URL:
+**Gather job data:**
 
-1. Fetch the run's job list.
-2. Filter by `job=` if provided, otherwise pick all
-   failed jobs.
-3. Fetch the failing job logs.
+1. Fetch the run's job list via API:
+   ```
+   /actions/runs/{run_id}/jobs?per_page=30
+   ```
+2. Classify each job by `status` and `conclusion`.
+3. For failed jobs, record: name, duration
+   (`started_at` to `completed_at`), runner labels.
+4. Also fetch the **last successful run on `main`**
+   for the same jobs — this confirms whether the
+   failure is a regression.
 
 ### Phase 2: Fetch Logs
+
+Try to get actual log text using the methods below.
+If all fail, proceed to Phase 3 with indirect methods.
 
 #### Option A: `gh` CLI
 
 ```bash
-# List failed jobs in a run
-gh run view <run-id> --repo atframework/cmake-toolset
-
-# Get specific job log
-gh run view <run-id> --repo atframework/cmake-toolset \
+gh run view <run-id> --repo owent/cmake-toolset \
   --log-failed
 ```
 
-#### Option B: GitHub REST API
+#### Option B: GitHub REST API (authenticated)
 
 ```powershell
-# List jobs for a workflow run
-$owner = "atframework/cmake-toolset"
-$base = "https://api.github.com/repos/$owner"
-Invoke-RestMethod `
-  "$base/actions/runs/<run-id>/jobs" |
-  Select-Object -ExpandProperty jobs |
-  Where-Object { $_.conclusion -eq "failure" } |
-  Select-Object name, conclusion, html_url
-
-# Download job log (needs auth token)
 Invoke-RestMethod `
   "$base/actions/jobs/<job-id>/logs" `
   -Headers @{
@@ -90,12 +96,27 @@ Invoke-RestMethod `
   }
 ```
 
-#### Option C: `fetch_webpage`
+#### Option C: Check-run annotations
 
-Use `fetch_webpage` with the job URL from the Actions
-UI to read the log output directly.
+Even without log access, annotations contain error
+summaries:
+```
+/repos/{owner}/{repo}/check-runs/{job-id}/annotations
+```
+These are usually just "Process completed with exit
+code 1" but occasionally contain cmake error lines.
+
+#### Option D: `fetch_webpage` on job HTML
+
+```
+https://github.com/{owner}/{repo}/actions/runs/{run_id}/job/{job_id}
+```
+Note: This often returns "Sign in to view logs" for
+private repos or when unauthenticated.
 
 ### Phase 3: Diagnose the Failure
+
+#### With logs available
 
 Parse the log output and classify the failure:
 
@@ -106,19 +127,99 @@ Parse the log output and classify the failure:
 | `fatal error: … not found` | Missing dependency or include order |
 | `undefined reference` / link error | ABI or library mismatch |
 | `FAILED: … test` | Runtime test regression |
-| `Could not find … package` | `find_package` failure, version mismatch |
+| `Could not find … package` / `include could not find` | Config-package bug or `find_package` failure |
 | Cross-compile host tool error | Host-tool not built or not found |
+| `-lc++abi` / compiler not found | CI environment change (runner OS update) |
 
-Record:
+#### Without logs (indirect diagnosis)
 
-- failing job name and platform
-- exact error message(s)
+When logs are inaccessible, use these strategies:
+
+1. **Timing analysis** — classify failures by
+   duration:
+   - **< 2 min**: configuration/cmake error or CI
+     script error (compiler detection, environment)
+   - **2–10 min**: early build failure (first port
+     fails to configure or compile)
+   - **10–30 min**: late build failure (port compiles
+     but linking or later port fails)
+   - **> 30 min**: test failure or final link stage
+
+2. **Platform grouping** — if all MSVC jobs fail but
+   Linux passes, the issue is platform-specific.
+   Similarly for macOS-only failures.
+
+3. **BUILD_SHARED_LIBS grouping** — if shared jobs
+   fail but static passes (or vice versa), the issue
+   involves library type handling (config packages,
+   DLL exports, etc.).
+
+4. **Diff analysis** — compare `main..dev` changes:
+   - Which ports were upgraded?
+   - Which patches were added/modified?
+   - Were CI scripts changed?
+   - Were core modules (`ProjectBuildTools.cmake`,
+     `FindConfigurePackage.cmake`) changed?
+
+5. **Local reproduction** — the most powerful tool
+   when logs are unavailable. Build the suspected
+   port locally and test `find_package`:
+   ```powershell
+   # Example: test a port's config package
+   cmake -S <upstream-src> -B build `
+     -DBUILD_SHARED_LIBS=OFF `
+     -DCMAKE_INSTALL_PREFIX=install
+   cmake --build build --target install
+   # Then test find_package:
+   cmake -S test_project -B test_build `
+     -DCMAKE_PREFIX_PATH=install
+   ```
+
+6. **CI script analysis** — read `ci/do_ci.sh` and
+   `ci/do_ci.ps1` for the failing job's configuration.
+   Check for:
+   - Combined `-D` flags in a single quoted string
+     (PowerShell bug)
+   - Platform-specific detection logic (e.g., clang
+     version loops on macOS)
+   - Environment assumptions that may break with
+     runner OS updates
+
+7. **Compare with last main CI** — fetch the last
+   successful `main` run's jobs to confirm the same
+   jobs passed before. This isolates regressions
+   from pre-existing flakiness.
+
+Record for each failure:
+
+- failing job name, platform, and runner labels
+- failure duration (fast vs slow)
+- exact error message (if available)
 - which port and version is involved
 - which patch file (if any) was being applied
+- `BUILD_SHARED_LIBS` value for the job
+- whether the same job passed on `main`
 
 ### Phase 4: Fix the Port
 
 Based on diagnosis, apply the appropriate fix:
+
+#### Config-package bug
+
+This is a common issue when upstream cmake config
+files (`<Pkg>Config.cmake`) have bugs:
+
+1. Build the port locally with the same
+   `BUILD_SHARED_LIBS` setting as the failing CI job.
+2. Inspect the installed cmake config files
+   (usually in `lib/cmake/<Pkg>/`).
+3. Look for unconditional `include()` without
+   `OPTIONAL`, missing target aliases, or assumptions
+   about which components are installed.
+4. Add fixes to the port's patch file — patch the
+   upstream `*Config.cmake.in` template.
+5. Test by running `find_package(<Pkg> REQUIRED)` in
+   a minimal test cmake project.
 
 #### Patch failure
 
@@ -153,6 +254,26 @@ Follow
    for changed dependency pins.
 3. Update the port's version pin or dependency order.
 
+#### CI environment issue
+
+When the failure is caused by runner OS changes, not
+port code:
+
+1. Check the failing CI script section
+   (`do_ci.sh` / `do_ci.ps1`) for the affected job.
+2. Identify environment assumptions (e.g.,
+   `-lc++abi` on macOS, versioned compiler binaries,
+   SDK paths).
+3. Add fallback logic to handle both old and new
+   environments. For example:
+   ```bash
+   # Fallback: try without -lc++abi (macOS bundles
+   # it into libc++)
+   cmd1 || cmd1_without_abi || FAIL=1
+   ```
+4. Verify the fix doesn't break the corresponding
+   Linux job that uses the same CI script section.
+
 #### Cross-compilation failure
 
 Follow
@@ -161,22 +282,35 @@ Follow
 ### Phase 5: Verify the Fix
 
 1. If the fix is a patch, test it locally:
-
    ```bash
    cd test/third_party/packages/<port>-<version>
-   git apply --check <new-patch>
+   git -c "core.autocrlf=input" apply --check <patch>
    ```
 
-2. Review `test/CMakeLists.txt`,
+2. If the fix touches a config package, do a full
+   local verification:
+   - Build the port with the patched source
+   - Install it to a temp prefix
+   - Run `find_package()` in a test cmake project
+   - Test with both `BUILD_SHARED_LIBS=ON` and `OFF`
+     if both variants are used in CI
+
+3. Review `test/CMakeLists.txt`,
    `.github/workflows/build.yaml`, and `ci/do_ci.*`
    for related job combinations that may be affected.
-3. Summarize: what failed, root cause, files changed,
+
+4. Clean up all local test artifacts:
+   - `test/third_party/packages/<port>-*`
+   - `test/build_*` temp directories
+
+5. Summarize: what failed, root cause, files changed,
    and any remaining risks.
 
 ## Important Rules
 
-- **Always fetch actual logs.** Do not guess the
-  failure cause from the job name alone.
+- **Always fetch actual logs first.** If unavailable,
+  use indirect diagnosis (timing, platform grouping,
+  local reproduction). Do not guess from job name.
 - **Match the exact failing platform and compiler.**
   A fix for GCC may not apply to MSVC or
   cross-compile jobs.
@@ -185,9 +319,20 @@ Follow
   when content actually differs.
 - **Test `.cross.patch` separately** from normal
   patches.
-- **Clean up** `test/third_party/packages/` after
-  patch testing.
+- **Clean up** `test/third_party/packages/` and any
+  temp build directories after testing.
 - **Do not remove repository-specific guards** (RTTI,
   exceptions, compiler-version, backend exclusions)
   when fixing a build failure — they encode real
   compatibility constraints.
+- **Config packages are a common failure mode.** When
+  `CMAKE_FIND_PACKAGE_PREFER_CONFIG=TRUE` is set
+  (as in this repo), all `find_package` calls prefer
+  config mode. Upstream `*Config.cmake` bugs surface
+  immediately.
+- **Always test patches with `core.autocrlf=input`**
+  since the repo uses this setting.
+- **Runner OS updates** can break CI scripts without
+  any code changes. Always compare with the last
+  successful main CI run to distinguish environment
+  regressions from code regressions.
