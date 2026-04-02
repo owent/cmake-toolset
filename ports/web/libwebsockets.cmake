@@ -264,8 +264,23 @@ if(NOT Libwebsockets_FOUND
       if(ZLIB_INCLUDE_DIRS AND ZLIB_LIBRARIES)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_ZLIB=ON"
              "-DLWS_WITH_BUNDLED_ZLIB=OFF" "-DLWS_ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
-        list_append_unescape(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-                             "-DLWS_ZLIB_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME}")
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_LIBRARIES
+            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME}")
+        # On MSVC, IMPORTED_LOCATION of shared zlib is the DLL file, which cannot be used as a linker input.
+        # Use IMPORTED_IMPLIB (the import library) instead.
+        if(MSVC
+           AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_LIBRARIES MATCHES "\\.dll$"
+           AND TARGET ZLIB::ZLIB)
+          project_build_tools_get_imported_property(
+            ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_IMPLIB ZLIB::ZLIB IMPORTED_IMPLIB)
+          if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_IMPLIB)
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_LIBRARIES
+                "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_IMPLIB}")
+          endif()
+        endif()
+        list_append_unescape(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+          "-DLWS_ZLIB_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_ZLIB_LIBRARIES}")
       endif()
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_MBEDTLS)
         # libwebsockets do not support mbedtls 3
@@ -290,27 +305,6 @@ if(NOT Libwebsockets_FOUND
           # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_OPENSSL_INCLUDE_DIRS "${OPENSSL_INCLUDE_DIR}")
           # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LWS_OPENSSL_LIBRARIES ${OPENSSL_SSL_LIBRARY}
           # ${OPENSSL_CRYPTO_LIBRARY})
-        endif()
-        # Force OpenSSL 3.x API detection results. libwebsockets' CHECK_FUNCTION_EXISTS and CHECK_C_SOURCE_COMPILES for
-        # OpenSSL functions fail on MSVC with shared OpenSSL, causing fallback to OpenSSL 1.0 code paths that access
-        # opaque structs (HMAC_CTX, RSA, ECDSA_SIG, BIGNUM) directly, resulting in compilation errors.
-        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_BORINGSSL AND OPENSSL_VERSION VERSION_GREATER_EQUAL
-                                                                              "3.0.0")
-          list(
-            APPEND
-            ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-            "-DLWS_HAVE_HMAC_CTX_new=1"
-            "-DLWS_HAVE_EVP_MD_CTX_free=1"
-            "-DLWS_HAVE_RSA_SET0_KEY=1"
-            "-DLWS_HAVE_ECDSA_SIG_set0=1"
-            "-DLWS_HAVE_BN_bn2binpad=1"
-            "-DLWS_HAVE_OPENSSL_STACK=1"
-            "-DLWS_HAVE_SSL_EXTRA_CHAIN_CERTS=1"
-            "-DLWS_HAVE_SSL_CTX_SET_ECDH_AUTO=1"
-            "-DLWS_HAVE_SSL_set_tlsext_host_name=1"
-            "-DLWS_HAVE_SSL_CTX_set_keylog_callback=1"
-            "-DLWS_HAVE_EC_KEY_new_by_curve_name=1"
-            "-DLWS_HAVE_EC_POINT_get_affine_coordinates=1")
         endif()
         if(MSVC OR ANDROID)
           # Some version of libwebsockets have compiling problems.
