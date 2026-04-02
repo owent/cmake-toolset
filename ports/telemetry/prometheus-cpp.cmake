@@ -57,6 +57,16 @@ if(NOT TARGET prometheus-cpp::core)
     project_third_party_append_build_shared_lib_var(
       "prometheus_cpp" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS BUILD_SHARED_LIBS)
 
+    # Propagate curl 8.19+ *_USE_STATIC_LIBS flags so that CURLConfig.cmake's find_dependency(Zstd MODULE) etc. locate
+    # static libraries in child cmake processes.
+    foreach(_CURL_DEP_STATIC_VAR ZSTD_USE_STATIC_LIBS CARES_USE_STATIC_LIBS NGHTTP2_USE_STATIC_LIBS
+                                 NGHTTP3_USE_STATIC_LIBS NGTCP2_USE_STATIC_LIBS)
+      if(${_CURL_DEP_STATIC_VAR})
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS "-D${_CURL_DEP_STATIC_VAR}=ON")
+      endif()
+    endforeach()
+    unset(_CURL_DEP_STATIC_VAR)
+    
     if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_PATCH_FILE
        AND EXISTS "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_PATCH_FILE}")
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS GIT_PATCH_FILES
@@ -68,16 +78,6 @@ if(NOT TARGET prometheus-cpp::core)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_SUB_MODULES GIT_RESET_SUBMODULE_URLS
            ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_RESET_SUBMODULE_URLS})
     endif()
-
-    # Propagate curl 8.19+ *_USE_STATIC_LIBS flags so that CURLConfig.cmake's find_dependency(Zstd MODULE) etc. locate
-    # static libraries in child cmake processes.
-    foreach(_CURL_DEP_STATIC_VAR ZSTD_USE_STATIC_LIBS CARES_USE_STATIC_LIBS NGHTTP2_USE_STATIC_LIBS
-                                 NGHTTP3_USE_STATIC_LIBS NGTCP2_USE_STATIC_LIBS)
-      if(${_CURL_DEP_STATIC_VAR})
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_BUILD_OPTIONS "-D${_CURL_DEP_STATIC_VAR}=ON")
-      endif()
-    endforeach()
-    unset(_CURL_DEP_STATIC_VAR)
 
     find_configure_package(
       PACKAGE

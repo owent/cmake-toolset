@@ -2,19 +2,16 @@ include_guard(DIRECTORY)
 
 # =========== third party zstd ==================
 # force to use prebuilt when using mingw
-macro(PROJECT_THIRD_PARTY_ZSTD_IMPORT)
+function(PROJECT_THIRD_PARTY_ZSTD_IMPORT)
   if(TARGET zstd::libzstd_shared)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd_shared)
+    project_third_party_export_port_set(zstd LINK_NAME zstd::libzstd_shared)
     message(STATUS "Dependency(${PROJECT_NAME}): zstd found target zstd::libzstd_shared")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd_shared)
   elseif(TARGET zstd::libzstd_static)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd_static)
+    project_third_party_export_port_set(zstd LINK_NAME zstd::libzstd_static)
     message(STATUS "Dependency(${PROJECT_NAME}): zstd found target zstd::libzstd_static")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd_static)
   elseif(TARGET zstd::libzstd)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd)
+    project_third_party_export_port_set(zstd LINK_NAME zstd::libzstd)
     message(STATUS "Dependency(${PROJECT_NAME}): zstd found target zstd::libzstd")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME zstd::libzstd)
   else()
     unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
   endif()
@@ -61,9 +58,17 @@ macro(PROJECT_THIRD_PARTY_ZSTD_IMPORT)
       echowithcolor(
         COLOR GREEN
         "-- Dependency(${PROJECT_NAME}): zstd found executable: ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_BIN}")
+      project_third_party_export_port_set(zstd BIN ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_BIN})
     endif()
   endif()
-endmacro()
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
+    project_build_tools_check_link_name_static(ZSTD_USE_STATIC_LIBS
+                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME})
+    set(ZSTD_USE_STATIC_LIBS
+        ${ZSTD_USE_STATIC_LIBS}
+        PARENT_SCOPE)
+  endif()
+endfunction()
 
 if(NOT TARGET zstd::libzstd_shared
    AND NOT TARGET zstd::libzstd_static

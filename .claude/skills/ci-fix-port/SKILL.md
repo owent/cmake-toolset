@@ -175,6 +175,13 @@ Follow
 
 ## Important Rules
 
+- **Pre-commit formatting is mandatory.** Before
+  committing, run `cmake-format -i` on every modified
+  `.cmake`, `.cmake.in`, and `CMakeLists.txt` file
+  (excluding `test/third_party/` and
+  `test/build_jobs_*/`). Alternatively run
+  `bash ci/format.sh` to format the entire tree.
+  CI will reject unformatted files.
 - **Always fetch actual logs.** Do not guess the
   failure cause from the job name alone.
 - **Match the exact failing platform and compiler.**

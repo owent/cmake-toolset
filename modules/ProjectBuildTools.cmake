@@ -3016,3 +3016,97 @@ macro(project_build_tools_pop_patch_link_flags_state)
   unset(__inherit_link_flags_state_INHERIT_SRC_NAME)
   unset(__inherit_link_flags_state_INHERIT_BACKUP_NAME)
 endmacro()
+
+function(project_build_tools_check_link_name_static OUTPUT_VAR LINK_NAME)
+  if(TARGET ${LINK_NAME})
+    project_build_tools_resolve_alias_target(LINK_NAME ${LINK_NAME})
+    project_build_tools_get_imported_property(LINK_FILE_NAME ${LINK_NAME} IMPORTED_LOCATION)
+    if(LINK_FILE_NAME)
+      if(LINK_FILE_NAME MATCHES "\\.a|\\.lib$")
+        set(${OUTPUT_VAR}
+            TRUE
+            PARENT_SCOPE)
+      else()
+        set(${OUTPUT_VAR}
+            FALSE
+            PARENT_SCOPE)
+      endif()
+      return()
+    endif()
+    # Not a imported target, check its type
+    get_target_property(LINK_TYPE ${LINK_NAME} TYPE)
+    if(LINK_TYPE STREQUAL "STATIC_LIBRARY")
+      set(${OUTPUT_VAR}
+          TRUE
+          PARENT_SCOPE)
+    elseif(LINK_TYPE STREQUAL "INTERFACE_LIBRARY")
+      get_target_property(LINK_TARGET ${LINK_NAME} INTERFACE_LINK_LIBRARIES)
+      list(GET LINK_TARGET 0 LINK_TARGET_FIRST)
+      project_build_tools_check_link_name_static(${OUTPUT_VAR} ${LINK_TARGET_FIRST})
+      set(${OUTPUT_VAR}
+          ${${OUTPUT_VAR}}
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VAR}
+          FALSE
+          PARENT_SCOPE)
+    endif()
+  else()
+    if(LINK_NAME MATCHES "\\.a|\\.lib$")
+      set(${OUTPUT_VAR}
+          TRUE
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VAR}
+          FALSE
+          PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
+function(project_build_tools_check_link_name_dynamic OUTPUT_VAR LINK_NAME)
+  if(TARGET ${LINK_NAME})
+    project_build_tools_resolve_alias_target(LINK_NAME ${LINK_NAME})
+    project_build_tools_get_imported_property(LINK_FILE_NAME ${LINK_NAME} IMPORTED_LOCATION)
+    if(LINK_FILE_NAME)
+      if(LINK_FILE_NAME MATCHES "\\.so|\\.dll|\\.dylib$")
+        set(${OUTPUT_VAR}
+            TRUE
+            PARENT_SCOPE)
+      else()
+        set(${OUTPUT_VAR}
+            FALSE
+            PARENT_SCOPE)
+      endif()
+      return()
+    endif()
+    # Not a imported target, check its type
+    get_target_property(LINK_TYPE ${LINK_NAME} TYPE)
+    if(LINK_TYPE STREQUAL "SHARED_LIBRARY" OR LINK_TYPE STREQUAL "MODULE")
+      set(${OUTPUT_VAR}
+          TRUE
+          PARENT_SCOPE)
+    elseif(LINK_TYPE STREQUAL "INTERFACE_LIBRARY")
+      get_target_property(LINK_TARGET ${LINK_NAME} INTERFACE_LINK_LIBRARIES)
+      list(GET LINK_TARGET 0 LINK_TARGET_FIRST)
+      project_build_tools_check_link_name_dynamic(${OUTPUT_VAR} ${LINK_TARGET_FIRST})
+      set(${OUTPUT_VAR}
+          ${${OUTPUT_VAR}}
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VAR}
+          FALSE
+          PARENT_SCOPE)
+    endif()
+  else()
+    if(LINK_NAME MATCHES "\\.so|\\.dll|\\.dylib$")
+      set(${OUTPUT_VAR}
+          TRUE
+          PARENT_SCOPE)
+    else()
+      set(${OUTPUT_VAR}
+          FALSE
+          PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
