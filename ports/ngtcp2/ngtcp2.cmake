@@ -113,6 +113,12 @@ function(PROJECT_THIRD_PARTY_NGTCP2_IMPORT)
                                                                  "Libngtcp2::libngtcp2_crypto_boringssl")
       endif()
     endif()
+
+    project_build_tools_check_link_name_static(NGTCP2_USE_STATIC_LIBS
+                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_LINK_NAME})
+    set(NGTCP2_USE_STATIC_LIBS
+        ${NGTCP2_USE_STATIC_LIBS}
+        PARENT_SCOPE)
   endif()
 endfunction()
 

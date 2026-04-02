@@ -6,26 +6,32 @@
 include_guard(DIRECTORY)
 
 # =========== third party c-ares ==================
-macro(PROJECT_THIRD_PARTY_CARES_IMPORT)
+function(PROJECT_THIRD_PARTY_CARES_IMPORT)
   if(TARGET c-ares::cares)
     message(STATUS "Dependency(${PROJECT_NAME}): c-ares using target c-ares::cares")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME c-ares::cares)
+    project_third_party_export_port_set(cares LINK_NAME c-ares::cares)
   elseif(TARGET c-ares::cares_static)
     message(STATUS "Dependency(${PROJECT_NAME}): c-ares using target c-ares::cares_static")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME c-ares::cares_static)
+    project_third_party_export_port_set(cares LINK_NAME c-ares::cares_static)
   elseif(TARGET c-ares::cares_shared)
     message(STATUS "Dependency(${PROJECT_NAME}): c-ares using target c-ares::cares_shared")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME c-ares::cares_shared)
+    project_third_party_export_port_set(cares LINK_NAME c-ares::cares_shared)
   elseif(CARES_FOUND AND CARES_LIBRARIES)
     message(STATUS "Dependency(${PROJECT_NAME}): c-ares support enabled")
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME ${CARES_LIBRARIES})
+    project_third_party_export_port_set(cares LINK_NAME ${CARES_LIBRARIES})
   else()
     message(STATUS "Dependency(${PROJECT_NAME}): c-ares support disabled")
   endif()
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME)
     project_build_tools_patch_default_imported_config(c-ares::cares c-ares::cares_static c-ares::cares_shared)
+
+    project_build_tools_check_link_name_static(CARES_USE_STATIC_LIBS
+                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME})
+    set(CARES_USE_STATIC_LIBS
+        ${CARES_USE_STATIC_LIBS}
+        PARENT_SCOPE)
   endif()
-endmacro()
+endfunction()
 
 if(NOT TARGET c-ares::cares
    AND NOT TARGET c-ares::cares_static

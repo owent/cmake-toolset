@@ -19,6 +19,12 @@ function(PROJECT_THIRD_PARTY_NGHTTP3_IMPORT)
       set_target_properties(nghttp3 PROPERTIES INTERFACE_LINK_LIBRARIES
                                                "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME}")
     endif()
+
+    project_build_tools_check_link_name_static(NGHTTP3_USE_STATIC_LIBS
+                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP3_LINK_NAME})
+    set(NGHTTP3_USE_STATIC_LIBS
+        ${NGHTTP3_USE_STATIC_LIBS}
+        PARENT_SCOPE)
   endif()
 endfunction()
 

@@ -37,6 +37,12 @@ function(PROJECT_THIRD_PARTY_NGHTTP2_IMPORT)
       set_target_properties(nghttp2 PROPERTIES INTERFACE_LINK_LIBRARIES
                                                "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_LINK_NAME}")
     endif()
+
+    project_build_tools_check_link_name_static(NGHTTP2_USE_STATIC_LIBS
+                                               ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_LINK_NAME})
+    set(NGHTTP2_USE_STATIC_LIBS
+        ${NGHTTP2_USE_STATIC_LIBS}
+        PARENT_SCOPE)
   endif()
 endfunction()
 

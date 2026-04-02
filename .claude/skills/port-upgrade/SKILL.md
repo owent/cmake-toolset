@@ -99,6 +99,13 @@ and repository-specific guards.
 
 ## Important Rules
 
+- **Pre-commit formatting is mandatory.** Before
+  committing, run `cmake-format -i` on every modified
+  `.cmake`, `.cmake.in`, and `CMakeLists.txt` file
+  (excluding `test/third_party/` and
+  `test/build_jobs_*/`). Alternatively run
+  `bash ci/format.sh` to format the entire tree.
+  CI will reject unformatted files.
 - **Never update a dependency without checking its
   dependents.** Always query upstream repos for actual
    version pins rather than assuming from memory.

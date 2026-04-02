@@ -56,6 +56,12 @@ bash ci/format.sh
 - CMake style: 2-space indentation, lowercase function
   names, uppercase variables, `if(TARGET ...)`, and
   `echowithcolor()` for user-facing messages.
+- **Pre-commit formatting is mandatory.** Before
+  committing, run `cmake-format -i` on every modified
+  `.cmake`, `.cmake.in`, and `CMakeLists.txt` file
+  (excluding `test/third_party/` and
+  `test/build_jobs_*/`). Alternatively run
+  `bash ci/format.sh` to format the entire tree.
 - Shared/static library selection uses
   `project_third_party_check_build_shared_lib()` with
   this priority (first match wins):
