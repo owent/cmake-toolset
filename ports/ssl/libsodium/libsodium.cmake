@@ -256,8 +256,9 @@ if(NOT TARGET sodium
         file(REMOVE "${PROJECT_THIRD_PARTY_INSTALL_DIR}/include/Makefile.am"
              "${PROJECT_THIRD_PARTY_INSTALL_DIR}/include/sodium/version.h.in")
 
-        # Install libraries - MSBuild outputs to <source>/bin/<Platform>/<DebugOrRelease>/<PlatformToolset>/<DefaultLinkage>/
-        # (see builds/msvc/properties/Output.props). Use GLOB_RECURSE under <source>/bin/ for robustness since
+        # Install libraries - MSBuild outputs to
+        # <source>/bin/<Platform>/<DebugOrRelease>/<PlatformToolset>/<DefaultLinkage>/ (see
+        # builds/msvc/properties/Output.props). Use GLOB_RECURSE under <source>/bin/ for robustness since
         # PlatformToolset comes from the vcxproj (e.g. v143) and DefaultLinkage is "static"/"dynamic" not "LIB"/"DLL".
         file(GLOB_RECURSE ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_INSTALL_LIBS
              "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_SOURCE_DIR}/bin/*.lib")
