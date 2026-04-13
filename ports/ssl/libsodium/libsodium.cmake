@@ -108,15 +108,40 @@ if(NOT TARGET sodium
       endif()
 
       # Select vcxproj path - prefer vs2022
+      if(CMAKE_GENERATOR MATCHES "^Visual Studio\\s*([0-9]+)\\s*([0-9]+)$")
+        # By Generator
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION ${CMAKE_MATCH_2})
+      elseif(MSVC_TOOLSET_VERSION)
+        # By toolset
+        if(MSVC_TOOLSET_VERSION GREATER_EQUAL "144")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION 2026)
+        elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL "143")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION 2022)
+        elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL "142")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION 2019)
+        elseif(MSVC_TOOLSET_VERSION GREATER_EQUAL "141")
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION 2017)
+        else()
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION 2022)
+        endif()
+      else()
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION 2022)
+      endif()
+
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VCXPROJ_SUBPATH
           "builds/msvc/vs2022/libsodium/libsodium.vcxproj")
-      if(NOT
-         EXISTS
-         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_SOURCE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VCXPROJ_SUBPATH}"
-      )
-        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VCXPROJ_SUBPATH
-            "builds/msvc/vs2019/libsodium/libsodium.vcxproj")
-      endif()
+      foreach(_test_msvc_toolset 2026 2022 2019 2017)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VS_START_VERSION LESS _test_msvc_toolset)
+          continue()
+        endif()
+        if(EXISTS
+           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_SOURCE_DIR}/builds/msvc/vs${_test_msvc_toolset}/libsodium/libsodium.vcxproj"
+        )
+          set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_VCXPROJ_SUBPATH
+              "builds/msvc/vs${_test_msvc_toolset}/libsodium/libsodium.vcxproj")
+          break()
+        endif()
+      endforeach()
 
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_MSBUILD_CONFIG
           "Release${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_MSBUILD_LINKAGE}")
@@ -195,6 +220,12 @@ if(NOT TARGET sodium
            "\$OutputEncoding = [System.Text.UTF8Encoding]::new()${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
       file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_BUILD_DIR}/run-build-release.bat"
            "@echo off${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}" "chcp 65001${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}")
+      file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_BUILD_DIR}/run-build-release.bat"
+           "set PATH=%PATH%${PROJECT_THIRD_PARTY_BUILDTOOLS_EOL}")
+
+      project_third_party_generate_load_env_powershell(
+        "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_BUILD_DIR}/run-build-release.ps1")
+
       project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_BUILD_DIR}/run-build-release.ps1")
       project_make_executable("${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBSODIUM_BUILD_DIR}/run-build-release.bat")
 
