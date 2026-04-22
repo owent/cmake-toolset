@@ -891,9 +891,13 @@ function(project_third_party_mutable_package_targets PORT_NAME)
     return()
   endif()
 
-  file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/.cmake-toolset/${PORT_NAME}")
+  set(__project_third_party_mutable_package_targets_SOURCE_DIR "${CMAKE_SOURCE_DIR}/.cmake-toolset/${PORT_NAME}")
+  set(__project_third_party_mutable_package_targets_BINARY_DIR "${CMAKE_BINARY_DIR}/.cmake-toolset/${PORT_NAME}")
+
+  file(MAKE_DIRECTORY "${__project_third_party_mutable_package_targets_SOURCE_DIR}"
+       "${__project_third_party_mutable_package_targets_BINARY_DIR}")
   file(
-    WRITE "${CMAKE_SOURCE_DIR}/.cmake-toolset/${PORT_NAME}/CMakeLists.txt"
+    WRITE "${__project_third_party_mutable_package_targets_SOURCE_DIR}/CMakeLists.txt"
     "
 add_custom_target(\"cmake-toolset.port.${PORT_NAME}.build\")
 add_custom_target(
@@ -903,7 +907,8 @@ add_custom_target(
 set_property(TARGET \"cmake-toolset.port.${PORT_NAME}.build\" PROPERTY FOLDER \"cmake-toolset/build/${PORT_NAME}\")
 set_property(TARGET \"cmake-toolset.port.${PORT_NAME}.package\" PROPERTY FOLDER \"cmake-toolset/package/${PORT_NAME}\")
 ")
-  add_subdirectory("${CMAKE_SOURCE_DIR}/.cmake-toolset/${PORT_NAME}")
+  add_subdirectory("${__project_third_party_mutable_package_targets_SOURCE_DIR}"
+                   "${__project_third_party_mutable_package_targets_BINARY_DIR}")
 endfunction()
 
 function(project_third_party_port_cleanup_cache_dir BUILD_CACHE_DIR PACKAGE_SOURCE_DIR)
