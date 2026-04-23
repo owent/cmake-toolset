@@ -1743,12 +1743,22 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
 
   unset(FINAL_CFLAGS)
   unset(FINAL_CXXFLAGS)
+  unset(_bash_env_LDFLAGS_VALUE)
+
   add_compiler_flags_to_var(FINAL_CFLAGS ${COMPILER_OPTION_INHERIT_CMAKE_C_FLAGS})
   add_compiler_flags_to_var(FINAL_CXXFLAGS ${COMPILER_OPTION_INHERIT_CMAKE_CXX_FLAGS})
   if(CMAKE_OSX_ARCHITECTURES)
-    if(CMAKE_CROSSCOMPILING AND CMAKE_OSX_SYSROOT)
-      add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
-      add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+    if(CMAKE_CROSSCOMPILING)
+      if(CMAKE_OSX_SYSROOT)
+        add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+        add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+      elseif(CMAKE_SYSROOT_COMPILE)
+        add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_SYSROOT_COMPILE}")
+        add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_SYSROOT_COMPILE}")
+      elseif(CMAKE_SYSROOT)
+        add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_SYSROOT}")
+        add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_SYSROOT}")
+      endif()
     endif()
 
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -1758,6 +1768,18 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
 
     add_compiler_flags_to_var(FINAL_CFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
     add_compiler_flags_to_var(FINAL_CXXFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
+  elseif(
+    UNIX
+    AND NOT APPLE
+    AND NOT ANDROID
+    AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" OR CMAKE_C_COMPILER_ID MATCHES "GNU|Clang"))
+    if(CMAKE_SYSROOT_COMPILE)
+      add_compiler_flags_to_var(FINAL_CFLAGS "--sysroot=${CMAKE_SYSROOT_COMPILE}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "--sysroot=${CMAKE_SYSROOT_COMPILE}")
+    elseif(CMAKE_SYSROOT)
+      add_compiler_flags_to_var(FINAL_CFLAGS "--sysroot=${CMAKE_SYSROOT}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "--sysroot=${CMAKE_SYSROOT}")
+    endif()
   endif()
 
   if(FINAL_CFLAGS AND NOT _bash_env_DISABLE_C)
@@ -1816,14 +1838,21 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
         ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
     endif()
 
-    unset(INHERIT_LDFLAGS_VALUE)
     project_build_tools_combine_space_flags_unique(
-      INHERIT_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+      _bash_env_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
       COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS
       CHECK_SANITIZER_LINK_TYPE)
+  endif()
 
-    file(APPEND "${OUTPUT_FILE}"
-         "export LDFLAGS=\"\$LDFLAGS ${INHERIT_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  if(UNIX
+     AND NOT APPLE
+     AND NOT ANDROID
+     AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    if(CMAKE_SYSROOT_LINK)
+      add_compiler_flags_to_var(_bash_env_LDFLAGS_VALUE "--sysroot=${CMAKE_SYSROOT_LINK}")
+    elseif(CMAKE_SYSROOT)
+      add_compiler_flags_to_var(_bash_env_LDFLAGS_VALUE "--sysroot=${CMAKE_SYSROOT}")
+    endif()
   endif()
 
   if((COMPILER_OPTION_INHERIT_CMAKE_RANLIB
@@ -1857,10 +1886,14 @@ function(project_build_tools_generate_load_env_bash OUTPUT_FILE)
 
     file(APPEND "${OUTPUT_FILE}" "export RPATH=\"${RPATH_STRING_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     if(NOT _bash_env_DISABLE_LD AND RPATH_LINK_VALUE)
-      file(APPEND "${OUTPUT_FILE}"
-           "export LDFLAGS=\"\$LDFLAGS -Wl,-rpath,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+      add_compiler_flags_to_var(_bash_env_LDFLAGS_VALUE "-Wl,-rpath,${RPATH_LINK_VALUE}")
+
       file(APPEND "${OUTPUT_FILE}" "export ORIGIN='\$ORIGIN'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
+  endif()
+  if(_bash_env_LDFLAGS_VALUE AND NOT _bash_env_DISABLE_LD)
+    file(APPEND "${OUTPUT_FILE}"
+         "export LDFLAGS=\"\$LDFLAGS ${_bash_env_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
   if(CMAKE_CROSSCOMPILING AND CMAKE_OSX_SYSROOT)
@@ -1923,10 +1956,10 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
   file(APPEND "${OUTPUT_FILE}"
        "$OutputEncoding = [System.Text.UTF8Encoding]::new()${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
 
-  if(NOT _bash_env_DISABLE_C)
+  if(NOT _pwsh_env_DISABLE_C)
     file(APPEND "${OUTPUT_FILE}" "$ENV:CC=\"${CMAKE_C_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
-  if(NOT _bash_env_DISABLE_CXX)
+  if(NOT _pwsh_env_DISABLE_CXX)
     file(APPEND "${OUTPUT_FILE}" "$ENV:CXX=\"${CMAKE_CXX_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
@@ -1942,14 +1975,21 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
 
   unset(FINAL_CFLAGS)
   unset(FINAL_CXXFLAGS)
+  unset(_pwsh_env_LDFLAGS_VALUE)
   add_compiler_flags_to_var(FINAL_CFLAGS ${COMPILER_OPTION_INHERIT_CMAKE_C_FLAGS})
   add_compiler_flags_to_var(FINAL_CXXFLAGS ${COMPILER_OPTION_INHERIT_CMAKE_CXX_FLAGS})
-  if(ANDROID)
-    # No need to patch anymore
-  else()
-    if(CMAKE_CROSSCOMPILING AND CMAKE_OSX_SYSROOT)
-      add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
-      add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+  if(CMAKE_OSX_ARCHITECTURES)
+    if(CMAKE_CROSSCOMPILING)
+      if(CMAKE_OSX_SYSROOT)
+        add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+        add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_OSX_SYSROOT}")
+      elseif(CMAKE_SYSROOT_COMPILE)
+        add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_SYSROOT_COMPILE}")
+        add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_SYSROOT_COMPILE}")
+      elseif(CMAKE_SYSROOT)
+        add_compiler_flags_to_var(FINAL_CFLAGS "-isysroot" "${CMAKE_SYSROOT}")
+        add_compiler_flags_to_var(FINAL_CXXFLAGS "-isysroot" "${CMAKE_SYSROOT}")
+      endif()
     endif()
 
     if(CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -1961,42 +2001,54 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
       add_compiler_flags_to_var(FINAL_CFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
       add_compiler_flags_to_var(FINAL_CXXFLAGS "-arch ${CMAKE_OSX_ARCHITECTURES}")
     endif()
+  elseif(
+    UNIX
+    AND NOT APPLE
+    AND NOT ANDROID
+    AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" OR CMAKE_C_COMPILER_ID MATCHES "GNU|Clang"))
+    if(CMAKE_SYSROOT_COMPILE)
+      add_compiler_flags_to_var(FINAL_CFLAGS "--sysroot=${CMAKE_SYSROOT_COMPILE}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "--sysroot=${CMAKE_SYSROOT_COMPILE}")
+    elseif(CMAKE_SYSROOT)
+      add_compiler_flags_to_var(FINAL_CFLAGS "--sysroot=${CMAKE_SYSROOT}")
+      add_compiler_flags_to_var(FINAL_CXXFLAGS "--sysroot=${CMAKE_SYSROOT}")
+    endif()
   endif()
 
-  if(FINAL_CFLAGS AND NOT _bash_env_DISABLE_C)
+  if(FINAL_CFLAGS AND NOT _pwsh_env_DISABLE_C)
     file(APPEND "${OUTPUT_FILE}"
          "$ENV:CFLAGS=\"\$ENV:CFLAGS ${FINAL_CFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(FINAL_CFLAGS)
 
-  if(FINAL_CXXFLAGS AND NOT _bash_env_DISABLE_CXX)
+  if(FINAL_CXXFLAGS AND NOT _pwsh_env_DISABLE_CXX)
     file(APPEND "${OUTPUT_FILE}"
          "$ENV:CXXFLAGS=\"\$ENV:CXXFLAGS ${FINAL_CXXFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   unset(FINAL_CXXFLAGS)
 
-  if(ENV{RC} AND NOT _bash_env_DISABLE_RC)
+  if(ENV{RC} AND NOT _pwsh_env_DISABLE_RC)
     file(APPEND "${OUTPUT_FILE}" "$ENV:RC=\"$ENV{RC}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
-  if(ENV{RCFLAGS} AND NOT _bash_env_DISABLE_RC)
+  if(ENV{RCFLAGS} AND NOT _pwsh_env_DISABLE_RC)
     file(APPEND "${OUTPUT_FILE}" "$ENV:RCFLAGS=\"$ENV{RCFLAGS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
-  if(ENV{LD} AND NOT _bash_env_DISABLE_LD)
+  if(ENV{LD} AND NOT _pwsh_env_DISABLE_LD)
     file(APPEND "${OUTPUT_FILE}" "$ENV:LD=\"$ENV{LD}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
-  if(ENV{AS} AND NOT _bash_env_DISABLE_AS)
+  if(ENV{AS} AND NOT _pwsh_env_DISABLE_AS)
     file(APPEND "${OUTPUT_FILE}" "$ENV:AS=\"$ENV{AS}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   elseif(DEFINED CACHE{CMAKE_ASM_COMPILER})
     file(APPEND "${OUTPUT_FILE}" "$ENV:AS=\"$ENV{CMAKE_ASM_COMPILER}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
-  if(ENV{STRIP} AND NOT _bash_env_DISABLE_STRIP)
+  if(ENV{STRIP} AND NOT _pwsh_env_DISABLE_STRIP)
     file(APPEND "${OUTPUT_FILE}" "$ENV:STRIP=\"$ENV{STRIP}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
-  if(ENV{NM} AND NOT _bash_env_DISABLE_NM)
+  if(ENV{NM} AND NOT _pwsh_env_DISABLE_NM)
     file(APPEND "${OUTPUT_FILE}" "$ENV:NM=\"$ENV{NM}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
 
-  if(NOT _bash_env_DISABLE_ASM AND (COMPILER_OPTION_INHERIT_CMAKE_ASM_FLAGS
+  if(NOT _pwsh_env_DISABLE_ASM AND (COMPILER_OPTION_INHERIT_CMAKE_ASM_FLAGS
                                     OR COMPILER_OPTION_INHERIT_CMAKE_ASM_FLAGS_RELEASE))
     file(
       APPEND "${OUTPUT_FILE}"
@@ -2004,7 +2056,7 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
     )
   endif()
 
-  if(NOT _bash_env_DISABLE_LD
+  if(NOT _pwsh_env_DISABLE_LD
      AND (COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
           OR COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS
           OR COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS))
@@ -2020,14 +2072,21 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
         ${COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS} ${COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS})
     endif()
 
-    unset(INHERIT_LDFLAGS_VALUE)
     project_build_tools_combine_space_flags_unique(
-      INHERIT_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
+      _pwsh_env_LDFLAGS_VALUE COMPILER_OPTION_INHERIT_CMAKE_EXE_LINKER_FLAGS
       COMPILER_OPTION_INHERIT_CMAKE_SHARED_LINKER_FLAGS COMPILER_OPTION_INHERIT_CMAKE_STATIC_LINKER_FLAGS
       CHECK_SANITIZER_LINK_TYPE)
+  endif()
 
-    file(APPEND "${OUTPUT_FILE}"
-         "$ENV:LDFLAGS=\"\$ENV:LDFLAGS ${INHERIT_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  if(UNIX
+     AND NOT APPLE
+     AND NOT ANDROID
+     AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    if(CMAKE_SYSROOT_LINK)
+      add_compiler_flags_to_var(_pwsh_env_LDFLAGS_VALUE "--sysroot=${CMAKE_SYSROOT_LINK}")
+    elseif(CMAKE_SYSROOT)
+      add_compiler_flags_to_var(_pwsh_env_LDFLAGS_VALUE "--sysroot=${CMAKE_SYSROOT}")
+    endif()
   endif()
 
   if((COMPILER_OPTION_INHERIT_CMAKE_RANLIB
@@ -2035,7 +2094,7 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
       OR ENV{CMAKE_C_COMPILER_RANLIB}
       OR ENV{CMAKE_CXX_COMPILER_RANLIB}
      )
-     AND NOT _bash_env_DISABLE_RANLIB)
+     AND NOT _pwsh_env_DISABLE_RANLIB)
     file(APPEND "${OUTPUT_FILE}" "$ENV:RANLIB=\"${CMAKE_RANLIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
   if(CMAKE_INSTALL_RPATH)
@@ -2059,12 +2118,16 @@ function(project_build_tool_generate_load_env_powershell OUTPUT_FILE)
       endif()
     endforeach()
     file(APPEND "${OUTPUT_FILE}" "$ENV:RPATH=\"${RPATH_STRING_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-    if(NOT _bash_env_DISABLE_LD AND RPATH_LINK_VALUE)
-      file(APPEND "${OUTPUT_FILE}"
-           "$ENV:LDFLAGS=\"\$ENV:LDFLAGS -Wl,-rpath,${RPATH_LINK_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+    if(NOT _pwsh_env_DISABLE_LD AND RPATH_LINK_VALUE)
+      add_compiler_flags_to_var(_pwsh_env_LDFLAGS_VALUE "-Wl,-rpath,${RPATH_LINK_VALUE}")
       file(APPEND "${OUTPUT_FILE}" "$ENV:ORIGIN='\$ORIGIN'${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
     endif()
   endif()
+  if(_pwsh_env_LDFLAGS_VALUE AND NOT _pwsh_env_DISABLE_LD)
+    file(APPEND "${OUTPUT_FILE}"
+         "$ENV:LDFLAGS=\"\$ENV:LDFLAGS ${_pwsh_env_LDFLAGS_VALUE}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
+  endif()
+
   if(CMAKE_CROSSCOMPILING AND CMAKE_OSX_SYSROOT)
     file(APPEND "${OUTPUT_FILE}" "$ENV:OSX_SYSROOT=\"${CMAKE_OSX_SYSROOT}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
   endif()
