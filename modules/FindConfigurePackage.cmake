@@ -21,6 +21,7 @@
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD
 #   CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD
+#   CMAKE_INHERIT_BUILD_ENV_DISABLE_GENERATOR
 #   CMAKE_INHERIT_FIND_ROOT_PATH
 #   CMAKE_INHERIT_SYSTEM_LINKS
 #   SCONS_FLAGS [scons options...]
@@ -246,6 +247,7 @@ macro(FindConfigurePackage)
       CMAKE_INHERIT_BUILD_ENV_DISABLE_ASM_FLAGS
       CMAKE_INHERIT_BUILD_ENV_DISABLE_C_STANDARD
       CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD
+      CMAKE_INHERIT_BUILD_ENV_DISABLE_GENERATOR
       CMAKE_INHERIT_FIND_ROOT_PATH
       CMAKE_INHERIT_SYSTEM_LINKS
       GIT_ENABLE_SUBMODULE
@@ -676,6 +678,9 @@ macro(FindConfigurePackage)
           endif()
           if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_CXX_STANDARD)
             list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_CXX_STANDARD)
+          endif()
+          if(FindConfigurePackage_CMAKE_INHERIT_BUILD_ENV_DISABLE_GENERATOR)
+            list(APPEND project_build_tools_append_cmake_inherit_options_CALL_VARS DISABLE_GENERATOR)
           endif()
           # When with CMAKE_INHERIT_FIND_ROOT_PATH, some variables will be append by
           # project_build_tools_append_cmake_options_for_lib() below.

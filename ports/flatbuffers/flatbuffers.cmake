@@ -125,6 +125,11 @@ if(NOT TARGET flatbuffers::flatbuffers)
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_PATCH_FILE}")
     endif()
 
+    if(CMAKE_GENERATOR STREQUAL "Ninja")
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_OPTIONS
+           CMAKE_INHERIT_BUILD_ENV_DISABLE_GENERATOR)
+    endif()
+
     # Build host architecture flatc first
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_HOST_BUILDING AND CMAKE_CROSSCOMPILING)
       project_third_party_crosscompiling_host(
