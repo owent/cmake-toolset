@@ -1,13 +1,9 @@
 ---
 name: port-upgrade
-description: >-
-   Upgrade cmake-toolset ports to newer upstream
-   versions. Use when: checking releases, resolving
-   dependency pins, validating patches, handling
-   cross-compiling host tools, or reviewing CI impact.
+description: "Use when: upgrading cmake-toolset ports, checking upstream releases, resolving dependency pins, validating patches, handling cross-compiling host tools, or reviewing CI impact."
 argument-hint: >-
-   ports=<names|all>; mode=analyze|update;
-   validate=patch|build|ci|full
+  ports=<names|all>; mode=analyze|update;
+  validate=patch|build|ci|full
 ---
 
 # Port Upgrade Workflow
@@ -35,20 +31,20 @@ and repository-specific guards.
 ### Phase 1: Version Survey
 
 - Find all current version declarations and related
-   tag or compiler fallback logic.
+  tag or compiler fallback logic.
 - Fetch the latest stable upstream releases.
 - Build a table of current vs target versions.
 
 ### Phase 2: Dependency Analysis
 
 - Query upstream build metadata such as
-   `MODULE.bazel`, `WORKSPACE`, `bazel/*_deps.bzl`,
-   `CMakeLists.txt`, and `cmake/*.cmake`.
+  `MODULE.bazel`, `WORKSPACE`, `bazel/*_deps.bzl`,
+  `CMakeLists.txt`, and `cmake/*.cmake`.
 - Use `test/CMakeLists.txt` for repository include
-   order and local compatibility guards.
+  order and local compatibility guards.
 - When multiple ports pin the same dependency
-   differently, use the highest commonly supported
-   version or report the conflict.
+  differently, use the highest commonly supported
+  version or report the conflict.
 - See [dependency-chains.md](./references/dependency-chains.md).
 
 ### Phase 3: Special-Case Analysis
@@ -70,31 +66,31 @@ and repository-specific guards.
 ### Phase 4: Version Updates
 
 - Update all relevant version, tag, and conditional
-   references.
+  references.
 - Check tag-format changes and multiple version sites.
 
 ### Phase 5: Patch Validation
 
 - Reuse same-minor patch files when they still apply
-   cleanly.
+  cleanly.
 - Create a new patch only when the content differs.
 - Validate `.cross.patch` separately when relevant.
 - Use `--depth 1` for patch testing and clean up
-   `test/third_party/packages/` afterward.
+  `test/third_party/packages/` afterward.
 - See [patch-workflow.md](./references/patch-workflow.md).
 
 ### Phase 6: Deprecated Build Options
 
 - Check upstream changelogs and CMake files for option
-   removals or renames.
+  removals or renames.
 - See [deprecated-options.md](./references/deprecated-options.md).
 
 ### Phase 7: Integration and CI Verification
 
 - Confirm versions, tags, build options, and patch names.
 - Review `test/CMakeLists.txt`,
-   `.github/workflows/build.yaml`, and `ci/do_ci.*` for
-   impacted combinations.
+  `.github/workflows/build.yaml`, and `ci/do_ci.*` for
+  impacted combinations.
 - Summarize changes, validation, and remaining risks.
 
 ## Important Rules
@@ -108,15 +104,15 @@ and repository-specific guards.
   CI will reject unformatted files.
 - **Never update a dependency without checking its
   dependents.** Always query upstream repos for actual
-   version pins rather than assuming from memory.
+  version pins rather than assuming from memory.
 - **Repository include order comes from
-   `test/CMakeLists.txt`.**
+  `test/CMakeLists.txt`.**
 - **Patch files are matched by minor version prefix.**
   A patch for `v1.9.4` will match `v1.9.5`
   automatically. Only create a new patch if the content
   actually differs.
 - **Ports with `crosscompiling-host/` assets or hosted
-   tools require host-side validation.**
+  tools require host-side validation.**
 - **Preserve repository-specific guards.** Existing
   no-exception, no-rtti, compiler-version, and backend
   exclusions are compatibility knowledge, not dead code.

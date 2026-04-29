@@ -1,5 +1,6 @@
-# cmake-toolset
+# cmake-toolset Claude Notes
 
-See `AGENTS.md` for the full project rules and
-`.agents/skills/port-upgrade/` for the upgrade
-workflow.
+This file is a compatibility bridge. Keep shared guidance in `AGENTS.md`; keep repeatable workflows in `.agents/skills/`.
+
+@AGENTS.md
+@.agents/skills/README.md

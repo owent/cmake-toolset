@@ -1,11 +1,6 @@
 ---
 name: ci-fix-port
-description: >-
-  Fetch CI build failure logs from GitHub Actions or
-  PRs, diagnose the root cause, and fix the failing
-  port or patch. Use when: a CI job fails after a
-  port upgrade, a patch no longer applies, or a build
-  option changed upstream.
+description: "Use when: diagnosing or fixing cmake-toolset CI failures after port upgrades, patch-apply errors, changed upstream build options, or GitHub Actions job failures."
 argument-hint: >-
   pr=<number|url>; run=<id|url>; job=<name>;
   port=<name>; mode=diagnose|fix
@@ -100,9 +95,11 @@ Invoke-RestMethod `
 
 Even without log access, annotations contain error
 summaries:
+
 ```
 /repos/{owner}/{repo}/check-runs/{job-id}/annotations
 ```
+
 These are usually just "Process completed with exit
 code 1" but occasionally contain cmake error lines.
 
@@ -111,6 +108,7 @@ code 1" but occasionally contain cmake error lines.
 ```
 https://github.com/{owner}/{repo}/actions/runs/{run_id}/job/{job_id}
 ```
+
 Note: This often returns "Sign in to view logs" for
 private repos or when unauthenticated.
 
@@ -150,16 +148,16 @@ wastes context and tokens. Instead:
 
 Parse the log output and classify the failure:
 
-| Pattern | Likely Cause |
-| ------- | ------------ |
-| `error: patch failed` / `git apply` error | Patch no longer applies cleanly |
-| `Unknown CMake command` / option error | Deprecated or renamed build option |
-| `fatal error: … not found` | Missing dependency or include order |
-| `undefined reference` / link error | ABI or library mismatch |
-| `FAILED: … test` | Runtime test regression |
+| Pattern                                               | Likely Cause                                 |
+| ----------------------------------------------------- | -------------------------------------------- |
+| `error: patch failed` / `git apply` error             | Patch no longer applies cleanly              |
+| `Unknown CMake command` / option error                | Deprecated or renamed build option           |
+| `fatal error: … not found`                            | Missing dependency or include order          |
+| `undefined reference` / link error                    | ABI or library mismatch                      |
+| `FAILED: … test`                                      | Runtime test regression                      |
 | `Could not find … package` / `include could not find` | Config-package bug or `find_package` failure |
-| Cross-compile host tool error | Host-tool not built or not found |
-| `-lc++abi` / compiler not found | CI environment change (runner OS update) |
+| Cross-compile host tool error                         | Host-tool not built or not found             |
+| `-lc++abi` / compiler not found                       | CI environment change (runner OS update)     |
 
 #### Without logs (indirect diagnosis)
 
@@ -188,8 +186,9 @@ When logs are inaccessible, use these strategies:
    `ports/Configure.cmake`:
    `${FULL_PORT_NAME}_USE_SHARED` > `_USE_STATIC` >
    `BUILD_SHARED_LIBS` / `ATFRAMEWORK_USE_DYNAMIC_LIBRARY`
+
    > default static. A port may be static even when
-   `BUILD_SHARED_LIBS=ON` if its `_USE_STATIC` is set.
+   > `BUILD_SHARED_LIBS=ON` if its `_USE_STATIC` is set.
 
 4. **Diff analysis** — compare `main..dev` changes:
    - Which ports were upgraded?
@@ -201,6 +200,7 @@ When logs are inaccessible, use these strategies:
 5. **Local reproduction** — the most powerful tool
    when logs are unavailable. Build the suspected
    port locally and test `find_package`:
+
    ```powershell
    # Example: test a port's config package
    cmake -S <upstream-src> -B build `
@@ -319,6 +319,7 @@ Follow
 ### Phase 5: Verify the Fix
 
 1. If the fix is a patch, test it locally:
+
    ```bash
    cd test/third_party/packages/<port>-<version>
    git -c "core.autocrlf=input" apply --check <patch>

@@ -1,81 +1,56 @@
-# cmake-toolset Project Guidelines
+# cmake-toolset Agent Guide
 
-## Overview
+This is the canonical, cross-agent guide for this subproject. Keep it short: put repeatable workflows in
+`.agents/skills/*/SKILL.md`, and keep `.github/copilot-instructions.md` / `CLAUDE.md` as lightweight bridges.
 
-CMake-based third-party dependency management toolkit
-for fetching, patching, building, and installing
+**cmake-toolset** is a CMake-based third-party dependency toolkit for fetching, patching, building, and installing
 upstream libraries across platforms and toolchains.
 
-## Build & Test
+- **Repository**: <https://github.com/atframework/cmake-toolset>
+- **Languages**: CMake plus shell/PowerShell CI helpers
 
-```bash
-mkdir -p test/build_jobs_dir && cd test/build_jobs_dir
-cmake .. \
-  -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON
-cmake --build . -j
-ctest . -V
-bash ci/format.sh
-```
+## Project Map
 
-## Source of Truth
+- `ports/`: standard ports, import aggregators, orchestrators, patches, and cross-compiling host assets.
+- `modules/`: reusable CMake helper modules.
+- `test/`: integration coverage and canonical include order.
+- `ci/`, `.github/workflows/`: validated CI entrypoints and platform wrappers.
+- `.agents/skills/`: port upgrade, CI-failure, and AI-agent maintenance playbooks.
 
-- `ports/Configure.cmake` — core macros, patch
-  matching, shared/static helpers, and host-build
-  helpers
-- `test/CMakeLists.txt` — canonical include order and
-  repository-specific compatibility guards
-- `.github/workflows/build.yaml` and `ci/do_ci.*` —
-  validated CI combinations
-- upstream repo at the target tag — dependency pins,
-  tag naming, and build option changes
+## Always-On Rules
 
-## Structure
+- Respect the user's dirty workspace: inspect current file contents before editing and avoid unrelated reformatting.
+- Read the matching `.agents/skills/*/SKILL.md` before port upgrade, patch, dependency, or CI-failure work.
+- Treat `ports/Configure.cmake`, `test/CMakeLists.txt`, `.github/workflows/build.yaml`, `ci/do_ci.*`, and upstream repo
+  metadata as source of truth; do not rely on historical dependency chains alone.
+- Before committing CMake edits, run `cmake-format -i` on modified `.cmake`, `.cmake.in`, and `CMakeLists.txt` files
+  (excluding `test/third_party/` and `test/build_jobs_*/`), or run `bash ci/format.sh` for the whole tree.
 
-- `ports/` — standard ports, import aggregators, and
-  orchestrators
-- `modules/` — shared CMake helpers
-- `test/` — integration coverage for most ports
-- `ci/` — workflow entrypoints and platform wrappers
+## CMake Conventions
 
-## Rules
+- Use 2-space indentation, lowercase function names, uppercase variables, `if(TARGET ...)`, and `echowithcolor()` for
+  user-facing messages.
+- Standard ports usually follow: `include_guard`, import macro, `find_package`, `project_third_party_port_declare`,
+  patch lookup, then `find_configure_package`.
+- Treat `ssl/port.cmake`, `grpc/import.cmake`, and `protobuf/protobuf.cmake` as special cases.
+- Patch names are `{port}-{version}.patch` or `{port}-{version}.cross.patch`; same-minor matching picks the highest
+  version `<=` target.
+- Use `project_third_party_check_build_shared_lib()` for shared/static selection; do not hardcode `BUILD_SHARED_LIBS`
+  directly in ports.
 
-- Historical dependency chains are hints only. Real
-  pins come from upstream, and repository include order
-  comes from `test/CMakeLists.txt`.
-- Standard ports usually follow: `include_guard`,
-  import macro, `find_package`,
-  `project_third_party_port_declare`, patch lookup, and
-  `find_configure_package`.
-- Treat `ssl/port.cmake`, `grpc/import.cmake`, and
-  `protobuf/protobuf.cmake` as special cases.
-- Patch names are `{port}-{version}.patch` or
-  `{port}-{version}.cross.patch`. Same-minor matching
-  picks the highest version `<=` target.
-- Ports with `crosscompiling-host/` assets need
-  host-side validation.
-- CMake style: 2-space indentation, lowercase function
-  names, uppercase variables, `if(TARGET ...)`, and
-  `echowithcolor()` for user-facing messages.
-- **Pre-commit formatting is mandatory.** Before
-  committing, run `cmake-format -i` on every modified
-  `.cmake`, `.cmake.in`, and `CMakeLists.txt` file
-  (excluding `test/third_party/` and
-  `test/build_jobs_*/`). Alternatively run
-  `bash ci/format.sh` to format the entire tree.
-- Shared/static library selection uses
-  `project_third_party_check_build_shared_lib()` with
-  this priority (first match wins):
-  1. `${FULL_PORT_NAME}_USE_SHARED` — per-port force
-     shared
-  2. `${FULL_PORT_NAME}_USE_STATIC` — per-port force
-     static
-  3. `BUILD_SHARED_LIBS` or
-     `ATFRAMEWORK_USE_DYNAMIC_LIBRARY` — global shared
-  4. Default — static
-  where `FULL_PORT_NAME` =
-  `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_{PREFIX}_{PORT}`
-  (uppercased). Environment variables with the same
-  names are also checked. See `ports/Configure.cmake`
-  for the full implementation. Ports must use the
-  helper macros, not hardcode `BUILD_SHARED_LIBS`
-  directly.
+## Skill Routing
+
+Read the matching `.agents/skills/*/SKILL.md` before specialized work:
+
+| Skill | Use when |
+| --- | --- |
+| `port-upgrade` | Upgrading ports, resolving pins, validating patches, or reviewing CI impact |
+| `ci-fix-port` | Diagnosing or fixing CI failures after port or patch changes |
+| `ai-agent-maintenance` | Auditing or optimizing AI agent prompts, bridge files, and skills |
+
+## Agent File Compatibility
+
+- `AGENTS.md` is canonical for tools that support hierarchical agent instructions.
+- `.github/copilot-instructions.md` exists only to point VS Code Copilot at this guide and `.agents/skills/`.
+- `CLAUDE.md` exists only to point Claude-compatible tools at this guide and `.agents/skills/`.
+- Keep skill folder names and frontmatter `name` values identical; descriptions are the discovery surface.
