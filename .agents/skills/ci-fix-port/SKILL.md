@@ -15,6 +15,19 @@ affected port or patch.
 Repository: `atframework/cmake-toolset`
 (remote may be `owent/cmake-toolset`)
 
+## Input Form
+
+Parse the user's request with this form:
+
+- `pr=` PR number or URL; optional if `run=` is given.
+- `run=` Actions run ID or URL; optional if `pr=` is given.
+- `job=` job name filter, for example `gcc.no-rtti.test`; optional.
+- `port=` port name hint; optional.
+- `mode=` `diagnose` or `fix`; default is `fix`.
+
+If neither `pr=` nor `run=` is provided, auto-detect from the current branch when possible; ask the user only when
+auto-detection is not possible.
+
 ## Prerequisites
 
 The agent needs access to GitHub data. Try these
@@ -52,16 +65,19 @@ If no input is given, auto-detect:
 2. Find the latest PR targeting `main` from that
    branch, or the latest CI run on that branch.
 3. Use `fetch_webpage` with the GitHub API:
-   ```
+
+   ```text
    https://api.github.com/repos/{owner}/{repo}/actions/runs?branch={branch}&per_page=5
    ```
 
 **Gather job data:**
 
 1. Fetch the run's job list via API:
-   ```
+
+   ```text
    /actions/runs/{run_id}/jobs?per_page=30
    ```
+
 2. Classify each job by `status` and `conclusion`.
 3. For failed jobs, record: name, duration
    (`started_at` to `completed_at`), runner labels.
@@ -96,7 +112,7 @@ Invoke-RestMethod `
 Even without log access, annotations contain error
 summaries:
 
-```
+```text
 /repos/{owner}/{repo}/check-runs/{job-id}/annotations
 ```
 
@@ -105,7 +121,7 @@ code 1" but occasionally contain cmake error lines.
 
 #### Option D: `fetch_webpage` on job HTML
 
-```
+```text
 https://github.com/{owner}/{repo}/actions/runs/{run_id}/job/{job_id}
 ```
 
@@ -241,6 +257,9 @@ Record for each failure:
 
 Based on diagnosis, apply the appropriate fix:
 
+When the fix touches port CMake files, patches, `test/CMakeLists.txt`, CI entrypoints, or GitHub workflow matrices, also
+follow [repository-maintenance-guidelines.md](../port-upgrade/references/repository-maintenance-guidelines.md).
+
 #### Config-package bug
 
 This is a common issue when upstream cmake config
@@ -303,11 +322,13 @@ port code:
    SDK paths).
 3. Add fallback logic to handle both old and new
    environments. For example:
+
    ```bash
    # Fallback: try without -lc++abi (macOS bundles
    # it into libc++)
    cmd1 || cmd1_without_abi || FAIL=1
    ```
+
 4. Verify the fix doesn't break the corresponding
    Linux job that uses the same CI script section.
 

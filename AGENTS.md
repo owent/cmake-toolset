@@ -1,7 +1,9 @@
 # cmake-toolset Agent Guide
 
-This is the canonical, cross-agent guide for this subproject. Keep it short: put repeatable workflows in
-`.agents/skills/*/SKILL.md`, and keep `.github/copilot-instructions.md` / `CLAUDE.md` as lightweight bridges.
+This is the canonical, self-contained cross-agent guide for this repository. Keep it short: put repeatable workflows in
+`.agents/skills/*/SKILL.md`, keep `CLAUDE.md` and `.clinerules` as lightweight bridges, and avoid redundant
+tool-specific prompt copies. This repository manages its own AI agent prompts and skills; it must not depend on a parent
+or sibling repository guide. All checked-in AI guidance in this repository must be English-only.
 
 **cmake-toolset** is a CMake-based third-party dependency toolkit for fetching, patching, building, and installing
 upstream libraries across platforms and toolchains.
@@ -16,6 +18,7 @@ upstream libraries across platforms and toolchains.
 - `test/`: integration coverage and canonical include order.
 - `ci/`, `.github/workflows/`: validated CI entrypoints and platform wrappers.
 - `.agents/skills/`: port upgrade, CI-failure, and AI-agent maintenance playbooks.
+- `.agents/skills/port-upgrade/references/`: on-demand port, patch, test, and CI maintenance references.
 
 ## Always-On Rules
 
@@ -23,6 +26,8 @@ upstream libraries across platforms and toolchains.
 - Read the matching `.agents/skills/*/SKILL.md` before port upgrade, patch, dependency, or CI-failure work.
 - Treat `ports/Configure.cmake`, `test/CMakeLists.txt`, `.github/workflows/build.yaml`, `ci/do_ci.*`, and upstream repo
   metadata as source of truth; do not rely on historical dependency chains alone.
+- For edits under `ports/`, `test/CMakeLists.txt`, `ci/do_ci.*`, `.github/workflows/*.yaml`, or patch files, also follow
+  `.agents/skills/port-upgrade/references/repository-maintenance-guidelines.md`.
 - Before committing CMake edits, run `cmake-format -i` on modified `.cmake`, `.cmake.in`, and `CMakeLists.txt` files
   (excluding `test/third_party/` and `test/build_jobs_*/`), or run `bash ci/format.sh` for the whole tree.
 
@@ -46,11 +51,15 @@ Read the matching `.agents/skills/*/SKILL.md` before specialized work:
 | --- | --- |
 | `port-upgrade` | Upgrading ports, resolving pins, validating patches, or reviewing CI impact |
 | `ci-fix-port` | Diagnosing or fixing CI failures after port or patch changes |
-| `ai-agent-maintenance` | Auditing or optimizing AI agent prompts, bridge files, and skills |
+| `ai-agent-maintenance` | Auditing or optimizing AI agent prompts, bridge files, skills, and cross-tool compatibility |
 
 ## Agent File Compatibility
 
 - `AGENTS.md` is canonical for tools that support hierarchical agent instructions.
-- `.github/copilot-instructions.md` exists only to point VS Code Copilot at this guide and `.agents/skills/`.
+- Do not maintain `.github/copilot-instructions.md`, `.github/prompts/*.prompt.md`, or
+  `.github/instructions/*.instructions.md` AI customization copies when `AGENTS.md` and `.agents/skills/` cover the same
+  rules. Keep `.github/workflows/*.yaml` because those files are real CI configuration.
 - `CLAUDE.md` exists only to point Claude-compatible tools at this guide and `.agents/skills/`.
+- `.clinerules` exists only as a lightweight compatibility bridge for tools that read it.
+- Do not create or restore `.claude/skills` mirrors; local skills live under `.agents/skills/`.
 - Keep skill folder names and frontmatter `name` values identical; descriptions are the discovery surface.

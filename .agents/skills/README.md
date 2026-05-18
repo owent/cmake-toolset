@@ -7,9 +7,9 @@ commands, caveats, and examples here.
 
 | Skill | Description |
 | --- | --- |
-| `port-upgrade/` | Upgrade ports, resolve dependency pins, and validate patches |
-| `ci-fix-port/` | Diagnose and fix CI failures after port or patch changes |
-| `ai-agent-maintenance/` | Audit and optimize AI agent prompts, bridge files, and skills |
+| `port-upgrade/` | Use when upgrading ports, resolving dependency pins, validating patches, or reviewing CI impact |
+| `ci-fix-port/` | Use when diagnosing and fixing CI failures after port or patch changes |
+| `ai-agent-maintenance/` | Use when auditing and optimizing AI agent prompts, bridge files, skills, and compatibility |
 
 ## When to read what
 

@@ -3,7 +3,7 @@ name: port-upgrade
 description: "Use when: upgrading cmake-toolset ports, checking upstream releases, resolving dependency pins, validating patches, handling cross-compiling host tools, or reviewing CI impact."
 argument-hint: >-
   ports=<names|all>; mode=analyze|update;
-  validate=patch|build|ci|full
+  validate=patch|build|ci|full; notes=<optional>
 ---
 
 # Port Upgrade Workflow
@@ -11,6 +11,21 @@ argument-hint: >-
 Use this skill to upgrade one or more ports while
 preserving dependency compatibility, patch behavior,
 and repository-specific guards.
+
+## Input Form
+
+Parse the user's request with this form:
+
+- `ports=` required; one or more port names, or `all`.
+- `mode=` `analyze` or `update`; default is `update`.
+- `validate=` `patch`, `build`, `ci`, or `full`; default is `patch`.
+  - `patch`: patch validation only.
+  - `build`: version, patch, and local build validation.
+  - `ci`: CI impact review.
+  - `full`: local build validation plus CI impact review.
+- `notes=` optional extra constraints.
+
+If a field is missing, infer safe defaults and ask only for blocking missing information.
 
 ## Workflow
 
@@ -24,6 +39,8 @@ and repository-specific guards.
   - `ports/Configure.cmake`
   - `test/CMakeLists.txt`
   - `.github/workflows/build.yaml` and `ci/do_ci.*`
+- For port files, patches, test integration, CI entrypoints, and workflow matrices, also follow
+  [repository-maintenance-guidelines.md](./references/repository-maintenance-guidelines.md).
 - Record compiler/version fallbacks, hosted tools,
   RTTI/visibility logic, cross-compiling support, and
   backend exclusions.
@@ -102,6 +119,9 @@ and repository-specific guards.
   `test/build_jobs_*/`). Alternatively run
   `bash ci/format.sh` to format the entire tree.
   CI will reject unformatted files.
+- **Repository maintenance rules are shared.** When touching port CMake files, patches, `test/CMakeLists.txt`,
+  `ci/do_ci.*`, or `.github/workflows/*.yaml`, follow
+  [repository-maintenance-guidelines.md](./references/repository-maintenance-guidelines.md).
 - **Never update a dependency without checking its
   dependents.** Always query upstream repos for actual
   version pins rather than assuming from memory.
