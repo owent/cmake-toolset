@@ -4,6 +4,13 @@
 
 Code is formatted automatically and enforced by CI.
 
+### Incremental Build Stability
+
+Do not unconditionally `touch` or overwrite code/resources consumed by CMake targets, including generated, copied,
+and other non-handwritten files. Declare real `OUTPUT`/`BYPRODUCTS` and accurate `DEPENDS`/`DEPFILE`; use
+content-stable generation or publish a temporary file with `cmake -E copy_if_different`. A stamp/witness must not be a
+compiled, linked, packaged, or installed input.
+
 ### Build and Run Code Examples
 
 ```sh

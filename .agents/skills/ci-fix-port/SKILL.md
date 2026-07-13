@@ -367,6 +367,11 @@ Follow
 
 ## Important Rules
 
+- **Protect incremental builds in fixes and review.** Block unconditional `touch` or same-content overwrites of
+  code/resources consumed by `add_custom_command`, `add_custom_target`, `add_executable`, `add_library`, or
+  `target_sources`, including generated and copied files. Require real `OUTPUT`/`BYPRODUCTS`, accurate
+  `DEPENDS`/`DEPFILE`, and content-stable publication (or a temporary file plus `cmake -E copy_if_different`). A
+  stamp/witness must not be a compiled, linked, packaged, or installed input.
 - **Pre-commit formatting is mandatory.** Before
   committing, run `cmake-format -i` on every modified
   `.cmake`, `.cmake.in`, and `CMakeLists.txt` file
