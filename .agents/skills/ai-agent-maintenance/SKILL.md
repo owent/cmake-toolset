@@ -11,8 +11,10 @@ Use this skill when updating AI-agent guidance for this repository or subproject
 
 - Deeply research the current prompt/skill layout and current AI-agent customization practices before editing.
 - Keep always-on guidance compact, actionable, and non-redundant.
-- Preserve compatibility across AGENTS-aware tools, VS Code Copilot, Codex, Claude Code, Kilo Code/CLI, Roo Code, and
-  OpenCode where the repository intentionally supports them.
+- Preserve compatibility across AGENTS-aware tools, VS Code Copilot, Codex, Claude Code, Kilo Code/CLI, Zoo Code, Pi,
+  and OpenCode where the repository intentionally supports them.
+- Discover the current harness's actual capabilities before writing tool-specific guidance; never document features
+  that another tool has but the target tool does not.
 - Keep this repository independent from parent or sibling repository prompt files.
 - Keep all checked-in AI guidance in this repository English-only.
 - Merge improvements into existing prompt and skill content; do not leave old versions, migration notes, changelog notes,
@@ -29,15 +31,27 @@ Use this skill when updating AI-agent guidance for this repository or subproject
 - Keep repeatable workflows in `.agents/skills/<name>/SKILL.md`; bridge files should not duplicate full skill bodies.
 - Do not create or restore `.claude/skills` mirrors; Claude-compatible tools should use the canonical guide and local
   `.agents/skills` content.
-- For Roo/Kilo/OpenCode compatibility, preserve the `AGENTS.md` path first. Add `.roo`, `.kilo`, `.kilocode`, or
-  `opencode.json` rules only when the repository already uses them or the task explicitly asks for tool-specific config.
+- For Zoo Code, Kilo, Pi, and OpenCode compatibility, preserve the `AGENTS.md` path first. Add tool-specific files
+  (`.roo/rules/`, `.kilo/`, `.pi/`, `opencode.json`) only when the repository already uses them or the task explicitly
+  asks for tool-specific config, and keep them thin diffs that link the shared rules.
+- Zoo Code is the community continuation of the discontinued Roo Code. Its official config paths still
+  use historical `.roo*` names (`.roo/rules/`, `.roorules`, `roo-cline.*` settings); do not rename them to `.zoo*`.
+  Zoo reads `AGENTS.md` directly, so this repository needs no Zoo-specific files.
+- Pi reads `AGENTS.md`/`CLAUDE.md` and `.agents/skills/`; use `.pi/SYSTEM.md` or `APPEND_SYSTEM.md` only for
+  system-prompt overrides. Pi's core ships no subagents, plan mode, MCP, or permission gates — those arrive via
+  extensions or packages, so shared guidance must state goals and constraints without assuming them, and plans belong
+  in files rather than a built-in plan mode.
+- Tool compatibility facts are volatile: verify them against current official docs before changing guidance, and keep
+  verified conclusions in [references/tool-compatibility-sources.md](references/tool-compatibility-sources.md).
 
 ## Procedure
 
 1. **Research first**
    - Read the nearest `AGENTS.md`, `CLAUDE.md`, `.clinerules`, `.agents/skills/README.md`, and any relevant `SKILL.md`
      files before editing. Read legacy `.github` AI customization files only when migrating or deleting them.
-   - If compatibility behavior may change, check current official docs or maintained references for the affected tools.
+   - If compatibility behavior may change, re-verify the volatile entries in
+     `references/tool-compatibility-sources.md` against current official docs or maintained references for the
+     affected tools, and update that index with the new conclusion and the reason for the change.
    - Respect dirty workspaces: preserve unrelated user or formatter edits and avoid broad reformatting.
 
 2. **Choose the right surface**
