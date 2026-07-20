@@ -338,7 +338,7 @@ elif [[ "$1" == "msvc.static.test" ]]; then
    </PropertyGroup>
 </Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
-    CMAKE_GENERATOR="Visual Studio 17 2022"
+    CMAKE_GENERATOR="Visual Studio 18 2026"
   fi
   cmake .. -G "$CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     -DVS_GLOBAL_VcpkgEnabled=OFF \
@@ -366,7 +366,7 @@ elif [[ "$1" == "msvc.shared.test" ]]; then
    </PropertyGroup>
 </Project>" > Directory.Build.props
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
-    CMAKE_GENERATOR="Visual Studio 17 2022"
+    CMAKE_GENERATOR="Visual Studio 18 2026"
   fi
   cmake .. -G "$CMAKE_GENERATOR" -A x64 -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \
     -DVS_GLOBAL_VcpkgEnabled=OFF \
@@ -403,7 +403,7 @@ elif [[ "$1" == "msvc.vcpkg.test" ]]; then
   fi
   cd test/build_jobs_dir
   if [[ "x$CMAKE_GENERATOR" == "x" ]]; then
-    CMAKE_GENERATOR="Visual Studio 17 2022"
+    CMAKE_GENERATOR="Visual Studio 18 2026"
   fi
   cmake .. -G "$CMAKE_GENERATOR" -A x64 -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static-md \
     -DCMAKE_BUILD_TYPE=$CI_BUILD_CONFIGURE_TYPE -DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON \

@@ -82,7 +82,7 @@ if ($IsWindows) {
   }
 
   if (!(Test-Path Env:CMAKE_GENERATOR)) {
-    $Env:CMAKE_GENERATOR = "Visual Studio 17 2022"
+    $Env:CMAKE_GENERATOR = "Visual Studio 18 2026"
   }
 }
 

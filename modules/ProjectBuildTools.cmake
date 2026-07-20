@@ -1084,8 +1084,9 @@ function(project_git_clone_repository)
         math(EXPR project_git_fetch_repository_RETRY_TIMES "${project_git_fetch_repository_RETRY_TIMES} + 1"
              OUTPUT_FORMAT DECIMAL)
         execute_process(
-          COMMAND "${GIT_EXECUTABLE}" ${project_git_fetch_repository_args}
-                  "--depth=${project_git_clone_repository_DEPTH}" "-n" origin ${project_git_clone_repository_COMMIT}
+          COMMAND
+            "${GIT_EXECUTABLE}" ${project_git_fetch_repository_args} "--depth=${project_git_clone_repository_DEPTH}"
+            --tags "-n" origin ${project_git_clone_repository_COMMIT}
           RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
           WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -1093,7 +1094,7 @@ function(project_git_clone_repository)
         if(NOT project_git_clone_repository_GIT_FETCH_RESULT EQUAL 0)
           message(WARNING "It's recommended to use git 2.11.0 or upper to only fetch partly of repository.")
           execute_process(
-            COMMAND "${GIT_EXECUTABLE}" ${project_git_fetch_repository_args} "-n" origin
+            COMMAND "${GIT_EXECUTABLE}" ${project_git_fetch_repository_args} --tags "-n" origin
                     ${project_git_clone_repository_COMMIT}
             RESULT_VARIABLE project_git_clone_repository_GIT_FETCH_RESULT
             WORKING_DIRECTORY "${project_git_clone_repository_REPO_DIRECTORY}"
