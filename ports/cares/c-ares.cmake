@@ -48,7 +48,7 @@ if(NOT TARGET c-ares::cares
     project_third_party_port_declare(
       cares
       VERSION
-      "1.34.5" # 1.34.6 do not work on Windows
+      "1.34.8" # 1.34.6 do not work on Windows, 1.34.7+ contains Win32 fixes (PR #1111, #1121, #1132)
       GIT_URL
       "https://github.com/c-ares/c-ares.git"
       BUILD_OPTIONS

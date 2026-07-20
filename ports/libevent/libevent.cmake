@@ -35,7 +35,7 @@ if(NOT TARGET libevent::core)
   find_package(Libevent QUIET)
 
   if(NOT TARGET libevent::core)
-    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_DEFAULT_VERSION "2.1.12")
+    set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_DEFAULT_VERSION "2.1.13")
     project_third_party_port_declare(
       Libevent
       VERSION

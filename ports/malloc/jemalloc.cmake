@@ -24,7 +24,7 @@ if(NOT TARGET jemalloc)
     project_third_party_port_declare(
       jemalloc
       VERSION
-      "5.3.0"
+      "5.3.1"
       GIT_URL
       "https://github.com/jemalloc/jemalloc.git"
       BUILD_OPTIONS

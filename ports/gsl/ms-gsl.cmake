@@ -18,7 +18,7 @@ if(NOT TARGET Microsoft.GSL::GSL)
     project_third_party_port_declare(
       Microsoft.GSL
       VERSION
-      "v4.2.1"
+      "v4.2.2"
       GIT_URL
       "https://github.com/microsoft/GSL.git"
       BUILD_OPTIONS

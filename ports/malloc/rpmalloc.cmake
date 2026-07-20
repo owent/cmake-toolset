@@ -8,7 +8,7 @@ endmacro()
 
 if(NOT TARGET rpmalloc)
   if(NOT TARGET rpmalloc)
-    project_third_party_port_declare(rpmalloc VERSION "1.4.5" GIT_URL "https://github.com/mjansson/rpmalloc.git")
+    project_third_party_port_declare(rpmalloc VERSION "2.0.1" GIT_URL "https://github.com/mjansson/rpmalloc.git")
     project_third_party_rpmalloc_import()
   endif()
 endif()

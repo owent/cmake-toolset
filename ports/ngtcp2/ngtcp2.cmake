@@ -187,7 +187,7 @@ else()
   project_third_party_port_declare(
     ngtcp2
     VERSION
-    "v1.22.0"
+    "v1.24.0"
     GIT_URL
     "https://github.com/ngtcp2/ngtcp2.git"
     BUILD_OPTIONS
