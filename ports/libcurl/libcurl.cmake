@@ -114,6 +114,21 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
         unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_PATCHED_INTERFACE_LINK_LIBRARIES)
         unset(PROJECT_THIRD_PARTY_LIBCURL_ALIAS_TARGET)
       endforeach()
+
+      # libssh2 may be exported by curl's FindLibssh2 as a plain library name (found by pkg-config). Add the library
+      # directories from pkg-config to the link search paths of the imported targets, so the linker can find it.
+      find_package(PkgConfig QUIET)
+      if(PkgConfig_FOUND)
+        pkg_check_modules(LIBSSH2 QUIET libssh2)
+      endif()
+      if(LIBSSH2_FOUND AND LIBSSH2_LIBRARY_DIRS)
+        foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES} CURL::libssh2)
+          if(TARGET ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+            target_link_directories(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} INTERFACE ${LIBSSH2_LIBRARY_DIRS})
+          endif()
+        endforeach()
+        unset(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+      endif()
     else()
       add_library(CURL::libcurl UNKNOWN IMPORTED)
       if(CURL_INCLUDE_DIRS)
@@ -385,6 +400,19 @@ if(NOT TARGET CURL::libcurl
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBPSL=ON")
     else()
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBPSL=OFF")
+    endif()
+
+    # libssh2: curl's FindLibssh2 prefers pkg-config and records plain "ssh2" in the exported link interface, which is
+    # resolved by the link directories we add in PROJECT_THIRD_PARTY_LIBCURL_IMPORT. Disable it explicitly when it can
+    # not be found, so a system one is not picked up by accident.
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+      pkg_check_modules(LIBSSH2 QUIET libssh2)
+    endif()
+    if(LIBSSH2_FOUND)
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBSSH2=ON")
+    else()
+      list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_BUILD_OPTIONS "-DCURL_USE_LIBSSH2=OFF")
     endif()
 
     # curl 8.19+ uses *_USE_STATIC_LIBS flags in its Find modules to set static compile definitions. Parent-scope
