@@ -81,6 +81,11 @@ int main() {
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_DEFAULT_VERSION "11.0.2")
         endif()
       endif()
+      # fmt's module support is not stable yet, and may cause error when finding package We disable it now, until it's
+      # available on all platforms and all compilers.
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ENABLE_MODULE)
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ENABLE_MODULE OFF)
+      endif()
       project_third_party_port_declare(
         fmtlib
         VERSION
@@ -91,6 +96,7 @@ int main() {
         "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
         "-DFMT_DOC=OFF"
         "-DFMT_INSTALL=ON"
+        "-DFMT_MODULE=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_ENABLE_MODULE}"
         "-DFMT_TEST=OFF"
         "-DFMT_FUZZ=OFF"
         "-DFMT_CUDA_TEST=OFF")
