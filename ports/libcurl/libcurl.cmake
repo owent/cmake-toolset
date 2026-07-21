@@ -115,20 +115,82 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
         unset(PROJECT_THIRD_PARTY_LIBCURL_ALIAS_TARGET)
       endforeach()
 
-      # libssh2 may be exported by curl's FindLibssh2 as a plain library name (found by pkg-config). Add the library
-      # directories from pkg-config to the link search paths of the imported targets, so the linker can find it.
+      # Some dependencies (brotli, libssh2 and so on) may be exported by curl's bundled Find modules as plain library
+      # names (usually found by pkg-config), without the library directories needed by the linker to find them. Scan the
+      # real INTERFACE_LINK_LIBRARIES of the imported targets (including the CURL::* interface targets they reference),
+      # probe only the plain library names that are really used with pkg-config, and add the library directories to the
+      # link search paths of the imported targets.
       find_package(PkgConfig QUIET)
       if(PkgConfig_FOUND)
-        pkg_check_modules(LIBSSH2 QUIET libssh2)
-      endif()
-      if(LIBSSH2_FOUND AND LIBSSH2_LIBRARY_DIRS)
-        foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES} CURL::libssh2)
-          if(TARGET ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
-            project_build_tools_resolve_alias_target(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME
-                                                     ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
-            target_link_directories(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} INTERFACE ${LIBSSH2_LIBRARY_DIRS})
+        set(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAMES)
+        set(PROJECT_THIRD_PARTY_LIBCURL_DEP_SCANNED_TARGETS)
+        set(PROJECT_THIRD_PARTY_LIBCURL_DEP_PENDING_TARGETS ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+        while(PROJECT_THIRD_PARTY_LIBCURL_DEP_PENDING_TARGETS)
+          list(POP_FRONT PROJECT_THIRD_PARTY_LIBCURL_DEP_PENDING_TARGETS PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
+          if(NOT TARGET ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+            continue()
           endif()
-        endforeach()
+          project_build_tools_resolve_alias_target(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME
+                                                   ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+          if(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME IN_LIST PROJECT_THIRD_PARTY_LIBCURL_DEP_SCANNED_TARGETS)
+            continue()
+          endif()
+          list(APPEND PROJECT_THIRD_PARTY_LIBCURL_DEP_SCANNED_TARGETS ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+          get_target_property(PROJECT_THIRD_PARTY_LIBCURL_DEP_INTERFACE_LINK_LIBRARIES
+                              ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} INTERFACE_LINK_LIBRARIES)
+          foreach(PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME ${PROJECT_THIRD_PARTY_LIBCURL_DEP_INTERFACE_LINK_LIBRARIES})
+            if(TARGET ${PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME})
+              if(PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME MATCHES "^CURL::")
+                list(APPEND PROJECT_THIRD_PARTY_LIBCURL_DEP_PENDING_TARGETS
+                     ${PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME})
+              endif()
+            elseif(NOT IS_ABSOLUTE "${PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME}"
+                   AND NOT PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME MATCHES "^(-|\\\$<)")
+              list(APPEND PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAMES ${PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME})
+            endif()
+          endforeach()
+          unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_INTERFACE_LINK_LIBRARIES)
+        endwhile()
+
+        if(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAMES)
+          list(REMOVE_DUPLICATES PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAMES)
+          set(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_DIRS)
+          foreach(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAME ${PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAMES})
+            string(REGEX REPLACE "[^A-Za-z0-9]" "_" PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX
+                                 "${PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAME}")
+            string(TOUPPER "${PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX}" PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX)
+            foreach(PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_MODULE "lib${PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAME}"
+                                                              "${PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAME}")
+              if(NOT ${PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX}_FOUND)
+                pkg_check_modules(${PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX} QUIET
+                                  ${PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_MODULE})
+              endif()
+            endforeach()
+            if(${PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX}_FOUND)
+              list(APPEND PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_DIRS
+                   ${${PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX}_LIBRARY_DIRS})
+            endif()
+            unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_PREFIX)
+          endforeach()
+          if(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_DIRS)
+            list(REMOVE_DUPLICATES PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_DIRS)
+            foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES})
+              if(TARGET ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+                project_build_tools_resolve_alias_target(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME
+                                                         ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+                target_link_directories(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} INTERFACE
+                                        ${PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_DIRS})
+              endif()
+            endforeach()
+          endif()
+        endif()
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAMES)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_DIRS)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_SCANNED_TARGETS)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_PENDING_TARGETS)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_LINK_NAME)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_LIBRARY_NAME)
+        unset(PROJECT_THIRD_PARTY_LIBCURL_DEP_PC_MODULE)
         unset(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME)
       endif()
     else()
