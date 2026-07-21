@@ -1,0 +1,11 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ada04a6..0a4c7b0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ # Require CMake 3.10. If available, use the policies up to CMake 3.22.
+-cmake_minimum_required (VERSION 3.13...3.22)
++cmake_minimum_required (VERSION 3.16)
+ 
+ project (benchmark VERSION 1.9.5 LANGUAGES CXX)
+ 

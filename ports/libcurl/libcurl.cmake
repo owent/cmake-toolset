@@ -124,6 +124,8 @@ macro(PROJECT_THIRD_PARTY_LIBCURL_IMPORT)
       if(LIBSSH2_FOUND AND LIBSSH2_LIBRARY_DIRS)
         foreach(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAMES} CURL::libssh2)
           if(TARGET ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
+            project_build_tools_resolve_alias_target(PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME
+                                                     ${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME})
             target_link_directories(${PROJECT_THIRD_PARTY_LIBCURL_TARGET_NAME} INTERFACE ${LIBSSH2_LIBRARY_DIRS})
           endif()
         endforeach()
