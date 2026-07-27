@@ -687,10 +687,7 @@ function(project_third_party_get_build_dir OUTPUT_VARNAME PORT_NAME PORT_VERSION
     set(${OUTPUT_VARNAME}
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_PLATFORM_NAME}${PROJECT_THIRD_PARTY_INSTALL_DEFAULT_SUFFIX}"
         PARENT_SCOPE)
-  elseif(
-    WIN32
-    AND NOT MINGW
-    AND NOT CYGWIN)
+  elseif(CMAKE_SYSTEM_NAME MATCHES "^Windows")
     string(TOLOWER "win-${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}" USE_SHORT_PREBUILT_NAME)
     set(${OUTPUT_VARNAME}
         "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/b/${PORT_NAME}/${USE_SHORT_PREBUILT_NAME}"
@@ -718,10 +715,7 @@ function(project_third_party_get_host_build_dir OUTPUT_VARNAME PORT_NAME PORT_VE
     set(${OUTPUT_VARNAME}
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR}/${PORT_NAME}-${project_third_party_get_build_dir_PORT_VERSION}/${PROJECT_PREBUILT_HOST_PLATFORM_NAME}${PROJECT_THIRD_PARTY_HOST_INSTALL_DEFAULT_SUFFIX}"
         PARENT_SCOPE)
-  elseif(
-    WIN32
-    AND NOT MINGW
-    AND NOT CYGWIN)
+  elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "^Windows")
     string(TOLOWER "win-${CMAKE_HOST_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}" USE_SHORT_PREBUILT_NAME)
     set(${OUTPUT_VARNAME}
         "${project_third_party_get_build_dir_SELECT_BASE}/cmake-toolset/${project_third_party_get_build_dir_HASH}/b/${PORT_NAME}/${USE_SHORT_PREBUILT_NAME}"
@@ -1200,7 +1194,7 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
   if(HOST_PREBUILT_EXISTED)
     if(project_third_party_crosscompiling_host_RESULT_VARIABLE)
       set(${project_third_party_crosscompiling_host_RESULT_VARIABLE}
-          ${BUILD_RESULT_CODE}
+          0
           PARENT_SCOPE)
     endif()
     return()
@@ -1218,7 +1212,7 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
                                                                             "${HOST_PROJECT_SOURCE_DIRECTORY}")
   message(
     STATUS
-      "Dependency(${PROJECT_NAME}): Try to build ${PORT_NAME} fo host architecture(${PROJECT_PREBUILT_HOST_PLATFORM_NAME}@${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR})"
+      "Dependency(${PROJECT_NAME}): Try to build ${PORT_NAME} for host architecture(${PROJECT_PREBUILT_HOST_PLATFORM_NAME}@${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_TOOL_BUILD_DIR})"
   )
   project_build_tools_append_cmake_host_options(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CROSSCOMPILING_HOST_BUILD_FLAGS)
   # Vcpkg
@@ -1267,6 +1261,7 @@ function(project_third_party_crosscompiling_host PORT_NAME HOST_PROJECT_SOURCE_D
   endforeach()
   unset(CMD_ARG_UNESCAPE)
 
+  unset(BUILD_RESULT_CODE)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH
      OR CMAKE_HOST_UNIX
      OR MSYS)
