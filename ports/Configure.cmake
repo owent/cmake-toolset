@@ -310,32 +310,156 @@ if(NOT EXISTS ${PROJECT_THIRD_PARTY_INSTALL_DIR})
   file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
 endif()
 
-if(NOT CMAKE_BUILD_RPATH)
-  add_list_flags_to_inherit_var(CMAKE_BUILD_RPATH "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64"
-                                "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-
-  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
-    add_compiler_flags_to_inherit_var_unique(
-      CMAKE_EXE_LINKER_FLAGS
-      "-Wl,-rpath-link,${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-    add_compiler_flags_to_inherit_var_unique(
-      CMAKE_MODULE_LINKER_FLAGS
-      "-Wl,-rpath-link,${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-    add_compiler_flags_to_inherit_var_unique(
-      CMAKE_SHARED_LINKER_FLAGS
-      "-Wl,-rpath-link,${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64:${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib")
-  endif()
-else()
-  if(ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
-    add_compiler_flags_to_inherit_var_unique(CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath-link,${CMAKE_BUILD_RPATH}")
-    add_compiler_flags_to_inherit_var_unique(CMAKE_MODULE_LINKER_FLAGS "-Wl,-rpath-link,${CMAKE_BUILD_RPATH}")
-    add_compiler_flags_to_inherit_var_unique(CMAKE_SHARED_LINKER_FLAGS "-Wl,-rpath-link,${CMAKE_BUILD_RPATH}")
-  endif()
-endif()
-
 if(NOT EXISTS ${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR})
   file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR})
 endif()
+
+option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH
+       "Use absolute paths instead of loader-relative paths for additional third-party build RPATH entries" OFF)
+
+if(APPLE)
+  set(_atframework_cmake_toolset_target_rpath_origin "@loader_path")
+elseif(UNIX)
+  set(_atframework_cmake_toolset_target_rpath_origin "$ORIGIN")
+endif()
+if(CMAKE_HOST_APPLE)
+  set(_atframework_cmake_toolset_host_rpath_origin "@loader_path")
+elseif(CMAKE_HOST_UNIX)
+  set(_atframework_cmake_toolset_host_rpath_origin "$ORIGIN")
+endif()
+
+# Build absolute and loader-relative RPATH lists for a third-party prefix.
+function(_atframework_cmake_toolset_make_build_rpath _atframework_cmake_toolset_out_var
+         _atframework_cmake_toolset_absolute_out_var _atframework_cmake_toolset_install_dir
+         _atframework_cmake_toolset_origin)
+  get_filename_component(_atframework_cmake_toolset_install_dir "${_atframework_cmake_toolset_install_dir}" ABSOLUTE
+                         BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+  foreach(_atframework_cmake_toolset_library_dir "${CMAKE_INSTALL_LIBDIR}" lib64 lib)
+    list(APPEND _atframework_cmake_toolset_absolute_rpath
+         "${_atframework_cmake_toolset_install_dir}/${_atframework_cmake_toolset_library_dir}")
+    list(APPEND _atframework_cmake_toolset_relative_rpath
+         "${_atframework_cmake_toolset_origin}/../${_atframework_cmake_toolset_library_dir}")
+  endforeach()
+  list(REMOVE_DUPLICATES _atframework_cmake_toolset_absolute_rpath)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH OR NOT _atframework_cmake_toolset_origin)
+    set(_atframework_cmake_toolset_rpath ${_atframework_cmake_toolset_absolute_rpath})
+  else()
+    list(PREPEND _atframework_cmake_toolset_relative_rpath "${_atframework_cmake_toolset_origin}")
+    foreach(_atframework_cmake_toolset_output_dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+                                                  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+      if(NOT _atframework_cmake_toolset_output_dir OR _atframework_cmake_toolset_output_dir MATCHES "\\$<")
+        continue()
+      endif()
+      get_filename_component(_atframework_cmake_toolset_output_dir "${_atframework_cmake_toolset_output_dir}" ABSOLUTE
+                             BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+      foreach(_atframework_cmake_toolset_library_dir IN LISTS _atframework_cmake_toolset_absolute_rpath)
+        file(RELATIVE_PATH _atframework_cmake_toolset_relative_dir "${_atframework_cmake_toolset_output_dir}"
+             "${_atframework_cmake_toolset_library_dir}")
+        if(IS_ABSOLUTE "${_atframework_cmake_toolset_relative_dir}")
+          continue()
+        elseif(_atframework_cmake_toolset_relative_dir STREQUAL ".")
+          set(_atframework_cmake_toolset_relative_dir)
+        else()
+          set(_atframework_cmake_toolset_relative_dir "/${_atframework_cmake_toolset_relative_dir}")
+        endif()
+        list(APPEND _atframework_cmake_toolset_relative_rpath
+             "${_atframework_cmake_toolset_origin}${_atframework_cmake_toolset_relative_dir}")
+        if(CMAKE_CONFIGURATION_TYPES)
+          list(APPEND _atframework_cmake_toolset_relative_rpath
+               "${_atframework_cmake_toolset_origin}/..${_atframework_cmake_toolset_relative_dir}")
+        endif()
+      endforeach()
+    endforeach()
+    list(REMOVE_DUPLICATES _atframework_cmake_toolset_relative_rpath)
+    set(_atframework_cmake_toolset_rpath ${_atframework_cmake_toolset_relative_rpath})
+  endif()
+  set(${_atframework_cmake_toolset_out_var}
+      ${_atframework_cmake_toolset_rpath}
+      PARENT_SCOPE)
+  set(${_atframework_cmake_toolset_absolute_out_var}
+      ${_atframework_cmake_toolset_absolute_rpath}
+      PARENT_SCOPE)
+endfunction()
+
+_atframework_cmake_toolset_make_build_rpath(
+  _atframework_cmake_toolset_target_runtime_library_dirs
+  _atframework_cmake_toolset_target_absolute_runtime_library_dirs "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+  "${_atframework_cmake_toolset_target_rpath_origin}")
+_atframework_cmake_toolset_make_build_rpath(
+  _atframework_cmake_toolset_host_runtime_library_dirs _atframework_cmake_toolset_host_absolute_runtime_library_dirs
+  "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}" "${_atframework_cmake_toolset_host_rpath_origin}")
+
+if(NOT DEFINED CMAKE_BUILD_RPATH_USE_ORIGIN)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH)
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN FALSE)
+  else()
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+  endif()
+endif()
+if(NOT DEFINED CMAKE_HOST_BUILD_RPATH_USE_ORIGIN)
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH)
+    set(CMAKE_HOST_BUILD_RPATH_USE_ORIGIN FALSE)
+  else()
+    set(CMAKE_HOST_BUILD_RPATH_USE_ORIGIN TRUE)
+  endif()
+endif()
+if(NOT DEFINED COMPILER_OPTION_INHERIT_CMAKE_BUILD_RPATH_USE_ORIGIN)
+  set(COMPILER_OPTION_INHERIT_CMAKE_BUILD_RPATH_USE_ORIGIN "${CMAKE_BUILD_RPATH_USE_ORIGIN}")
+endif()
+if(NOT DEFINED COMPILER_OPTION_INHERIT_CMAKE_HOST_BUILD_RPATH_USE_ORIGIN)
+  set(COMPILER_OPTION_INHERIT_CMAKE_HOST_BUILD_RPATH_USE_ORIGIN "${CMAKE_HOST_BUILD_RPATH_USE_ORIGIN}")
+endif()
+
+if(NOT DEFINED COMPILER_OPTION_INHERIT_CMAKE_BUILD_RPATH)
+  set(COMPILER_OPTION_INHERIT_CMAKE_BUILD_RPATH "${CMAKE_BUILD_RPATH}")
+endif()
+if(NOT DEFINED COMPILER_OPTION_INHERIT_CMAKE_HOST_BUILD_RPATH)
+  set(COMPILER_OPTION_INHERIT_CMAKE_HOST_BUILD_RPATH "${CMAKE_HOST_BUILD_RPATH}")
+endif()
+foreach(_atframework_cmake_toolset_rpath_var CMAKE_BUILD_RPATH COMPILER_OPTION_INHERIT_CMAKE_BUILD_RPATH)
+  list(PREPEND ${_atframework_cmake_toolset_rpath_var} ${_atframework_cmake_toolset_target_runtime_library_dirs})
+  list(REMOVE_DUPLICATES ${_atframework_cmake_toolset_rpath_var})
+endforeach()
+foreach(_atframework_cmake_toolset_rpath_var CMAKE_HOST_BUILD_RPATH COMPILER_OPTION_INHERIT_CMAKE_HOST_BUILD_RPATH)
+  list(PREPEND ${_atframework_cmake_toolset_rpath_var} ${_atframework_cmake_toolset_host_runtime_library_dirs})
+  list(REMOVE_DUPLICATES ${_atframework_cmake_toolset_rpath_var})
+endforeach()
+unset(_atframework_cmake_toolset_rpath_var)
+
+# GNU-compatible ELF linkers use rpath-link only while resolving indirect shared-library dependencies. Runtime lookup is
+# provided by CMAKE_BUILD_RPATH above. Use one option per directory so Windows drive letters in cross builds are not
+# mistaken for path-list separators.
+if((ANDROID OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android") AND NOT MSVC)
+  foreach(_atframework_cmake_toolset_runtime_library_dir IN
+          LISTS _atframework_cmake_toolset_target_absolute_runtime_library_dirs)
+    set(_atframework_cmake_toolset_rpath_link_option
+        "-Wl,-rpath-link,\"${_atframework_cmake_toolset_runtime_library_dir}\"")
+    foreach(_atframework_cmake_toolset_linker_type EXE MODULE SHARED)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_${_atframework_cmake_toolset_linker_type}_LINKER_FLAGS
+                                               "${_atframework_cmake_toolset_rpath_link_option}")
+    endforeach()
+  endforeach()
+endif()
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+  foreach(_atframework_cmake_toolset_runtime_library_dir IN
+          LISTS _atframework_cmake_toolset_host_absolute_runtime_library_dirs)
+    set(_atframework_cmake_toolset_rpath_link_option
+        "-Wl,-rpath-link,\"${_atframework_cmake_toolset_runtime_library_dir}\"")
+    foreach(_atframework_cmake_toolset_linker_type EXE MODULE SHARED)
+      add_compiler_flags_to_inherit_var_unique(CMAKE_HOST_${_atframework_cmake_toolset_linker_type}_LINKER_FLAGS
+                                               "${_atframework_cmake_toolset_rpath_link_option}")
+    endforeach()
+  endforeach()
+endif()
+unset(_atframework_cmake_toolset_linker_type)
+unset(_atframework_cmake_toolset_rpath_link_option)
+unset(_atframework_cmake_toolset_runtime_library_dir)
+unset(_atframework_cmake_toolset_target_runtime_library_dirs)
+unset(_atframework_cmake_toolset_host_runtime_library_dirs)
+unset(_atframework_cmake_toolset_target_absolute_runtime_library_dirs)
+unset(_atframework_cmake_toolset_host_absolute_runtime_library_dirs)
+unset(_atframework_cmake_toolset_target_rpath_origin)
+unset(_atframework_cmake_toolset_host_rpath_origin)
 
 if(NOT EXISTS ${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR})
   file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_CMAKE_MODULE_DIR})
@@ -546,37 +670,11 @@ project_third_party_print_find_information()
 
 mark_as_advanced(PROJECT_THIRD_PARTY_PACKAGE_DIR PROJECT_THIRD_PARTY_INSTALL_DIR)
 
-# Some libraries maybe has wrong RPATH
-string(FIND "$ENV{PATH}" "\;" PROJECT_THIRD_PARTY_TEST_PATH_SEP)
-if(PROJECT_THIRD_PARTY_TEST_PATH_SEP GREATER_EQUAL 0)
-  set(PROJECT_THIRD_PARTY_PATH_SEPARATOR ";")
-else()
-  set(PROJECT_THIRD_PARTY_PATH_SEPARATOR ":")
-endif()
-unset(PROJECT_THIRD_PARTY_TEST_PATH_SEP)
-
-# reset LD_LIBRARY_PATH may lead to conflict when external tools depends on our ports when ours are built with sanitizer
-if(NOT ((CMAKE_CROSSCOMPILING AND PROJECT_COMPILER_OPTIONS_HOST_USE_SANITIZER)
-        OR PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER))
-  if(UNIX
-     OR MINGW
-     OR MSYS)
-    if(DEFINED ENV{LD_LIBRARY_PATH})
-      set(ENV{LD_LIBRARY_PATH}
-          "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64${PROJECT_THIRD_PARTY_PATH_SEPARATOR}${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib${PROJECT_THIRD_PARTY_PATH_SEPARATOR}$ENV{LD_LIBRARY_PATH}"
-      )
-    else()
-      set(ENV{LD_LIBRARY_PATH}
-          "${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib64${PROJECT_THIRD_PARTY_PATH_SEPARATOR}${PROJECT_THIRD_PARTY_INSTALL_DIR}/lib"
-      )
-    endif()
-  endif()
-endif()
-
-# Can not append PATH when corssing compiling, CMAKE_USE_SYSTEM_ENVIRONMENT_PATH will cause a invalid arch searching.
+# Do not append PATH when cross compiling. CMAKE_USE_SYSTEM_ENVIRONMENT_PATH may otherwise find target-architecture
+# tools while configuring host tools.
 if(NOT CMAKE_CROSSCOMPILING)
   set(ENV{PATH}
-      "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/bin${PROJECT_THIRD_PARTY_PATH_SEPARATOR}${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/libexec${PROJECT_THIRD_PARTY_PATH_SEPARATOR}$ENV{PATH}"
+      "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/bin${ATFRAMEWORK_CMAKE_TOOLSET_HOST_PATH_SEPARATOR}${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/libexec${ATFRAMEWORK_CMAKE_TOOLSET_HOST_PATH_SEPARATOR}$ENV{PATH}"
   )
 endif()
 

@@ -224,6 +224,8 @@ For example, if we want to use the same python3 executable on target and host bu
 + Option(Optional): `PROJECT_THIRD_PARTY_PACKAGE_DIR` : Where to place package sources.
 + Option(Optional): `PROJECT_THIRD_PARTY_INSTALL_DIR` : Where to place installed packages.
 + Option(Optional): `PROJECT_THIRD_PARTY_HOST_INSTALL_DIR` : Where to place installed packages of host system.
++ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH` : Use absolute third-party prefix paths
+  instead of loader-relative paths for additional build `RPATH` entries(default: `OFF`).
 + Option(Optional): `FindConfigurePackageGitFetchDepth` : Fetch depth og git repository.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR` : Where to build packages.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR` : Where to build packages of host system.
@@ -239,6 +241,10 @@ For example, if we want to use the same python3 executable on target and host bu
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE` : Show more information of cmake-toolset
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE` : Cleanup build cache directory after a package is built successfully.
 + Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR` : Cleanup souce cache directory after a package is built successfully.
+
+cmake-toolset does not modify `LD_LIBRARY_PATH`. Additional build `RPATH` entries use `$ORIGIN` on Unix or
+`@loader_path` on Apple by default; set `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH=ON` to use absolute
+third-party prefix paths instead. Windows DLL lookup continues to use `PATH`.
 
 ```cmake
 # set(PROJECT_THIRD_PARTY_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/third_party/packages")
