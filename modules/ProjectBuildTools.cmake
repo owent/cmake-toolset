@@ -2234,7 +2234,7 @@ function(project_build_tools_set_export_declaration OUTPUT_VARNAME)
           ""
           PARENT_SCOPE)
     endif()
-  elseif(SunPro)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     set(${OUTPUT_VARNAME}
         "__global"
         PARENT_SCOPE)
@@ -2270,7 +2270,7 @@ function(project_build_tools_set_import_declaration OUTPUT_VARNAME)
           ""
           PARENT_SCOPE)
     endif()
-  elseif(SunPro)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     set(${OUTPUT_VARNAME}
         "__global"
         PARENT_SCOPE)

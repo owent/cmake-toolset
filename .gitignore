@@ -9,6 +9,8 @@ CMakeCache.txt
 CMakeFiles
 CMakeScripts
 Testing
+!/.agents/skills/testing/
+!/.agents/skills/testing/**
 Makefile
 cmake_install.cmake
 install_manifest.txt

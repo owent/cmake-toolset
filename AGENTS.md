@@ -17,15 +17,21 @@ upstream libraries across platforms and toolchains.
 - `modules/`: reusable CMake helper modules.
 - `test/`: integration coverage and canonical include order.
 - `ci/`, `.github/workflows/`: validated CI entrypoints and platform wrappers.
-- `.agents/skills/`: port upgrade, CI-failure, and AI-agent maintenance playbooks.
+- `.agents/skills/`: testing, port upgrade, CI-failure, and AI-agent maintenance playbooks.
 - `.agents/skills/port-upgrade/references/`: on-demand port, patch, test, and CI maintenance references.
 
 ## Always-On Rules
 
 - Respect the user's dirty workspace: inspect current file contents before editing and avoid unrelated reformatting.
-- Read the matching `.agents/skills/*/SKILL.md` before port upgrade, patch, dependency, or CI-failure work.
+- Read the matching `.agents/skills/*/SKILL.md` before test, port upgrade, patch, dependency, or CI-failure work.
 - Treat `ports/Configure.cmake`, `test/CMakeLists.txt`, `.github/workflows/build.yaml`, `ci/do_ci.*`, and upstream repo
   metadata as source of truth; do not rely on historical dependency chains alone.
+- For test work, derive cases from verified behavior and risk. Exercise the smallest observable configure/build/run
+  contract with deterministic inputs, then cover the highest-value boundaries and failures. Do not invent interfaces,
+  variables, environments, or root causes; do not tune data/options only to make a test pass or add trivial smoke tests
+  for counts. When a check fails, fix the implementation or the case design; never weaken, skip, or loosen an existing
+  assertion, drop a platform guard, add a retry, or widen a timeout merely to force green. If scope or prerequisites
+  remain unclear, state assumptions and coverage gaps instead of claiming complete behavior coverage.
 - For edits under `ports/`, `test/CMakeLists.txt`, `ci/do_ci.*`, `.github/workflows/*.yaml`, or patch files, also follow
   `.agents/skills/port-upgrade/references/repository-maintenance-guidelines.md`.
 - Before committing CMake edits, run `cmake-format -i` on modified `.cmake`, `.cmake.in`, and `CMakeLists.txt` files
@@ -75,6 +81,7 @@ Read the matching `.agents/skills/*/SKILL.md` before specialized work:
 
 | Skill | Use when |
 | --- | --- |
+| `testing` | Designing, reviewing, registering, or running CTest/configure/link-smoke coverage |
 | `port-upgrade` | Upgrading ports, resolving pins, validating patches, or reviewing CI impact |
 | `ci-fix-port` | Diagnosing or fixing CI failures after port or patch changes |
 | `ai-agent-maintenance` | Auditing or optimizing AI agent prompts, bridge files, skills, and cross-tool compatibility |
