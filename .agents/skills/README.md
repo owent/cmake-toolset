@@ -11,6 +11,7 @@ commands, caveats, and examples here.
 | `port-upgrade/` | Use when upgrading ports, resolving dependency pins, validating patches, or reviewing CI impact |
 | `ci-fix-port/` | Use when diagnosing and fixing CI failures after port or patch changes |
 | `ai-agent-maintenance/` | Use when auditing and optimizing AI agent prompts, bridge files, skills, and compatibility |
+| `shell-tooling/` | Use when running terminal commands, choosing modern CLI tools, or writing/debugging PowerShell |
 
 ## When to read what
 
@@ -18,6 +19,7 @@ commands, caveats, and examples here.
 - If you are upgrading a port or dependency pin: start with `port-upgrade/SKILL.md`.
 - If CI fails after a port or patch change: start with `ci-fix-port/SKILL.md`.
 - If you are updating AI agent prompts or skills: see `ai-agent-maintenance/SKILL.md`.
+- If you are running terminal commands or writing/debugging PowerShell: see `shell-tooling/SKILL.md`.
 
 ## Maintenance rules
 

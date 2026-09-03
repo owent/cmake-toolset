@@ -37,6 +37,19 @@ upstream libraries across platforms and toolchains.
 - Before committing CMake edits, run `cmake-format -i` on modified `.cmake`, `.cmake.in`, and `CMakeLists.txt` files
   (excluding `test/third_party/` and `test/build_jobs_*/`), or run `bash ci/format.sh` for the whole tree.
 
+## Terminal and Tooling
+
+- On Windows use PowerShell 7+ (`pwsh.exe`); never use the legacy Windows PowerShell 5.1 (`powershell.exe`). Launch
+  independent processes with `pwsh.exe -NoLogo -NoProfile`, and do not nest `cmd.exe`, Git Bash, WSL, or other shells
+  unless the task explicitly requires it.
+- Probe before use (`Get-Command <name>`): prefer an installed modern CLI tool (`rg`, `fd`, `sd`, `bat`, `jq`, ...)
+  and fall back to PowerShell cmdlets or the traditional tool when it is absent.
+- Write PowerShell defensively: single quotes unless expansion is needed, `${name}` for ambiguous boundaries,
+  here-strings instead of heredocs, `& { ... } | ...` to pipe statement blocks, and full cmdlet names instead of
+  ambiguous Unix aliases (`cat`, `find`, `where`).
+- Read the `shell-tooling` skill for the full modern-tool inventory, install channels, agent practices, and
+  PowerShell authoring rules before shell-heavy work or command-failure debugging.
+
 ## Task Triage
 
 Match process intensity to risk:
@@ -85,6 +98,7 @@ Read the matching `.agents/skills/*/SKILL.md` before specialized work:
 | `port-upgrade` | Upgrading ports, resolving pins, validating patches, or reviewing CI impact |
 | `ci-fix-port` | Diagnosing or fixing CI failures after port or patch changes |
 | `ai-agent-maintenance` | Auditing or optimizing AI agent prompts, bridge files, skills, and cross-tool compatibility |
+| `shell-tooling` | Running terminal commands, choosing modern CLI tools, or writing/debugging PowerShell |
 
 ## Agent File Compatibility
 
