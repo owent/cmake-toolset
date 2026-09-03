@@ -815,6 +815,7 @@ if(NOT DEFINED __COMPILER_OPTION_LOADED)
       /we6246)
     list(APPEND COMPILER_STRICT_RECOMMEND_REMOVE_CFLAGS /wd4100 /wd4127)
     add_linker_flags_for_runtime_unique(/ignore:4217)
+    add_linker_flags_for_runtime_unique(/ignore:4099)
 
     if(NOT VCPKG_TOOLCHAIN)
       add_compiler_flags_to_inherit_var_unique(CMAKE_CXX_FLAGS /nologo /DWIN32 /D_WINDOWS "/utf-8" /MP)
