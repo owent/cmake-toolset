@@ -129,13 +129,20 @@ endif()
 
 project_third_party_include_port("compression/import.cmake")
 
+# jemalloc and libunwind are built with autoconf. When cross compiling from a Windows host there is no usable
+# autoconf/automake toolchain, so these two ports can only be covered by Unix hosts.
+if(CMAKE_CROSSCOMPILING AND CMAKE_HOST_WIN32)
+  set(CMAKE_TOOLSET_HOST_AUTOCONF_UNAVAILABLE TRUE)
+endif()
+
 if(NOT ANDROID AND NOT CMAKE_HOST_APPLE)
-  if(COMPILER_OPTIONS_TEST_EXCEPTION)
+  if(COMPILER_OPTIONS_TEST_EXCEPTION AND NOT CMAKE_TOOLSET_HOST_AUTOCONF_UNAVAILABLE)
     project_third_party_include_port("jemalloc/jemalloc.cmake")
   endif()
   if(NOT WIN32
      AND NOT MINGW
-     AND NOT PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER)
+     AND NOT PROJECT_COMPILER_OPTIONS_TARGET_USE_SANITIZER
+     AND NOT CMAKE_TOOLSET_HOST_AUTOCONF_UNAVAILABLE)
     #[[
     # There is a BUG in gcc 4.6-4.8 and finxed in gcc 4.9
     #   @see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=58016

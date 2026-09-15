@@ -125,7 +125,10 @@ if(NOT TARGET flatbuffers::flatbuffers)
            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_PATCH_FILE}")
     endif()
 
-    if(CMAKE_GENERATOR STREQUAL "Ninja")
+    # Keep the generator of the top level project for the sub build. When cross compiling we must pass the generator
+    # down, otherwise the sub build would fall back to the default generator of the host platform(Visual Studio on
+    # Windows), which can not work with the cross compilers.
+    if(CMAKE_GENERATOR STREQUAL "Ninja" AND NOT CMAKE_CROSSCOMPILING)
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATBUFFERS_BUILD_OPTIONS
            CMAKE_INHERIT_BUILD_ENV_DISABLE_GENERATOR)
     endif()

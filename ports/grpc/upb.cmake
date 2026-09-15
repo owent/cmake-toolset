@@ -291,13 +291,23 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME OR NOT
       foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS)
         # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
         set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+        # Escape the embedded quotes for pwsh, otherwise arguments with quotes(such as
+        # -DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath-link,"...") would be split into broken pieces.
+        string(REPLACE "\"" "\\\"" CMD_ARG_PWSH_UNESCAPE "${CMD_ARG_UNESCAPE}")
         project_build_tools_append_space_one_flag_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_PWSH
-                                                         "\"${CMD_ARG_UNESCAPE}\"")
+                                                         "\"${CMD_ARG_PWSH_UNESCAPE}\"")
         string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+        string(REPLACE "\"" "\\\"" CMD_ARG_BASH_UNESCAPE "${CMD_ARG_UNESCAPE}")
         project_build_tools_append_space_one_flag_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_FLAGS_BASH
-                                                         "\"${CMD_ARG_UNESCAPE}\"")
+                                                         "\"${CMD_ARG_BASH_UNESCAPE}\"")
       endforeach()
       unset(CMD_ARG_UNESCAPE)
+
+      if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_CONFIG)
+        # The value of CMAKE_BUILD_TYPE may be changed by other ports during configuring, and the host build
+        # configuration must match the prebuilt host libraries, so use a fixed matching configuration here.
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_HOST_BUILD_CONFIG "Release")
+      endif()
 
       # Build host
       if(NOT ATFRAMEWORK_CMAKE_TOOLSET_PWSH

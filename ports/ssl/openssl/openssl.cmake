@@ -472,6 +472,33 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
           endif()
         endif()
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_CONFIG "Configure")
+      elseif(
+        CMAKE_SYSTEM_NAME STREQUAL "Linux"
+        AND CMAKE_CROSSCOMPILING
+        AND NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+        # `config` detects the target by running uname of the host, which can not work when cross compiling on a
+        # non-Unix host. We must always use an explicit target there.
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_CONFIG "Configure")
+        if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET)
+          if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)")
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "linux-x86_64")
+          elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|ARM64)")
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "linux-aarch64")
+          elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm|ARM)")
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "linux-armv4")
+          elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86|X86)")
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "linux-x86")
+          elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(riscv64)")
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "linux-riscv64")
+          elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(loongarch64)")
+            set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "linux64-loongarch")
+          else()
+            message(
+              FATAL_ERROR
+                "Unsupported Linux target for OpenSSL cross compiling: CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}"
+            )
+          endif()
+        endif()
       endif()
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_OPTIONS
@@ -480,6 +507,10 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
       project_expand_list_for_command_line_to_file(
         BASH
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh"
+        # Calling the perl interpreter explicitly instead of relying on the shebang line, so that we always use the
+        # perl detected by find_package(Perl). The shebang may resolve to a limited perl without the modules required
+        # by Configure, such as the one shipped with Git for Windows.
+        "${PERL_EXECUTABLE}"
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_CONFIG}"
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_OPTIONS})
 

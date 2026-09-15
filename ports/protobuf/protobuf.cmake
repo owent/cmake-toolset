@@ -222,6 +222,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
         # are only used by internal sources. So it's safe to install them.
         set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_USE_CXX_STANDARD 17)
       endif()
+      if(CMAKE_HOST_WIN32 AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_USE_C_STANDARD GREATER 17)
+        # MSVC only has experimental support of C23(static_assert etc.) and upb requires a stable C standard when
+        # building the host tools on a Windows host.
+        set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_USE_C_STANDARD 17)
+      endif()
 
       list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS
            "-DCMAKE_CXX_STANDARD=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_USE_CXX_STANDARD}")
@@ -245,21 +250,29 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
               ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_OPTIONS)
         # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
         set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+        # Escape the embedded quotes for pwsh, otherwise arguments with quotes(such as
+        # -DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath-link,"...") would be split into broken pieces.
+        string(REPLACE "\"" "\\\"" CMD_ARG_PWSH_UNESCAPE "${CMD_ARG_UNESCAPE}")
         project_build_tools_append_space_one_flag_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_PWSH
-                                                         "\"${CMD_ARG_UNESCAPE}\"")
+                                                         "\"${CMD_ARG_PWSH_UNESCAPE}\"")
         string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+        string(REPLACE "\"" "\\\"" CMD_ARG_BASH_UNESCAPE "${CMD_ARG_UNESCAPE}")
         project_build_tools_append_space_one_flag_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BUILD_FLAGS_BASH
-                                                         "\"${CMD_ARG_UNESCAPE}\"")
+                                                         "\"${CMD_ARG_BASH_UNESCAPE}\"")
       endforeach()
 
       foreach(CMD_ARG IN LISTS ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS)
         # string(REPLACE ";" "\\;" CMD_ARG_UNESCAPE "${CMD_ARG}")
         set(CMD_ARG_UNESCAPE "${CMD_ARG}")
+        # Escape the embedded quotes for pwsh, otherwise arguments with quotes(such as
+        # -DCMAKE_EXE_LINKER_FLAGS=-Wl,-rpath-link,"...") would be split into broken pieces.
+        string(REPLACE "\"" "\\\"" CMD_ARG_PWSH_UNESCAPE "${CMD_ARG_UNESCAPE}")
         project_build_tools_append_space_one_flag_to_var(
-          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_PWSH "\"${CMD_ARG_UNESCAPE}\"")
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_PWSH "\"${CMD_ARG_PWSH_UNESCAPE}\"")
         string(REPLACE "\$" "\\\$" CMD_ARG_UNESCAPE "${CMD_ARG_UNESCAPE}")
+        string(REPLACE "\"" "\\\"" CMD_ARG_BASH_UNESCAPE "${CMD_ARG_UNESCAPE}")
         project_build_tools_append_space_one_flag_to_var(
-          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_BASH "\"${CMD_ARG_UNESCAPE}\"")
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_HOST_BUILD_FLAGS_BASH "\"${CMD_ARG_BASH_UNESCAPE}\"")
       endforeach()
       unset(CMD_ARG_UNESCAPE)
 

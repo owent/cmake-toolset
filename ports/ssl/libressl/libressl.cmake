@@ -27,6 +27,11 @@ macro(PROJECT_THIRD_PARTY_LIBRESSL_IMPORT)
     set(OPENSSL_VERSION
         "1.1.0"
         CACHE STRING "openssl version of libressl" FORCE)
+    # Downstream ports(hiredis, libwebsockets, etc.) pass this root to their sub builds to locate the OpenSSL compatible
+    # headers and libraries provided by LibreSSL.
+    set(OPENSSL_ROOT_DIR
+        "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+        CACHE PATH "root of the OpenSSL compatible libraries provided by LibreSSL" FORCE)
 
     set_target_properties(LibreSSL::Crypto LibreSSL::SSL PROPERTIES IMPORTED_GLOBAL TRUE)
     add_library(OpenSSL::Crypto ALIAS LibreSSL::Crypto)
