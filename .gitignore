@@ -25,3 +25,4 @@ build_jobs_*
 /test/third_party/packages
 /test/upb/third_party/install
 /test/upb/third_party/packages
+/test/.cmake-toolset

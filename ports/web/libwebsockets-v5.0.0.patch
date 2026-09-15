@@ -1,0 +1,74 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8a923b4..cbe95a8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,7 +22,7 @@
+ # IN THE SOFTWARE.
+ #
+ 
+-cmake_minimum_required(VERSION 3.10...4.0)
++cmake_minimum_required(VERSION 3.16)
+ 
+ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+ 
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 1e74888..581aadf 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -256,7 +256,7 @@ if (LWS_WITH_STATIC)
+ 	target_include_directories(websockets PRIVATE ${LWS_LIB_BUILD_INC_PATHS} ${LWS_LIB_BUILD_INC_PATHS_TEMP} ${CMAKE_CURRENT_SOURCE_DIR}/../core)
+ 	target_compile_definitions(websockets PRIVATE LWS_BUILDING_STATIC)
+ 	foreach(inc ${LWS_PUBLIC_INCLUDES})
+-		target_include_directories(websockets PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
++		target_include_directories(websockets BEFORE PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
+ 	endforeach()
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+@@ -286,7 +286,7 @@ if (LWS_WITH_SHARED)
+ 	target_include_directories(websockets_shared PRIVATE ${LWS_LIB_BUILD_INC_PATHS} ${LWS_LIB_BUILD_INC_PATHS_TEMP} ${CMAKE_CURRENT_SOURCE_DIR}/../core)
+ 	target_compile_definitions(websockets_shared PRIVATE LWS_BUILDING_SHARED)
+ 	foreach(inc ${LWS_PUBLIC_INCLUDES})
+-		target_include_directories(websockets_shared PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
++		target_include_directories(websockets_shared BEFORE PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
+ 	endforeach()
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
+index 28460b3..1f7a348 100644
+--- a/lib/event-libs/libuv/CMakeLists.txt
++++ b/lib/event-libs/libuv/CMakeLists.txt
+@@ -47,6 +47,7 @@ message("libuv include dir: ${LIBUV_INCLUDE_DIRS}")
+ message("libuv libraries: ${LIBUV_LIBRARIES}")
+ 
+ include_directories("${LIBUV_INCLUDE_DIRS}")
++list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBUV_INCLUDE_DIRS}")
+ 
+ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   # libuv changed the location in 1.21.0. Retain both
+@@ -54,6 +55,7 @@ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   if (NOT LWS_HAVE_UV_VERSION_H)
+     CHECK_INCLUDE_FILE(uv/version.h LWS_HAVE_NEW_UV_VERSION_H)
+   endif()
++  list(POP_BACK CMAKE_REQUIRED_INCLUDES)
+   
+   if (LWS_WITH_EVLIB_PLUGINS AND LWS_WITH_LIBUV)
+ 
+diff --git a/lib/tls/CMakeLists.txt b/lib/tls/CMakeLists.txt
+index b51fa3e..beef5d0 100644
+--- a/lib/tls/CMakeLists.txt
++++ b/lib/tls/CMakeLists.txt
+@@ -505,6 +505,14 @@ if (LWS_WITH_SSL)
+ 				find_package(PkgConfig QUIET)
+ 				pkg_check_modules(PC_OPENSSL openssl QUIET)
+ 				find_package(OpenSSL)
++				if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
++					if(TARGET OpenSSL::SSL AND NOT "OpenSSL::SSL" IN_LIST OPENSSL_LIBRARIES)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::SSL)
++					endif()
++					if(TARGET OpenSSL::Crypto AND NOT "OpenSSL::Crypto" IN_LIST OPENSSL_LIBRARIES)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::Crypto)
++					endif()
++				endif()
+ 				if (NOT OPENSSL_FOUND)
+ 					message(FATAL_ERROR "OpenSSL development packages (e.g., libssl-dev or openssl-devel) not found! \\nIf you want to use OpenSSL, please install them.\\nIf you installed GnuTLS instead, you must explicitly enable it by adding -DLWS_WITH_GNUTLS=1 to your cmake line.\\nYou can also disable SSL completely with -DLWS_WITH_SSL=0.")
+ 				endif()
