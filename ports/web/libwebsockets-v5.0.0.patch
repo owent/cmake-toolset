@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8a923b4..cbe95a8 100644
+index 8a923b4..901c80e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -22,7 +22,7 @@
@@ -11,6 +11,63 @@ index 8a923b4..cbe95a8 100644
  
  set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
  
+@@ -1319,6 +1319,12 @@ if (LWS_WITH_HUBBUB)
+ 	list(APPEND LIB_LIST ${LIBHUBBUB_LIBRARIES} )
+ endif()
+ 
++# ===== Patch: generate lws_config.h earlier. The bundled plugins check their requirements
++# ===== against it while being added, and this point is before the lib sources are collected.
++configure_file(
++       "${PROJECT_SOURCE_DIR}/cmake/lws_config.h.in"
++       "${PROJECT_BINARY_DIR}/lws_config.h")
++
+ if (LWS_WITH_PLUGINS_BUILTIN)
+ 	add_subdirectory(plugins)
+ 
+@@ -1425,9 +1431,7 @@ if (NOT LWS_WITHOUT_TESTAPPS)
+ 	add_subdirectory(test-apps)
+ endif()
+ 
+-if (NOT LWS_WITH_PLUGINS_BUILTIN)
+-add_subdirectory(plugins)
+-endif()
++# NOTE(apply plugin): moved below, the bundled plugins require the generated lws_config.h
+ add_subdirectory(lwsws)
+ if (PICO_SDK_PATH)
+ 	link_libraries(pico_stdlib PRIVATE)
+@@ -1444,6 +1448,12 @@ message("LWS_HAVE_SSL_set_tlsext_host_name: ${LWS_HAVE_SSL_set_tlsext_host_name}
+ configure_file(
+        "${PROJECT_SOURCE_DIR}/cmake/lws_config.h.in"
+        "${PROJECT_BINARY_DIR}/lws_config.h")
++
++# NOTE(apply plugin): The bundled plugins check their requirements against the generated lws_config.h,
++# so they can only be added after it has been generated.
++if (NOT LWS_WITH_PLUGINS_BUILTIN)
++add_subdirectory(plugins)
++endif()
+        
+ add_custom_command(
+ 		OUTPUT ${PROJECT_BINARY_DIR}/include/lws_config.h
+diff --git a/cmake/LwsCheckRequirements.cmake b/cmake/LwsCheckRequirements.cmake
+index e7012b2..0879f1b 100644
+--- a/cmake/LwsCheckRequirements.cmake
++++ b/cmake/LwsCheckRequirements.cmake
+@@ -54,11 +54,10 @@ MACRO(require_lws_config reqconfig _val result)
+ 			endif()
+ 		endif()
+ 		if (NOT MET AND _cmp)
+-			if (${_val})
+-				message(FATAL_ERROR "This project requires lws must have been configured with ${reqconfig}")
+-			else()
+-				message(FATAL_ERROR "Lws configuration of ${reqconfig} is incompatible with this project")
+-			endif()
++			# ===== Patch: in-tree plugins are optional components. Skip the ones whose required
++			# ===== features are disabled or not satisfied instead of failing the whole build.
++			message(STATUS "skipping plugin: lws is being built without ${reqconfig}")
++			set(${result} 0)
+ 		endif()
+ 
+ 	endif()
 diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
 index 1e74888..581aadf 100644
 --- a/lib/CMakeLists.txt

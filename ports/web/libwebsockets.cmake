@@ -111,8 +111,16 @@ if(NOT Libwebsockets_FOUND
             "-DLWS_WITHOUT_TEST_PING=ON"
             "-DLWS_WITHOUT_TEST_SERVER=ON"
             "-DLWS_WITHOUT_TEST_SERVER_EXTPOLL=ON"
-            "-DLWS_WITH_PLUGINS=ON"
-            "-DLWS_WITHOUT_EXTENSIONS=OFF")
+            # The bundled protocol plugins are disabled by default. libwebsockets v5.0 fails on their requirement checks
+            # when built in shared mode (they use CHECK_C_SOURCE_COMPILES without the include directories of lws
+            # itself). The event loop plugins(libuv/libevent) are controlled by LWS_WITH_LIBUV/LWS_WITH_LIBEVENT below
+            # and are always kept enabled when their libraries are available.
+            "-DLWS_WITH_PLUGINS=OFF"
+            "-DLWS_WITH_PLUGINS_BUILTIN=OFF"
+            "-DLWS_WITHOUT_EXTENSIONS=OFF"
+            # Make the event loop plugins position independent, so that they can link against the static libraries of
+            # the dependencies(for example libuv.a) in static builds.
+            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_APPEND_DEFAULT_BUILD_OPTIONS)
           list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
                ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_APPEND_DEFAULT_BUILD_OPTIONS})
@@ -228,7 +236,7 @@ if(NOT Libwebsockets_FOUND
       # Compile failed with libuv on mingw
       if(MINGW)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_LIBUV=OFF"
-             "-DLWS_WITH_LWSWS=OFF" "-DLWS_WITH_PLUGINS=OFF")
+             "-DLWS_WITH_LWSWS=OFF")
       elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_LIBUV=ON")
         if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_INCLUDE_DIRS)
@@ -253,11 +261,49 @@ if(NOT Libwebsockets_FOUND
         endif()
       endif()
 
-      if(WIN32
-         OR CYGWIN
-         OR MINGW)
-        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_PLUGINS=OFF")
-      else()
+      # libevent can also be used as an event loop plugin. When libevent is available, build its plugin as well.
+      if(NOT MINGW
+         AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES
+         AND TARGET libevent::core)
+        list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_LIBEVENT=ON")
+        unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_IMPORTED_LOCATION)
+        project_build_tools_get_imported_location(
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_IMPORTED_LOCATION libevent::core)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_IMPORTED_LOCATION)
+          list(
+            APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+            "-DLWS_LIBEVENT_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_IMPORTED_LOCATION}"
+          )
+        endif()
+        unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_IMPORTED_LOCATION)
+        get_target_property(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_INCLUDE_DIRS libevent::core
+                            INTERFACE_INCLUDE_DIRECTORIES)
+        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_INCLUDE_DIRS)
+          list(
+            APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+            "-DLWS_LIBEVENT_INCLUDE_DIRS=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_INCLUDE_DIRS}")
+        endif()
+        unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LIBEVENT_INCLUDE_DIRS)
+      endif()
+
+      # The bundled plugins of libwebsockets v5.0 check their requirements with CHECK_C_SOURCE_COMPILES, which does not
+      # inherit the include_directories() of lws and would always fail to find libwebsockets.h. Append the source and
+      # the build include directories of lws explicitly. The flags are appended into CMAKE_REQUIRED_FLAGS instead of
+      # CMAKE_REQUIRED_INCLUDES to avoid the list separators in the generated scripts.
+      if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+         AND NOT WIN32
+         AND NOT CYGWIN
+         AND NOT MINGW)
+        list(
+          APPEND
+          ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+          "-DCMAKE_REQUIRED_FLAGS=-I${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_REPOSITORY_DIR}/include -I${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR} -I${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_DIR}/include"
+        )
+      endif()
+
+      if(UNIX
+         AND NOT CYGWIN
+         AND NOT MINGW)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_UNIX_SOCK=ON")
       endif()
 

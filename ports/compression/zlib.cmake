@@ -92,6 +92,26 @@ macro(PROJECT_THIRD_PARTY_ZLIB_IMPORT)
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_DEBUG_NAME}")
     endif()
 
+    # Apple SDKs provide the system zlib as a text-based stub(.tbd) inside the SDK directory. The path only exists under
+    # the sysroot, so Makefile generators would fail on the dependency check when it appears in the link line. Convert
+    # it into the plain library name and let the linker resolve it via the sysroot instead.
+    if(APPLE AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME MATCHES "\\.tbd$")
+      get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME
+                             "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME}" NAME)
+      string(REGEX REPLACE "^lib" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME
+                           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
+      string(REGEX REPLACE "\\.tbd$" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME
+                           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): zlib link item is a tbd stub, use plain library name instead.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME})"
+      )
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME
+          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME)
+    endif()
+
     if(ZLIB_INCLUDE_DIRS)
       get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_COMPRESSION_ZLIB_ROOT_DIR "${ZLIB_INCLUDE_DIRS}"
                              DIRECTORY CACHE)

@@ -32,3 +32,77 @@ index a797c1e..3134e01 100644
  #  define OPENTELEMETRY_TRIVIALITY_TYPE_TRAITS
  #endif
  
+diff --git a/sdk/CMakeLists.txt b/sdk/CMakeLists.txt
+index 1be2c71..774c50c 100644
+--- a/sdk/CMakeLists.txt
++++ b/sdk/CMakeLists.txt
+@@ -14,23 +14,29 @@ target_link_libraries(opentelemetry_sdk INTERFACE opentelemetry_api)
+ set(OTEL_SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ add_subdirectory(src)
+ 
++set(OTELCPP_PATCH_SDK_TARGETS
++    opentelemetry_sdk
++    opentelemetry_common
++    opentelemetry_resources
++    opentelemetry_version
++    opentelemetry_instrumentation_scope
++    opentelemetry_logs
++    opentelemetry_trace
++    opentelemetry_metrics)
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++  list(APPEND OTELCPP_PATCH_SDK_TARGETS
++       opentelemetry_configuration_core
++       opentelemetry_configuration_trace_builders
++       opentelemetry_configuration_metrics_builders
++       opentelemetry_configuration_logs_builders
++       opentelemetry_configuration_registry_factory)
++endif()
++
+ otel_add_component(
+   COMPONENT
+   sdk
+   TARGETS
+-  opentelemetry_sdk
+-  opentelemetry_common
+-  opentelemetry_resources
+-  opentelemetry_version
+-  opentelemetry_instrumentation_scope
+-  opentelemetry_logs
+-  opentelemetry_trace
+-  opentelemetry_metrics
+-  opentelemetry_configuration_core
+-  opentelemetry_configuration_trace_builders
+-  opentelemetry_configuration_metrics_builders
+-  opentelemetry_configuration_logs_builders
+-  opentelemetry_configuration_registry_factory
++  ${OTELCPP_PATCH_SDK_TARGETS}
+   FILES_DIRECTORY
+   "include/opentelemetry/"
+   FILES_DESTINATION
+diff --git a/sdk/src/CMakeLists.txt b/sdk/src/CMakeLists.txt
+index 41f4881..5948098 100644
+--- a/sdk/src/CMakeLists.txt
++++ b/sdk/src/CMakeLists.txt
+@@ -1,6 +1,14 @@
+ # Copyright The OpenTelemetry Authors
+ # SPDX-License-Identifier: Apache-2.0
+ 
++# ===== Patch: skip the configuration component when exception handling is disabled =====
++# The configuration component always uses throw/catch and can not be compiled with -fno-exceptions.
++include(CheckCXXSourceCompiles)
++check_cxx_source_compiles("int main() { throw 1; return 0; }" OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++if(NOT OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++  message(STATUS "Exception handling is disabled, skip building the configuration component")
++endif()
++
+ add_subdirectory(common)
+ add_subdirectory(instrumentationscope)
+ add_subdirectory(trace)
+@@ -8,4 +16,6 @@ add_subdirectory(metrics)
+ add_subdirectory(logs)
+ add_subdirectory(version)
+ add_subdirectory(resource)
+-add_subdirectory(configuration)
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++  add_subdirectory(configuration)
++endif()
