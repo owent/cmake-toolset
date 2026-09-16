@@ -1,0 +1,4 @@
+# @see https://cmake-format.readthedocs.io/en/latest/configuration.html for more details
+
+format:
+  disable: True

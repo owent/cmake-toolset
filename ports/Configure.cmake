@@ -302,17 +302,24 @@ if(NOT DEFINED ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG)
   endif()
 endif()
 
-if(NOT EXISTS ${PROJECT_THIRD_PARTY_PACKAGE_DIR})
-  file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_PACKAGE_DIR})
-endif()
+function(project_third_party_ignore_format_tools)
+  foreach(TARGET_DIR ${ARGN})
+    if(NOT EXISTS "${TARGET_DIR}")
+      file(MAKE_DIRECTORY "${TARGET_DIR}")
+    endif()
+    if(IS_DIRECTORY "${TARGET_DIR}")
+      foreach(FORMAT_FILE ".cmake-format.yaml" ".clang-format")
+        execute_process(
+          COMMAND
+            "${CMAKE_COMMAND}" -E copy_if_different
+            "${CMAKE_CURRENT_LIST_DIR}/../test/third_party/packages/${FORMAT_FILE}" "${TARGET_DIR}/${FORMAT_FILE}")
+      endforeach()
+    endif()
+  endforeach()
+endfunction()
 
-if(NOT EXISTS ${PROJECT_THIRD_PARTY_INSTALL_DIR})
-  file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_INSTALL_DIR})
-endif()
-
-if(NOT EXISTS ${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR})
-  file(MAKE_DIRECTORY ${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR})
-endif()
+project_third_party_ignore_format_tools("${PROJECT_THIRD_PARTY_PACKAGE_DIR}" "${PROJECT_THIRD_PARTY_INSTALL_DIR}"
+                                        "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}")
 
 option(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH
        "Use absolute paths instead of loader-relative paths for additional third-party build RPATH entries" OFF)

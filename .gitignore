@@ -23,7 +23,15 @@ build_jobs_*
 
 /build
 /.lock
-/test/third_party/install
-/test/third_party/packages
-/test/upb/third_party/install
-/test/upb/third_party/packages
+/test/third_party/install/*
+!/test/third_party/install/.cmake-format.yaml
+!/test/third_party/install/.clang-format
+/test/third_party/packages/*
+!/test/third_party/packages/.cmake-format.yaml
+!/test/third_party/packages/.clang-format
+/test/upb/third_party/install/*
+!/test/upb/third_party/install/.cmake-format.yaml
+!/test/upb/third_party/install/.clang-format
+/test/upb/third_party/packages/*
+!/test/upb/third_party/packages/.cmake-format.yaml
+!/test/upb/third_party/packages/.clang-format
