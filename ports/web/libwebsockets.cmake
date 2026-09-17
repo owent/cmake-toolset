@@ -20,6 +20,14 @@ function(PROJECT_THIRD_PARTY_LIBWEBSOCKETS_PATCH_IMPORTED_TARGET TARGET_NAME)
     list(APPEND PATCH_REMOVE_RULES "(lib)?uv(_a)?")
     list(APPEND PATCH_ADD_TARGETS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME})
   endif()
+
+  if(TARGET ZLIB::ZLIB AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME)
+    # libwebsockets records the zlib link item into its exported interface. On Apple cross builds the .tbd stub path
+    # would be re-rooted out of the sysroot("/usr/lib/libz.tbd") and break the Makefile dependency check of the
+    # consumers. Drop the zlib items(paths or bare names, but never zstd) and use the toolset zlib target instead.
+    list(APPEND PATCH_REMOVE_RULES "^(.*[/])?(lib)?z([.]|$)")
+    list(APPEND PATCH_ADD_TARGETS ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME})
+  endif()
   if(PATCH_REMOVE_RULES OR PATCH_ADD_TARGETS)
     project_build_tools_patch_imported_link_interface_libraries(${TARGET_NAME} REMOVE_LIBRARIES ${PATCH_REMOVE_RULES}
                                                                 ADD_LIBRARIES ${PATCH_ADD_TARGETS})
@@ -314,15 +322,8 @@ if(NOT Libwebsockets_FOUND
       if(ZLIB_INCLUDE_DIRS AND ZLIB_LIBRARIES)
         list(APPEND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS "-DLWS_WITH_ZLIB=ON"
              "-DLWS_WITH_BUNDLED_ZLIB=OFF" "-DLWS_ZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIRS}")
-        # When zlib is an Apple SDK .tbd stub, libwebsockets would re-root the stub path out of the sysroot and fail the
-        # Makefile dependency check. Use the linker flag exposed by the zlib port in that case.
-        if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_FLAG)
-          list_append_unescape(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-                               "-DLWS_ZLIB_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_FLAG}")
-        else()
-          list_append_unescape(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
-                               "-DLWS_ZLIB_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME}")
-        endif()
+        list_append_unescape(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_BUILD_OPTIONS
+                             "-DLWS_ZLIB_LIBRARIES=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME}")
       endif()
       if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_MBEDTLS)
         # libwebsockets do not support mbedtls 3

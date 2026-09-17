@@ -163,10 +163,10 @@ macro(project_build_tools_append_cmake_inherit_options OUTVAR)
   if(CMAKE_CROSSCOMPILING
      AND CMAKE_HOST_WIN32
      AND NOT CMAKE_HOST_SYSTEM_NAME STREQUAL CMAKE_SYSTEM_NAME)
-    # The sub build is for the target platform only, and all the tools it requires(compilers, make program, etc.)
-    # are passed down by the options above. Searching the host system environment would only pollute the result on
-    # Windows hosts: CMake re-roots the search paths with each entry of PATH, and then no target file can ever be
-    # found when CMAKE_FIND_ROOT_PATH_MODE_INCLUDE/LIBRARY is ONLY.
+    # The sub build is for the target platform only, and all the tools it requires(compilers, make program, etc.) are
+    # passed down by the options above. Searching the host system environment would only pollute the result on Windows
+    # hosts: CMake re-roots the search paths with each entry of PATH, and then no target file can ever be found when
+    # CMAKE_FIND_ROOT_PATH_MODE_INCLUDE/LIBRARY is ONLY.
     list(APPEND ${OUTVAR} "-DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF")
   endif()
 
