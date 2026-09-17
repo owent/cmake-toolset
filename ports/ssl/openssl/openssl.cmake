@@ -507,9 +507,9 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
       project_expand_list_for_command_line_to_file(
         BASH
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh"
-        # Calling the perl interpreter explicitly instead of relying on the shebang line, so that we always use the
-        # perl detected by find_package(Perl). The shebang may resolve to a limited perl without the modules required
-        # by Configure, such as the one shipped with Git for Windows.
+        # Calling the perl interpreter explicitly instead of relying on the shebang line, so that we always use the perl
+        # detected by find_package(Perl). The shebang may resolve to a limited perl without the modules required by
+        # Configure, such as the one shipped with Git for Windows.
         "${PERL_EXECUTABLE}"
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PACKAGE_DIR}/${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_CONFIG}"
         ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_OPTIONS})

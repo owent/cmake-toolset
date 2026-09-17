@@ -92,9 +92,12 @@ macro(PROJECT_THIRD_PARTY_ZLIB_IMPORT)
           "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_DEBUG_NAME}")
     endif()
 
-    # Apple SDKs provide the system zlib as a text-based stub(.tbd) inside the SDK directory. The path only exists under
-    # the sysroot, so Makefile generators would fail on the dependency check when it appears in the link line. Convert
-    # it into the plain library name and let the linker resolve it via the sysroot instead.
+    # Apple SDKs provide the system zlib as a text-based stub(.tbd) inside the SDK directory. The sub builds that
+    # receive the stub path via -D..._LIBRARIES would re-root it out of the sysroot and fail the Makefile dependency
+    # check("No rule to make target /usr/lib/libz.tbd"), and a bare library name would become a file dependency too.
+    # Expose an extra linker flag(-l<name>) for such sub builds; ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME
+    # and ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME keep their natural values.
+    unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_FLAG)
     if(APPLE AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME MATCHES "\\.tbd$")
       get_filename_component(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME
                              "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME}" NAME)
@@ -102,13 +105,12 @@ macro(PROJECT_THIRD_PARTY_ZLIB_IMPORT)
                            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
       string(REGEX REPLACE "\\.tbd$" "" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME
                            "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_FLAG
+          "-l${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
       message(
         STATUS
-          "Dependency(${PROJECT_NAME}): zlib link item is a tbd stub, use plain library name instead.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME})"
+          "Dependency(${PROJECT_NAME}): zlib link item is a tbd stub, provide the linker flag for sub builds.(${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_FLAG})"
       )
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_SELECT_NAME
-          "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME}")
       unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_TBD_NAME)
     endif()
 
