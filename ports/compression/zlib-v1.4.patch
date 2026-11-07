@@ -1,0 +1,75 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2ccbab9..067da3b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,6 +22,17 @@ set(CPACK_RESOURCE_FILE_README ${zlib_SOURCE_DIR}/README)
+ option(ZLIB_BUILD_TESTING "Enable Zlib Examples as tests" ON)
+ option(ZLIB_BUILD_SHARED "Enable building zlib shared library" ON)
+ option(ZLIB_BUILD_STATIC "Enable building zlib static library" ON)
++
++# Respect BUILD_SHARED_LIBS
++if(DEFINED BUILD_SHARED_LIBS OR DEFINED CACHE{BUILD_SHARED_LIBS})
++    if(BUILD_SHARED_LIBS)
++        set(ZLIB_BUILD_SHARED ON)
++        set(ZLIB_BUILD_STATIC OFF)
++    else()
++        set(ZLIB_BUILD_SHARED OFF)
++        set(ZLIB_BUILD_STATIC ON)
++    endif()
++endif()
+ option(ZLIB_INSTALL "Enable installation of zlib" ON)
+ set(ZLIB_PREFIX "" CACHE STRING
+     "prefix for all types and library functions, see zconf.h.in")
+@@ -234,7 +245,9 @@ set(ZLIB_SRCS
+     zutil.c)
+ 
+ if(WIN32)
+-    set(zlib_static_suffix "s")
++    # ===== Patch: keep the classic static library name(zlibstatic instead of zs/libzs) for the
++    # ===== compatibility with CMake's FindZLIB and downstream projects. =====
++    set(zlib_static_suffix "libstatic")
+     set(CMAKE_DEBUG_POSTFIX "d")
+ endif(WIN32)
+ 
+@@ -277,7 +290,9 @@ if(ZLIB_BUILD_SHARED)
+             PUBLIC_HEADER "${ZLIB_PUBLIC_HDRS}")
+ 
+     if(MSVC)
+-        set_target_properties(zlib PROPERTIES OUTPUT_NAME libz)
++        # ===== Patch: keep the classic MSVC artifact names(zlib.lib/zlib.dll), CMake's FindZLIB and many
++        # ===== downstream projects only look for the classic names, not the new libz.lib. =====
++        set_target_properties(zlib PROPERTIES OUTPUT_NAME zlib)
+     else(MSVC)
+         set_target_properties(zlib PROPERTIES OUTPUT_NAME z)
+     endif(MSVC)
+@@ -324,7 +339,9 @@ if(ZLIB_BUILD_STATIC)
+     if(MSVC)
+         set_target_properties(zlibstatic
+             PROPERTIES
+-                ARCHIVE_OUTPUT_NAME libz${zlib_static_suffix})
++                # ===== Patch: keep the classic static library name(zlibstatic.lib instead of libzs.lib)
++                # ===== for the compatibility with CMake's FindZLIB and downstream projects. =====
++                ARCHIVE_OUTPUT_NAME zlibstatic)
+     else(MSVC)
+         set_target_properties(zlibstatic
+             PROPERTIES
+diff --git a/zlibConfig.cmake.in b/zlibConfig.cmake.in
+index 72c3104..bab9a63 100644
+--- a/zlibConfig.cmake.in
++++ b/zlibConfig.cmake.in
+@@ -24,6 +24,15 @@ else(ZLIB_FIND_COMPONENTS)
+                 OPTIONAL)
+     endforeach(_component_config IN LISTS _ZLIB_supported_components)
+ 
++    if(NOT TARGET ZLIB::ZLIB)
++        if(TARGET ZLIB::ZLIBSTATIC)
++            # ===== Patch: provide ZLIB::ZLIB for compatibility when only the static library is built =====
++            add_library(ZLIB::ZLIB INTERFACE IMPORTED)
++            set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_LINK_LIBRARIES
++                                                       ZLIB::ZLIBSTATIC)
++        endif()
++    endif(NOT TARGET ZLIB::ZLIB)
++
+     if(NOT TARGET ZLIB::ZLIB)
+         set(ZLIB_FOUND False)
+         set(ZLIB_NOT_FOUND_MESSAGE "Target ZLIB::ZLIB not created\n")

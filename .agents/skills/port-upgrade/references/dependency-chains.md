@@ -76,6 +76,34 @@ include:
 port cmake files and `test/CMakeLists.txt`. Groups and
 their members may change over time.
 
+## gRPC-Aligned Ports
+
+protobuf, abseil-cpp, and boringssl must follow the
+versions pinned by the selected gRPC release; do not
+move them to their own latest releases independently.
+Where to find the pins at a gRPC tag:
+
+- `bazel/grpc_deps.bzl`: `com_google_absl`
+  (abseil-cpp tag), `boringssl` (commit), and the
+  legacy `com_google_protobuf`/`com_github_cares_cares`
+  pins.
+- `third_party/` submodule gitlinks (via
+  `git ls-tree <tag> third_party/` or the GitHub
+  contents API): `protobuf` and `upb` commits.
+- Map a pinned protobuf commit to a release tag with
+  the GitHub compare API
+  (`compare/<tag>...<sha>`, `status=identical` means
+  the tag is exactly that commit).
+
+Policy: keep the gRPC-pinned major/minor line and take
+the newest patch release on it when one exists. When
+gRPC's pin equals the latest suitable release already
+(as happened for protobuf v35.1 with gRPC v1.84/v1.85),
+no protobuf change is needed even if protobuf has
+newer majors. c-ares and re2 are backward-compatible
+enough to track their own latest releases; gRPC only
+sets a minimum (`find_package(c-ares 1.13.0)`).
+
 ## Port Include Order
 
 The `test/CMakeLists.txt` file defines the canonical

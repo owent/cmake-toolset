@@ -1,0 +1,133 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5be0716..44fc51c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,7 +22,7 @@
+ # IN THE SOFTWARE.
+ #
+ 
+-cmake_minimum_required(VERSION 3.10...4.0)
++cmake_minimum_required(VERSION 3.16)
+ 
+ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+ 
+@@ -1443,6 +1443,12 @@ if (LWS_WITH_HUBBUB)
+ 	list(APPEND LIB_LIST ${LIBHUBBUB_LIBRARIES} )
+ endif()
+ 
++# ===== Patch: generate lws_config.h earlier. The bundled plugins check their requirements
++# ===== against it while being added, and this point is before the lib sources are collected.
++configure_file(
++       "${PROJECT_SOURCE_DIR}/cmake/lws_config.h.in"
++       "${PROJECT_BINARY_DIR}/lws_config.h")
++
+ if (LWS_WITH_PLUGINS_BUILTIN)
+ 	add_subdirectory(plugins)
+ 
+@@ -1588,9 +1594,7 @@ if (LWS_WITH_FUZZERS)
+ 	add_subdirectory(fuzz)
+ endif()
+ 
+-if (NOT LWS_WITH_PLUGINS_BUILTIN)
+-add_subdirectory(plugins)
+-endif()
++# NOTE(apply plugin): moved below, the bundled plugins require the generated lws_config.h
+ add_subdirectory(lwsws)
+ if (PICO_SDK_PATH)
+ 	link_libraries(pico_stdlib PRIVATE)
+@@ -1626,6 +1630,12 @@ message("LWS_HAVE_SSL_set_tlsext_host_name: ${LWS_HAVE_SSL_set_tlsext_host_name}
+ configure_file(
+        "${PROJECT_SOURCE_DIR}/cmake/lws_config.h.in"
+        "${PROJECT_BINARY_DIR}/lws_config.h")
++
++# NOTE(apply plugin): The bundled plugins check their requirements against the generated lws_config.h,
++# so they can only be added after it has been generated.
++if (NOT LWS_WITH_PLUGINS_BUILTIN)
++add_subdirectory(plugins)
++endif()
+        
+ add_custom_command(
+ 		OUTPUT ${PROJECT_BINARY_DIR}/include/lws_config.h
+diff --git a/cmake/LwsCheckRequirements.cmake b/cmake/LwsCheckRequirements.cmake
+index 3fefae1..8ab3548 100644
+--- a/cmake/LwsCheckRequirements.cmake
++++ b/cmake/LwsCheckRequirements.cmake
+@@ -63,11 +63,10 @@ MACRO(require_lws_config reqconfig _val result)
+ 			endif()
+ 		endif()
+ 		if (NOT MET AND _cmp)
+-			if (${_val})
+-				message(FATAL_ERROR "This project requires lws must have been configured with ${reqconfig}")
+-			else()
+-				message(FATAL_ERROR "Lws configuration of ${reqconfig} is incompatible with this project")
+-			endif()
++			# ===== Patch: in-tree plugins are optional components. Skip the ones whose required
++			# ===== features are disabled or not satisfied instead of failing the whole build.
++			message(STATUS "skipping plugin: lws is being built without ${reqconfig}")
++			set(${result} 0)
+ 		endif()
+ 
+ 		# for non-requirements result vars, export whether the requirement
+diff --git a/lib/CMakeLists.txt b/lib/CMakeLists.txt
+index 8748185..fd08955 100644
+--- a/lib/CMakeLists.txt
++++ b/lib/CMakeLists.txt
+@@ -321,7 +321,7 @@ if (LWS_WITH_STATIC)
+ 	target_include_directories(websockets PRIVATE ${LWS_LIB_BUILD_INC_PATHS} ${LWS_LIB_BUILD_INC_PATHS_TEMP} ${CMAKE_CURRENT_SOURCE_DIR}/../core)
+ 	target_compile_definitions(websockets PRIVATE LWS_BUILDING_STATIC)
+ 	foreach(inc ${LWS_PUBLIC_INCLUDES})
+-		target_include_directories(websockets PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
++		target_include_directories(websockets BEFORE PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
+ 	endforeach()
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+@@ -351,7 +351,7 @@ if (LWS_WITH_SHARED)
+ 	target_include_directories(websockets_shared PRIVATE ${LWS_LIB_BUILD_INC_PATHS} ${LWS_LIB_BUILD_INC_PATHS_TEMP} ${CMAKE_CURRENT_SOURCE_DIR}/../core)
+ 	target_compile_definitions(websockets_shared PRIVATE LWS_BUILDING_SHARED)
+ 	foreach(inc ${LWS_PUBLIC_INCLUDES})
+-		target_include_directories(websockets_shared PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
++		target_include_directories(websockets_shared BEFORE PUBLIC "$<BUILD_INTERFACE:${inc}>" "$<INSTALL_INTERFACE:${inc}>")
+ 	endforeach()
+ 	set(LWS_PUBLIC_INCLUDES ${LWS_PUBLIC_INCLUDES} PARENT_SCOPE)
+ 
+diff --git a/lib/event-libs/libuv/CMakeLists.txt b/lib/event-libs/libuv/CMakeLists.txt
+index 7303ac0..9fa724b 100644
+--- a/lib/event-libs/libuv/CMakeLists.txt
++++ b/lib/event-libs/libuv/CMakeLists.txt
+@@ -47,6 +47,7 @@ message("libuv include dir: ${LIBUV_INCLUDE_DIRS}")
+ message("libuv libraries: ${LIBUV_LIBRARIES}")
+ 
+ include_directories("${LIBUV_INCLUDE_DIRS}")
++list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBUV_INCLUDE_DIRS}")
+ 
+ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   # libuv changed the location in 1.21.0. Retain both
+@@ -54,7 +55,8 @@ CHECK_INCLUDE_FILE(uv-version.h LWS_HAVE_UV_VERSION_H)
+   if (NOT LWS_HAVE_UV_VERSION_H)
+     CHECK_INCLUDE_FILE(uv/version.h LWS_HAVE_NEW_UV_VERSION_H)
+   endif()
+-  
++  list(POP_BACK CMAKE_REQUIRED_INCLUDES)
++
+   #
+   # When libuv is built into the lib, the context uses the evlib from there,
+   # so there's no plugin to build
+diff --git a/lib/tls/CMakeLists.txt b/lib/tls/CMakeLists.txt
+index e9be2fc..2b033d6 100644
+--- a/lib/tls/CMakeLists.txt
++++ b/lib/tls/CMakeLists.txt
+@@ -509,6 +509,14 @@ if (LWS_WITH_SSL)
+ 				find_package(PkgConfig QUIET)
+ 				pkg_check_modules(PC_OPENSSL openssl QUIET)
+ 				find_package(OpenSSL)
++				if(TARGET OpenSSL::SSL OR TARGET OpenSSL::Crypto)
++					if(TARGET OpenSSL::SSL AND NOT "OpenSSL::SSL" IN_LIST OPENSSL_LIBRARIES)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::SSL)
++					endif()
++					if(TARGET OpenSSL::Crypto AND NOT "OpenSSL::Crypto" IN_LIST OPENSSL_LIBRARIES)
++						list(APPEND OPENSSL_LIBRARIES OpenSSL::Crypto)
++					endif()
++				endif()
+ 				if (NOT OPENSSL_FOUND)
+ 					message(FATAL_ERROR "OpenSSL development packages (e.g., libssl-dev or openssl-devel) not found! \\nIf you want to use OpenSSL, please install them.\\nIf you installed GnuTLS instead, you must explicitly enable it by adding -DLWS_WITH_GNUTLS=1 to your cmake line.\\nYou can also disable SSL completely with -DLWS_WITH_SSL=0.")
+ 				endif()

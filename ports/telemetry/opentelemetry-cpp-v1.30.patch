@@ -1,0 +1,632 @@
+diff --git a/api/include/opentelemetry/common/macros.h b/api/include/opentelemetry/common/macros.h
+index 4117a2f..fbacaca 100644
+--- a/api/include/opentelemetry/common/macros.h
++++ b/api/include/opentelemetry/common/macros.h
+@@ -548,3 +548,16 @@ point.
+ #else
+ #  define OPENTELEMETRY_SANITIZER_NO_ADDRESS
+ #endif
++
++// ====== Patch for GCC 4.8 ======
++#if !defined(__clang__) && defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 8)
++#include <memory>
++namespace std
++{
++template <class T, class... ArgsT>
++unique_ptr<T> make_unique(ArgsT &&...args)
++{
++  return unique_ptr<T>(new T(std::forward<ArgsT>(args)...));
++}
++}  // namespace std
++#endif
+diff --git a/api/include/opentelemetry/nostd/type_traits.h b/api/include/opentelemetry/nostd/type_traits.h
+index a797c1e..3134e01 100644
+--- a/api/include/opentelemetry/nostd/type_traits.h
++++ b/api/include/opentelemetry/nostd/type_traits.h
+@@ -20,7 +20,7 @@
+ #endif
+ 
+ #if !defined(__GLIBCXX__) || (defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE >= 7) || \
+-    (defined(__GLIBCXX__) && __GLIBCXX__ >= 20150422)  // >= libstdc++-5
++    (defined(__GLIBCXX__) && __GLIBCXX__ >= 20150422 && (!defined(__GNUC__) || __GNUC__ >= 5))  // >= libstdc++-5
+ #  define OPENTELEMETRY_TRIVIALITY_TYPE_TRAITS
+ #endif
+ 
+diff --git a/exporters/ostream/CMakeLists.txt b/exporters/ostream/CMakeLists.txt
+index 755d5e5..c8a856c 100644
+--- a/exporters/ostream/CMakeLists.txt
++++ b/exporters/ostream/CMakeLists.txt
+@@ -38,6 +38,9 @@ endif() # OTELCPP_BUILD_TESTING
+ # opentelemetry_exporter_ostream_span_builder
+ #
+ 
++# ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
+ add_library(opentelemetry_exporter_ostream_span_builder
+             src/console_span_builder.cc)
+ 
+@@ -57,6 +60,8 @@ target_link_libraries(
+ 
+ list(APPEND OPENTELEMETRY_OSTREAM_BUILDER_TARGETS
+      opentelemetry_exporter_ostream_span_builder)
++endif()
++
+ 
+ #
+ # opentelemetry_exporter_ostream_metrics
+@@ -94,6 +99,9 @@ endif()
+ # opentelemetry_exporter_ostream_metrics_builder
+ #
+ 
++# ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
+ add_library(opentelemetry_exporter_ostream_metrics_builder
+             src/console_push_metric_builder.cc)
+ set_target_properties(opentelemetry_exporter_ostream_metrics_builder
+@@ -111,6 +119,8 @@ target_link_libraries(
+ 
+ list(APPEND OPENTELEMETRY_OSTREAM_BUILDER_TARGETS
+      opentelemetry_exporter_ostream_metrics_builder)
++endif()
++
+ 
+ #
+ # opentelemetry_exporter_ostream_logs
+@@ -144,6 +154,9 @@ endif()
+ # opentelemetry_exporter_ostream_logs_builder
+ #
+ 
++# ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
+ add_library(opentelemetry_exporter_ostream_logs_builder
+             src/console_log_record_builder.cc)
+ set_target_properties(
+@@ -161,6 +174,8 @@ target_link_libraries(
+   PRIVATE opentelemetry_exporter_ostream_logs)
+ list(APPEND OPENTELEMETRY_OSTREAM_BUILDER_TARGETS
+      opentelemetry_exporter_ostream_logs_builder)
++endif()
++
+ 
+ otel_add_component(
+   COMPONENT
+@@ -183,29 +198,35 @@ if(OTELCPP_INSTALL)
+     exporter_ostream_span "OpenTelemetry Exporter - OStream Span"
+     "Exports trace spans to output stream." "opentelemetry_trace")
+ 
+-  opentelemetry_add_pkgconfig(
++    if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+     exporter_ostream_span_builder
+     "OpenTelemetry Exporter - OStream Span Builder"
+     "Builder for OStream span exporter."
+     "opentelemetry_exporter_ostream_span opentelemetry_configuration_core")
++  endif()
+ 
+   opentelemetry_add_pkgconfig(
+     exporter_ostream_metrics "OpenTelemetry Exporter - OStream Metrics"
+     "Exports metrics to output stream." "opentelemetry_metrics")
+ 
+-  opentelemetry_add_pkgconfig(
++    if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+     exporter_ostream_metrics_builder
+     "OpenTelemetry Exporter - OStream Metrics Builder"
+     "Builder for OStream metrics exporter."
+     "opentelemetry_exporter_ostream_metrics opentelemetry_configuration_core")
++  endif()
+ 
+   opentelemetry_add_pkgconfig(
+     exporter_ostream_logs "OpenTelemetry Exporter - OStream Logs"
+     "Exports log records to output stream." "opentelemetry_logs")
+ 
+-  opentelemetry_add_pkgconfig(
++    if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+     exporter_ostream_logs_builder
+     "OpenTelemetry Exporter - OStream Logs Builder"
+     "Builder for OStream log record exporter."
+     "opentelemetry_exporter_ostream_logs opentelemetry_configuration_core")
++  endif()
+ endif()
+diff --git a/exporters/otlp/CMakeLists.txt b/exporters/otlp/CMakeLists.txt
+index 04098a9..bc379fe 100644
+--- a/exporters/otlp/CMakeLists.txt
++++ b/exporters/otlp/CMakeLists.txt
+@@ -62,6 +62,10 @@ endif()
+ # opentelemetry_exporter_otlp_builder_utils
+ #
+ 
++# ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++set(OPENTELEMETRY_OTLP_BUILDER_UTILS_TARGETS)
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
+ add_library(opentelemetry_exporter_otlp_builder_utils
+             ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_builder_utils.cc)
+ 
+@@ -78,6 +82,9 @@ target_link_libraries(
+   opentelemetry_exporter_otlp_builder_utils
+   PUBLIC opentelemetry_otlp_common opentelemetry_configuration_core)
+ 
++  list(APPEND OPENTELEMETRY_OTLP_BUILDER_UTILS_TARGETS opentelemetry_exporter_otlp_builder_utils)
++endif()
++
+ if(OTELCPP_INSTALL)
+   opentelemetry_add_pkgconfig(
+     otlp_common "OpenTelemetry OTLP - Common"
+@@ -91,9 +98,11 @@ if(OTELCPP_INSTALL)
+     "opentelemetry_trace opentelemetry_metrics opentelemetry_logs opentelemetry_resources opentelemetry_proto"
+   )
+ 
+-  opentelemetry_add_pkgconfig(
++    if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+     exporter_otlp_builder_utils "OpenTelemetry OTLP - Builder Utils"
+     "Common utilities for OTLP exporter builders." "opentelemetry_otlp_common")
++  endif()
+ endif()
+ 
+ if(OTELCPP_WITH_OTLP_GRPC)
+@@ -172,7 +181,10 @@ if(OTELCPP_WITH_OTLP_GRPC)
+   # opentelemetry_exporter_otlp_grpc_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_grpc_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_grpc_span_builder.cc)
+ 
+@@ -193,6 +205,8 @@ if(OTELCPP_WITH_OTLP_GRPC)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_GRPC_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_grpc_builder)
++  endif()
++
+ 
+   #
+   # opentelemetry_exporter_otlp_grpc_log
+@@ -220,7 +234,10 @@ if(OTELCPP_WITH_OTLP_GRPC)
+   # opentelemetry_exporter_otlp_grpc_log_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_grpc_log_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_grpc_log_record_builder.cc)
+ 
+@@ -242,6 +259,8 @@ if(OTELCPP_WITH_OTLP_GRPC)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_GRPC_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_grpc_log_builder)
++  endif()
++
+ 
+   #
+   # opentelemetry_exporter_otlp_grpc_metrics
+@@ -269,7 +288,10 @@ if(OTELCPP_WITH_OTLP_GRPC)
+   # opentelemetry_exporter_otlp_grpc_metric_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_grpc_metric_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_grpc_push_metric_builder.cc)
+ 
+@@ -291,6 +313,8 @@ if(OTELCPP_WITH_OTLP_GRPC)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_GRPC_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_grpc_metric_builder)
++  endif()
++
+ 
+   if(OTELCPP_INSTALL)
+     opentelemetry_add_pkgconfig(
+@@ -304,12 +328,14 @@ if(OTELCPP_WITH_OTLP_GRPC)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_grpc_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_grpc_builder
+       "OpenTelemetry OTLP - gRPC Span Builder"
+       "Builder for OTLP gRPC span exporter."
+       "opentelemetry_exporter_otlp_grpc opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+ 
+     opentelemetry_add_pkgconfig(
+       exporter_otlp_grpc_log
+@@ -318,12 +344,14 @@ if(OTELCPP_WITH_OTLP_GRPC)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_grpc_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_grpc_log_builder
+       "OpenTelemetry OTLP - gRPC Log Builder"
+       "Builder for OTLP gRPC log record exporter."
+       "opentelemetry_exporter_otlp_grpc_log opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+ 
+     opentelemetry_add_pkgconfig(
+       exporter_otlp_grpc_metrics
+@@ -332,12 +360,14 @@ if(OTELCPP_WITH_OTLP_GRPC)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_grpc_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_grpc_metric_builder
+       "OpenTelemetry OTLP - gRPC Metric Builder"
+       "Builder for OTLP gRPC metric exporter."
+       "opentelemetry_exporter_otlp_grpc_metrics opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+   endif()
+ 
+ endif()
+@@ -399,7 +429,10 @@ if(OTELCPP_WITH_OTLP_HTTP)
+   # opentelemetry_exporter_otlp_http_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_http_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_http_span_builder.cc)
+ 
+@@ -420,6 +453,8 @@ if(OTELCPP_WITH_OTLP_HTTP)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_HTTP_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_http_builder)
++  endif()
++
+ 
+   #
+   # opentelemetry_exporter_otlp_http_log
+@@ -447,7 +482,10 @@ if(OTELCPP_WITH_OTLP_HTTP)
+   # opentelemetry_exporter_otlp_http_log_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_http_log_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_http_log_record_builder.cc)
+ 
+@@ -469,6 +507,8 @@ if(OTELCPP_WITH_OTLP_HTTP)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_HTTP_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_http_log_builder)
++  endif()
++
+ 
+   #
+   # opentelemetry_exporter_otlp_http_metric
+@@ -496,7 +536,10 @@ if(OTELCPP_WITH_OTLP_HTTP)
+   # opentelemetry_exporter_otlp_http_metric_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_http_metric_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_http_push_metric_builder.cc)
+ 
+@@ -518,6 +561,8 @@ if(OTELCPP_WITH_OTLP_HTTP)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_HTTP_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_http_metric_builder)
++  endif()
++
+ 
+   if(OTELCPP_INSTALL)
+     set(_otlp_http_client_pc_requires "opentelemetry_api")
+@@ -536,12 +581,14 @@ if(OTELCPP_WITH_OTLP_HTTP)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_http_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_http_builder
+       "OpenTelemetry OTLP - HTTP Span Builder"
+       "Builder for OTLP HTTP span exporter."
+       "opentelemetry_exporter_otlp_http opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+ 
+     opentelemetry_add_pkgconfig(
+       exporter_otlp_http_log
+@@ -550,12 +597,14 @@ if(OTELCPP_WITH_OTLP_HTTP)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_http_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_http_log_builder
+       "OpenTelemetry OTLP - HTTP Log Builder"
+       "Builder for OTLP HTTP log record exporter."
+       "opentelemetry_exporter_otlp_http_log opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+ 
+     opentelemetry_add_pkgconfig(
+       exporter_otlp_http_metric
+@@ -564,12 +613,14 @@ if(OTELCPP_WITH_OTLP_HTTP)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_http_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_http_metric_builder
+       "OpenTelemetry OTLP - HTTP Metric Builder"
+       "Builder for OTLP HTTP metric exporter."
+       "opentelemetry_exporter_otlp_http_metric opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+   endif()
+ 
+ endif()
+@@ -625,7 +676,10 @@ if(OTELCPP_WITH_OTLP_FILE)
+   # opentelemetry_exporter_otlp_file_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_file_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_file_span_builder.cc)
+ 
+@@ -645,6 +699,8 @@ if(OTELCPP_WITH_OTLP_FILE)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_FILE_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_file_builder)
++  endif()
++
+ 
+   #
+   # opentelemetry_exporter_otlp_file_log
+@@ -672,7 +728,10 @@ if(OTELCPP_WITH_OTLP_FILE)
+   # opentelemetry_exporter_otlp_file_log_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_file_log_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_file_log_record_builder.cc)
+ 
+@@ -693,6 +752,8 @@ if(OTELCPP_WITH_OTLP_FILE)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_FILE_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_file_log_builder)
++  endif()
++
+ 
+   #
+   # opentelemetry_exporter_otlp_file_metric
+@@ -720,7 +781,10 @@ if(OTELCPP_WITH_OTLP_FILE)
+   # opentelemetry_exporter_otlp_file_metric_builder
+   #
+ 
+-  add_library(
++    # ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++  if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++add_library(
+     opentelemetry_exporter_otlp_file_metric_builder
+     ${OPENTELEMETRY_OTLP_TARGETS_LIB_TYPE} src/otlp_file_push_metric_builder.cc)
+ 
+@@ -742,6 +806,8 @@ if(OTELCPP_WITH_OTLP_FILE)
+ 
+   list(APPEND OPENTELEMETRY_OTLP_FILE_BUILDER_TARGETS
+        opentelemetry_exporter_otlp_file_metric_builder)
++  endif()
++
+ 
+   if(OTELCPP_INSTALL)
+     opentelemetry_add_pkgconfig(
+@@ -755,10 +821,12 @@ if(OTELCPP_WITH_OTLP_FILE)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_file_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_file_builder "OpenTelemetry OTLP - File Span Builder"
+       "Builder for OTLP file span exporter."
+       "opentelemetry_exporter_otlp_file opentelemetry_configuration_core")
++    endif()
+ 
+     opentelemetry_add_pkgconfig(
+       exporter_otlp_file_log
+@@ -767,10 +835,12 @@ if(OTELCPP_WITH_OTLP_FILE)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_file_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_file_log_builder "OpenTelemetry OTLP - File Log Builder"
+       "Builder for OTLP file log record exporter."
+       "opentelemetry_exporter_otlp_file_log opentelemetry_configuration_core")
++    endif()
+ 
+     opentelemetry_add_pkgconfig(
+       exporter_otlp_file_metric
+@@ -779,12 +849,14 @@ if(OTELCPP_WITH_OTLP_FILE)
+       "opentelemetry_otlp_common opentelemetry_otlp_recordable opentelemetry_exporter_otlp_file_client"
+     )
+ 
+-    opentelemetry_add_pkgconfig(
++        if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+       exporter_otlp_file_metric_builder
+       "OpenTelemetry OTLP - File Metric Builder"
+       "Builder for OTLP file metric exporter."
+       "opentelemetry_exporter_otlp_file_metric opentelemetry_exporter_otlp_builder_utils opentelemetry_configuration_core"
+     )
++    endif()
+   endif()
+ 
+ endif()
+@@ -802,7 +874,7 @@ otel_add_component(
+   opentelemetry_otlp_common
+   opentelemetry_otlp_recordable
+   opentelemetry_proto
+-  opentelemetry_exporter_otlp_builder_utils
++  ${OPENTELEMETRY_OTLP_BUILDER_UTILS_TARGETS}
+   FILES_DIRECTORY
+   "include/opentelemetry/exporters/otlp"
+   FILES_DESTINATION
+diff --git a/exporters/prometheus/CMakeLists.txt b/exporters/prometheus/CMakeLists.txt
+index e9aef6f..ff4d6e2 100644
+--- a/exporters/prometheus/CMakeLists.txt
++++ b/exporters/prometheus/CMakeLists.txt
+@@ -30,6 +30,10 @@ target_link_libraries(
+ # opentelemetry_exporter_prometheus_builder
+ #
+ 
++# ===== Patch: SDK builders require the configuration component, skip them when exception
++# ===== handling is disabled. =====
++set(OPENTELEMETRY_PROMETHEUS_BUILDER_TARGETS)
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
+ add_library(opentelemetry_exporter_prometheus_builder
+             src/prometheus_pull_builder.cc)
+ 
+@@ -47,6 +51,9 @@ target_link_libraries(
+   PUBLIC opentelemetry_configuration_core opentelemetry_metrics
+   PRIVATE opentelemetry_exporter_prometheus)
+ 
++  list(APPEND OPENTELEMETRY_PROMETHEUS_BUILDER_TARGETS opentelemetry_exporter_prometheus_builder)
++endif()
++
+ otel_add_component(
+   COMPONENT
+   exporters_prometheus
+@@ -54,7 +61,7 @@ otel_add_component(
+   exporters_prometheus_builder
+   TARGETS
+   opentelemetry_exporter_prometheus
+-  opentelemetry_exporter_prometheus_builder
++  ${OPENTELEMETRY_PROMETHEUS_BUILDER_TARGETS}
+   FILES_DIRECTORY
+   "include/opentelemetry/exporters/prometheus"
+   FILES_DESTINATION
+@@ -69,10 +76,12 @@ if(OTELCPP_INSTALL)
+     "Exports metrics in Prometheus format."
+     "opentelemetry_metrics prometheus-cpp-pull")
+ 
+-  opentelemetry_add_pkgconfig(
++    if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++opentelemetry_add_pkgconfig(
+     exporter_prometheus_builder "OpenTelemetry Exporter - Prometheus Builder"
+     "Builder for Prometheus exporter."
+     "opentelemetry_exporter_prometheus opentelemetry_configuration_core")
++  endif()
+ endif()
+ 
+ if(OTELCPP_BUILD_TESTING)
+diff --git a/sdk/CMakeLists.txt b/sdk/CMakeLists.txt
+index 1be2c71..774c50c 100644
+--- a/sdk/CMakeLists.txt
++++ b/sdk/CMakeLists.txt
+@@ -14,23 +14,29 @@ target_link_libraries(opentelemetry_sdk INTERFACE opentelemetry_api)
+ set(OTEL_SDK_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+ add_subdirectory(src)
+ 
++set(OTELCPP_PATCH_SDK_TARGETS
++    opentelemetry_sdk
++    opentelemetry_common
++    opentelemetry_resources
++    opentelemetry_version
++    opentelemetry_instrumentation_scope
++    opentelemetry_logs
++    opentelemetry_trace
++    opentelemetry_metrics)
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++  list(APPEND OTELCPP_PATCH_SDK_TARGETS
++       opentelemetry_configuration_core
++       opentelemetry_configuration_trace_builders
++       opentelemetry_configuration_metrics_builders
++       opentelemetry_configuration_logs_builders
++       opentelemetry_configuration_registry_factory)
++endif()
++
+ otel_add_component(
+   COMPONENT
+   sdk
+   TARGETS
+-  opentelemetry_sdk
+-  opentelemetry_common
+-  opentelemetry_resources
+-  opentelemetry_version
+-  opentelemetry_instrumentation_scope
+-  opentelemetry_logs
+-  opentelemetry_trace
+-  opentelemetry_metrics
+-  opentelemetry_configuration_core
+-  opentelemetry_configuration_trace_builders
+-  opentelemetry_configuration_metrics_builders
+-  opentelemetry_configuration_logs_builders
+-  opentelemetry_configuration_registry_factory
++  ${OTELCPP_PATCH_SDK_TARGETS}
+   FILES_DIRECTORY
+   "include/opentelemetry/"
+   FILES_DESTINATION
+diff --git a/sdk/src/CMakeLists.txt b/sdk/src/CMakeLists.txt
+index 41f4881..5948098 100644
+--- a/sdk/src/CMakeLists.txt
++++ b/sdk/src/CMakeLists.txt
+@@ -1,6 +1,14 @@
+ # Copyright The OpenTelemetry Authors
+ # SPDX-License-Identifier: Apache-2.0
+ 
++# ===== Patch: skip the configuration component when exception handling is disabled =====
++# The configuration component always uses throw/catch and can not be compiled with -fno-exceptions.
++include(CheckCXXSourceCompiles)
++check_cxx_source_compiles("int main() { throw 1; return 0; }" OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++if(NOT OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++  message(STATUS "Exception handling is disabled, skip building the configuration component")
++endif()
++
+ add_subdirectory(common)
+ add_subdirectory(instrumentationscope)
+ add_subdirectory(trace)
+@@ -8,4 +16,6 @@ add_subdirectory(metrics)
+ add_subdirectory(logs)
+ add_subdirectory(version)
+ add_subdirectory(resource)
+-add_subdirectory(configuration)
++if(OTELCPP_CONFIGURATION_HAVE_EXCEPTIONS)
++  add_subdirectory(configuration)
++endif()

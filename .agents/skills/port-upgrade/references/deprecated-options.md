@@ -82,12 +82,45 @@ they are discovered.
 - **zlib >= 1.3.2**: CMake completely rewritten.
   Uses `ZLIB_BUILD_SHARED`/`ZLIB_BUILD_STATIC`
   instead of always building both.
+- **zlib >= 1.4**: MSVC artifact names changed to
+  `libz.lib`/`libzs.lib`, which CMake's module-mode
+  `FindZLIB` and many downstream projects can not
+  find. The port patch restores the classic
+  `zlib.lib`/`zlibstatic.lib` names. The upstream
+  `zlibConfig.cmake.in` now uses `include(... OPTIONAL)`
+  (previously patched in), but the static-only
+  `ZLIB::ZLIB` interface wrapper is still required.
+- **xxHash >= 0.8.4**: The CMake project moved from
+  `cmake_unofficial/` to `build/cmake/`; the port
+  selects the project directory by version.
+- **mimalloc >= 3.6**: `src/alloc.c` moved to
+  `src/alloc/alloc.c`; patch paths must follow.
+- **flatbuffers**: Maintenance snapshot tags such as
+  `v25.12.19-2026-02-06-03fffb2` are valid releases
+  (stable tag plus a fix set) and can be used as
+  `GIT_BRANCH` directly.
 - **yaml-cpp >= 0.9.0**: Tag format reverted from
   bare version (e.g., `0.8.0`) to prefixed
   (e.g., `yaml-cpp-0.9.0`).
 - **opentelemetry-cpp >= 1.22**: Many fixes from
   v1.21 patch were upstreamed. Only GCC 4.8
   compatibility patches remain needed.
+- **opentelemetry-cpp >= 1.29**: CMake options moved
+  into the `OTELCPP_WITH_*` namespace; the port picks
+  the prefix by version.
 - **grpc >= 1.54**: Requires abseil-cpp >= 20230125
   and protobuf >= v22. Older compiler path uses
   grpc v1.54.3.
+
+## Version String Pitfalls
+
+- CMake `VERSION_*` comparisons fail on `v`-prefixed
+  tags: `if("v0.8.4" VERSION_GREATER_EQUAL "0.8.4")`
+  is false. Strip the prefix into a standard version
+  variable before comparing, like the existing
+  `*_STANDARD_VERSION` variables in the ports.
+- Pinned-commit ports (boringssl, standalone upb)
+  have no `.` in their version, so the same-minor
+  patch fallback never matches; a new patch file named
+  with the new commit is required even when the diff
+  content is unchanged.
