@@ -112,6 +112,60 @@ index 7303ac0..9fa724b 100644
    #
    # When libuv is built into the lib, the context uses the evlib from there,
    # so there's no plugin to build
+diff --git a/lib/plat/unix/CMakeLists.txt b/lib/plat/unix/CMakeLists.txt
+index 18ecece..8494ede 100644
+--- a/lib/plat/unix/CMakeLists.txt
++++ b/lib/plat/unix/CMakeLists.txt
+@@ -73,10 +73,21 @@ if (LWS_WITH_NETWORK)
+ 				# too.  CoreFoundation is needed directly (not just
+ 				# via SystemConfiguration) for our own CF references.
+ 				find_library(LWS_SYSCONFIG_FW NAMES SystemConfiguration)
++				if (NOT LWS_SYSCONFIG_FW)
++					# ===== Patch: restricted find modes (CMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY with
++					# ===== a third party prefix as the only root) hide the system frameworks, retry
++					# ===== with the default paths. =====
++					find_library(LWS_SYSCONFIG_FW NAMES SystemConfiguration
++						     NO_CMAKE_FIND_ROOT_PATH)
++				endif()
+ 				if (NOT LWS_SYSCONFIG_FW)
+ 					message(FATAL_ERROR "SystemConfiguration framework not found")
+ 				endif()
+ 				find_library(LWS_COREFOUNDATION_FW NAMES CoreFoundation)
++				if (NOT LWS_COREFOUNDATION_FW)
++					find_library(LWS_COREFOUNDATION_FW NAMES CoreFoundation
++						     NO_CMAKE_FIND_ROOT_PATH)
++				endif()
+ 				if (NOT LWS_COREFOUNDATION_FW)
+ 					message(FATAL_ERROR "CoreFoundation framework not found")
+ 				endif()
+diff --git a/lib/plat/unix/unix-spawn-tree.c b/lib/plat/unix/unix-spawn-tree.c
+index 8132a63..8d74c26 100644
+--- a/lib/plat/unix/unix-spawn-tree.c
++++ b/lib/plat/unix/unix-spawn-tree.c
+@@ -48,7 +48,14 @@
+ #if defined(__linux__)
+ #include <dirent.h>
+ #elif defined(__APPLE__)
++/* ===== Patch: libproc.h and the libproc based tree measurement below are macOS only;
++ * ===== the iPhoneOS and iPhoneSimulator SDKs do not provide libproc.h. ===== */
++#include <TargetConditionals.h>
++#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
++#define LWS_PATCH_NO_LIBPROC 1
++#else
+ #include <libproc.h>
++#endif
+ #elif defined(__FreeBSD__)
+ #include <sys/types.h>
+ #include <sys/sysctl.h>
+@@ -351,7 +358,7 @@ lws_spawn_cgroup_cpu(struct lws_spawn_piped *lsp, uint64_t *us_user,
+ 	return got == 2 ? 0 : -1;
+ }
+ 
+-#elif defined(__APPLE__)
++#elif defined(__APPLE__) && !defined(LWS_PATCH_NO_LIBPROC)
+ 
+ /*
+  * libproc can list a process's children directly, so walk down the tree from
 diff --git a/lib/tls/CMakeLists.txt b/lib/tls/CMakeLists.txt
 index e9be2fc..2b033d6 100644
 --- a/lib/tls/CMakeLists.txt

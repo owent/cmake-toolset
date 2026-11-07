@@ -1,3 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6386e5d..1cda5c7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -914,7 +914,26 @@ if(NOT WIN32 AND MI_PROFILE)
+   if(MI_HAS_UNISTDH)
+     list(APPEND mi_defines MI_HAS_UNISTDH=1)
+   endif()
+-  CHECK_INCLUDE_FILES("execinfo.h" MI_HAS_EXECINFOH)
++  # ===== Patch: use a compile check instead of an include-only check. The Android NDK ships
++  # ===== `execinfo.h` for all API levels but only declares `backtrace()` for newer ones, so an
++  # ===== include-only check enables a `backtrace()` call that fails to compile on older APIs.
++  include(CheckCSourceCompiles)
++  if(CMAKE_SYSTEM_NAME MATCHES "BSD|DragonFly")
++    # On FreeBSD (and some other BSDs) `backtrace`/`backtrace_symbols` are not part of
++    # libc but live in a separate `libexecinfo` that must be linked explicitly.
++    find_link_library("execinfo" MI_LIB_EXECINFO)
++    if(MI_LIB_EXECINFO)
++      set(CMAKE_REQUIRED_LIBRARIES "${MI_LIB_EXECINFO}")
++    endif()
++  endif()
++  check_c_source_compiles("
++    #include <execinfo.h>
++    int main(void) {
++      void* mi_backtrace_buffer[1];
++      (void)backtrace(mi_backtrace_buffer, 1);
++      return 0;
++    }" MI_HAS_EXECINFOH)
++  unset(CMAKE_REQUIRED_LIBRARIES)
+   if(MI_HAS_EXECINFOH)
+     list(APPEND mi_defines MI_HAS_EXECINFOH=1)
+     # On FreeBSD (and some other BSDs) `backtrace`/`backtrace_symbols` are not part of
 diff --git a/src/alloc/alloc.c b/src/alloc/alloc.c
 index 1be26dc..267e4a6 100644
 --- a/src/alloc/alloc.c
