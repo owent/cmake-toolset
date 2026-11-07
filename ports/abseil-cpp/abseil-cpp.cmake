@@ -114,3 +114,10 @@ if(NOT absl_FOUND)
 else()
   project_third_party_abseil_import()
 endif()
+
+# When absl is provided by a prebuilt package, the version variables above are not set and the dependent ports(for
+# example re2) can not pick a matching version. Derive the version from the prebuilt package; the config version file of
+# abseil-cpp reports the LTS date, for example "20260526" for the 20260526.0 release.
+if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION AND absl_VERSION)
+  set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "${absl_VERSION}")
+endif()
