@@ -1,5 +1,5 @@
 diff --git a/src/unix/process.c b/src/unix/process.c
-index 5d8d6fa..7103ba9 100644
+index 5d8d6fa..2b21312 100644
 --- a/src/unix/process.c
 +++ b/src/unix/process.c
 @@ -53,6 +53,9 @@
@@ -12,7 +12,29 @@ index 5d8d6fa..7103ba9 100644
  # include <crt_externs.h>
  # include <xlocale.h>
  # define environ (*_NSGetEnviron())
-@@ -476,7 +479,7 @@ static void uv__spawn_init_can_use_setsid(void) {
+@@ -84,6 +87,13 @@ extern char **environ;
+ #define UV_USE_SIGCHLD
+ #endif
+ 
++/* ===== Patch: bionic only declares (and provides) the posix_spawn APIs from API level 28,
++ * ===== fall back to the fork/exec path on older API levels. ===== */
++#if defined(__ANDROID__) && __ANDROID_API__ < 28
++#define UV_PATCH_NO_POSIX_SPAWN 1
++#endif
++
++#ifndef UV_PATCH_NO_POSIX_SPAWN
+ static uv_once_t posix_spawn_init_once = UV_ONCE_INIT;
+ static int posix_spawn_can_use_setsid;
+ static volatile int posix_spawn_works;
+@@ -93,6 +103,7 @@ static struct uv__posix_spawn_fncs_s {
+     int (*addchdir)(posix_spawn_file_actions_t *, const char *);
+   } file_actions;
+ } posix_spawn_fncs;
++#endif
+ 
+ #ifdef UV_USE_SIGCHLD
+ static void uv__chld(uv_signal_t* handle, int signum) {
+@@ -476,7 +487,7 @@ static void uv__spawn_init_can_use_setsid(void) {
      return;
  
    /* NULL specifies to use LC_C_LOCALE */
@@ -21,3 +43,46 @@ index 5d8d6fa..7103ba9 100644
      return;
  
    posix_spawn_can_use_setsid = (major >= 19);  /* macOS Catalina */
+@@ -484,6 +495,7 @@ static void uv__spawn_init_can_use_setsid(void) {
+ #endif
+ 
+ 
++#ifndef UV_PATCH_NO_POSIX_SPAWN
+ static void uv__spawn_init_posix_spawn(void) {
+ #if defined(__OpenBSD__)
+   /* Always use fork(). Its posix_spawn() works different from other
+@@ -530,8 +542,10 @@ static void uv__spawn_init_posix_spawn(void) {
+ #endif
+ #endif
+ }
++#endif /* UV_PATCH_NO_POSIX_SPAWN */
+ 
+ 
++#ifndef UV_PATCH_NO_POSIX_SPAWN
+ static int uv__spawn_set_posix_spawn_attrs(
+     posix_spawnattr_t* attrs,
+     const uv_process_options_t* options) {
+@@ -897,6 +911,7 @@ error:
+    * already destroyed, only the happy path requires cleanup */
+   return UV__ERR(err);
+ }
++#endif /* UV_PATCH_NO_POSIX_SPAWN */
+ 
+ 
+ static int uv__spawn_and_init_child_fork(const uv_process_options_t* options,
+@@ -952,6 +967,7 @@ static int uv__spawn_and_init_child(
+   int exec_errorno;
+   ssize_t r;
+ 
++#ifndef UV_PATCH_NO_POSIX_SPAWN
+   uv_once(&posix_spawn_init_once, uv__spawn_init_posix_spawn);
+ 
+   /* Calling posix_spawn is considerably faster, if it supports the given
+@@ -966,6 +982,7 @@ static int uv__spawn_and_init_child(
+                                              pid);
+   if (err != UV_ENOSYS)
+     return err;
++#endif
+ 
+   /* This pipe is used by the parent to wait until
+    * the child has called `execve()`. We need this
