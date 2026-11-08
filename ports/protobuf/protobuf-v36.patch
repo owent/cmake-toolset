@@ -49,3 +49,23 @@ index 88cece5..d99a392 100644
  }
  
  }  // namespace
+diff --git a/src/google/protobuf/port.h b/src/google/protobuf/port.h
+index 7347203..16069fa 100644
+--- a/src/google/protobuf/port.h
++++ b/src/google/protobuf/port.h
+@@ -907,9 +907,12 @@ class alignas(8) GlobalEmptyStringDynamicInit {
+   alignas(std::string) char buffer_[sizeof(std::string)];
+ };
+ 
+-using GlobalEmptyString = std::conditional_t<
+-    GlobalEmptyStringConstexpr::HasConstexprDefaultConstructor(0),
+-    const GlobalEmptyStringConstexpr, GlobalEmptyStringDynamicInit>;
++// ===== Patch: always use the dynamic-init variant. The constexpr probe resolves differently
++// ===== under different C++ standard modes on MSVC (for example /std:c++17 vs /std:c++20), so a
++// ===== library built in one mode fails to link with consumers compiled in another
++// ===== (`fixed_address_empty_string` gets a different mangled name). Pin one variant to keep
++// ===== the ABI stable for distributed prebuilt packages. =====
++using GlobalEmptyString = GlobalEmptyStringDynamicInit;
+ 
+ PROTOBUF_EXPORT extern GlobalEmptyString fixed_address_empty_string;
+ 

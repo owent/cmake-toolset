@@ -114,6 +114,15 @@ they are discovered.
   `protobuf-pull.cmake` ("Protobuf port not declared").
   Test version changes by editing the port default
   instead.
+- **protobuf >= 36**: installs upb headers into the shared
+  prefix, which shadow gRPC's vendored upb headers when the
+  SSL backend also lives in the prefix (gRPC puts the SSL
+  package's include dir before its own upb include dir);
+  the port patch skips installing them. Also,
+  `GlobalEmptyString`'s constexpr probe resolves differently
+  per C++ standard mode on MSVC, so the port patch pins the
+  dynamic-init variant to keep the `fixed_address_empty_string`
+  ABI stable across consumer standard modes.
 - **grpc >= 1.54**: Requires abseil-cpp >= 20230125
   and protobuf >= v22. Older compiler path uses
   grpc v1.54.3.
