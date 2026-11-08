@@ -1,3 +1,26 @@
+diff --git a/cmake/ssl.cmake b/cmake/ssl.cmake
+index 3416605..c6d9d92 100644
+--- a/cmake/ssl.cmake
++++ b/cmake/ssl.cmake
+@@ -65,10 +65,17 @@ elseif(gRPC_SSL_PROVIDER STREQUAL "package")
+   
+   if(TARGET OpenSSL::SSL)
+     set(_gRPC_SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
++    # ===== Patch: do not propagate OPENSSL_INCLUDE_DIR into `_gRPC_SSL_INCLUDE_DIR` when the
++    # ===== imported targets are available. `_gRPC_SSL_INCLUDE_DIR` ranks before gRPC's own
++    # ===== vendored upb include directories in the target include lists, so when the SSL
++    # ===== package lives in a shared prefix that also installs protobuf's upb headers, those
++    # ===== headers shadow gRPC's vendored ones and break the build. The OpenSSL::SSL and
++    # ===== OpenSSL::Crypto targets already provide the include directories via their
++    # ===== interfaces, which rank after gRPC's own include directories. =====
+   else()
+     set(_gRPC_SSL_LIBRARIES ${OPENSSL_LIBRARIES})
++    set(_gRPC_SSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+   endif()
+-  set(_gRPC_SSL_INCLUDE_DIR ${OPENSSL_INCLUDE_DIR})
+   
+   set(_gRPC_FIND_SSL "if(NOT OPENSSL_FOUND)\n  find_package(OpenSSL)\nendif()")
+ endif()
 diff --git a/src/compiler/node_generator.cc b/src/compiler/node_generator.cc
 index 795b3f3..23c3be7 100644
 --- a/src/compiler/node_generator.cc

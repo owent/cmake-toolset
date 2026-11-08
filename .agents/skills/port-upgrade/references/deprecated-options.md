@@ -114,15 +114,23 @@ they are discovered.
   `protobuf-pull.cmake` ("Protobuf port not declared").
   Test version changes by editing the port default
   instead.
-- **protobuf >= 36**: installs upb headers into the shared
-  prefix, which shadow gRPC's vendored upb headers when the
-  SSL backend also lives in the prefix (gRPC puts the SSL
-  package's include dir before its own upb include dir);
-  the port patch skips installing them. Also,
-  `GlobalEmptyString`'s constexpr probe resolves differently
-  per C++ standard mode on MSVC, so the port patch pins the
-  dynamic-init variant to keep the `fixed_address_empty_string`
-  ABI stable across consumer standard modes.
+- **protobuf >= 30**: no longer ships
+  `upb/cmake/make_cmakelists.py`, so the upb port can not
+  build upb from protobuf sources any more; the upb port
+  reuses the prebuilt `protobuf::libupb` target instead
+  (protobuf installs libupb, the upb headers, `upb.pc`, and
+  the protoc-gen-upb* plugins when `protobuf_BUILD_LIBUPB=ON`,
+  the default). protobuf also installs its upb headers into
+  the shared prefix, which shadow gRPC's vendored upb headers
+  when the SSL backend lives in the same prefix (gRPC ranks
+  `_gRPC_SSL_INCLUDE_DIR` before its own upb include dir);
+  the grpc port patch stops propagating `OPENSSL_INCLUDE_DIR`
+  into `_gRPC_SSL_INCLUDE_DIR` when the OpenSSL targets are
+  available. Also, protobuf >= 36 `GlobalEmptyString`'s
+  constexpr probe resolves differently per C++ standard mode
+  on MSVC, so the protobuf port patch pins the dynamic-init
+  variant to keep the `fixed_address_empty_string` ABI stable
+  across consumer standard modes.
 - **grpc >= 1.54**: Requires abseil-cpp >= 20230125
   and protobuf >= v22. Older compiler path uses
   grpc v1.54.3.

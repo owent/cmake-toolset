@@ -110,12 +110,20 @@ project_third_party_include_port("abseil-cpp/abseil-cpp.cmake")
 project_third_party_include_port("protobuf/protobuf.cmake")
 project_third_party_include_port("grpc/upb.cmake")
 
-add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
+# The lua bindings are only installed by the upb source build modes; when upb reuses the prebuilt libupb from protobuf
+# there are no lua bindings to test.
+if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/CMakeLists.txt"
+   AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA)
+  add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
+endif()
 
-set(UPB_COMMAND_OPTIONS
-    "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
-    "--plugin=protoc-gen-lua=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}"
-    "--upb_out=${CMAKE_CURRENT_BINARY_DIR}" "--lua_out=${CMAKE_CURRENT_BINARY_DIR}")
+set(UPB_COMMAND_OPTIONS "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
+                        "--upb_out=${CMAKE_CURRENT_BINARY_DIR}")
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
+   AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua")
+  list(APPEND UPB_COMMAND_OPTIONS "--plugin=protoc-gen-lua=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}"
+       "--lua_out=${CMAKE_CURRENT_BINARY_DIR}")
+endif()
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS)
   list(APPEND UPB_COMMAND_OPTIONS
        "--plugin=protoc-gen-upbdefs=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}"
@@ -136,12 +144,24 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE)
        "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb_minitable.c")
 endif()
 
+set(UPB_TEST_GENERATE_LUA_COMMANDS)
+if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+   AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA)
+  list(
+    APPEND
+    UPB_TEST_GENERATE_LUA_COMMANDS
+    COMMAND
+    "${CMAKE_COMMAND}"
+    -E
+    copy_if_different
+    "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+    "${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+
 add_custom_command(
   OUTPUT ${UPB_TEST_GENERATE_CXX_FILES}
   COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}/.."
-          ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto"
-  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
-          "${CMAKE_CURRENT_BINARY_DIR}"
+          ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto" ${UPB_TEST_GENERATE_LUA_COMMANDS}
   DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../test_pb.proto"
   COMMENT "Generate ${UPB_TEST_GENERATE_CXX_FILES};${UPB_TEST_GENERATE_LUA_FILES} into ${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -150,9 +170,13 @@ add_executable(cmake-toolset-upb-and-lua-binding-test ${UPB_TEST_GENERATE_CXX_FI
 target_include_directories("cmake-toolset-upb-and-lua-binding-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 target_link_directories(cmake-toolset-upb-and-lua-binding-test PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
-target_link_libraries(
-  "cmake-toolset-upb-and-lua-binding-test" PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} upb::lupb
-                                                   ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
+set(UPB_TEST_LUA_LIBRARIES)
+if(TARGET upb::lupb)
+  list(APPEND UPB_TEST_LUA_LIBRARIES upb::lupb ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
+  target_compile_definitions("cmake-toolset-upb-and-lua-binding-test" PRIVATE UPB_TEST_WITH_LUA_BINDING=1)
+endif()
+target_link_libraries("cmake-toolset-upb-and-lua-binding-test"
+                      PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} ${UPB_TEST_LUA_LIBRARIES})
 
 target_compile_options("cmake-toolset-upb-and-lua-binding-test"
                        PRIVATE "${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS}")

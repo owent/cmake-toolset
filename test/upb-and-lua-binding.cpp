@@ -13,20 +13,22 @@
 #include "test_pb.upb.h"
 #include "test_pb.upbdefs.h"
 
-#ifdef __cplusplus
+#if defined(UPB_TEST_WITH_LUA_BINDING)
+#  ifdef __cplusplus
 extern "C" {
-#endif
-#include "lauxlib.h"
-#include "lua.h"
-#include "lualib.h"
+#  endif
+#  include "lauxlib.h"
+#  include "lua.h"
+#  include "lualib.h"
 
-#if defined (UPB_BINDING_LUA_WITH_LEGACY_BINDING)
-#  include "upb/lua/upb.h"
-#else
-#  include "lua/upb.h"
-#endif
-#ifdef __cplusplus
+#  if defined(UPB_BINDING_LUA_WITH_LEGACY_BINDING)
+#    include "upb/lua/upb.h"
+#  else
+#    include "lua/upb.h"
+#  endif
+#  ifdef __cplusplus
 }
+#  endif
 #endif
 
 int main(int argc, char* argv[]) {
@@ -41,6 +43,18 @@ int main(int argc, char* argv[]) {
     }
   }
 
+#if !defined(UPB_TEST_WITH_LUA_BINDING)
+  // No lua bindings installed (upb reuses the prebuilt libupb from protobuf), only exercise
+  // the C API.
+  {
+    upb::Arena arena;
+    cmake_toolset_test_message* test_msg = cmake_toolset_test_message_new(arena.ptr());
+    cmake_toolset_test_message_set_i64(test_msg, 123321);
+    size_t size;
+    cmake_toolset_test_message_serialize(test_msg, arena.ptr(), &size);
+    std::cout << "Serialized test message size: " << size << std::endl;
+  }
+#else
   // Lua binding
   {
     lua_State* L = luaL_newstate();
@@ -99,5 +113,6 @@ int main(int argc, char* argv[]) {
 
     lua_close(L);
   }
+#endif
   return 0;
 }

@@ -95,6 +95,34 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME OR NOT
     project_third_party_upb_import()
   endif()
 
+  # protobuf(>= v25 with protobuf_BUILD_LIBUPB=ON, the default) builds, installs and exports libupb together with the
+  # protoc-gen-upb* plugins. Reuse it instead of building upb from source; protobuf removed upb/cmake/make_cmakelists.py
+  # since v30, so the source build modes below can not be used with a recent protobuf any more.
+  if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME AND TARGET protobuf::libupb)
+    project_third_party_upb_import()
+    if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME)
+      foreach(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_NAME protoc-gen-upb protoc-gen-upbdefs
+                                                                     protoc-gen-upb_minitable)
+        string(REPLACE "-" "_" ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_VAR
+                       "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_NAME}")
+        if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_VAR})
+          find_program(
+            ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_VAR}
+            NAMES "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_NAME}"
+                  "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_NAME}.exe"
+            PATHS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/bin" "${PROJECT_THIRD_PARTY_HOST_INSTALL_DIR}/bin"
+            NO_DEFAULT_PATH)
+        endif()
+      endforeach()
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_NAME)
+      unset(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROGRAM_VAR)
+      message(
+        STATUS
+          "Dependency(${PROJECT_NAME}): upb using target ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} and plugins from protobuf"
+      )
+    endif()
+  endif()
+
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME
      OR NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB)
     find_package(PythonInterp)
@@ -111,7 +139,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME OR NOT
     endif()
 
     set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_GENERATE_CMAKE_MODE "LEGACY")
-    if(Protobuf_VERSION AND Protobuf_VERSION VERSION_GREATER_EQUAL "25.0")
+    # protobuf removed upb/cmake/make_cmakelists.py since v30, the protobuf source build mode below only works for v25.x
+    # - v29.x.
+    if(Protobuf_VERSION
+       AND Protobuf_VERSION VERSION_GREATER_EQUAL "25.0"
+       AND Protobuf_VERSION VERSION_LESS "30.0")
       include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf-declare.cmake")
       include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/ports/protobuf/protobuf-pull.cmake")
       project_third_party_port_declare(
