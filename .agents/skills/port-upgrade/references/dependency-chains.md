@@ -76,12 +76,16 @@ include:
 port cmake files and `test/CMakeLists.txt`. Groups and
 their members may change over time.
 
-## gRPC-Aligned Ports
+## gRPC-Related Ports
 
-protobuf, abseil-cpp, and boringssl must follow the
-versions pinned by the selected gRPC release; do not
-move them to their own latest releases independently.
-Where to find the pins at a gRPC tag:
+Default policy: protobuf and abseil-cpp track their
+own **latest releases**; fall back to the versions
+pinned by the selected gRPC release only when the
+newer release is actually incompatible (prove it with
+a full local test-suite build before falling back).
+boringssl has no releases and stays pinned to the
+gRPC release's commit. Where to find the pins at a
+gRPC tag:
 
 - `bazel/grpc_deps.bzl`: `com_google_absl`
   (abseil-cpp tag), `boringssl` (commit), and the
@@ -94,15 +98,22 @@ Where to find the pins at a gRPC tag:
   the GitHub compare API
   (`compare/<tag>...<sha>`, `status=identical` means
   the tag is exactly that commit).
+- Also check grpc `master`'s pins: when master has
+  already moved to a newer protobuf major, the current
+  gRPC release may not be ready for it yet.
 
-Policy: keep the gRPC-pinned major/minor line and take
-the newest patch release on it when one exists. When
-gRPC's pin equals the latest suitable release already
-(as happened for protobuf v35.1 with gRPC v1.84/v1.85),
-no protobuf change is needed even if protobuf has
-newer majors. c-ares and re2 are backward-compatible
-enough to track their own latest releases; gRPC only
-sets a minimum (`find_package(c-ares 1.13.0)`).
+Compatibility evidence to collect before moving
+protobuf/abseil-cpp ahead of gRPC's pins: protobuf
+release notes (C++ section) for removed APIs, the
+minimum abseil version in protobuf's
+`cmake/dependencies.cmake`, and a full local
+`gcc.static.test`-equivalent build. Example: gRPC
+v1.85.1 pins protobuf v35.1 + abseil-cpp 20260526.0,
+while protobuf v36.2 + abseil-cpp 20260817.0 also
+build and pass the full suite with it. c-ares and re2
+are backward-compatible enough to track their own
+latest releases; gRPC only sets a minimum
+(`find_package(c-ares 1.13.0)`).
 
 ## Port Include Order
 

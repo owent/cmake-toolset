@@ -10,8 +10,9 @@ endif()
 if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION)
   if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION)
     if(absl_FOUND AND absl_VERSION VERSION_GREATER_EQUAL "20230125")
-      # We must use the version of protobuf in gRPC, which used to keep the compatibility with upb
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v35.1")
+      # Use the latest protobuf release by default. gRPC v1.85.1 pins protobuf v35.1, but v36.x is still compatible with
+      # it (verified by the full test suite builds).
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v36.2")
     else()
       set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_DEFAULT_VERSION "v3.21.12")
     endif()

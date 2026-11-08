@@ -108,6 +108,12 @@ they are discovered.
 - **opentelemetry-cpp >= 1.29**: CMake options moved
   into the `OTELCPP_WITH_*` namespace; the port picks
   the prefix by version.
+- **protobuf port version override**: passing
+  `-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_VERSION`
+  on the command line skips the declare block and breaks
+  `protobuf-pull.cmake` ("Protobuf port not declared").
+  Test version changes by editing the port default
+  instead.
 - **grpc >= 1.54**: Requires abseil-cpp >= 20230125
   and protobuf >= v22. Older compiler path uses
   grpc v1.54.3.

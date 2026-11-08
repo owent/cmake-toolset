@@ -18,8 +18,10 @@ if(NOT absl_FOUND)
   if(NOT absl_FOUND)
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION)
 
-      # Keep the same LTS version as gRPC v1.85.1(bazel/grpc_deps.bzl)
-      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20260526.0")
+      # Use the latest LTS release by default. gRPC v1.85.1 pins abseil-cpp 20260526.0 (bazel/grpc_deps.bzl), but the
+      # newer LTS 20260817.0 is still compatible with it and the other ports in the gRPC group (verified by the full
+      # test suite builds).
+      set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20260817.0")
       if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9.0")
           set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_ABSEIL_VERSION "20200225.3")
