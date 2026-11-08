@@ -11,6 +11,24 @@ index 3b412aa..32f66bd 100644
    endif()
  endif (protobuf_BUILD_SHARED_LIBS)
  
+diff --git a/cmake/install.cmake b/cmake/install.cmake
+index 3e0e165..c19fc65 100644
+--- a/cmake/install.cmake
++++ b/cmake/install.cmake
+@@ -102,7 +102,12 @@ set(protobuf_HEADERS
+   ${release_all_options_protos_files}
+ )
+ if (protobuf_BUILD_LIBUPB)
+-  list(APPEND protobuf_HEADERS ${libupb_hdrs})
++  # ===== Patch: do not install the upb headers into the shared prefix. gRPC's SSL provider
++  # ===== package also lives in the prefix, and gRPC puts the prefix's include directory before
++  # ===== its own vendored upb headers, so protobuf's upb headers would shadow gRPC's vendored
++  # ===== ones and break the gRPC build when their internal layouts differ. The upb headers are
++  # ===== delivered by the standalone upb port instead. =====
++  # list(APPEND protobuf_HEADERS ${libupb_hdrs})
+   # Manually install the bootstrap headers
+   install(
+     FILES
 diff --git a/src/google/protobuf/compiler/objectivec/names.cc b/src/google/protobuf/compiler/objectivec/names.cc
 index 88cece5..d99a392 100644
 --- a/src/google/protobuf/compiler/objectivec/names.cc
