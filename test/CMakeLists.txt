@@ -283,9 +283,9 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE)
 endif()
 
 add_executable(cmake-toolset-test ${MAIN_TEST_SRC_FILES})
+target_include_directories(cmake-toolset-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
-  target_include_directories(cmake-toolset-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
   target_compile_definitions(cmake-toolset-test PRIVATE "HAVE_PROTOBUF=1")
   project_build_tools_patch_protobuf_targets(cmake-toolset-test)
 endif()

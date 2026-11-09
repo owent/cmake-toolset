@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 int main(int argc, char* argv[]) {
+  int return_code = 0;
   std::string init_script = "package.preload['lupb'] = ... ";
   std::vector<std::string> load_files;
   for (int i = 1; i < argc; ++i) {
@@ -64,6 +65,7 @@ int main(int argc, char* argv[]) {
       std::cout << "upb: round-trip ok" << std::endl;
     } else {
       std::cout << "upb: round-trip failed" << std::endl;
+      return_code = 1;
     }
   }
 #else
@@ -101,6 +103,7 @@ int main(int argc, char* argv[]) {
         std::cout << "upb: round-trip ok" << std::endl;
       } else {
         std::cout << "upb: round-trip failed" << std::endl;
+        return_code = 1;
       }
 
       std::cout << "Run lua code:" << std::endl;
@@ -138,5 +141,5 @@ int main(int argc, char* argv[]) {
     lua_close(L);
   }
 #endif
-  return 0;
+  return return_code;
 }

@@ -125,6 +125,8 @@ if(NOT TARGET gRPC::grpc++_alts
   find_package(gRPC QUIET)
   find_package(grpc QUIET)
   project_third_party_grpc_import()
+else()
+  project_third_party_grpc_import()
 endif()
 
 set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_PREBUILT_USABLE FALSE)
