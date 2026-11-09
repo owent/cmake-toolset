@@ -51,8 +51,20 @@ int main(int argc, char* argv[]) {
     cmake_toolset_test_message* test_msg = cmake_toolset_test_message_new(arena.ptr());
     cmake_toolset_test_message_set_i64(test_msg, 123321);
     size_t size;
-    cmake_toolset_test_message_serialize(test_msg, arena.ptr(), &size);
+    char* serialized = cmake_toolset_test_message_serialize(test_msg, arena.ptr(), &size);
     std::cout << "Serialized test message size: " << size << std::endl;
+
+    // Round-trip: decode the serialized message and read the field back
+    upb::Arena decode_arena;
+    cmake_toolset_test_message* decoded_msg = nullptr;
+    if (nullptr != serialized && size > 0) {
+      decoded_msg = cmake_toolset_test_message_parse(serialized, size, decode_arena.ptr());
+    }
+    if (nullptr != decoded_msg && 123321 == cmake_toolset_test_message_i64(decoded_msg)) {
+      std::cout << "upb: round-trip ok" << std::endl;
+    } else {
+      std::cout << "upb: round-trip failed" << std::endl;
+    }
   }
 #else
   // Lua binding
@@ -76,8 +88,20 @@ int main(int argc, char* argv[]) {
       // cmake_toolset_test_message_set_str(test_msg, upb_strview_makez("hello world!")); // Old implementation
       cmake_toolset_test_message_set_i64(test_msg, 123321);
       size_t size;
-      cmake_toolset_test_message_serialize(test_msg, arena.ptr(), &size);
+      char* serialized = cmake_toolset_test_message_serialize(test_msg, arena.ptr(), &size);
       std::cout << "Serialized test message size: " << size << std::endl;
+
+      // Round-trip: decode the serialized message and read the field back
+      upb::Arena decode_arena;
+      cmake_toolset_test_message* decoded_msg = nullptr;
+      if (nullptr != serialized && size > 0) {
+        decoded_msg = cmake_toolset_test_message_parse(serialized, size, decode_arena.ptr());
+      }
+      if (nullptr != decoded_msg && 123321 == cmake_toolset_test_message_i64(decoded_msg)) {
+        std::cout << "upb: round-trip ok" << std::endl;
+      } else {
+        std::cout << "upb: round-trip failed" << std::endl;
+      }
 
       std::cout << "Run lua code:" << std::endl;
       std::string script =

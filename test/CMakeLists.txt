@@ -83,6 +83,10 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_TARGET_IS_WINDOWS)
       CACHE BOOL "Allow build protobuf as dynamic(May cause duplicate symbol[File already exists in database])")
 endif()
 
+# Exercise the upb port in this test project. With a modern protobuf, the upb port reuses the prebuilt libupb from
+# protobuf; with an older one it builds upb from the gRPC or the standalone sources.
+set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_ENABLE_STANDALONE_UPB ON)
+
 if(CMAKE_TOOLSET_TEST_IS_TOP_LEVEL)
   if(NOT COMPILER_OPTION_DEFAULT_ENABLE_RTTI)
     if(COMPILER_OPTIONS_TEST_RTTI)
@@ -319,6 +323,7 @@ target_link_libraries(
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_LINK_NAME}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_LINK_NAME}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME}
+          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARIES}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_LINK_NAME}
@@ -329,7 +334,103 @@ target_link_libraries(
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_LINK_NAME}
           ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_LINK_NAME}
-          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_LINK_NAME})
+          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_LINK_NAME}
+          ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_LINK_NAME})
+
+# Expose the presence of the linked third-party libraries to the test source, so that it can call at least one API of
+# every linked non-header-only library.
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZLIB_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_ZLIB=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LZ4_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LZ4=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_SNAPPY_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_SNAPPY=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_ZSTD_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_ZSTD=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_JEMALLOC_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_JEMALLOC=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUNWIND_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LIBUNWIND=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MIMALLOC_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_MIMALLOC=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_XXHASH_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_XXHASH=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_TBB_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_TBB=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBUV_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LIBUV=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LUA=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FMTLIB_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_FMTLIB=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_YAML_CPP_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_YAML_CPP=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NLOHMANN_JSON_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_NLOHMANN_JSON=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RAPIDJSON_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_RAPIDJSON=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_FLATC_EXECUTABLE)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_FLATBUFFERS=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_MBEDTLS AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_MBEDTLS_FOUND)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_SSL_MBEDTLS=1)
+elseif(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_SSL=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBEVENT_LIBRARY_CORE)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LIBEVENT=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HIREDIS_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_HIREDIS=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CARES_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_CARES=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_RE2=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBNGHTTP3_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_NGHTTP3=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGTCP2_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_NGTCP2=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_NGHTTP2_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_NGHTTP2=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCURL_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LIBCURL=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CIVETWEB_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_CIVETWEB=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBWEBSOCKETS_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LIBWEBSOCKETS=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_GRPC_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_GRPC=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROMETHEUS_CPP_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_PROMETHEUS_CPP=1)
+endif()
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LIBCOPP_LINK_NAME)
+  target_compile_definitions(cmake-toolset-test PRIVATE HAVE_LIBCOPP=1)
+endif()
 
 get_target_property(CMAKE_TOOLSE_TEST_LINK_LIBRARIES cmake-toolset-test LINK_LIBRARIES)
 message(STATUS "CMAKE_TOOLSE_TEST_LINK_LIBRARIES=${CMAKE_TOOLSE_TEST_LINK_LIBRARIES}")
@@ -352,22 +453,29 @@ else()
   message(FATAL_ERROR "Build benchmark failed")
 endif()
 
-if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
+if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB
+   AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS
    AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME
-   AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC
-   AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/CMakeLists.txt")
+   AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC)
 
-  add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
-
-  set(UPB_COMMAND_OPTIONS
-      "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
-      "--plugin=protoc-gen-lua=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}"
-      "--upb_out=${CMAKE_CURRENT_BINARY_DIR}" "--lua_out=${CMAKE_CURRENT_BINARY_DIR}")
-  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS)
-    list(APPEND UPB_COMMAND_OPTIONS
-         "--plugin=protoc-gen-upbdefs=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}"
-         "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}")
+  # The lua bindings are only installed by the upb source build modes; when upb reuses the prebuilt libupb from protobuf
+  # there are no lua bindings to test.
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
+     AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/CMakeLists.txt")
+    add_subdirectory("${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua")
   endif()
+
+  set(UPB_COMMAND_OPTIONS "--plugin=protoc-gen-upb=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB}"
+                          "--upb_out=${CMAKE_CURRENT_BINARY_DIR}")
+  if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
+     AND EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua")
+    list(APPEND UPB_COMMAND_OPTIONS
+         "--plugin=protoc-gen-lua=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA}"
+         "--lua_out=${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
+  list(APPEND UPB_COMMAND_OPTIONS
+       "--plugin=protoc-gen-upbdefs=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPBDEFS}"
+       "--upbdefs_out=${CMAKE_CURRENT_BINARY_DIR}")
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE)
     list(APPEND UPB_COMMAND_OPTIONS
          "--plugin=protoc-gen-upb_minitable=${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE}"
@@ -377,21 +485,41 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
   set(UPB_TEST_GENERATE_CXX_FILES
       "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb.c"
       "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.h" "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upbdefs.c")
-  set(UPB_TEST_GENERATE_LUA_FILES "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
-                                  "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua")
+  set(UPB_TEST_GENERATE_LUA_FILES)
+  if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+     AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA)
+    list(APPEND UPB_TEST_GENERATE_LUA_FILES "${CMAKE_CURRENT_BINARY_DIR}/test_pb_pb.lua"
+         "${CMAKE_CURRENT_BINARY_DIR}/test_upb-and-lua-binding.lua")
+  endif()
   if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_UPB_MINITABLE)
     list(APPEND UPB_TEST_GENERATE_CXX_FILES "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb_minitable.h"
          "${CMAKE_CURRENT_BINARY_DIR}/test_pb.upb_minitable.c")
   endif()
 
+  set(UPB_TEST_GENERATE_LUA_COMMANDS)
+  if(EXISTS "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+     AND ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA)
+    list(
+      APPEND
+      UPB_TEST_GENERATE_LUA_COMMANDS
+      COMMAND
+      "${CMAKE_COMMAND}"
+      -E
+      copy_if_different
+      "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
+      "${CMAKE_CURRENT_BINARY_DIR}"
+      COMMAND
+      "${CMAKE_COMMAND}"
+      -E
+      copy_if_different
+      "${CMAKE_CURRENT_LIST_DIR}/test_upb-and-lua-binding.lua"
+      "${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
+
   add_custom_command(
     OUTPUT ${UPB_TEST_GENERATE_CXX_FILES} ${UPB_TEST_GENERATE_LUA_FILES}
     COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PROTOBUF_BIN_PROTOC}" --proto_path "${CMAKE_CURRENT_LIST_DIR}"
-            ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${PROJECT_THIRD_PARTY_INSTALL_DIR}/share/upb/lua/upb.lua"
-            "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/test_upb-and-lua-binding.lua"
-            "${CMAKE_CURRENT_BINARY_DIR}"
+            ${UPB_COMMAND_OPTIONS} "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto" ${UPB_TEST_GENERATE_LUA_COMMANDS}
     DEPENDS "${CMAKE_CURRENT_LIST_DIR}/test_pb.proto"
     COMMENT "Generate ${UPB_TEST_GENERATE_CXX_FILES};${UPB_TEST_GENERATE_LUA_FILES} into ${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -400,15 +528,23 @@ if(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_PROTOC_GEN_LUA
   target_include_directories("cmake-toolset-upb-and-lua-binding-test" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
   target_link_directories(cmake-toolset-upb-and-lua-binding-test PRIVATE ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES})
-  target_link_libraries(
-    "cmake-toolset-upb-and-lua-binding-test" PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} upb::lupb
-                                                     ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
+  set(UPB_TEST_LUA_LIBRARIES)
+  if(TARGET upb::lupb)
+    list(APPEND UPB_TEST_LUA_LIBRARIES upb::lupb ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LUA_LINK_NAME})
+    target_compile_definitions("cmake-toolset-upb-and-lua-binding-test" PRIVATE UPB_TEST_WITH_LUA_BINDING=1)
+  endif()
+  target_link_libraries("cmake-toolset-upb-and-lua-binding-test"
+                        PRIVATE ${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_UPB_LINK_NAME} ${UPB_TEST_LUA_LIBRARIES})
 
   target_compile_options("cmake-toolset-upb-and-lua-binding-test"
                          PRIVATE "${PROJECT_BUILD_TOOLS_PATCH_PROTOBUF_SOURCES_OPTIONS}")
 
-  add_test(
-    NAME cmake-toolset.upb-and-lua-binding-test
-    COMMAND cmake-toolset-upb-and-lua-binding-test "./test_upb-and-lua-binding.lua"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  if(TARGET upb::lupb)
+    add_test(
+      NAME cmake-toolset.upb-and-lua-binding-test
+      COMMAND cmake-toolset-upb-and-lua-binding-test "./test_upb-and-lua-binding.lua"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  else()
+    add_test(NAME cmake-toolset.upb-and-lua-binding-test COMMAND cmake-toolset-upb-and-lua-binding-test)
+  endif()
 endif()
