@@ -62,21 +62,27 @@ done
 
 shift $(($OPTIND - 1))
 
-# Windows hosted bash (Git Bash/MSYS2/Cygwin): CMake defaults to the Visual Studio generator
-# which can not drive the NDK clang toolchain, use Ninja instead (unless a generator is given).
-CMAKE_GENERATOR_OPTIONS=""
+# Extract the user specified generator(-G <name> or -G<name>)
+USER_GENERATOR=""
+NEXT_IS_GENERATOR=0
+for CMAKE_OPTION in "$@"; do
+  if [[ $NEXT_IS_GENERATOR -eq 1 ]]; then
+    USER_GENERATOR="$CMAKE_OPTION"
+    break
+  fi
+  if [[ "x$CMAKE_OPTION" == "x-G" ]]; then
+    NEXT_IS_GENERATOR=1
+  elif [[ "$CMAKE_OPTION" == -G* ]]; then
+    USER_GENERATOR="${CMAKE_OPTION#-G}"
+    break
+  fi
+done
+unset NEXT_IS_GENERATOR CMAKE_OPTION
+
+IS_WINDOWS_HOSTED_BASH=0
 case "$(uname -s)" in
   MINGW* | MSYS* | CYGWIN*)
-    USER_SPECIFIED_GENERATOR=0
-    for CMAKE_OPTION in "$@"; do
-      if [[ "$CMAKE_OPTION" == -G* ]]; then
-        USER_SPECIFIED_GENERATOR=1
-        break
-      fi
-    done
-    if [[ $USER_SPECIFIED_GENERATOR -eq 0 ]]; then
-      CMAKE_GENERATOR_OPTIONS="-G Ninja"
-    fi
+    IS_WINDOWS_HOSTED_BASH=1
     ;;
 esac
 
@@ -118,6 +124,33 @@ fi
 
 if [[ "x${MAKE_EXEC_PATH}" != "x" ]]; then
   export PATH="$(dirname "$MAKE_EXEC_PATH"):$PATH"
+fi
+
+# Select the generator and the make program. On Windows hosted bash(Git Bash/MSYS2/Cygwin), CMake defaults to
+# the Visual Studio generator which can not drive the NDK clang toolchain. Prefer the make bundled with the
+# NDK(all Windows NDKs ship prebuilt/windows-x86_64/bin/make.exe), ninja is used only when the NDK does not
+# provide make.
+CMAKE_GENERATOR_ARGS=()
+CMAKE_MAKE_PROGRAM_ARGS=("-DCMAKE_MAKE_PROGRAM=$MAKE_EXEC_PATH")
+GENERATOR_IS_NINJA=0
+if [[ "x$USER_GENERATOR" != "x" ]] && [[ "$USER_GENERATOR" == *Ninja* ]]; then
+  GENERATOR_IS_NINJA=1
+fi
+if [[ $IS_WINDOWS_HOSTED_BASH -eq 1 ]] && [[ "x$USER_GENERATOR" == "x" ]]; then
+  if [[ "x$MAKE_EXEC_PATH" != "x" ]]; then
+    CMAKE_GENERATOR_ARGS=(-G "Unix Makefiles")
+  elif [[ "x$(command -v ninja)" != "x" ]]; then
+    CMAKE_GENERATOR_ARGS=(-G "Ninja")
+    GENERATOR_IS_NINJA=1
+  else
+    echo "Can not find a build program for the NDK clang toolchain: neither the NDK bundled make"
+    echo "($ANDROID_NDK_ROOT/prebuilt/*/bin/make.exe) nor ninja is available."
+    exit 1
+  fi
+fi
+if [[ $GENERATOR_IS_NINJA -eq 1 ]]; then
+  # The ninja generator can not use the NDK bundled GNU make as CMAKE_MAKE_PROGRAM, let cmake find ninja itself.
+  CMAKE_MAKE_PROGRAM_ARGS=()
 fi
 
 ##########
@@ -178,7 +211,7 @@ for ARCH in ${ARCHS}; do
   # add -DCMAKE_OSX_DEPLOYMENT_TARGET=7.1 to specify the min SDK version
   # -DANDROID_NDK="$ANDROID_NDK_ROOT" -DCMAKE_ANDROID_NDK="$ANDROID_NDK_ROOT"   \
   # Using -DANDROID_SANITIZE="" to patch "hwaddress" "IN_LIST" "ANDROID_SANITIZE" in NDK
-  "$CMAKE_BIN" "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE "-DCMAKE_MAKE_PROGRAM=$MAKE_EXEC_PATH" \
+  "$CMAKE_BIN" "$SOURCE_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE "${CMAKE_MAKE_PROGRAM_ARGS[@]}" \
     -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$WORKING_DIR/lib/$ARCH" -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY="$WORKING_DIR/lib/$ARCH" \
     -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake" \
     -DANDROID_PLATFORM=android-$ANDROID_NATIVE_API_LEVEL -DCMAKE_ANDROID_API=$ANDROID_NATIVE_API_LEVEL \
@@ -190,7 +223,7 @@ for ARCH in ${ARCHS}; do
     -DANDROID_SANITIZE="" \
     "-DCMAKE_C_STANDARD_LIBRARIES=$OTHER_LD_FLAGS" "-DCMAKE_CXX_STANDARD_LIBRARIES=$OTHER_LD_FLAGS" \
     "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR=$WORKING_DIR/build_jobs_host" \
-    $CMAKE_GENERATOR_OPTIONS $EXT_OPTIONS "$@"
+    "${CMAKE_GENERATOR_ARGS[@]}" $EXT_OPTIONS "$@"
 
   LAST_EXIT_CODE=$?
   if [[ $LAST_EXIT_CODE -ne 0 ]]; then

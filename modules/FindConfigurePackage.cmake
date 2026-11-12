@@ -566,7 +566,7 @@ macro(FindConfigurePackage)
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             execute_process(
-              COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+              COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
                       ${FindConfigurePackage_AUTOGEN_CONFIGURE}
               WORKING_DIRECTORY "${FindConfigurePackage_PROJECT_DIRECTORY}"
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
