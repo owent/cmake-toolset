@@ -62,6 +62,24 @@ done
 
 shift $(($OPTIND - 1))
 
+# Windows hosted bash (Git Bash/MSYS2/Cygwin): CMake defaults to the Visual Studio generator
+# which can not drive the NDK clang toolchain, use Ninja instead (unless a generator is given).
+CMAKE_GENERATOR_OPTIONS=""
+case "$(uname -s)" in
+  MINGW* | MSYS* | CYGWIN*)
+    USER_SPECIFIED_GENERATOR=0
+    for CMAKE_OPTION in "$@"; do
+      if [[ "$CMAKE_OPTION" == -G* ]]; then
+        USER_SPECIFIED_GENERATOR=1
+        break
+      fi
+    done
+    if [[ $USER_SPECIFIED_GENERATOR -eq 0 ]]; then
+      CMAKE_GENERATOR_OPTIONS="-G Ninja"
+    fi
+    ;;
+esac
+
 # cmake
 printf "Checking cmake ...              "
 if [[ -z "$CMAKE_HOME" ]]; then
@@ -93,7 +111,10 @@ if [[ -z "$ANDROID_NDK_ROOT" ]]; then
   fi
 fi
 
-MAKE_EXEC_PATH=$(find "$ANDROID_NDK_ROOT/prebuilt" -name "*make*" | grep "bin/")
+MAKE_EXEC_PATH=""
+if [[ -d "$ANDROID_NDK_ROOT/prebuilt" ]]; then
+  MAKE_EXEC_PATH=$(find "$ANDROID_NDK_ROOT/prebuilt" -name "*make*" | grep "bin/")
+fi
 
 if [[ "x${MAKE_EXEC_PATH}" != "x" ]]; then
   export PATH="$(dirname "$MAKE_EXEC_PATH"):$PATH"
@@ -169,7 +190,7 @@ for ARCH in ${ARCHS}; do
     -DANDROID_SANITIZE="" \
     "-DCMAKE_C_STANDARD_LIBRARIES=$OTHER_LD_FLAGS" "-DCMAKE_CXX_STANDARD_LIBRARIES=$OTHER_LD_FLAGS" \
     "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR=$WORKING_DIR/build_jobs_host" \
-    $EXT_OPTIONS "$@"
+    $CMAKE_GENERATOR_OPTIONS $EXT_OPTIONS "$@"
 
   LAST_EXIT_CODE=$?
   if [[ $LAST_EXIT_CODE -ne 0 ]]; then

@@ -5,6 +5,7 @@ on: # @see https://help.github.com/en/articles/events-that-trigger-workflows#web
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 env:
   CMAKE_FIND_ROOT_PATH_MODE_PACKAGE: ONLY
 
@@ -337,6 +338,19 @@ jobs:
         shell: bash
         run: |
           bash ci/do_ci.sh android.x86_64.test ;
+  android_windows_arm64_test:
+    name: "android.arm64.windows.test"
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: CI Job
+        shell: pwsh
+        env:
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE: "ON"
+          ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR: "ON"
+        run: |
+          pwsh ci/do_ci.ps1 android.arm64.test ;
   # Build libuv on ios has some problem now.
   ios_test:
     name: "ios.test"

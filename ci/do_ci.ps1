@@ -249,6 +249,83 @@ elseif ( $RUN_MODE -eq "msvc.no-exceptions.test" ) {
     exit $LastExitCode
   }
 }
+elseif ( $RUN_MODE -eq "android.arm64.test" ) {
+  # Android cross compiling on Windows host, see ci/cmake_android_wrapper.sh for the linux/macos version.
+  # Prefer the latest NDK on CI runners, fallback to ANDROID_NDK (github windows runners set
+  # ANDROID_NDK/ANDROID_NDK_HOME/ANDROID_NDK_ROOT to the LTS one)
+  $ANDROID_NDK_ROOT = ""
+  foreach ($ANDROID_NDK_CANDIDATE in @("$Env:ANDROID_NDK_LATEST_HOME", "$Env:ANDROID_NDK", "$Env:ANDROID_NDK_ROOT", "$Env:ANDROID_NDK_HOME")) {
+    if ( [string]::IsNullOrEmpty($ANDROID_NDK_CANDIDATE) ) {
+      continue
+    }
+    if ( Test-Path "$ANDROID_NDK_CANDIDATE/build/cmake/android.toolchain.cmake" ) {
+      $ANDROID_NDK_ROOT = $ANDROID_NDK_CANDIDATE
+      break
+    }
+  }
+  if ( [string]::IsNullOrEmpty($ANDROID_NDK_ROOT) ) {
+    Write-Output "Can not find Android NDK (checked ANDROID_NDK_LATEST_HOME, ANDROID_NDK, ANDROID_NDK_ROOT and ANDROID_NDK_HOME), dependency error."
+    exit 1
+  }
+  Write-Output "Using Android NDK: $ANDROID_NDK_ROOT"
+
+  $ANDROID_ABI = "arm64-v8a"
+  $ANDROID_NATIVE_API_LEVEL = 24 # 64 bits must at least android-21, and libuv needs android-24(Android 7.0)
+  $ANDROID_EXT_OPTIONS = @("-DANDROID_LD=lld")
+  # The legacy toolchain file is deprecated since NDK 25 and removed in newer versions
+  $ANDROID_NDK_MAJOR_VERSION = 0
+  if ( Test-Path "$ANDROID_NDK_ROOT/source.properties" ) {
+    foreach ($ANDROID_NDK_PROPERTY_LINE in Get-Content "$ANDROID_NDK_ROOT/source.properties") {
+      if ( $ANDROID_NDK_PROPERTY_LINE -match '^Pkg\.Revision\s*=\s*(\d+)' ) {
+        $ANDROID_NDK_MAJOR_VERSION = [int]$Matches[1]
+        break
+      }
+    }
+  }
+  if ( $ANDROID_NDK_MAJOR_VERSION -ge 25 ) {
+    $ANDROID_EXT_OPTIONS += "-DANDROID_USE_LEGACY_TOOLCHAIN_FILE=OFF"
+  }
+
+  Write-Output $args
+  New-Item -Path "test/build_jobs_android" -ItemType "directory" -Force
+  Set-Location "test/build_jobs_android"
+  $WORKING_DIR = (Get-Location).Path
+  New-Item -Path "build_jobs_arm64-v8a" -ItemType "directory" -Force
+  Set-Location "build_jobs_arm64-v8a"
+  # Use Ninja generator, the default Visual Studio generator can not drive the NDK clang toolchain.
+  # Host tools (protoc, flatc, grpc plugins...) are still built by the host default generator.
+  & cmake ../.. -G "Ninja" `
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo" `
+    "-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake" `
+    "-DANDROID_PLATFORM=android-$ANDROID_NATIVE_API_LEVEL" "-DCMAKE_ANDROID_API=$ANDROID_NATIVE_API_LEVEL" `
+    "-DANDROID_TOOLCHAIN=clang" "-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang" `
+    "-DANDROID_ABI=$ANDROID_ABI" "-DCMAKE_ANDROID_ARCH_ABI=$ANDROID_ABI" `
+    "-DANDROID_STL=c++_shared" "-DCMAKE_ANDROID_STL_TYPE=c++_shared" `
+    "-DANDROID_PIE=YES" `
+    "-DCMAKE_POLICY_DEFAULT_CMP0057=NEW" `
+    "-DANDROID_SANITIZE=" `
+    "-DCMAKE_C_STANDARD_LIBRARIES=-llog -lc" "-DCMAKE_CXX_STANDARD_LIBRARIES=-llog -lc" `
+    "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR=$WORKING_DIR/build_jobs_host" `
+    "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_USE_OPENSSL=YES" `
+    "-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE=ON" `
+    $ANDROID_EXT_OPTIONS $ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS
+  if ( $LastExitCode -ne 0 ) {
+    if (Test-Path "CMakeFiles/CMakeConfigureLog.yaml") {
+      Get-Content "CMakeFiles/CMakeConfigureLog.yaml"
+    }
+    elseif (Test-Path "CMakeFiles/CMakeError.log") {
+      Get-Content "CMakeFiles/CMakeError.log"
+    }
+    exit $LastExitCode
+  }
+  & cmake --build . -j
+  if ( $LastExitCode -ne 0 ) {
+    & cmake --build . -j --verbose
+  }
+  if ( $LastExitCode -ne 0 ) {
+    exit $LastExitCode
+  }
+}
 elseif ( $RUN_MODE -eq "msvc.standalone-upb.test" ) {
   Invoke-Environment "call ""$vsInstallationPath/VC/Auxiliary/Build/vcvars64.bat"""
   Write-Output $args

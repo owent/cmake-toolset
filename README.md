@@ -21,7 +21,7 @@ But if you want a special version of some packages or just download packages fro
 > # set(PROJECT_THIRD_PARTY_INSTALL_DIR "Where to place third party installed packages")
 > # Import.cmake is required by all ports and just need to include once
 > include("${ATFRAMEWORK_CMAKE_TOOLSET_DIR}/Import.cmake")
-> 
+>
 > # openssl options
 > set(ATFRAMEWORK_CMAKE_TOOLSET_PORTS_OPENSSL_VERSION "1.1.0k")
 > set(ATFRAMEWORK_CMAKE_TOOLSET_PORTS_OPENSSL_OPTIONS "no-dso no-tests no-external-tests no-shared no-idea no-md4 no-mdc2 no-rc2 no-ssl2 no-ssl3 no-weak-ssl-ciphers")
@@ -83,30 +83,31 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 
 ## CI Job Status
 
-| Name                    | Target System   | Toolchain              | Note                                                                                                            |
-| ----------------------- | --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Format                  | -               | -                      | -                                                                                                               |
-| gcc.no-rtti.test        | Linux           | GCC Without RTTI       | With `-fno-rtti` for C++                                                                                        |
-| gcc.no-exceptions.test  | Linux           | GCC Without Exception  | With `-fno-exceptions` for C++                                                                                  |
-| gcc.static.test         | Linux           | GCC                    | Static linking                                                                                                  |
-| gcc.shared.test         | Linux           | GCC                    | Dynamic linking                                                                                                 |
-| gcc.libressl.test       | Linux           | GCC                    | Using libressl for SSL porting                                                                                  |
-| gcc.boringssl.test      | Linux           | GCC                    | Using boringssl for SSL porting                                                                                 |
-| gcc.mbedtls.test        | Linux           | GCC                    | Using mbedtls for SSL porting                                                                                   |
-| clang.test              | Linux           | Clang with libc++      | -                                                                                                               |
-| ~gcc.vcpkg.test~        | Linux           | GCC With vcpkg         | Some versions of vcpkg may have poor compatibility on github's CI runner, just disable it when it's unavailable |
-| msys2.mingw.static.test | Windows         | GCC                    | Static linking                                                                                                  |
-| msys2.mingw.shared.test | Windows         | GCC                    | Dynamic linking                                                                                                 |
-| msvc.static.test        | Windows         | MSVC                   | Static linking                                                                                                  |
-| msvc.shared.test        | Windows         | MSVC                   | Dynamic linking                                                                                                 |
-| msvc.no-rtti.test       | Windows         | MSVC Without RTTI      | With `/GR-` for C++                                                                                             |
-| msvc.no-exceptions.test | Windows         | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++                                                          |
-| ~msvc.vcpkg.test~       | Windows         | MSVC With vcpkg        | Some versions of vcpkg may have poor compatibility on github's CI runner, just disable it when it's unavailable |
-| macos.appleclang.test   | macOS           | Clang with libc++      | -                                                                                                               |
-| android.arm64.test      | Android         | Clang with libc++      | `-DANDROID_ABI=arm64-v8a`                                                                                       |
-| android.x86_64.test     | Android         | Clang with libc++      | `-DANDROID_ABI=x86_64`                                                                                          |
-| ios.test                | iOS             | Clang with libc++      | `-DCMAKE_OSX_ARCHITECTURES=arm64`                                                                               |
-| iphone_simulator.test   | iPhoneSimulator | Clang with libc++      | `-DCMAKE_OSX_ARCHITECTURES=x86_64`                                                                              |
+| Name                       | Target System   | Toolchain              | Note                                                                                                            |
+| -------------------------- | --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Format                     | -               | -                      | -                                                                                                               |
+| gcc.no-rtti.test           | Linux           | GCC Without RTTI       | With `-fno-rtti` for C++                                                                                        |
+| gcc.no-exceptions.test     | Linux           | GCC Without Exception  | With `-fno-exceptions` for C++                                                                                  |
+| gcc.static.test            | Linux           | GCC                    | Static linking                                                                                                  |
+| gcc.shared.test            | Linux           | GCC                    | Dynamic linking                                                                                                 |
+| gcc.libressl.test          | Linux           | GCC                    | Using libressl for SSL porting                                                                                  |
+| gcc.boringssl.test         | Linux           | GCC                    | Using boringssl for SSL porting                                                                                 |
+| gcc.mbedtls.test           | Linux           | GCC                    | Using mbedtls for SSL porting                                                                                   |
+| clang.test                 | Linux           | Clang with libc++      | -                                                                                                               |
+| ~gcc.vcpkg.test~           | Linux           | GCC With vcpkg         | Some versions of vcpkg may have poor compatibility on github's CI runner, just disable it when it's unavailable |
+| msys2.mingw.static.test    | Windows         | GCC                    | Static linking                                                                                                  |
+| msys2.mingw.shared.test    | Windows         | GCC                    | Dynamic linking                                                                                                 |
+| msvc.static.test           | Windows         | MSVC                   | Static linking                                                                                                  |
+| msvc.shared.test           | Windows         | MSVC                   | Dynamic linking                                                                                                 |
+| msvc.no-rtti.test          | Windows         | MSVC Without RTTI      | With `/GR-` for C++                                                                                             |
+| msvc.no-exceptions.test    | Windows         | MSVC Without Exception | With `/D_HAS_EXCEPTIONS=0` and without `/EHsc` for C++                                                          |
+| ~msvc.vcpkg.test~          | Windows         | MSVC With vcpkg        | Some versions of vcpkg may have poor compatibility on github's CI runner, just disable it when it's unavailable |
+| macos.appleclang.test      | macOS           | Clang with libc++      | -                                                                                                               |
+| android.arm64.test         | Android         | Clang with libc++      | `-DANDROID_ABI=arm64-v8a`                                                                                       |
+| android.x86_64.test        | Android         | Clang with libc++      | `-DANDROID_ABI=x86_64`                                                                                          |
+| android.arm64.windows.test | Android         | Clang with libc++      | Cross compiling with NDK on Windows host, `-DANDROID_ABI=arm64-v8a`                                             |
+| ios.test                   | iOS             | Clang with libc++      | `-DCMAKE_OSX_ARCHITECTURES=arm64`                                                                               |
+| iphone_simulator.test      | iPhoneSimulator | Clang with libc++      | `-DCMAKE_OSX_ARCHITECTURES=x86_64`                                                                              |
 
 ## Utility Scripts
 
@@ -163,56 +164,56 @@ cmake <where to find CMakeLists.txt> -DCMAKE_TOOLCHAIN_FILE=$ATFRAMEWORK_CMAKE_T
 
 There are some example scripts to build android and iOS/iPhoneSimulator targets in [ci/cmake_android_wrapper.sh](ci/cmake_android_wrapper.sh) and [ci/cmake_ios_wrapper.sh](ci/cmake_ios_wrapper.sh). When in crossing mode(Set `CMAKE_SYSTEM_NAME` by commandline or toolchains), sometimes we need some packages built on host architecture first, and we can use `CMAKE_HOST_<VAR>` to configure the options only used when building with host architecture. The availables options are listed below:
 
-+ `CMAKE_HOST_TOOLCHAIN_FILE`
-+ `CMAKE_HOST_GENERATOR_PLATFORM`
-+ `CMAKE_HOST_GENERATOR_TOOLSET`
-+ `CMAKE_HOST_C_COMPILER`
-+ `CMAKE_HOST_C_COMPILER_LAUNCHER`
-+ `CMAKE_HOST_C_COMPILER_TARGET`
-+ `CMAKE_HOST_C_COMPILER_AR`
-+ `CMAKE_HOST_C_COMPILER_RANLIB`
-+ `CMAKE_HOST_C_EXTENSIONS`
-+ `CMAKE_HOST_OBJC_EXTENSIONS`
-+ `CMAKE_HOST_CXX_COMPILER`
-+ `CMAKE_HOST_CXX_COMPILER_LAUNCHER`
-+ `CMAKE_HOST_CXX_COMPILER_TARGET`
-+ `CMAKE_HOST_CXX_COMPILER_AR`
-+ `CMAKE_HOST_CXX_COMPILER_RANLIB`
-+ `CMAKE_HOST_CXX_EXTENSIONS`
-+ `CMAKE_HOST_OBJCXX_EXTENSIONS`
-+ `CMAKE_HOST_ASM_COMPILER`
-+ `CMAKE_HOST_ASM_COMPILER_TARGET`
-+ `CMAKE_HOST_ASM_COMPILER_LAUNCHER`
-+ `CMAKE_HOST_ASM_COMPILER_AR`
-+ `CMAKE_HOST_ASM_COMPILER_RANLIB`
-+ `CMAKE_HOST_AR`
-+ `CMAKE_HOST_RANLIB`
-+ `CMAKE_HOST_EXE_LINKER_FLAGS`
-+ `CMAKE_HOST_MODULE_LINKER_FLAGS`
-+ `CMAKE_HOST_SHARED_LINKER_FLAGS`
-+ `CMAKE_HOST_STATIC_LINKER_FLAGS`
-+ `CMAKE_HOST_LINK_DIRECTORIES_BEFORE`
-+ `CMAKE_HOST_BUILD_RPATH`
-+ `CMAKE_HOST_BUILD_RPATH_USE_ORIGIN`
-+ `CMAKE_HOST_BUILD_WITH_INSTALL_RPATH`
-+ `CMAKE_HOST_INSTALL_RPATH`
-+ `CMAKE_HOST_INSTALL_RPATH_USE_LINK_PATH`
-+ `CMAKE_HOST_INSTALL_REMOVE_ENVIRONMENT_RPATH`
-+ `CMAKE_HOST_SYSROOT`
-+ `CMAKE_HOST_SYSROOT_COMPILE`
-+ `CMAKE_HOST_SYSROOT_LINK`
-+ `CMAKE_HOST_FIND_ROOT_PATH`
-+ `CMAKE_HOST_PREFIX_PATH`
-+ `CMAKE_HOST_OSX_SYSROOT`
-+ `CMAKE_HOST_OSX_ARCHITECTURES`
-+ `CMAKE_HOST_OSX_DEPLOYMENT_TARGET`
-+ `CMAKE_HOST_MACOSX_RPATH`
-+ `CMAKE_HOST_MACOSX_BUNDLE`
-+ `CMAKE_HOST_MSVC_RUNTIME_LIBRARY`
-+ `CMAKE_HOST_FIND_ROOT_PATH_MODE_PROGRAM`
-+ `CMAKE_HOST_FIND_ROOT_PATH_MODE_LIBRARY`
-+ `CMAKE_HOST_FIND_ROOT_PATH_MODE_INCLUDE`
-+ `CMAKE_HOST_FIND_ROOT_PATH_MODE_PACKAGE`
+- `CMAKE_HOST_TOOLCHAIN_FILE`
+- `CMAKE_HOST_GENERATOR_PLATFORM`
+- `CMAKE_HOST_GENERATOR_TOOLSET`
+- `CMAKE_HOST_C_COMPILER`
+- `CMAKE_HOST_C_COMPILER_LAUNCHER`
+- `CMAKE_HOST_C_COMPILER_TARGET`
+- `CMAKE_HOST_C_COMPILER_AR`
+- `CMAKE_HOST_C_COMPILER_RANLIB`
+- `CMAKE_HOST_C_EXTENSIONS`
+- `CMAKE_HOST_OBJC_EXTENSIONS`
+- `CMAKE_HOST_CXX_COMPILER`
+- `CMAKE_HOST_CXX_COMPILER_LAUNCHER`
+- `CMAKE_HOST_CXX_COMPILER_TARGET`
+- `CMAKE_HOST_CXX_COMPILER_AR`
+- `CMAKE_HOST_CXX_COMPILER_RANLIB`
+- `CMAKE_HOST_CXX_EXTENSIONS`
+- `CMAKE_HOST_OBJCXX_EXTENSIONS`
+- `CMAKE_HOST_ASM_COMPILER`
+- `CMAKE_HOST_ASM_COMPILER_TARGET`
+- `CMAKE_HOST_ASM_COMPILER_LAUNCHER`
+- `CMAKE_HOST_ASM_COMPILER_AR`
+- `CMAKE_HOST_ASM_COMPILER_RANLIB`
+- `CMAKE_HOST_AR`
+- `CMAKE_HOST_RANLIB`
+- `CMAKE_HOST_EXE_LINKER_FLAGS`
+- `CMAKE_HOST_MODULE_LINKER_FLAGS`
+- `CMAKE_HOST_SHARED_LINKER_FLAGS`
+- `CMAKE_HOST_STATIC_LINKER_FLAGS`
+- `CMAKE_HOST_LINK_DIRECTORIES_BEFORE`
+- `CMAKE_HOST_BUILD_RPATH`
+- `CMAKE_HOST_BUILD_RPATH_USE_ORIGIN`
+- `CMAKE_HOST_BUILD_WITH_INSTALL_RPATH`
+- `CMAKE_HOST_INSTALL_RPATH`
+- `CMAKE_HOST_INSTALL_RPATH_USE_LINK_PATH`
+- `CMAKE_HOST_INSTALL_REMOVE_ENVIRONMENT_RPATH`
+- `CMAKE_HOST_SYSROOT`
+- `CMAKE_HOST_SYSROOT_COMPILE`
+- `CMAKE_HOST_SYSROOT_LINK`
+- `CMAKE_HOST_FIND_ROOT_PATH`
+- `CMAKE_HOST_PREFIX_PATH`
+- `CMAKE_HOST_OSX_SYSROOT`
+- `CMAKE_HOST_OSX_ARCHITECTURES`
+- `CMAKE_HOST_OSX_DEPLOYMENT_TARGET`
+- `CMAKE_HOST_MACOSX_RPATH`
+- `CMAKE_HOST_MACOSX_BUNDLE`
+- `CMAKE_HOST_MSVC_RUNTIME_LIBRARY`
+- `CMAKE_HOST_FIND_ROOT_PATH_MODE_PROGRAM`
+- `CMAKE_HOST_FIND_ROOT_PATH_MODE_LIBRARY`
+- `CMAKE_HOST_FIND_ROOT_PATH_MODE_INCLUDE`
+- `CMAKE_HOST_FIND_ROOT_PATH_MODE_PACKAGE`
 
 If we want to passthrough more options, we can set `PROJECT_BUILD_TOOLS_CMAKE_HOST_PASSTHROUGH` to the variable names.
 For example, if we want to use the same python3 executable on target and host building, we can use `cmake <SOURCE DIR> [other options] "-DPROJECT_BUILD_TOOLS_CMAKE_HOST_PASSTHROUGH=Python3_EXECUTABLE;Python_EXECUTABLE" -DPython3_EXECUTABLE=$(which python3) -DPython_EXECUTABLE=$(which python3)`
@@ -221,26 +222,26 @@ For example, if we want to use the same python3 executable on target and host bu
 
 ### Global options and requirements
 
-+ Option(Optional): `PROJECT_THIRD_PARTY_PACKAGE_DIR` : Where to place package sources.
-+ Option(Optional): `PROJECT_THIRD_PARTY_INSTALL_DIR` : Where to place installed packages.
-+ Option(Optional): `PROJECT_THIRD_PARTY_HOST_INSTALL_DIR` : Where to place installed packages of host system.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH` : Use absolute third-party prefix paths
+- Option(Optional): `PROJECT_THIRD_PARTY_PACKAGE_DIR` : Where to place package sources.
+- Option(Optional): `PROJECT_THIRD_PARTY_INSTALL_DIR` : Where to place installed packages.
+- Option(Optional): `PROJECT_THIRD_PARTY_HOST_INSTALL_DIR` : Where to place installed packages of host system.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH` : Use absolute third-party prefix paths
   instead of loader-relative paths for additional build `RPATH` entries(default: `OFF`).
-+ Option(Optional): `FindConfigurePackageGitFetchDepth` : Fetch depth og git repository.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR` : Where to build packages.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR` : Where to build packages of host system.
-+ Option(Optional): `PROJECT_PREBUILT_PLATFORM_NAME` : Platform name
-+ Option(Optional): `PROJECT_PREBUILT_HOST_PLATFORM_NAME` : Host platform name
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE` : Where to build packages in CI mode(Only one triplet for MSVC).
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_DEFAULT_VISIBILITY_HIDDEN` : Build third party libraries with `-fvisibility=hidden` by default.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG` : Whether to show patch log.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE` : Use lower concurrency to reduce memory cost.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS` : Jobs to use in low memory mode(default: 2).
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES` : Additional system libraries.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS` : parallel build jobs.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE` : Show more information of cmake-toolset
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE` : Cleanup build cache directory after a package is built successfully.
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR` : Cleanup souce cache directory after a package is built successfully.
+- Option(Optional): `FindConfigurePackageGitFetchDepth` : Fetch depth og git repository.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_BUILD_DIR` : Where to build packages.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_HOST_BUILD_DIR` : Where to build packages of host system.
+- Option(Optional): `PROJECT_PREBUILT_PLATFORM_NAME` : Platform name
+- Option(Optional): `PROJECT_PREBUILT_HOST_PLATFORM_NAME` : Host platform name
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CI_MODE` : Where to build packages in CI mode(Only one triplet for MSVC).
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_DEFAULT_VISIBILITY_HIDDEN` : Build third party libraries with `-fvisibility=hidden` by default.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_PACKAGE_PATCH_LOG` : Whether to show patch log.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_MODE` : Use lower concurrency to reduce memory cost.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_LOW_MEMORY_JOBS` : Jobs to use in low memory mode(default: 2).
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_ADDITIONAL_SYSTEM_LIBRARIES` : Additional system libraries.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_PARALLEL_JOBS` : parallel build jobs.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_VERBOSE` : Show more information of cmake-toolset
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_BUILD_CACHE` : Cleanup build cache directory after a package is built successfully.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_CLEANUP_PACKAGE_SOURCE_DIR` : Cleanup souce cache directory after a package is built successfully.
 
 cmake-toolset does not modify `LD_LIBRARY_PATH`. Additional build `RPATH` entries use `$ORIGIN` on Unix or
 `@loader_path` on Apple by default; set `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_USE_ABSOLUTE_RPATH=ON` to use absolute
@@ -259,7 +260,7 @@ project_third_party_include_port("<package dir>[/package sub dir]/<which package
 
 Port file options means these variable should ony be set in port file and be reset after built.
 
-+ Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_<LANG>_STANDARD` : Set the max standard when building a package.
+- Option(Optional): `ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CURRENT_PORT_MAX_<LANG>_STANDARD` : Set the max standard when building a package.
 
 ### Package - jemalloc
 
@@ -450,7 +451,7 @@ project_third_party_include_port("protobuf/protobuf.cmake")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_VERSION "3.0.7")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_GIT_URL "https://github.com/openssl/openssl.git")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_ENABLE_QUIC TRUE)
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PACKAGE_DIR "") # Where to place source 
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PACKAGE_DIR "") # Where to place source
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_DEFAULT_TARGET "") # VC-WIN64A-masm VC-WIN64A VC-WIN32 and etc.
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM FALSE) # Allow load system prebuilt openssl
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_OPTIONS
@@ -508,7 +509,7 @@ project_third_party_include_port("cares/c-ares.cmake")
 ```cmake
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_VERSION "2021-04-01")
 # set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_GIT_URL "https://github.com/google/re2.git")
-# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS 
+# set(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_RE2_BUILD_OPTIONS
 #   "-DCMAKE_POSITION_INDEPENDENT_CODE=YES" "-DRE2_BUILD_TESTING=OFF")
 
 project_third_party_include_port("re2/re2.cmake")

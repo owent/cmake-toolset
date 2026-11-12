@@ -35,6 +35,16 @@ if [[ ! -z "$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM" ]
   ATFRAMEWORK_CMAKE_TOOLSET_CI_OPTIONS+=("-DATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM=$ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_WITH_SYSTEM")
 fi
 
+# Android cross compiling: prefer the latest NDK on CI runners, fallback to ANDROID_NDK
+# (github windows runners set ANDROID_NDK/ANDROID_NDK_HOME/ANDROID_NDK_ROOT to the LTS one)
+if [[ "$1" == android.* ]]; then
+  if [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]] && [[ -d "$ANDROID_NDK_LATEST_HOME" ]]; then
+    export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
+  elif [[ ! -z "$ANDROID_NDK" ]] && [[ -d "$ANDROID_NDK" ]]; then
+    export ANDROID_NDK_ROOT="$ANDROID_NDK"
+  fi
+fi
+
 CMAKE_CONFIGURE_EXIT_CODE=0
 if [[ "$1" == "format" ]]; then
   python3 -m pip install --user -r ./ci/requirements.txt
@@ -418,9 +428,6 @@ elif [[ "$1" == "msvc2017.test" ]]; then
   ctest . -V -C $CI_BUILD_CONFIGURE_TYPE
 elif [[ "$1" == "android.arm64.test" ]]; then
   echo "$1"
-  if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
-    export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
-  fi
   mkdir -p test/build_jobs_android
   cd test/build_jobs_android
   bash ../../ci/cmake_android_wrapper.sh -r .. -a arm64-v8a -- \
@@ -438,9 +445,6 @@ elif [[ "$1" == "android.arm64.test" ]]; then
   cmake --build . -j || cmake --build . || cmake --build . --verbose
 elif [[ "$1" == "android.x86_64.test" ]]; then
   echo "$1"
-  if [[ -z "$ANDROID_NDK_ROOT" ]] && [[ ! -z "$ANDROID_NDK_LATEST_HOME" ]]; then
-    export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
-  fi
   mkdir -p test/build_jobs_android
   cd test/build_jobs_android
   bash ../../ci/cmake_android_wrapper.sh -r .. -a x86_64 -- \

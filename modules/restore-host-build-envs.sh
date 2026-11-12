@@ -57,8 +57,8 @@ fi
 if [[ "x$BACKUP_CXXFLAGS" != "x" ]]; then
   export CXXFLAGS="$BACKUP_CXXFLAGS"
 fi
-if [[ "x$BACKUP_CXXFLAGS" != "x" ]]; then
-  export CPPFLAGS="$BACKUP_CXXFLAGS"
+if [[ "x$BACKUP_CPPFLAGS" != "x" ]]; then
+  export CPPFLAGS="$BACKUP_CPPFLAGS"
 fi
 if [[ "x$BACKUP_ASMFLAGS" != "x" ]]; then
   export ASMFLAGS="$BACKUP_ASMFLAGS"
