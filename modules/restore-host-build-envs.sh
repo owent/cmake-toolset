@@ -9,6 +9,18 @@ fi
 if [[ "x$BACKUP_CXX" != "x" ]]; then
   export CXX="$BACKUP_CXX"
 fi
+if [[ "x$BACKUP_LD" != "x" ]]; then
+  export LD="$BACKUP_LD"
+fi
+if [[ "x$BACKUP_NM" != "x" ]]; then
+  export NM="$BACKUP_NM"
+fi
+if [[ "x$BACKUP_RANLIB" != "x" ]]; then
+  export RANLIB="$BACKUP_RANLIB"
+fi
+if [[ "x$BACKUP_STRIP" != "x" ]]; then
+  export STRIP="$BACKUP_STRIP"
+fi
 if [[ "x$BACKUP_SDKROOT" != "x" ]]; then
   export SDKROOT="$BACKUP_SDKROOT"
 fi
@@ -44,6 +56,9 @@ if [[ "x$BACKUP_CFLAGS" != "x" ]]; then
 fi
 if [[ "x$BACKUP_CXXFLAGS" != "x" ]]; then
   export CXXFLAGS="$BACKUP_CXXFLAGS"
+fi
+if [[ "x$BACKUP_CXXFLAGS" != "x" ]]; then
+  export CPPFLAGS="$BACKUP_CXXFLAGS"
 fi
 if [[ "x$BACKUP_ASMFLAGS" != "x" ]]; then
   export ASMFLAGS="$BACKUP_ASMFLAGS"

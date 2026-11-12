@@ -588,7 +588,7 @@ macro(FindConfigurePackage)
           file(APPEND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "\"$@\"")
           if(FindConfigurePackage_AUTOGEN_CONFIGURE)
             execute_process(
-              COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+              COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
                       ${FindConfigurePackage_AUTOGEN_CONFIGURE}
               WORKING_DIRECTORY "${FindConfigurePackage_WORKING_DIRECTORY}/${FindConfigurePackage_SRC_DIRECTORY_NAME}"
                                 ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -602,7 +602,7 @@ macro(FindConfigurePackage)
                          "${FindConfigurePackage_CONFIGURE_FLAGS}")
         endif()
         execute_process(
-          COMMAND "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "${CONFIGURE_EXEC_FILE}"
+          COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "${CONFIGURE_EXEC_FILE}"
                   "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}" ${FindConfigurePackage_CONFIGURE_FLAGS}
           WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
@@ -624,7 +624,7 @@ macro(FindConfigurePackage)
         endif()
         execute_process(
           COMMAND
-            "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+            "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
             "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" "O=\$\$O" ${FindConfigurePackage_MAKE_FLAGS}
             ${FindConfigurePackage_INSTALL_TARGET} ${FindConfigurePackageCMakeBuildParallelFlags}
           WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
@@ -633,7 +633,7 @@ macro(FindConfigurePackage)
         if(NOT RUN_MAKE_RESULT EQUAL 0 AND FindConfigurePackageCMakeBuildParallelFlags)
           execute_process(
             COMMAND
-              "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+              "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
               "${FindConfigurePackage_BUILD_WITH_CONFIGURE_MAKE}" "O=\$\$O" ${FindConfigurePackage_MAKE_FLAGS}
               ${FindConfigurePackage_INSTALL_TARGET}
             WORKING_DIRECTORY ${FindConfigurePackage_BUILD_DIRECTORY}
