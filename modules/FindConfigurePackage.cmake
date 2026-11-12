@@ -602,8 +602,10 @@ macro(FindConfigurePackage)
                          "${FindConfigurePackage_CONFIGURE_FLAGS}")
         endif()
         execute_process(
-          COMMAND "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}" "${CONFIGURE_EXEC_FILE}"
-                  "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}" ${FindConfigurePackage_CONFIGURE_FLAGS}
+          COMMAND
+            "${ATFRAMEWORK_CMAKE_TOOLSET_BASH}" "${FindConfigurePackage_BUILD_WITH_CONFIGURE_LOAD_ENVS_RUN}"
+            "${CONFIGURE_EXEC_FILE}" "--prefix=${FindConfigurePackage_PREFIX_DIRECTORY}"
+            ${FindConfigurePackage_CONFIGURE_FLAGS}
           WORKING_DIRECTORY "${FindConfigurePackage_BUILD_DIRECTORY}"
                             ${ATFRAMEWORK_CMAKE_TOOLSET_EXECUTE_PROCESS_OUTPUT_OPTIONS})
 
