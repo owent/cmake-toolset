@@ -2267,7 +2267,7 @@ function(project_build_tools_set_import_declaration OUTPUT_VARNAME)
           PARENT_SCOPE)
     else()
       set(${OUTPUT_VARNAME}
-          ""
+          "__attribute__((visibility(\"default\")))"
           PARENT_SCOPE)
     endif()
   elseif(MSVC)
