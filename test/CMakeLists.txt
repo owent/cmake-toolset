@@ -22,6 +22,8 @@ project(cmake-toolset-test LANGUAGES C CXX)
 
 enable_testing()
 
+add_subdirectory(cross-compiling)
+
 if(UNIX
    AND NOT CYGWIN
    AND NOT CMAKE_CROSSCOMPILING)

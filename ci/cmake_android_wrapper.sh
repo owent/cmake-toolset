@@ -62,8 +62,8 @@ done
 
 shift $(($OPTIND - 1))
 
-# Extract the user specified generator(-G <name> or -G<name>)
-USER_GENERATOR=""
+# Extract the user specified generator(-G <name> or -G<name> overrides CMAKE_GENERATOR).
+USER_GENERATOR="${CMAKE_GENERATOR:-}"
 NEXT_IS_GENERATOR=0
 for CMAKE_OPTION in "$@"; do
   if [[ $NEXT_IS_GENERATOR -eq 1 ]]; then
@@ -131,7 +131,10 @@ fi
 # NDK(all Windows NDKs ship prebuilt/windows-x86_64/bin/make.exe), ninja is used only when the NDK does not
 # provide make.
 CMAKE_GENERATOR_ARGS=()
-CMAKE_MAKE_PROGRAM_ARGS=("-DCMAKE_MAKE_PROGRAM=$MAKE_EXEC_PATH")
+CMAKE_MAKE_PROGRAM_ARGS=()
+if [[ -n "$MAKE_EXEC_PATH" ]]; then
+  CMAKE_MAKE_PROGRAM_ARGS=("-DCMAKE_MAKE_PROGRAM=$MAKE_EXEC_PATH")
+fi
 GENERATOR_IS_NINJA=0
 if [[ "x$USER_GENERATOR" != "x" ]] && [[ "$USER_GENERATOR" == *Ninja* ]]; then
   GENERATOR_IS_NINJA=1

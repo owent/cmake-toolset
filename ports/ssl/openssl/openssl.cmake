@@ -277,6 +277,18 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
           PARENT_SCOPE)
     endfunction()
 
+    function(project_third_party_openssl_generate_load_env_bash output_file)
+      if(CMAKE_CROSSCOMPILING
+         AND CMAKE_HOST_WIN32
+         AND NOT WIN32)
+        # OpenSSL's Unix Makefile needs a colon-separated target RPATH and doubled dollars for Make expansion. Keep the
+        # adjustment local to this environment, leaving the parent CMake project's RPATH unchanged.
+        string(REPLACE ";" ":" CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}")
+        string(REPLACE "$" "$$" CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}")
+      endif()
+      project_third_party_generate_load_env_bash("${output_file}")
+    endfunction()
+
     if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PACKAGE_DIR)
       if(WIN32
          AND NOT MINGW
@@ -340,7 +352,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
            "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
       file(WRITE "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-build-release.sh"
            "#!/bin/bash${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
-      project_third_party_generate_load_env_bash(
+      project_third_party_openssl_generate_load_env_bash(
         "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh")
       file(
         APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-config.sh"
@@ -364,7 +376,7 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
         # which breaks the list split of the bundled perl again. A relative name survives all the path conversions and
         # is resolved against the working directory of every perl invocation(Configure and all the Makefile rules run in
         # the build directory).
-        file(COPY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PERL5LIB}/"
+        file(COPY "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_PERL5LIB}"
              DESTINATION "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}")
         file(APPEND "${ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_BUILD_DIR}/run-load-envs.sh"
              "export PERL5LIB=\"perl-stub\${PERL5LIB:+:\$PERL5LIB}\"${PROJECT_THIRD_PARTY_BUILDTOOLS_BASH_EOL}")
@@ -382,6 +394,11 @@ if(NOT ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPT_LINK_NAME)
       endif()
       # Android flags is set by NDK toolchain
       if(NOT ANDROID AND NOT "${PROJECT_PREBUILT_PLATFORM_NAME}" STREQUAL "${PROJECT_PREBUILT_HOST_PLATFORM_NAME}")
+        # OpenSSL invokes the compiler outside CMake, so it must receive Clang's cross target explicitly.
+        if(CMAKE_C_COMPILER_TARGET AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+          add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_CFLAGS
+                                    "--target=${CMAKE_C_COMPILER_TARGET}")
+        endif()
         if(CMAKE_OSX_SYSROOT)
           add_compiler_flags_to_var(ATFRAMEWORK_CMAKE_TOOLSET_THIRD_PARTY_CRYPTO_OPENSSL_CFLAGS "-isysroot"
                                     "${CMAKE_OSX_SYSROOT}")
